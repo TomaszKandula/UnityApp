@@ -24,19 +24,16 @@ type
         var FSessionLog:   string;
         var FSessionData:  TSessionData;
         var FAccessToken:  string;
-        var FRefreshToken: string;
     public
         constructor Create();
         destructor Destroy(); override;
         procedure InitializeSession(GenSessionId: string; SessionLog: string);
         procedure RegisterAccessToken(NewValue: string);
-        procedure RegisterRefreshToken(NewValue: string);
         procedure UpdateUserData(UnityUserId: integer; Department: string; AliasName: string; DisplayName: string; EmailAddress: string);
         property SessionId:    string       read FSessionId;
         property SessionLog:   string       read FSessionLog;
         property SessionData:  TSessionData read FSessionData;
         property AccessToken:  string       read FAccessToken  write RegisterAccessToken;
-        property RefreshToken: string       read FRefreshToken write RegisterRefreshToken;
     end;
 
 
@@ -87,12 +84,6 @@ end;
 procedure TSessionService.RegisterAccessToken(NewValue: string);
 begin
     FAccessToken:=NewValue;
-end;
-
-
-procedure TSessionService.RegisterRefreshToken(NewValue: string);
-begin
-    FRefreshToken:=NewValue;
 end;
 
 

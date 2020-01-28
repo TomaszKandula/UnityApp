@@ -103,7 +103,9 @@ begin
     try
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'mailer/send/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
 

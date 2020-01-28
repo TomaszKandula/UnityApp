@@ -149,6 +149,7 @@ uses
     System.Threading,
     REST.Types,
     REST.Json,
+    Unity.Settings,
     Unity.RestWrapper,
     Unity.Helpers,
     Unity.EventLogger,
@@ -173,7 +174,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'dailycommentaries/'
             + PayLoad.SourceDBName
             + '/'
@@ -334,7 +337,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'generalcommentaries/'
             + PayLoad.SourceDBName
             + '/'
@@ -475,7 +480,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'generalcommentaries/'
             + SourceDBName
             + '/'
@@ -558,7 +565,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'dailycommentaries/'
             + SourceDBName
             + '/'
@@ -634,7 +643,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'dailycommentaries/'
             + SourceDBName
             + '/'

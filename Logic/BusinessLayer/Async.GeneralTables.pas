@@ -245,10 +245,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/companies/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetCompaniesAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/companies/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetCompaniesAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -354,10 +356,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/controlstatus/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetControlStatusAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/controlstatus/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetControlStatusAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -443,10 +447,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/paidinfo/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetPaidInfoAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/paidinfo/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetPaidInfoAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -530,10 +536,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/paymentterms/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetPaymentTermsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/paymentterms/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetPaymentTermsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -627,10 +635,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/salesresponsible/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetSalesResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/salesresponsible/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetSalesResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -716,10 +726,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/personresponsible/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetPersonResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/personresponsible/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetPersonResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -805,10 +817,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/accounttype/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetAccountTypeAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/accounttype/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetAccountTypeAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -894,10 +908,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'generaltables/customergroup/';
-         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-         ThreadFileLog.Log('[GetCustomerGroupAsync]: Executing GET ' + Restful.ClientBaseURL);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'generaltables/customergroup/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetCustomerGroupAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try

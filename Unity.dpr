@@ -16,7 +16,7 @@ program Unity;
 // Framework used:         VCL (created by Borland).                      //
 // Require web services:   Yes, cloud based (Azure).                      //
 // Active Directory:       Yes, via web service.                          //
-// Chromium engine:        CEF4Delphi.                                    //
+// Chromium engine:        CEF4Delphi / embedded, sub-processed           //
 // ---------------------------------------------------------------------- //
 // Copyright (C) 2017-2020 Tomasz Kandula/DFDS Polska sp. z o.o.          //
 // All rights reserved.                                                   //
@@ -118,6 +118,7 @@ uses
     Api.ReturnSsisData in 'Model\Json\Responses\Api.ReturnSsisData.pas',
     Api.ReturnOpenItems in 'Model\Json\Responses\Api.ReturnOpenItems.pas',
 	Api.ReturnCustSnapshots in 'Model\Json\Responses\Api.ReturnCustSnapshots.pas',
+	Api.TokenGranted in 'Model\Json\Responses\Api.TokenGranted.pas',
     Unity.RestWrapper in 'Logic\DataLayer\Unity.RestWrapper.pas',
     Sync.Mailer in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Document in 'Logic\BusinessLayer\Sync.Document.pas',

@@ -103,6 +103,7 @@ type
     TRESTful = class(TInterfacedObject, IRESTFul)
     {$TYPEINFO ON}
     strict private
+        var FContentType: TRESTContentType;
         var restClient: TRESTClient;
         var restRequest: TRESTRequest;
         var restResponse: TRESTResponse;
@@ -158,7 +159,7 @@ type
         procedure SetRequestTimeout(NewValue: integer);
         procedure TrimContent(var TextStr: string);
     public
-        constructor Create(AccessToken: string = '');
+        constructor Create(AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON);
         destructor Destroy; override;
         property ExecuteError: string read GetExecuteError;
         property StatusCode: integer read GetStatusCode;
@@ -190,18 +191,6 @@ type
     end;
 
 
-    /// <summary>
-    /// Non-interfaced class constant providing fixed settings for REST controller including
-    /// fixed client credentials data.
-    /// </summary>
-    TRestAuth = class abstract
-    public
-        const ClientId       = '1001';
-        const ClientSecret   = '30adc06a61bd';
-        const restApiBaseUrl = 'https://unityapi.azurewebsites.net/api/v1/';
-    end;
-
-
 implementation
 
 
@@ -209,29 +198,43 @@ uses
     System.SysUtils;
 
 
-constructor TRESTful.Create(AccessToken: string = '');
+constructor TRESTful.Create(AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON);
 begin
 
     restClient  :=TRESTClient.Create('');
     restResponse:=TRESTResponse.Create(nil);
     restRequest :=TRESTRequest.Create(nil);
+    restRequest.Client:=restClient;
+    restRequest.Response:=restResponse;
 
     if not String.IsNullOrEmpty(AccessToken) then
         restClient.SetHTTPHeader('Authorization:','Bearer ' + AccessToken);
 
-    restRequest.Client:=restClient;
-    restRequest.Response:=restResponse;
+    FContentType:=ContentType;
+
+    case FContentType of
+
+        TRESTContentType.ctAPPLICATION_JSON:
+        begin
+            ClientAccept     :='application/json, text/plain; q=0.9, text/html;q=0.8,';
+            ClientContentType:='application/json';
+        end;
+
+        TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED:
+        begin
+            ClientAccept     :='*/*';
+            ClientContentType:='application/x-www-form-urlencoded';
+        end;
+
+    end;
 
     queryList:=TList<string>.Create();
     paramList:=TList<string>.Create();
 
-    ClientAccept             :='application/json, text/plain; q=0.9, text/html;q=0.8,';
     ClientAcceptCharset      :='UTF-8, *;q=0.8';
     ClientAcceptEncoding     :='gzip, deflate';
     ClientAllowCookies       :=True;
     ClientAutoCreateParams   :=True;
-    ClientBaseURL            :=TRestAuth.restApiBaseUrl;
-    ClientContentType        :='application/json';
     ClientHandleRedirects    :=True;
     ClientRaiseExceptionOn500:=True;
     ClientSynchronizedEvents :=True;
@@ -262,13 +265,14 @@ begin
 
     Result:=False;
 
-    if (restRequest.Method = TRESTRequestMethod.rmGET) or (restRequest.Method = TRESTRequestMethod.rmDELETE) then
+    if (restRequest.Method = TRESTRequestMethod.rmGET)
+    or (restRequest.Method = TRESTRequestMethod.rmDELETE) then
     begin
 
         if ((queryList.Count > 0) and (paramList.Count > 0)) and (queryList.Count = paramList.Count) then
         begin
             restRequest.Params.Clear;
-            for var iCNT: integer:=0 to queryList.Count - 1 do
+            for var iCNT:=0 to queryList.Count - 1 do
                 restRequest.AddParameter(queryList.Items[iCNT], paramList.Items[iCNT]);
         end;
 
@@ -279,14 +283,22 @@ begin
     or (restRequest.Method = TRESTRequestMethod.rmPATCH) then
     begin
 
+        if (restRequest.Method = TRESTRequestMethod.rmPOST) then
+        begin
+
+            if ((queryList.Count > 0) and (paramList.Count > 0)) and (queryList.Count = paramList.Count) then
+            begin
+                restRequest.Params.Clear;
+                for var iCNT:=0 to queryList.Count - 1 do
+                    restRequest.AddParameter(queryList.Items[iCNT], paramList.Items[iCNT]);
+            end;
+
+        end;
+
         if not(String.IsNullOrEmpty(CustomBody)) then
         begin
             restRequest.Body.ClearBody;
-            restRequest.Body.Add(GetCustomBody, TRESTContentType.ctAPPLICATION_JSON);
-        end
-        else
-        begin
-            Exit();
+            restRequest.Body.Add(GetCustomBody, FContentType);
         end;
 
     end;

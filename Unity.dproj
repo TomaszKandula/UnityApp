@@ -227,6 +227,7 @@
         <DCCReference Include="Model\Json\Responses\Api.ReturnSsisData.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.ReturnOpenItems.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.ReturnCustSnapshots.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.TokenGranted.pas"/>
         <DCCReference Include="Logic\DataLayer\Unity.RestWrapper.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Document.pas"/>
@@ -367,9 +368,10 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Images\UnityIcon_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -400,10 +402,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Images\UnityIcon_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
-                        <RemoteDir>Assets\</RemoteDir>
-                        <RemoteName>Logo44x44.png</RemoteName>
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

@@ -80,9 +80,9 @@ type
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function ConfigToMemory(): boolean;
         function GetLicenceValue(Section: string; Key: string): string;
-        function GetStringValue(Section: string; Key: string; Default: string): string;
+        function GetStringValue(Section: string; Key: string; Default: string = ''): string;
         procedure SetStringValue(Section: string; Key: string; Value: string);
-        function  GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+        function  GetIntegerValue(Section: string; Key: string; Default: integer = 0): integer;
         procedure SetIntegerValue(Section: string; Key: string; Value: integer);
         procedure GetSectionValues(Section: string; var Values: TStringList);
         procedure GetSection(Section: string; var Keys: TStringList);
@@ -155,9 +155,9 @@ type
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function ConfigToMemory: boolean;
         function GetLicenceValue(Section: string; Key: string): string;
-        function GetStringValue(Section: string; Key: string; Default: string): string;
+        function GetStringValue(Section: string; Key: string; Default: string = ''): string;
         procedure SetStringValue(Section: string; Key: string; Value: string);
-        function GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+        function GetIntegerValue(Section: string; Key: string; Default: integer = 0): integer;
         procedure SetIntegerValue(Section: string; Key: string; Value: integer);
         procedure GetSectionValues(Section: string; var Values: TStringList);
         procedure GetSection(Section: string; var Keys: TStringList);
@@ -199,18 +199,12 @@ type
         const PasswordSection    = 'PASSWORD';
         const ApplicationDetails = 'APPLICATION';
         const RiskClassDetails   = 'RISK_CLASS_DETAILS';
-        const DatabaseSetup      = 'DATABASE_SETTINGS';{Legacy}
         const InvoiceTypes       = 'INVOICE_TYPES';
-        const TabSheetsCaps      = 'TABSHEETS_CAPTIONS';
         const Unallocated        = 'UNALLOCATED_DEFINITION';
         const Layouts            = 'EMAIL_LAYOUTS';
         const TimersSettings     = 'TIMERS_INTERVALS';
         const FollowUpColors     = 'FOLLOWUPS_COLORS';
         const AgingRanges        = 'AGEVIEW_BUCKETS';
-        const ColumnPrefix       = 'COLUMN';
-        const ColumnWidthName    = 'COLUMNWIDTH';
-        const ColumnOrderName    = 'COLUMNORDER';
-        const ColumnNames        = 'COLUMNNAMES';
         const UserFeedback       = 'USER_FEEDBACK';
     end;
 

@@ -71,12 +71,6 @@ type
     /// </summary>
     TListSelection = (First, Last);
 
-    // to be removed
-    TAuthTypes = (cdoAnonymous, cdoBasic, cdoNTLM);{Legacy}
-    TAuthUsing = (cdoNone, cdoSendUsingPickup, cdoSendUsingPort, cdoSendUsingExchange);{Legacy}
-    TQuotes = (Enabled, Disabled);{Legacy}
-    TBrackets = (Round, Square, Curly);{legacy}
-
 
 implementation
 

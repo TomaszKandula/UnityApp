@@ -31,6 +31,14 @@ type
     IAccounts = interface(IInterface)
     ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
         /// <summary>
+        //  Allow to request access token in exchange of client id and client secrets. It is necessary for further communication.
+        /// There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
+        /// <summary>
         /// Allow to initiate new user session by loggin user data in the database via Unity API.
         /// This user session entry is later used by other service that uses Active Directory.
         /// There is no separate notification.
@@ -97,6 +105,14 @@ type
     TAccounts = class(TInterfacedObject, IAccounts)
     {$TYPEINFO ON}
     public
+        /// <summary>
+        //  Allow to request access token in exchange of client id and client secrets. It is necessary for further communication.
+        /// There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
         /// <summary>
         /// Allow to initiate new user session by loggin user data in the database via Unity API.
         /// This user session entry is later used by other service that uses Active Directory.
@@ -170,6 +186,7 @@ uses
     REST.Types,
     REST.Json,
     Unity.Helpers,
+    Unity.Settings,
     Unity.EventLogger,
     Unity.SessionService,
     Unity.RestWrapper,
@@ -185,7 +202,83 @@ uses
     Api.UserRatingAdd,
     Api.UserRatingAdded,
     Api.UserRatingUpdate,
-    Api.UserRatingUpdated;
+    Api.UserRatingUpdated,
+    Api.TokenGranted;
+
+
+function TAccounts.RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var NewAccessToken: string;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(String.Empty, TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'oauth/authorize/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[RequestAccessTokenAwaited]: Executing POST ' + Restful.ClientBaseURL);
+
+        Restful.AddParameter('GrantType',    Settings.GetStringValue('APPLICATION', 'GRANT_TYPE'));
+        Restful.AddParameter('ClientId',     Settings.GetStringValue('APPLICATION', 'CLIENT_ID'));
+        Restful.AddParameter('ClientSecret', Settings.GetStringValue('APPLICATION', 'CLIENT_SECRET'));
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Restful.Content);
+                try
+                    NewAccessToken:=TokenGranted.AccessToken;
+                    CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
+                    CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=TokenGranted.Error.ErrorNum;
+                    ThreadFileLog.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                finally
+                    TokenGranted.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+                E: Exception do
+            begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    AccessToken:=NewAccessToken;
+    Result:=CallResponse;
+
+end;
 
 
 function TAccounts.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
@@ -197,7 +290,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/initiate/' + SessionId;
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -271,7 +366,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/check/' + SessionId;
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'accounts/check/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -353,7 +450,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/companies/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+            + 'accounts/'
+            + SessionService.SessionData.UnityUserId.ToString()
+            + '/companies/';
+
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -429,7 +532,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/logs/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+            + 'accounts/'
+            + SessionService.SessionData.UnityUserId.ToString()
+            + '/logs/';
+
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
         ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
@@ -510,7 +619,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/companies/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+            + 'accounts/'
+            + SessionService.SessionData.UnityUserId.ToString()
+            + '/companies/';
+
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
         ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
 
@@ -583,7 +698,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+            + 'accounts/'
+            + SessionService.SessionData.UnityUserId.ToString()
+            + '/rating/';
+
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[LoadRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -656,7 +777,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+            + 'accounts/'
+            + SessionService.SessionData.UnityUserId.ToString()
+            + '/rating/';
+
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SubmitRatingAsync]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -737,7 +864,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+            + 'accounts/'
+            + SessionService.SessionData.UnityUserId.ToString()
+            + '/rating/';
+
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
         ThreadFileLog.Log('[UpdateRatingAsync]: Executing PATCH ' + Restful.ClientBaseURL);
 

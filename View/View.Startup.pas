@@ -25,7 +25,6 @@ uses
     Vcl.StdCtrls,
     Vcl.Imaging.pngimage,
     Vcl.Imaging.jpeg,
-    Data.Win.ADODB,
     Unity.Records;
 
 
@@ -67,6 +66,7 @@ type
         procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
         procedure ExitAppSync();
         procedure ApplicationStart();
+        function GetAccessTokenSync(): boolean;
         function GetScreenDataSync(): boolean;
         function GetGeneralTablesSync(): boolean;
         function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
@@ -197,11 +197,29 @@ begin
 
         var Settings: ISettings:=TSettings.Create();
 
+        // ---------------------------
+        // Application initialization.
+        // ---------------------------
+        Sleep(50);
+        ChangeProgressBar(5, 'Initializing...', ProgressBar);
+
+        if not GetAccessTokenSync() then
+        begin
+            ThreadFileLog.Log('Critical error has occured [GetAccessTokenSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetAccessTokenSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            ExitAppSync();
+        end
+        else
+        begin
+            ThreadFileLog.Log('Access token has been requested.');
+            ChangeProgressBar(25, 'Getting access token... done.', ProgressBar);
+        end;
+
         // ----------------------------
         // Upload application settings.
         // ----------------------------
         Sleep(50);
-        ChangeProgressBar(5, 'Initializing...', ProgressBar);
+        ChangeProgressBar(33, 'Registering session...', ProgressBar);
 
         if not GetScreenDataSync() then
         begin
@@ -219,7 +237,7 @@ begin
             Accounts.InitiateSessionAwaited(SessionService.SessionId, Settings.WinUserName);
 
             ThreadFileLog.Log('Unity has been boot up.');
-            ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
+            ChangeProgressBar(50, 'Initializing... done.', ProgressBar);
 
         end;
 
@@ -288,6 +306,27 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+function TStartupForm.GetAccessTokenSync(): boolean;
+begin
+
+    Result:=True;
+
+    var Accounts: IAccounts:=TAccounts.Create();
+    var CallResponse: TCallResponse;
+    var NewAccessToken: string;
+
+    CallResponse:=Accounts.RequestAccessTokenAwaited(NewAccessToken);
+    NewAccessToken:=SessionService.AccessToken;
+
+    if not CallResponse.IsSucceeded then
+    begin
+        ThreadFileLog.Log('[GetAccessTokenSync]: ' + CallResponse.LastMessage);
+        Result:=False;
+    end;
 
 end;
 

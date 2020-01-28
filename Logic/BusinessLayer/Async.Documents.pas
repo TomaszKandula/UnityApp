@@ -309,7 +309,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'documents/'
             + PayLoad.SourceDBName
             + '/'

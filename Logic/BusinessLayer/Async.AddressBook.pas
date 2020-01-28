@@ -140,11 +140,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
 
         if LoadedCompanies.Count > 0 then
         begin
 
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'addressbook/selection/';
+
+            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'addressbook/selection/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[OpenAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -159,7 +161,7 @@ begin
         end
         else
         begin
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'addressbook/';
+            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'addressbook/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
         end;
@@ -283,8 +285,9 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
             + 'addressbook/'
             + SourceDBName
             + '/'

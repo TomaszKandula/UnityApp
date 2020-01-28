@@ -121,7 +121,9 @@ begin
         var Grid: TStringGrid:=TStringGrid.Create(nil);
 
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'snapshots/customers/';
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'snapshots/customers/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[ReadAgeViewAsync]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -318,7 +320,9 @@ begin
         begin
 
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'snapshots/options/';
+            var Settings: ISettings:=TSettings.Create();
+
+            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'snapshots/options/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 

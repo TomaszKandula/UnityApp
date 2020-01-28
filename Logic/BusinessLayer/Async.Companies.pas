@@ -69,6 +69,7 @@ uses
     System.SysUtils,
     REST.Types,
     REST.Json,
+    Unity.Settings,
     Unity.RestWrapper,
     Unity.Helpers,
     Unity.EventLogger,
@@ -89,7 +90,9 @@ begin
         begin
 
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + SourceDBName;
+            var Settings: ISettings:=TSettings.Create();
+
+            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'companies/' + SourceDBName;
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -159,7 +162,9 @@ begin
         begin
 
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/return/emails/';
+            var Settings: ISettings:=TSettings.Create();
+
+            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'companies/return/emails/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Restful.ClientBaseURL);
 

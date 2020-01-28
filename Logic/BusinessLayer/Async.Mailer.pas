@@ -76,11 +76,12 @@ begin
         try
 
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/feedback/';
+            var Settings: ISettings:=TSettings.Create();
+
+            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'mailer/feedback/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
-            var Settings: ISettings:=TSettings.Create();
             var SendFrom:=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
             var SendTo  :=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
 
