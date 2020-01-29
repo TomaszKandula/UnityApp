@@ -48,7 +48,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TCustomerDetails; Callback: TUpdateAddressBook);//not implemented
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; Callback: TUpdateAddressBook);
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -89,7 +89,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TCustomerDetails; Callback: TUpdateAddressBook);
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; Callback: TUpdateAddressBook);
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -130,7 +130,9 @@ uses
     Unity.SessionService,
     Api.UserCompanySelection,
     Api.AddressBookList,
-    Api.AddressBookItem;
+    Api.AddressBookItem,
+    Api.AddressBookUpdate,
+    Api.AddressBookUpdated;
 
 
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
@@ -146,7 +148,7 @@ begin
         begin
 
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'addressbook/selection/';
+            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/selection/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[OpenAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -161,7 +163,7 @@ begin
         end
         else
         begin
-            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'addressbook/';
+            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
         end;
@@ -251,10 +253,125 @@ begin
 end;
 
 
-procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TCustomerDetails; Callback: TUpdateAddressBook);
+procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; Callback: TUpdateAddressBook);
 begin
 
-    //...
+    if not Assigned(SourceGrid) then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute. Please contact IT Support.');
+        ThreadFileLog.Log('[UpdateAddressBookAsync]: Cannot execute, the object "' + SourceGrid.Name + '" is not assigned.');
+        Exit();
+    end;
+
+    if SourceGrid.UpdatedRowsHolder = nil then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Nothing to update.');
+        ThreadFileLog.Log('[UpdateAddressBookAsync]: Nothing to update.');
+        Exit();
+    end;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        ThreadFileLog.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Restful.ClientBaseURL);
+
+        var AddressBookUpdate:=TAddressBookUpdate.Create();
+        try
+
+            var Records:=high(SourceGrid.UpdatedRowsHolder);
+
+            var List1:=TList<integer>.Create();
+            var List2:=TList<string>.Create();
+            var List3:=TList<string>.Create();
+            var List4:=TList<string>.Create();
+            var List5:=TList<string>.Create();
+
+            for var iCNT:=0 to Records do
+            begin
+                List1.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._Id), SourceGrid.UpdatedRowsHolder[iCNT]].ToInteger());
+                List2.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._ContactPerson), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                List3.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._RegularEmails), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                List4.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._StatementEmails), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                List5.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._PhoneNumbers), SourceGrid.UpdatedRowsHolder[iCNT]]);
+            end;
+
+            AddressBookUpdate.Id:=List1.ToArray();
+            AddressBookUpdate.ContactPerson:=List2.ToArray();
+            AddressBookUpdate.RegularEmails:=List3.ToArray();
+            AddressBookUpdate.StatementEmails:=List4.ToArray();
+            AddressBookUpdate.PhoneNumbers:=List5.ToArray();
+
+            List1.Free();
+            List2.Free();
+            List3.Free();
+            List4.Free();
+            List5.Free();
+
+            Restful.CustomBody:=TJson.ObjectToJsonString(AddressBookUpdate);
+
+        finally
+            AddressBookUpdate.Free();
+        end;
+
+        var CallResponse: TCallResponse;
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var AddressBookUpdated:=TJson.JsonToObject<TAddressBookUpdated>(Restful.Content);
+                try
+                    CallResponse.IsSucceeded :=AddressBookUpdated.IsSucceeded;
+                    CallResponse.ErrorNumber :=AddressBookUpdated.Error.ErrorNum;
+                    CallResponse.LastMessage :=AddressBookUpdated.Error.ErrorDesc;
+                finally
+                    AddressBookUpdated.Free();
+                end;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                ThreadFileLog.Log('[UpdateAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[UpdateAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[UpdateAddressBookAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[UpdateAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[UpdateAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 
@@ -287,7 +404,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'addressbook/'
             + SourceDBName
             + '/'

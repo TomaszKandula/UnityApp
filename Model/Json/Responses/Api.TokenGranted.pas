@@ -26,7 +26,7 @@ type
         var FAccessToken: string;
         var FTokenType:   string;
         var FGrantType:   string;
-        var FExpiresIn:   string;
+        var FExpiresIn:   integer;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
     public
@@ -41,7 +41,7 @@ type
         property AccessToken: string        read FAccessToken write FAccessToken;
         property TokenType:   string        read FTokenType   write FTokenType;
         property GrantType:   string        read FGrantType   write FGrantType;
-        property ExpiresIn:   string        read FExpiresIn   write FExpiresIn;
+        property ExpiresIn:   integer       read FExpiresIn   write FExpiresIn;
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler read FError       write FError;
     end;

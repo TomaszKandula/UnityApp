@@ -218,13 +218,13 @@ begin
         var Restful: IRESTful:=TRESTful.Create(String.Empty, TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'oauth/authorize/';
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[RequestAccessTokenAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
-        Restful.AddParameter('GrantType',    Settings.GetStringValue('APPLICATION', 'GRANT_TYPE'));
-        Restful.AddParameter('ClientId',     Settings.GetStringValue('APPLICATION', 'CLIENT_ID'));
-        Restful.AddParameter('ClientSecret', Settings.GetStringValue('APPLICATION', 'CLIENT_SECRET'));
+        Restful.AddParameter('GrantType',    Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
+        Restful.AddParameter('ClientId',     Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
+        Restful.AddParameter('ClientSecret', Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
 
         try
 
@@ -292,7 +292,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -368,7 +368,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'accounts/check/' + SessionId;
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -452,7 +452,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + SessionService.SessionData.UnityUserId.ToString()
             + '/companies/';
@@ -534,7 +534,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + SessionService.SessionData.UnityUserId.ToString()
             + '/logs/';
@@ -621,7 +621,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + SessionService.SessionData.UnityUserId.ToString()
             + '/companies/';
@@ -700,7 +700,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + SessionService.SessionData.UnityUserId.ToString()
             + '/rating/';
@@ -779,7 +779,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + SessionService.SessionData.UnityUserId.ToString()
             + '/rating/';
@@ -866,7 +866,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + SessionService.SessionData.UnityUserId.ToString()
             + '/rating/';

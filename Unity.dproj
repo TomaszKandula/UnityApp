@@ -189,6 +189,7 @@
         <DCCReference Include="Model\Json\Requests\Api.UserDailyCommentUpdate.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.LogSentDocument.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.AddressBookAdd.pas"/>
+        <DCCReference Include="Model\Json\Requests\Api.AddressBookUpdate.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.UserCustSnapshotList.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserSessionAdded.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserSessionChecked.pas"/>
@@ -228,6 +229,7 @@
         <DCCReference Include="Model\Json\Responses\Api.ReturnOpenItems.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.ReturnCustSnapshots.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.TokenGranted.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.AddressBookUpdated.pas"/>
         <DCCReference Include="Logic\DataLayer\Unity.RestWrapper.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Document.pas"/>

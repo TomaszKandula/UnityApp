@@ -120,7 +120,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'openitems/customers/ssis/';
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[GetSSISDataAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -270,7 +270,7 @@ begin
     var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
     var Settings: ISettings:=TSettings.Create();
 
-    Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'openitems/customers/';
+    Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
     Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
     ThreadFileLog.Log('[FLoadToGrid]: Executing POST ' + Restful.ClientBaseURL);
 

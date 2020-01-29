@@ -176,7 +176,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'dailycommentaries/'
             + PayLoad.SourceDBName
             + '/'
@@ -339,7 +339,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'generalcommentaries/'
             + PayLoad.SourceDBName
             + '/'
@@ -482,7 +482,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'generalcommentaries/'
             + SourceDBName
             + '/'
@@ -567,7 +567,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'dailycommentaries/'
             + SourceDBName
             + '/'
@@ -645,7 +645,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'dailycommentaries/'
             + SourceDBName
             + '/'

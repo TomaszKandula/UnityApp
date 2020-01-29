@@ -207,17 +207,23 @@ begin
     restRequest.Client:=restClient;
     restRequest.Response:=restResponse;
 
-    if not String.IsNullOrEmpty(AccessToken) then
-        restClient.SetHTTPHeader('Authorization:','Bearer ' + AccessToken);
-
     FContentType:=ContentType;
-
     case FContentType of
 
         TRESTContentType.ctAPPLICATION_JSON:
         begin
+
             ClientAccept     :='application/json, text/plain; q=0.9, text/html;q=0.8,';
             ClientContentType:='application/json';
+
+            if not String.IsNullOrEmpty(AccessToken) then
+                restRequest.AddAuthParameter(
+                    'Authorization',
+                    'Bearer ' + AccessToken,
+                    TREStRequestParameterKind.pkHTTPHEADER,
+                    [poDoNotEncode]
+                );
+
         end;
 
         TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED:

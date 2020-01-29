@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -10959,7 +10959,7 @@ object MainForm: TMainForm
           DoubleBuffered = True
           RowCount = 2
           GradientEndColor = clGradientInactiveCaption
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
           ParentDoubleBuffered = False
           ParentShowHint = False
           PopupMenu = PopupAgeView

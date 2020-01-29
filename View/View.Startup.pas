@@ -66,9 +66,9 @@ type
         procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
         procedure ExitAppSync();
         procedure ApplicationStart();
-        function GetAccessTokenSync(): boolean;
+        function GetAccessTokenAsync(): boolean;
         function GetScreenDataSync(): boolean;
-        function GetGeneralTablesSync(): boolean;
+        function GetGeneralTablesAsync(): boolean;
         function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
@@ -203,7 +203,7 @@ begin
         Sleep(50);
         ChangeProgressBar(5, 'Initializing...', ProgressBar);
 
-        if not GetAccessTokenSync() then
+        if not GetAccessTokenAsync() then
         begin
             ThreadFileLog.Log('Critical error has occured [GetAccessTokenSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetAccessTokenSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
@@ -211,7 +211,7 @@ begin
         end
         else
         begin
-            ThreadFileLog.Log('Access token has been requested.');
+            ThreadFileLog.Log('Access token has been granted.');
             ChangeProgressBar(25, 'Getting access token... done.', ProgressBar);
         end;
 
@@ -276,7 +276,7 @@ begin
         Sleep(250);
         ChangeProgressBar(85, 'Calling general tables loaders...', ProgressBar);
 
-        if not GetGeneralTablesSync() then
+        if not GetGeneralTablesAsync() then
         begin
             ThreadFileLog.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
@@ -310,7 +310,7 @@ begin
 end;
 
 
-function TStartupForm.GetAccessTokenSync(): boolean;
+function TStartupForm.GetAccessTokenAsync(): boolean;
 begin
 
     Result:=True;
@@ -320,13 +320,15 @@ begin
     var NewAccessToken: string;
 
     CallResponse:=Accounts.RequestAccessTokenAwaited(NewAccessToken);
-    NewAccessToken:=SessionService.AccessToken;
 
     if not CallResponse.IsSucceeded then
     begin
         ThreadFileLog.Log('[GetAccessTokenSync]: ' + CallResponse.LastMessage);
         Result:=False;
+        Exit();
     end;
+
+    SessionService.AccessToken:=NewAccessToken;
 
 end;
 
@@ -455,7 +457,7 @@ begin
 end;
 
 
-function TStartupForm.GetGeneralTablesSync(): boolean;
+function TStartupForm.GetGeneralTablesAsync(): boolean;
 begin
 
     Result:=True;

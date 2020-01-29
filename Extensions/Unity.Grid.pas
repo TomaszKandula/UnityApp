@@ -237,12 +237,12 @@ begin
 
     inherited;
 
-    if HideFocusRect then
-    begin
-        var FocusRect: TRect:=CellRect(Col, Row);
-        if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
-        DrawFocusRect(Canvas.Handle, FocusRect);
-    end;
+//    if HideFocusRect then
+//    begin
+//        var FocusRect: TRect:=CellRect(Col, Row);
+//        if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
+//        DrawFocusRect(Canvas.Handle, FocusRect);
+//    end;
 
 end;
 

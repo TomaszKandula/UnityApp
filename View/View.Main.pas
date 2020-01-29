@@ -1597,7 +1597,6 @@ begin
     finally
         sgAddressBook.Freeze(False);
         sgAddressBook.SetColWidth(10, 20, 400);
-        sgAddressBook.ColWidths[1]:=-1;
     end;
 
     FIsAddressBookOpened:=True;
@@ -1614,7 +1613,7 @@ begin
 
         True:
         begin
-            THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
+            THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated successfully.');
             ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
         end;
 
@@ -2312,60 +2311,7 @@ end;
 
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
 begin
-
-    var Temp: TArray<TArray<string>>;
-    try
-
-        try
-
-            var iCNT:    integer;
-            var jCNT:    integer;
-            var SqlRows: integer;
-            var TmpRows: integer;
-
-            // -------------------------------------------------------
-            // "High" method returns number of rows counting from zero
-            // while "setlength" method setup array counting from one
-            // therefore, we need to add one to match dimensions.
-            // -------------------------------------------------------
-            SqlRows:=high(sgAgeView.SqlColumns);
-            Inc(SqlRows);
-            SetLength(Temp, SqlRows, 2);
-            TmpRows:=high(Temp);
-
-            // -------------------------------
-            // Copy SQL array to temp array.
-            // Note: Do not use "copy" method!
-            // -------------------------------
-            for iCNT:=0 to TmpRows do
-                for jCNT:=0 to 1 do
-                    Temp[iCNT, jCNT]:=sgAgeView.SqlColumns[iCNT, jCNT];
-
-            // Update titles in SQL column array
-            for iCNT:=0 to sgAgeView.ColCount - 1 do
-                sgAgeView.SqlColumns[iCNT, 1]:=sgAgeView.Cells[iCNT, 0];
-
-            // Re-write other SQL columns from temp
-            sgAgeView.SqlColumns[ToIndex, 0]:=Temp[FromIndex, 0];
-
-            // Move column from right to left
-            if FromIndex > ToIndex then
-                for iCNT:=ToIndex to (FromIndex - 1) do
-                    sgAgeView.SqlColumns[iCNT + 1, 0]:=Temp[iCNT, 0];
-
-            // Move from left to right
-            if FromIndex < ToIndex then
-                for iCNT:=(FromIndex + 1) to ToIndex do
-                    sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
-        except
-            on E: Exception do
-                THelpers.MsgCall(TAppMessage.Warn, 'Unexpected error has occured. Description: ' + E.Message + '. Please contact IT support.')
-        end;
-
-    finally
-        SetLength(Temp, 0);
-    end;
-
+    {Do nothing}
 end;
 
 
@@ -3801,15 +3747,15 @@ begin
     sgAddressBook.SetUpdatedRow(0);
     UpdateStatusBar(TStatusBar.Processing);
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
+    AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
 end;
 
 
 procedure TMainForm.btnUpdateAbClick(Sender: TObject);
 begin
-    {var AddressBook: IAddressBook:=TAddressBook.Create();}
-    {AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);}
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    sgAddressBook.RecordRowsAffected();
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.UpdateAddressBookAsync(sgAddressBook, UpdateAddressBook_Callback);
 end;
 
 

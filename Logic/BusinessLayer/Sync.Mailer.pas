@@ -105,7 +105,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'mailer/send/';
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/send/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
 

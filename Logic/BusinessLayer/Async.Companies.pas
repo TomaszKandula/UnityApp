@@ -92,7 +92,7 @@ begin
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
             var Settings: ISettings:=TSettings.Create();
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'companies/' + SourceDBName;
+            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -164,7 +164,7 @@ begin
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
             var Settings: ISettings:=TSettings.Create();
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'companies/return/emails/';
+            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Restful.ClientBaseURL);
 

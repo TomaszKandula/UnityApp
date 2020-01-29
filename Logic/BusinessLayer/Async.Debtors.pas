@@ -123,7 +123,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'snapshots/customers/';
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[ReadAgeViewAsync]: Executing POST ' + Restful.ClientBaseURL);
 
@@ -322,7 +322,7 @@ begin
             var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
             var Settings: ISettings:=TSettings.Create();
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('APPLICATION', 'BASE_API_URI') + 'snapshots/options/';
+            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
