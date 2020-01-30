@@ -1354,9 +1354,9 @@ object ActionsForm: TActionsForm
         object zText9: TLabel
           Left = 19
           Top = 86
-          Width = 120
+          Width = 118
           Height = 13
-          Caption = 'E-Mail address (general):'
+          Caption = 'E-Mail address (regular):'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = 5592405
           Font.Height = -11

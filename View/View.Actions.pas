@@ -194,6 +194,7 @@ type
     strict private
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
+        var FCustDetailsId: integer;
         var FSourceDBName: string;
         var FCustName: string;
         var FCustNumber: Int64;
@@ -441,6 +442,7 @@ end;
 procedure TActionsForm.UpdateCustDetails();
 begin
 
+    FCustDetailsId:=0;
     var AddressBook: IAddressBook:=TAddressBook.Create();
     var CustomerDetails: TCustomerDetails;
     var CallResponse: TCallResponse;
@@ -454,6 +456,7 @@ begin
 
     var Phones: string;
 
+    FCustDetailsId       :=CustomerDetails.Id;
     Cust_Person.Text     :=CustomerDetails.ContactPerson;
     Cust_MailGeneral.Text:=CustomerDetails.RegularEmails;
     Cust_Mail.Text       :=CustomerDetails.StatementEmails;
@@ -780,7 +783,27 @@ end;
 
 procedure TActionsForm.SaveCustomerDetails();
 begin
-    //
+
+    if FCustDetailsId = 0 then
+    begin
+
+    end
+    else
+    begin
+
+        var CustomerDetails: TCustomerDetails;
+
+        CustomerDetails.Id             :=FCustDetailsId;
+        CustomerDetails.ContactPerson  :=Cust_Person.Text;
+        CustomerDetails.RegularEmails  :=Cust_MailGeneral.Text;
+        CustomerDetails.StatementEmails:=Cust_Mail.Text;
+        CustomerDetails.PhoneNumbers   :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+
+        var AddressBook: IAddressBook:=TAddressBook.Create();
+        AddressBook.UpdateAddressBookAsync(CustomerDetails, UpdateAddressBook_Callback);
+
+    end;
+
 end;
 
 
@@ -870,21 +893,15 @@ end;
 procedure TActionsForm.UpdateAddressBook_Callback(CallResponse: TCallResponse);
 begin
 
-    case CallResponse.IsSucceeded of
-
-        True:
-        begin
-            THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
-            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
-        end;
-
-        False:
-        begin
-            THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
-            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
-        end;
-
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+        ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Exit();
     end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated.');
+    ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book has been updated.');
 
 end;
 

@@ -23,7 +23,7 @@ type
     {$TYPEINFO ON}
     strict private
         var FSourceDbName:    string;
-        var FCustomerNumber:  integer;
+        var FCustomerNumber:  Int64;
         var FCustomerName:    string;
         var FContactPerson:   string;
         var FRegularEmails:   string;
@@ -38,13 +38,13 @@ type
         const _StatementEmails = 'StatementEmails';
         const _PhoneNumbers    = 'PhoneNumbers';
     published
-        property SourceDbName:    string  read FSourceDbName    write FSourceDbName;
-        property CustomerNumber:  integer read FCustomerNumber  write FCustomerNumber;
-        property CustomerName:    string  read FCustomerName    write FCustomerName;
-        property ContactPerson:   string  read FContactPerson   write FContactPerson;
-        property RegularEmails:   string  read FRegularEmails   write FRegularEmails;
-        property StatementEmails: string  read FStatementEmails write FStatementEmails;
-        property PhoneNumbers:    string  read FPhoneNumbers    write FPhoneNumbers;
+        property SourceDbName:    string read FSourceDbName    write FSourceDbName;
+        property CustomerNumber:  Int64  read FCustomerNumber  write FCustomerNumber;
+        property CustomerName:    string read FCustomerName    write FCustomerName;
+        property ContactPerson:   string read FContactPerson   write FContactPerson;
+        property RegularEmails:   string read FRegularEmails   write FRegularEmails;
+        property StatementEmails: string read FStatementEmails write FStatementEmails;
+        property PhoneNumbers:    string read FPhoneNumbers    write FPhoneNumbers;
     end;
 
 

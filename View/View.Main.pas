@@ -195,10 +195,8 @@ type
         btnReload: TImage;
         txtReloadBtnA: TLabel;
         btnOpenAb: TImage;
-        btnUpdateAb: TImage;
         btnCloseAb: TImage;
         txtOpenAb: TLabel;
-        txtUpdateAb: TLabel;
         txtCloseAb: TLabel;
         txtAllOpenItems: TLabel;
         txtInvoices: TLabel;
@@ -286,10 +284,7 @@ type
         Action_Search: TMenuItem;
         PopupBook: TPopupMenu;
         Action_Copy: TMenuItem;
-        Action_Paste: TMenuItem;
-        Action_Cut: TMenuItem;
         Action_DelRow: TMenuItem;
-        N10: TMenuItem;
         Action_ToExce: TMenuItem;
         N13: TMenuItem;
         FileXLExport: TSaveDialog;
@@ -547,8 +542,6 @@ type
         procedure btnReloadMouseLeave(Sender: TObject);
         procedure btnOpenAbMouseEnter(Sender: TObject);
         procedure btnOpenAbMouseLeave(Sender: TObject);
-        procedure btnUpdateAbMouseEnter(Sender: TObject);
-        procedure btnUpdateAbMouseLeave(Sender: TObject);
         procedure btnCloseAbMouseEnter(Sender: TObject);
         procedure btnCloseAbMouseLeave(Sender: TObject);
         procedure btnExportAbMouseEnter(Sender: TObject);
@@ -569,7 +562,6 @@ type
         procedure sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnCloseAbClick(Sender: TObject);
-        procedure btnUpdateAbClick(Sender: TObject);
         procedure btnOpenAbClick(Sender: TObject);
         procedure btnExportAbClick(Sender: TObject);
         procedure TabSheet7Show(Sender: TObject);
@@ -617,9 +609,7 @@ type
         procedure Action_AutoColumnSizeClick(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure Action_SearchClick(Sender: TObject);
-        procedure Action_CutClick(Sender: TObject);
         procedure Action_CopyClick(Sender: TObject);
-        procedure Action_PasteClick(Sender: TObject);
         procedure Action_DelRowClick(Sender: TObject);
         procedure PopupBookPopup(Sender: TObject);
         procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1597,6 +1587,7 @@ begin
     finally
         sgAddressBook.Freeze(False);
         sgAddressBook.SetColWidth(10, 20, 400);
+        sgAddressBook.ColWidths[1]:=-1;
     end;
 
     FIsAddressBookOpened:=True;
@@ -1609,21 +1600,15 @@ end;
 procedure TMainForm.UpdateAddressBook_Callback(CallResponse: TCallResponse);
 begin
 
-    case CallResponse.IsSucceeded of
-
-        True:
-        begin
-            THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated successfully.');
-            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
-        end;
-
-        False:
-        begin
-            THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
-            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
-        end;
-
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+        ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Exit();
     end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated successfully.');
+    ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
 
 end;
 
@@ -1631,21 +1616,15 @@ end;
 procedure TMainForm.AddToAddressBook_Callback(CallResponse: TCallResponse);
 begin
 
-    case CallResponse.IsSucceeded of
-
-        True:
-        begin
-            THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
-            ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Item has been added to Adddress Book.');
-        end;
-
-        False:
-        begin
-            THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-            ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
-        end;
-
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Exit();
     end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'New data has been added to Address Book successfully.');
+    ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: New data has been inserted to Adddress Book successfully.');
 
 end;
 
@@ -1664,7 +1643,6 @@ begin
     sgAgeView.Freeze(True);
     try
 
-        sgAgeView.SqlColumns:=ReturnedData.SqlColumns;
         sgAgeView.RowCount  :=ReturnedData.RowCount;
         sgAgeView.ColCount  :=ReturnedData.ColCount;
 
@@ -1694,7 +1672,6 @@ begin
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
 
-    sgAddressBook.SetUpdatedRow(0);
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
@@ -1846,7 +1823,6 @@ begin
     MainForm.sgInvoiceTracker.Freeze(True);
     try
 
-        MainForm.sgInvoiceTracker.SqlColumns:=InvoiceList.SqlColumns;
         MainForm.sgInvoiceTracker.RowCount  :=InvoiceList.RowCount;
         MainForm.sgInvoiceTracker.ColCount  :=InvoiceList.ColCount;
 
@@ -2792,9 +2768,7 @@ end;
 procedure TMainForm.PopupBookPopup(Sender: TObject);
 begin
 
-    Action_Cut.Enabled          :=True;
     Action_Copy.Enabled         :=True;
-    Action_Paste.Enabled        :=True;
     Action_DelRow.Enabled       :=True;
     Action_SearchBook.Enabled   :=True;
     Action_ColumnWidth.Enabled  :=True;
@@ -2805,9 +2779,7 @@ begin
 
     if sgAddressBook.RowCount < 3 then
     begin
-        Action_Cut.Enabled          :=False;
         Action_Copy.Enabled         :=False;
-        Action_Paste.Enabled        :=False;
         Action_DelRow.Enabled       :=False;
         Action_SearchBook.Enabled   :=False;
         Action_ColumnWidth.Enabled  :=False;
@@ -2983,39 +2955,6 @@ begin
 end;
 
 
-procedure TMainForm.Action_CutClick(Sender: TObject);
-begin
-
-    // ----------------------------------------------------------------------------------
-    // Allow to cut/paste the data from cell(s) if selected column is marked for editing.
-    // ----------------------------------------------------------------------------------
-    if AddressBookExclusion then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
-        Exit();
-    end;
-
-    sgAddressBook.CopyCutPaste(TActions.Cut);
-    sgAddressBook.RecordRowsAffected();
-
-end;
-
-
-procedure TMainForm.Action_PasteClick(Sender: TObject);
-begin
-
-    if AddressBookExclusion then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
-        Exit();
-    end;
-
-    sgAddressBook.CopyCutPaste(TActions.Paste);
-    sgAddressBook.RecordRowsAffected();
-
-end;
-
-
 procedure TMainForm.Action_CopyClick(Sender: TObject);
 begin
     sgAddressBook.CopyCutPaste(TActions.Copy);
@@ -3024,21 +2963,26 @@ end;
 
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 begin
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
-//    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO
-//        then Exit();
-//
-//    var AddressBook: IAddressBook:=TAddressBook.Create();
-//
-//    if AddressBook.DelFromAddressBookAwaited(sgAddressBook.Cells[2, sgAddressBook.Row]) then
-//    begin
-//        sgAddressBook.DeleteRowFrom(1, 1)
-//    end
-//    else
-//    begin
-//        THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
-//        ThreadFileLog.Log('[Action_DelRowClick]: Cannot delete selected row.');
-//    end;
+
+    var Msg:='Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.';
+    if THelpers.MsgCall(TAppMessage.Question2, Msg) = IDNO then Exit();
+
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    var CallResponse: TCallResponse;
+    CallResponse:=AddressBook.DelFromAddressBookAwaited(
+        sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._Id),
+        sgAddressBook.Row].ToInteger()
+    );
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
+        ThreadFileLog.Log('[Action_DelRowClick]: Cannot delete selected row.');
+        Exit();
+    end;
+
+    sgAddressBook.DeleteRowFrom(1, 1);
+
 end;
 
 
@@ -3158,9 +3102,26 @@ end;
 
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
-    {var AddressBook: IAddressBook:=TAddressBook.Create();}
-    {AddressBook.AddToAddressBookAsync(sgAgeView, AddToAddressBook_Callback);}
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+
+    if sgAgeView.Selection.Bottom - sgAgeView.Selection.Top > 1 then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Bulk insertion is not supported in this version.');
+        Exit();
+    end;
+
+    var CustDetails: TCustomerDetails;
+
+    CustDetails.SourceDBName   :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row];
+    CustDetails.CustomerNumber :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row].ToInteger();
+    CustDetails.CustomerName   :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), sgAgeView.Row];
+    CustDetails.ContactPerson  :=' ';
+    CustDetails.RegularEmails  :=' ';
+    CustDetails.StatementEmails:=' ';
+    CustDetails.PhoneNumbers   :=' ';
+
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
+
 end;
 
 
@@ -3522,14 +3483,13 @@ end;
 
 procedure TMainForm.sgAddressBookDblClick(Sender: TObject);
 begin
-    if (sgAddressBook.Col = 1) then Exit();
-    sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
+    {Empty}
 end;
 
 
 procedure TMainForm.sgAddressBookClick(Sender: TObject);
 begin
-    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+    {Empty}
 end;
 
 
@@ -3744,18 +3704,9 @@ end;
 procedure TMainForm.btnOpenAbClick(Sender: TObject);
 begin
     BusyForm.Show();
-    sgAddressBook.SetUpdatedRow(0);
     UpdateStatusBar(TStatusBar.Processing);
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
-end;
-
-
-procedure TMainForm.btnUpdateAbClick(Sender: TObject);
-begin
-    sgAddressBook.RecordRowsAffected();
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.UpdateAddressBookAsync(sgAddressBook, UpdateAddressBook_Callback);
 end;
 
 
@@ -3764,7 +3715,6 @@ begin
 
     if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
     begin
-        sgAddressBook.SetUpdatedRow(0);
         sgAddressBook.ClearAll(2, 1, 1, True);
         FIsAddressBookOpened:=False;
     end;
@@ -4519,18 +4469,6 @@ begin
 end;
 
 
-procedure TMainForm.btnUpdateAbMouseEnter(Sender: TObject);
-begin
-    txtUpdateAb.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TMainForm.btnUpdateAbMouseLeave(Sender: TObject);
-begin
-    txtUpdateAb.Font.Color:=AppButtonTxtNormal;
-end;
-
-
 procedure TMainForm.btnCloseAbMouseEnter(Sender: TObject);
 begin
     txtCloseAb.Font.Color:=AppButtonTxtSelected;
@@ -4767,72 +4705,13 @@ end;
 
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
-    // ---------------------------------------------------------------------------
-    // Allow to edit specific Address Book cells. Once edited, it will be saved to
-    // database if user click "Update" button.
-    // ---------------------------------------------------------------------------
-    if (Key <> VK_LEFT) and (Key <> VK_RIGHT) and (Key <> VK_UP) and (Key <> VK_DOWN) and (Shift <> [ssShift]) and (Shift <> [ssCtrl])
-        and (Shift <> [ssAlt]) and (Key <> VK_BACK) and (Key <> VK_TAB) and (Key <> VK_ESCAPE) then
-    begin
-
-        if AddressBookExclusion then
-        begin
-            THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
-            Exit;
-        end;
-
-        if Key = VK_RETURN then
-        begin
-            sgAddressBook.DelEsc(TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
-            sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
-            sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
-        end;
-
-        if Key = VK_DELETE then
-        begin
-            sgAddressBook.DelEsc(TActions.Delete, sgAddressBook.Col, sgAddressBook.Row);
-            sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
-        end;
-
-    end;
-
+    {Empty}
 end;
 
 
 procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
-    if (Key = VK_F2)
-        or ((sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._RegularEmails))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._PhoneNumbers))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._ContactPerson))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._StatementEmails)))
-        and (Key <> VK_RETURN)
-    then
-        sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
-
-    if Key = VK_ESCAPE then
-    begin
-        sgAddressBook.DelEsc(TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
-        sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
-    end;
-
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAddressBook.CopyCutPaste(TActions.Copy);
-
-    if (Key = 86) and (Shift = [ssCtrl]) then
-    begin
-        sgAddressBook.CopyCutPaste(TActions.Paste);
-        sgAddressBook.RecordRowsAffected;
-    end;
-
-    if (Key = 88) and (Shift = [ssCtrl]) then
-    begin
-        sgAddressBook.CopyCutPaste(TActions.Cut);
-        sgAddressBook.RecordRowsAffected;
-    end;
-
+    {Empty}
 end;
 
 

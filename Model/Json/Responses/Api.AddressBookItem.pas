@@ -23,6 +23,7 @@ type
     TAddressBookItem = class
     {$TYPEINFO ON}
     strict private
+        var FId:              integer;
         var FSourceDbName:    string;
         var FCustomerNumber:  Int64;
         var FCustomerName:    string;
@@ -33,6 +34,7 @@ type
         var FIsSucceeded:     boolean;
         var FError:           TErrorHandler;
     public
+        const _Id              = 'Id';
         const _SourceDbName    = 'SourceDbName';
         const _CustomerNumber  = 'CustomerNumber';
         const _CustomerName    = 'CustomerName';
@@ -44,6 +46,7 @@ type
         const _Error           = 'Error';
         destructor Destroy(); override;
     published
+        property Id:              integer       read FId              write FId;
         property SourceDbName:    string        read FSourceDbName    write FSourceDbName;
         property CustomerNumber:  Int64         read FCustomerNumber  write FCustomerNumber;
         property CustomerName:    string        read FCustomerName    write FCustomerName;

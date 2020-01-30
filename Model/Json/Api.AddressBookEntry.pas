@@ -1,4 +1,4 @@
-unit Api.AddressBookUpdate;
+unit Api.AddressBookEntry;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -18,7 +18,7 @@ uses
 type
 
 
-    TAddressBookUpdate = class
+    TAddressBookEntry = class
     {$TYPEINFO ON}
     strict private
         var FId:              integer;
@@ -33,11 +33,22 @@ type
         const _StatementEmails = 'StatementEmails';
         const _PhoneNumbers    = 'PhoneNumbers';
     published
-        property Id:              integer read FId              write FId;
-        property ContactPerson:   string  read FContactPerson   write FContactPerson;
-        property RegularEmails:   string  read FRegularEmails   write FRegularEmails;
-        property StatementEmails: string  read FStatementEmails write FStatementEmails;
-        property PhoneNumbers:    string  read FPhoneNumbers    write FPhoneNumbers;
+
+        [JSONName('Id')]
+        property Id: integer read FId write FId;
+
+        [JSONName('ContactPerson')]
+        property ContactPerson: string read FContactPerson write FContactPerson;
+
+        [JSONName('RegularEmails')]
+        property RegularEmails: string read FRegularEmails write FRegularEmails;
+
+        [JSONName('StatementEmails')]
+        property StatementEmails: string read FStatementEmails write FStatementEmails;
+
+        [JSONName('PhoneNumbers')]
+        property PhoneNumbers: string read FPhoneNumbers write FPhoneNumbers;
+
     end;
 
 

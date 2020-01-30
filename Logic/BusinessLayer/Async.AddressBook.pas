@@ -48,21 +48,21 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; Callback: TUpdateAddressBook);
+        procedure UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook);
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);//not implemented
+        procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
         /// <summary>
         /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function DelFromAddressBookAwaited(Id: integer): TCallResponse;//not implemented
+        function DelFromAddressBookAwaited(Id: integer): TCallResponse;
         /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
@@ -89,14 +89,14 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; Callback: TUpdateAddressBook);
+        procedure UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook);
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for Callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+        procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
         /// <summary>
         /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
         /// </summary>
@@ -132,7 +132,10 @@ uses
     Api.AddressBookList,
     Api.AddressBookItem,
     Api.AddressBookUpdate,
-    Api.AddressBookUpdated;
+    Api.AddressBookUpdated,
+    Api.AddressBookItemDel,
+    Api.AddressBookAdd,
+    Api.AddressBookAdded;
 
 
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
@@ -253,22 +256,8 @@ begin
 end;
 
 
-procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; Callback: TUpdateAddressBook);
+procedure TAddressBook.UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook);
 begin
-
-    if not Assigned(SourceGrid) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute. Please contact IT Support.');
-        ThreadFileLog.Log('[UpdateAddressBookAsync]: Cannot execute, the object "' + SourceGrid.Name + '" is not assigned.');
-        Exit();
-    end;
-
-    if SourceGrid.UpdatedRowsHolder = nil then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Nothing to update.');
-        ThreadFileLog.Log('[UpdateAddressBookAsync]: Nothing to update.');
-        Exit();
-    end;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -276,41 +265,17 @@ begin
         var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + PayLoad.Id.ToString();
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
         ThreadFileLog.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Restful.ClientBaseURL);
 
         var AddressBookUpdate:=TAddressBookUpdate.Create();
         try
 
-            var Records:=high(SourceGrid.UpdatedRowsHolder);
-
-            var List1:=TList<integer>.Create();
-            var List2:=TList<string>.Create();
-            var List3:=TList<string>.Create();
-            var List4:=TList<string>.Create();
-            var List5:=TList<string>.Create();
-
-            for var iCNT:=0 to Records do
-            begin
-                List1.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._Id), SourceGrid.UpdatedRowsHolder[iCNT]].ToInteger());
-                List2.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._ContactPerson), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                List3.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._RegularEmails), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                List4.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._StatementEmails), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                List5.Add(SourceGrid.Cells[SourceGrid.GetCol(TAddressBookList._PhoneNumbers), SourceGrid.UpdatedRowsHolder[iCNT]]);
-            end;
-
-            AddressBookUpdate.Id:=List1.ToArray();
-            AddressBookUpdate.ContactPerson:=List2.ToArray();
-            AddressBookUpdate.RegularEmails:=List3.ToArray();
-            AddressBookUpdate.StatementEmails:=List4.ToArray();
-            AddressBookUpdate.PhoneNumbers:=List5.ToArray();
-
-            List1.Free();
-            List2.Free();
-            List3.Free();
-            List4.Free();
-            List5.Free();
+            AddressBookUpdate.ContactPerson  :=PayLoad.ContactPerson;
+            AddressBookUpdate.RegularEmails  :=PayLoad.RegularEmails;
+            AddressBookUpdate.StatementEmails:=PayLoad.StatementEmails;
+            AddressBookUpdate.PhoneNumbers   :=PayLoad.PhoneNumbers;
 
             Restful.CustomBody:=TJson.ObjectToJsonString(AddressBookUpdate);
 
@@ -376,10 +341,90 @@ begin
 end;
 
 
-procedure TAddressBook.AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+procedure TAddressBook.AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
 begin
 
-    //...
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[AddToAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
+
+        var AddressBookAdd:=TAddressBookAdd.Create();
+        try
+
+            AddressBookAdd.SourceDbName   :=PayLoad.SourceDBName;
+            AddressBookAdd.CustomerNumber :=PayLoad.CustomerNumber;
+            AddressBookAdd.CustomerName   :=PayLoad.CustomerName;
+            AddressBookAdd.ContactPerson  :=PayLoad.ContactPerson;
+            AddressBookAdd.RegularEmails  :=PayLoad.RegularEmails;
+            AddressBookAdd.StatementEmails:=PayLoad.StatementEmails;
+            AddressBookAdd.PhoneNumbers   :=PayLoad.PhoneNumbers;
+
+            Restful.CustomBody:=TJson.ObjectToJsonString(AddressBookAdd);
+
+        finally
+            AddressBookAdd.Free();
+        end;
+
+        var CallResponse: TCallResponse;
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var AddressBookAdded:=TJson.JsonToObject<TAddressBookAdded>(Restful.Content);
+                try
+                    CallResponse.IsSucceeded:=AddressBookAdded.IsSucceeded;
+                    CallResponse.ErrorNumber:=AddressBookAdded.Error.ErrorNum;
+                    CallResponse.LastMessage:=AddressBookAdded.Error.ErrorDesc;
+                finally
+                    AddressBookAdded.Free();
+                end;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                ThreadFileLog.Log('[AddToAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[AddToAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[AddToAddressBookAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[AddToAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[AddToAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 
@@ -387,7 +432,68 @@ end;
 function TAddressBook.DelFromAddressBookAwaited(Id: integer): TCallResponse;
 begin
 
-    //...
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + Id.ToString();
+        Restful.RequestMethod:=TRESTRequestMethod.rmDELETE;
+        ThreadFileLog.Log('[DelFromAddressBookAwaited]: Executing DELETE ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var AddressBookItemDel:=TJson.JsonToObject<TAddressBookItemDel>(Restful.Content);
+                try
+                    CallResponse.IsSucceeded:=AddressBookItemDel.IsSucceeded;
+                    CallResponse.LastMessage:=AddressBookItemDel.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=AddressBookItemDel.Error.ErrorNum;
+                finally
+                    AddressBookItemDel.Free();
+                end;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                ThreadFileLog.Log('[DelFromAddressBookAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[DelFromAddressBookAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
 
 end;
 
@@ -421,6 +527,7 @@ begin
                 var AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Restful.Content);
                 try
 
+                    LCustDetails.Id             :=AddressBookItem.Id;
                     LCustDetails.ContactPerson  :=AddressBookItem.ContactPerson;
                     LCustDetails.RegularEmails  :=AddressBookItem.RegularEmails;
                     LCustDetails.StatementEmails:=AddressBookItem.StatementEmails;

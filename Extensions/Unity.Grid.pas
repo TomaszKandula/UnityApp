@@ -30,16 +30,11 @@ type
     /// Extended version of Vcl.StdCtrls.TEdit visual component.
     /// </summary>
     TStringGrid = class(Vcl.Grids.TStringGrid)
-    protected
-        procedure Paint; override;
     strict private
-        var FHideFocusRect: boolean;
         var FToExcelResult: string;
         var FCsvImportResult: string;
         var FCsvExportResult: string;
     public
-        var SqlColumns: TArray<TArray<string>>;
-        var UpdatedRowsHolder: TArray<integer>;
         const sgRowHeight = 19;
         const sgRowHidden = -1;
         const xlWBATWorksheet = -4167;
@@ -49,10 +44,6 @@ type
         const FBackRed = $008080FF;
         const FBackYellow = $00CCFFFF;
         const FBackGreen = $00ACAC59;
-        /// <summary>
-        /// Allow to hide rectangle on component when return focus.
-        /// </summary>
-        property HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         /// <summary>
         /// Result message of a task executed by ToExcel method.
         /// </summary>
@@ -65,16 +56,6 @@ type
         /// Result message of a task executed by ExportCSV method.
         /// </summary>
         property CsvExportResult: string read FCsvExportResult;
-        /// <summary>
-        /// Register rows for update. Keeps row number to be updated, ex. if data is held in string grid popuated from database table,
-        /// then to build SQL batch with update statement, we must take all rows changed by the user and once cell(s) is(are) changed,
-        /// we add row to the register. Later such information can be used to build SQL update expression.
-        /// </summary>
-        procedure SetUpdatedRow(Row: integer);
-        /// <summary>
-        /// Scans grid and register changed cells.
-        /// </summary>
-        procedure RecordRowsAffected;
         /// <summary>
         /// Allow to either copy from, paste to, or cut data.
         /// </summary>
@@ -186,65 +167,6 @@ uses
     Unity.Helpers,
     Unity.Sorting,
     Unity.Settings;
-
-
-procedure TStringGrid.SetUpdatedRow(Row: integer);
-begin
-
-    var Rows: integer;
-
-    if Row = 0 then
-    begin
-        UpdatedRowsHolder:=nil;
-        Exit;
-    end;
-
-    if UpdatedRowsHolder = nil then
-    begin
-        SetLength(UpdatedRowsHolder, 1);
-        UpdatedRowsHolder[0]:=Row;
-    end
-    else
-    begin
-        Rows:=high(UpdatedRowsHolder);
-        Rows:=Rows + 2;
-        SetLength(UpdatedRowsHolder, Rows);
-        UpdatedRowsHolder[Rows - 1]:=Row;
-    end;
-
-end;
-
-
-procedure TStringGrid.RecordRowsAffected;
-begin
-
-    if Selection.Top - Selection.Bottom = 0 then
-    begin
-        SetUpdatedRow(Row);
-    end
-    else
-    begin
-        for var iCNT: integer:=Selection.Top to Selection.Bottom do
-            if RowHeights[iCNT] = sgRowHeight then
-                SetUpdatedRow(iCNT);
-    end;
-
-end;
-
-
-procedure TStringGrid.Paint;
-begin
-
-    inherited;
-
-//    if HideFocusRect then
-//    begin
-//        var FocusRect: TRect:=CellRect(Col, Row);
-//        if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
-//        DrawFocusRect(Canvas.Handle, FocusRect);
-//    end;
-
-end;
 
 
 procedure TStringGrid.CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False{Option});
