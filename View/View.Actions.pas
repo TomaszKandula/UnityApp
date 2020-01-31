@@ -232,6 +232,7 @@ type
         procedure SaveDailyComment();
         procedure SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
+        procedure InsertAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
     public
@@ -787,6 +788,19 @@ begin
     if FCustDetailsId = 0 then
     begin
 
+        var CustomerDetails: TCustomerDetails;
+
+        CustomerDetails.SourceDBName   :=SourceDBName;
+        CustomerDetails.CustomerNumber :=CustNumber;
+        CustomerDetails.CustomerName   :=CustName;
+        CustomerDetails.ContactPerson  :=Cust_Person.Text;
+        CustomerDetails.RegularEmails  :=Cust_MailGeneral.Text;
+        CustomerDetails.StatementEmails:=Cust_Mail.Text;
+        CustomerDetails.PhoneNumbers   :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+
+        var AddressBook: IAddressBook:=TAddressBook.Create();
+        AddressBook.AddToAddressBookAsync(CustomerDetails, InsertAddressBook_Callback);
+
     end
     else
     begin
@@ -902,6 +916,23 @@ begin
 
     THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated.');
     ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book has been updated.');
+
+end;
+
+
+procedure TActionsForm.InsertAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+        ThreadFileLog.Log('[InsertAddressBook_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    FCustDetailsId:=ReturnedId;
+    THelpers.MsgCall(TAppMessage.Info, 'New customer has been added successfully.');
+    ThreadFileLog.Log('[InsertAddressBook_Callback]: Address Book has been updated.');
 
 end;
 

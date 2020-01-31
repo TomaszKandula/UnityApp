@@ -30,7 +30,7 @@ type
     /// <summary>
     /// Callback signature for getting results of address book insert action.
     /// </summary>
-    TAddToAddressBook = procedure(CallResponse: TCallResponse) of object;
+    TAddToAddressBook = procedure(ReturnedId: integer; CallResponse: TCallResponse) of object;
 
 
     IAddressBook = interface(IInterface)
@@ -269,18 +269,18 @@ begin
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
         ThreadFileLog.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Restful.ClientBaseURL);
 
-        var AddressBookUpdate:=TAddressBookUpdate.Create();
+        var LAddressBookUpdate:=TAddressBookUpdate.Create();
         try
 
-            AddressBookUpdate.ContactPerson  :=PayLoad.ContactPerson;
-            AddressBookUpdate.RegularEmails  :=PayLoad.RegularEmails;
-            AddressBookUpdate.StatementEmails:=PayLoad.StatementEmails;
-            AddressBookUpdate.PhoneNumbers   :=PayLoad.PhoneNumbers;
+            LAddressBookUpdate.ContactPerson  :=PayLoad.ContactPerson;
+            LAddressBookUpdate.RegularEmails  :=PayLoad.RegularEmails;
+            LAddressBookUpdate.StatementEmails:=PayLoad.StatementEmails;
+            LAddressBookUpdate.PhoneNumbers   :=PayLoad.PhoneNumbers;
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(AddressBookUpdate);
+            Restful.CustomBody:=TJson.ObjectToJsonString(LAddressBookUpdate);
 
         finally
-            AddressBookUpdate.Free();
+            LAddressBookUpdate.Free();
         end;
 
         var CallResponse: TCallResponse;
@@ -344,6 +344,8 @@ end;
 procedure TAddressBook.AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
 begin
 
+    var ReturnedId: integer;
+
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
@@ -354,21 +356,21 @@ begin
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[AddToAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
 
-        var AddressBookAdd:=TAddressBookAdd.Create();
+        var LAddressBookAdd:=TAddressBookAdd.Create();
         try
 
-            AddressBookAdd.SourceDbName   :=PayLoad.SourceDBName;
-            AddressBookAdd.CustomerNumber :=PayLoad.CustomerNumber;
-            AddressBookAdd.CustomerName   :=PayLoad.CustomerName;
-            AddressBookAdd.ContactPerson  :=PayLoad.ContactPerson;
-            AddressBookAdd.RegularEmails  :=PayLoad.RegularEmails;
-            AddressBookAdd.StatementEmails:=PayLoad.StatementEmails;
-            AddressBookAdd.PhoneNumbers   :=PayLoad.PhoneNumbers;
+            LAddressBookAdd.SourceDbName   :=PayLoad.SourceDBName;
+            LAddressBookAdd.CustomerNumber :=PayLoad.CustomerNumber;
+            LAddressBookAdd.CustomerName   :=PayLoad.CustomerName;
+            LAddressBookAdd.ContactPerson  :=PayLoad.ContactPerson;
+            LAddressBookAdd.RegularEmails  :=PayLoad.RegularEmails;
+            LAddressBookAdd.StatementEmails:=PayLoad.StatementEmails;
+            LAddressBookAdd.PhoneNumbers   :=PayLoad.PhoneNumbers;
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(AddressBookAdd);
+            Restful.CustomBody:=TJson.ObjectToJsonString(LAddressBookAdd);
 
         finally
-            AddressBookAdd.Free();
+            LAddressBookAdd.Free();
         end;
 
         var CallResponse: TCallResponse;
@@ -377,13 +379,14 @@ begin
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
 
-                var AddressBookAdded:=TJson.JsonToObject<TAddressBookAdded>(Restful.Content);
+                var LAddressBookAdded:=TJson.JsonToObject<TAddressBookAdded>(Restful.Content);
                 try
-                    CallResponse.IsSucceeded:=AddressBookAdded.IsSucceeded;
-                    CallResponse.ErrorNumber:=AddressBookAdded.Error.ErrorNum;
-                    CallResponse.LastMessage:=AddressBookAdded.Error.ErrorDesc;
+                    ReturnedId:=LAddressBookAdded.Id;
+                    CallResponse.IsSucceeded:=LAddressBookAdded.IsSucceeded;
+                    CallResponse.ErrorNumber:=LAddressBookAdded.Error.ErrorNum;
+                    CallResponse.LastMessage:=LAddressBookAdded.Error.ErrorDesc;
                 finally
-                    AddressBookAdded.Free();
+                    LAddressBookAdded.Free();
                 end;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
@@ -419,7 +422,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CallResponse);
+            if Assigned(Callback) then Callback(ReturnedId, CallResponse);
         end);
 
     end);

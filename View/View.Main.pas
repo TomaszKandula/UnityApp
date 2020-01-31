@@ -59,7 +59,7 @@ uses
     Unity.ComboBox,
     Unity.Enums,
     Unity.Records,
-    Unity.References;
+    Unity.References{, SHDocVw};
 
 
 type
@@ -67,6 +67,21 @@ type
 
     TMainForm = class(TForm)
     published
+        shapeUrlSection: TShape;
+        PanelUrl: TPanel;
+        PanelButtons: TPanel;
+        EditUrlSection: TEdit;
+        btnNavHome: TImage;
+        txtNavHome: TLabel;
+        PanelNavigation: TPanel;
+        btnNavBack: TImage;
+        btnNavForward: TImage;
+        btnNavReload: TImage;
+        txtNavBack: TLabel;
+        txtNavForward: TLabel;
+        txtNavReload: TLabel;
+        Action_ShowNavigation: TMenuItem;
+        N10: TMenuItem;
         btnRating: TPanel;
         imgRating: TImage;
         txtRating: TLabel;
@@ -549,6 +564,18 @@ type
         procedure btnRatingClick(Sender: TObject);
         procedure btnRatingMouseEnter(Sender: TObject);
         procedure btnRatingMouseLeave(Sender: TObject);
+        procedure btnNavBackClick(Sender: TObject);
+        procedure btnNavBackMouseLeave(Sender: TObject);
+        procedure btnNavForwardClick(Sender: TObject);
+        procedure btnNavForwardMouseEnter(Sender: TObject);
+        procedure btnNavForwardMouseLeave(Sender: TObject);
+        procedure btnNavReloadClick(Sender: TObject);
+        procedure btnNavReloadMouseEnter(Sender: TObject);
+        procedure btnNavReloadMouseLeave(Sender: TObject);
+        procedure btnNavHomeClick(Sender: TObject);
+        procedure btnNavHomeMouseEnter(Sender: TObject);
+        procedure btnNavHomeMouseLeave(Sender: TObject);
+        procedure btnNavBackMouseEnter(Sender: TObject);
         procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
         procedure sgListValueClick(Sender: TObject);
         procedure sgListSectionClick(Sender: TObject);
@@ -683,7 +710,6 @@ type
         procedure btnTablesMouseLeave(Sender: TObject);
         procedure btnSettingsMouseEnter(Sender: TObject);
         procedure btnSettingsMouseLeave(Sender: TObject);
-        procedure ChromiumWindowAfterCreated(Sender: TObject);
         procedure txtStartClick(Sender: TObject);
         procedure txtReportsClick(Sender: TObject);
         procedure txtDebtorsClick(Sender: TObject);
@@ -725,6 +751,7 @@ type
         procedure Action_PersonRespClick(Sender: TObject);
         procedure Action_AccountTypeClick(Sender: TObject);
         procedure Action_ViewOptionsClick(Sender: TObject);
+        procedure Action_ShowNavigationClick(Sender: TObject);
         procedure TabSheet5Show(Sender: TObject);
         procedure sgFSCviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgLBUviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -757,7 +784,7 @@ type
         procedure Action_ShowAllColumnsClick(Sender: TObject);
         procedure TimerPermitCheckTimer(Sender: TObject);
         procedure Action_LoginRedeemClick(Sender: TObject);
-        procedure ChromiumLoadEnd(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; httpStatusCode: Integer);
+        procedure ChromiumAddressChange(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
         procedure Action_ClearCoockiesClick(Sender: TObject);
         procedure Action_ClearCacheClick(Sender: TObject);
         procedure PopupTrackerPopup(Sender: TObject);
@@ -787,9 +814,9 @@ type
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
+        var FAllowEditConfig: boolean;
         var FLoadedCompanies: TList<string>;
         var FLoadedAgeDate: string;
-        var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
         var FHadFirstLoad: boolean;
@@ -800,7 +827,7 @@ type
         var FFollowsNext: integer;
         function CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
-        procedure RedeemAccess(ShouldReloadPage: boolean = False);
+        procedure RedeemAccess();
         procedure PermitCheckInit();
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
@@ -817,7 +844,7 @@ type
         procedure AgeViewMapping();
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
-        procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
+        procedure AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
         procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
@@ -1190,32 +1217,36 @@ end;
 procedure TMainForm.AgeViewMapping();
 begin
 
-    var  ColSourceDbName:=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
+    // -------------------------------
+    // Get all column numbers at once.
+    // -------------------------------
 
-    var  ColPersonResp    :=sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible);
-    var  IdPersonResp     :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
-    var  DbNamePersonResp :=sgPersonResp.GetCol(TReturnPersonResponsible._SourceDbName);
-    var  ErpCodePersonResp:=sgPersonResp.GetCol(TReturnPersonResponsible._ErpCode);
-
-    var ColSalesResp    :=sgAgeView.GetCol(TReturnCustSnapshots._SalesResponsible);
-    var IdSalesResp     :=sgSalesResp.GetCol(TReturnSalesResponsible._Id);
-    var DbNameSalesResp :=sgSalesResp.GetCol(TReturnSalesResponsible._SourceDbName);
-    var ErpCodeSalesResp:=sgSalesResp.GetCol(TReturnSalesResponsible._ErpCode);
-
-    var ColAccountType    :=sgAgeView.GetCol(TReturnCustSnapshots._AccountType);
-    var IdAccountType     :=sgAccountType.GetCol(TReturnAccountType._Id);
-    var DbNameAccountType :=sgAccountType.GetCol(TReturnAccountType._SourceDbName);
-    var ErpCodeAccountType:=sgAccountType.GetCol(TReturnAccountType._ErpCode);
-
+    var  ColSourceDbName    :=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
+    var  ColPersonResp      :=sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible);
+    var  IdPersonResp       :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
+    var  DbNamePersonResp   :=sgPersonResp.GetCol(TReturnPersonResponsible._SourceDbName);
+    var  ErpCodePersonResp  :=sgPersonResp.GetCol(TReturnPersonResponsible._ErpCode);
+    var ColSalesResp        :=sgAgeView.GetCol(TReturnCustSnapshots._SalesResponsible);
+    var IdSalesResp         :=sgSalesResp.GetCol(TReturnSalesResponsible._Id);
+    var DbNameSalesResp     :=sgSalesResp.GetCol(TReturnSalesResponsible._SourceDbName);
+    var ErpCodeSalesResp    :=sgSalesResp.GetCol(TReturnSalesResponsible._ErpCode);
+    var ColAccountType      :=sgAgeView.GetCol(TReturnCustSnapshots._AccountType);
+    var IdAccountType       :=sgAccountType.GetCol(TReturnAccountType._Id);
+    var DbNameAccountType   :=sgAccountType.GetCol(TReturnAccountType._SourceDbName);
+    var ErpCodeAccountType  :=sgAccountType.GetCol(TReturnAccountType._ErpCode);
     var ColCustomerGroup    :=sgAgeView.GetCol(TReturnCustSnapshots._CustomerGroup);
     var IdCustomerGroup     :=sgCustomerGr.GetCol(TReturnCustomerGroup._Id);
     var DbNameCustomerGroup :=sgCustomerGr.GetCol(TReturnCustomerGroup._SourceDbName);
     var ErpCodeCustomerGroup:=sgCustomerGr.GetCol(TReturnCustomerGroup._ErpCode);
+    var ColPaymentTerms     :=sgAgeView.GetCol(TReturnCustSnapshots._PaymentTerms);
+    var ErpCodePaymentTerms :=sgPmtTerms.GetCol(TReturnPaymentTerms._ErpCode);
+    var EntityPaymentTerms  :=sgPmtTerms.GetCol(TReturnPaymentTerms._Entity);
+    var DescPaymentTerms    :=sgPmtTerms.GetCol(TReturnPaymentTerms._Description);
 
-    var ColPaymentTerms    :=sgAgeView.GetCol(TReturnCustSnapshots._PaymentTerms);
-    var ErpCodePaymentTerms:=sgPmtTerms.GetCol(TReturnPaymentTerms._ErpCode);
-    var EntityPaymentTerms :=sgPmtTerms.GetCol(TReturnPaymentTerms._Entity);
-    var DescPaymentTerms   :=sgPmtTerms.GetCol(TReturnPaymentTerms._Description);
+    // ------------------------------------------------
+    // Make asynchronous calls to map all the columns.
+    // Note: do not lock painting of target StringGrid.
+    // ------------------------------------------------
 
     UpdateStatusBar(TStatusBar.Mapping);
     var Debtors: IDebtors:=TDebtors.Create();
@@ -1391,7 +1422,7 @@ begin
     var Url:=WideString(BaseUrl) + '/?sessiontoken=' + SessionService.SessionId;
 
     try
-        ChromiumWindow.LoadURL(Url);
+        Chromium.LoadURL(Url);
         ThreadFileLog.Log('[RequestUnityWebWithToken]: Requested URL = "' + Url + '".');
     except
         on E: exception do
@@ -1401,15 +1432,8 @@ begin
 end;
 
 
-procedure TMainForm.RedeemAccess(ShouldReloadPage: boolean = False);
+procedure TMainForm.RedeemAccess();
 begin
-
-    if ShouldReloadPage then
-    begin
-        FRedeemOnReload:=True;
-        RequestUnityWebWithToken();
-        Exit();
-    end;
 
     var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
@@ -1420,6 +1444,7 @@ begin
         TimerPermitCheck.Enabled:=False;
         FIsAppMenuLocked:=False;
         valAadUser.Caption:=SessionService.SessionData.DisplayName;
+        ThreadFileLog.Log('[RedeemAccess]: Redeem user access to account has been completed successfully.');
     end;
 
 end;
@@ -1613,7 +1638,7 @@ begin
 end;
 
 
-procedure TMainForm.AddToAddressBook_Callback(CallResponse: TCallResponse);
+procedure TMainForm.AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
 begin
 
     if not CallResponse.IsSucceeded then
@@ -1880,12 +1905,6 @@ begin
 end;
 
 
-procedure TMainForm.ChromiumLoadEnd(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; httpStatusCode: Integer); // sep region
-begin
-    if FRedeemOnReload then RedeemAccess();
-end;
-
-
 procedure TMainForm.ChromiumModalLoopOff(PassMsg: TMessage);
 begin
     if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=False;
@@ -2056,12 +2075,12 @@ begin
     if FHadFirstLoad then Exit();
 
     ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
-    if not ChromiumWindow.Initialized then ChromiumWindow.CreateBrowser();
+    if not(Chromium.Initialized) then Chromium.CreateBrowser(ChromiumWindow, '');
 
     for var iCNT:=0 to TabSheets.PageCount - 1 do
         TabSheets.Pages[iCNT].TabVisible:=False;
 
-    TabSheets.ActivePage:=TabSheet9{Unity Home};
+    TabSheets.ActivePage:=TabSheet9; //Unity Home
 
     SetPanelBorders();
     SetGridColumnWidths();
@@ -2138,6 +2157,9 @@ begin
                     SortingOptions.Free();
                 end;
 
+                RequestUnityWebWithToken();
+                PermitCheckInit();
+
             end);
 
         end);
@@ -2155,6 +2177,7 @@ begin
     FLoadedCompanies:=TList<string>.Create();
     FIsAppMenuLocked:=True;
     FAllowClose:=False;
+    EditUrlSection.Text:='';
     ClearMainViewInfo();
     ClearOpenItemsSummary();
     ClearAgingSummary();
@@ -2181,13 +2204,6 @@ begin
 end;
 
 
-procedure TMainForm.ChromiumWindowAfterCreated(Sender: TObject);
-begin
-    RequestUnityWebWithToken();
-    PermitCheckInit();
-end;
-
-
 {$ENDREGION}
 
 
@@ -2208,16 +2224,22 @@ procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject;
     var Result: Boolean);
 begin
 
-    // Execute on "before popup" - ignore tab sheets and pop-ups.
+    // Execute on "before popup" - ignore listed
     Result:=(
                 targetDisposition in
                 [
                     WOD_NEW_FOREGROUND_TAB,
-                    WOD_NEW_BACKGROUND_TAB,
-                    WOD_NEW_POPUP,
-                    WOD_NEW_WINDOW
+                    WOD_NEW_BACKGROUND_TAB
+                    {WOD_NEW_POPUP,}
+                    {WOD_NEW_WINDOW}
                 ]
             );
+end;
+
+
+procedure TMainForm.ChromiumAddressChange(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
+begin
+    if Chromium.IsSameBrowser(browser) then EditUrlSection.Text:=url;
 end;
 
 
@@ -3064,6 +3086,23 @@ begin
 end;
 
 
+procedure TMainForm.Action_ShowNavigationClick(Sender: TObject);
+begin
+
+    if Action_ShowNavigation.Checked then
+    begin
+        Action_ShowNavigation.Checked:=not Action_ShowNavigation.Checked;
+        PanelNavigation.Visible:=False;
+    end
+    else
+    begin
+        Action_ShowNavigation.Checked:=not Action_ShowNavigation.Checked;
+        PanelNavigation.Visible:=True;
+    end;
+
+end;
+
+
 procedure TMainForm.Action_CloseClick(Sender: TObject);
 begin
     {Do nonthing}
@@ -3072,7 +3111,7 @@ end;
 
 procedure TMainForm.Action_LoginRedeemClick(Sender: TObject);
 begin
-    RedeemAccess(True);
+    RedeemAccess();
 end;
 
 
@@ -3354,13 +3393,13 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
 
-    UpdateStatusBar(TStatusBar.ExportXLS);
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 
-    var FileName: string;
-    if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
-
-    //var Utilities: IUtilities:=TUtilities.Create();
-    //Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
+//    UpdateStatusBar(TStatusBar.ExportXLS);
+//    var FileName: string;
+//    if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
+//    var Utilities: IUtilities:=TUtilities.Create();
+//    Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
 
 end;
 
@@ -3553,6 +3592,89 @@ begin
 end;
 
 
+procedure TMainForm.btnNavBackClick(Sender: TObject);
+begin
+    Chromium.GoBack();
+end;
+
+
+procedure TMainForm.btnNavBackMouseEnter(Sender: TObject);
+begin
+    txtNavBack.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnNavBackMouseLeave(Sender: TObject);
+begin
+    txtNavBack.Font.Color:=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.btnNavForwardClick(Sender: TObject);
+begin
+    Chromium.GoForward();
+end;
+
+
+procedure TMainForm.btnNavForwardMouseEnter(Sender: TObject);
+begin
+    txtNavForward.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnNavForwardMouseLeave(Sender: TObject);
+begin
+    txtNavForward.Font.Color:=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.btnNavReloadClick(Sender: TObject);
+begin
+
+    var Url: string:=EditUrlSection.Text;
+    if (String.IsNullOrEmpty(Url)) or (String.IsNullOrWhiteSpace(Url)) then Exit();
+
+    if Url.Contains(' ') then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'The URL address cannot contain whitespaces. Please corrected and try again.');
+        Exit();
+    end;
+
+    Chromium.LoadURL(Url);
+
+end;
+
+
+procedure TMainForm.btnNavReloadMouseEnter(Sender: TObject);
+begin
+    txtNavReload.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnNavReloadMouseLeave(Sender: TObject);
+begin
+    txtNavReload.Font.Color:=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.btnNavHomeClick(Sender: TObject);
+begin
+    RequestUnityWebWithToken();
+end;
+
+
+procedure TMainForm.btnNavHomeMouseEnter(Sender: TObject);
+begin
+    txtNavHome.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnNavHomeMouseLeave(Sender: TObject);
+begin
+    txtNavHome.Font.Color:=AppMenuTextNormal;
+end;
+
+
 procedure TMainForm.imgAppMenuClick(Sender: TObject);
 begin
 
@@ -3650,7 +3772,7 @@ begin
     RateForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtRating.Font.Style:=[fsBold];
-    txtRating.Font.Color:=$006433C9;
+    txtRating.Font.Color:=AppButtonTxtSelected;
     THelpers.WndCall(RateForm, TWindowState.Modal);
 end;
 
@@ -3660,7 +3782,7 @@ begin
     FeedbackForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtFeedback.Font.Style:=[fsBold];
-    txtFeedback.Font.Color:=$006433C9;
+    txtFeedback.Font.Color:=AppButtonTxtSelected;
     THelpers.WndCall(FeedbackForm, TWindowState.Modal);
 end;
 
@@ -3670,7 +3792,7 @@ begin
     AboutForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtInfo.Font.Style:=[fsBold];
-    txtInfo.Font.Color:=$006433C9;
+    txtInfo.Font.Color:=AppButtonTxtSelected;
     THelpers.WndCall(AboutForm, TWindowState.Modal);
 end;
 
@@ -3798,14 +3920,16 @@ end;
 procedure TMainForm.imgAllowEditClick(Sender: TObject);
 begin
 
-    if txtAllowEdit.Font.Style = [fsBold] then // use private flag!
+    if FAllowEditConfig then
     begin
+        FAllowEditConfig:=not FAllowEditConfig;
         sgListSection.Options  :=sgListSection.Options - [goEditing];
         sgListValue.Options    :=sgListValue.Options   - [goEditing];
         txtAllowEdit.Font.Style:=[];
     end
     else
     begin
+        FAllowEditConfig:=not FAllowEditConfig;
         sgListSection.Options  :=sgListSection.Options + [goEditing];
         sgListValue.Options    :=sgListValue.Options   + [goEditing];
         txtAllowEdit.Font.Style:=[fsBold];
@@ -4681,7 +4805,7 @@ begin
 end;
 
 
-procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);  // REFACTOR !!!
+procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     {Empty}
 end;
@@ -4690,6 +4814,10 @@ end;
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
+    // <CTRL> + <C>
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgAgeView.CopyCutPaste(TActions.Copy);
+
     // <CTRL> + <A>
     if (Key = 65) and (Shift = [ssCtrl]) then
     begin
@@ -4697,8 +4825,6 @@ begin
         sgAgeView.CopyCutPaste(TActions.Copy);
         THelpers.MsgCall(TAppMessage.Info, 'The selected spreadsheet has been copied to clipboard.');
     end;
-
-    {if ( Shift = [ssCtrl] ) and ( Key = 76 ) then btnMakeGroupAgeClick(self);}
 
 end;
 
@@ -4718,7 +4844,7 @@ end;
 procedure TMainForm.sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if txtAllowEdit.Font.Style = [fsBold] then  // use private flag!
+    if FAllowEditConfig then
     begin
         if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Paste);
         if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Cut);
@@ -4745,7 +4871,7 @@ end;
 procedure TMainForm.sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if txtAllowEdit.Font.Style = [fsBold] then // use private flag!
+    if FAllowEditConfig then
     begin
         if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Paste);
         if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Cut);
