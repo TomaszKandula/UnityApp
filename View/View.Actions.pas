@@ -126,6 +126,7 @@ type
         selSendFrom: TComboBox;
         txtSendFrom: TLabel;
         btnAddComment: TSpeedButton;
+    btnGoogleIt: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -191,6 +192,7 @@ type
         procedure btnCallCustomerMouseLeave(Sender: TObject);
         procedure btnAddCommentClick(Sender: TObject);
         procedure selSendFromSelect(Sender: TObject);
+    procedure btnGoogleItClick(Sender: TObject);
     strict private
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
@@ -258,6 +260,7 @@ implementation
 
 
 uses
+    System.NetEncoding,
     System.Generics.Collections,
     View.Main,
     View.Queries,
@@ -1225,6 +1228,24 @@ end;
 procedure TActionsForm.btnCallCustomerClick(Sender: TObject);
 begin
     MakePhoneCall();
+end;
+
+
+procedure TActionsForm.btnGoogleItClick(Sender: TObject);
+begin
+
+    var Settings: ISettings:=TSettings.Create();
+    var AppParam:='https://google.com/search?q=' + TNetEncoding.URL.Encode(Cust_Name.Caption);
+
+    ShellExecute(
+        ActionsForm.Handle,
+        'open',
+        PChar(Settings.DirApplication + TCommon.UnityReader),
+        PChar(AppParam),
+        nil,
+        SW_SHOWNORMAL
+    );
+
 end;
 
 

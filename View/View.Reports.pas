@@ -137,7 +137,7 @@ end;
 procedure TReportsForm.Report1OverdueClick(Sender: TObject);
 begin
 
-    var Return: cardinal:=THelpers.ShowReport(1, ReportsForm);
+    var Return:=THelpers.ShowReport(1, ReportsForm);
 
     if not(Return > 32) then
     begin
@@ -151,7 +151,7 @@ end;
 procedure TReportsForm.Report2ExceedersClick(Sender: TObject);
 begin
 
-    var Return: cardinal:=THelpers.ShowReport(2, ReportsForm);
+    var Return:=THelpers.ShowReport(2, ReportsForm);
 
     if not(Return > 32) then
     begin
@@ -165,7 +165,7 @@ end;
 procedure TReportsForm.Report3DebtorsClick(Sender: TObject);
 begin
 
-    var Return: cardinal:=THelpers.ShowReport(3, ReportsForm);
+    var Return:=THelpers.ShowReport(3, ReportsForm);
 
     if not(Return > 32) then
     begin
@@ -179,7 +179,7 @@ end;
 procedure TReportsForm.Report4StatusClick(Sender: TObject);
 begin
 
-    var Return: cardinal:=THelpers.ShowReport(4, ReportsForm);
+    var Return:=THelpers.ShowReport(4, ReportsForm);
 
     if not(Return > 32) then
     begin

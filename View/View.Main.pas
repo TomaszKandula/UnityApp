@@ -59,7 +59,7 @@ uses
     Unity.ComboBox,
     Unity.Enums,
     Unity.Records,
-    Unity.References{, SHDocVw};
+    Unity.References;
 
 
 type
@@ -67,6 +67,12 @@ type
 
     TMainForm = class(TForm)
     published
+        imgSSL: TImage;
+        imgNavCover: TImage;
+        Action_BrowserMode: TMenuItem;
+        Action_AccountDetails: TMenuItem;
+        PanelLock: TPanel;
+        imgLock: TImage;
         shapeUrlSection: TShape;
         PanelUrl: TPanel;
         PanelButtons: TPanel;
@@ -532,6 +538,8 @@ type
         procedure Action_HelpClick(Sender: TObject);
         procedure Action_AboutClick(Sender: TObject);
         procedure Action_OnTopClick(Sender: TObject);
+        procedure Action_AccountDetailsClick(Sender: TObject);
+        procedure Action_BrowserModeClick(Sender: TObject);
         procedure TabSheet8Show(Sender: TObject);
         procedure imgKeyAddMouseEnter(Sender: TObject);
         procedure imgKeyAddMouseLeave(Sender: TObject);
@@ -543,6 +551,7 @@ type
         procedure imgSectionAddMouseLeave(Sender: TObject);
         procedure imgSectionRemoveMouseEnter(Sender: TObject);
         procedure imgSectionRemoveMouseLeave(Sender: TObject);
+        procedure imgLockClick(Sender: TObject);
         procedure sgListSectionSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
         procedure imgSectionRemoveClick(Sender: TObject);
         procedure imgKeyRemoveClick(Sender: TObject);
@@ -788,6 +797,7 @@ type
         procedure Action_ClearCoockiesClick(Sender: TObject);
         procedure Action_ClearCacheClick(Sender: TObject);
         procedure PopupTrackerPopup(Sender: TObject);
+        procedure PopupLoginPopup(Sender: TObject);
         procedure Page1Show(Sender: TObject);
         procedure Page2Show(Sender: TObject);
         procedure Page3Show(Sender: TObject);
@@ -814,6 +824,8 @@ type
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
+        const AppMenuShown = 170;
+        const AppMenuHidden = 0;
         var FAllowEditConfig: boolean;
         var FLoadedCompanies: TList<string>;
         var FLoadedAgeDate: string;
@@ -1155,10 +1167,10 @@ end;
 
 procedure TMainForm.ClearOpenItemsSummary();
 begin
-    valOpenItems.Caption:='0';
-    valOverdue.Caption:='0';
-    valInvoices.Caption:='0';
-    amtOverdue.Caption:='0';
+    valOpenItems.Caption  :='0';
+    valOverdue.Caption    :='0';
+    valInvoices.Caption   :='0';
+    amtOverdue.Caption    :='0';
     amtOutstanding.Caption:='0';
     amtUnallocated.Caption:='0';
 end;
@@ -1221,11 +1233,11 @@ begin
     // Get all column numbers at once.
     // -------------------------------
 
-    var  ColSourceDbName    :=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
-    var  ColPersonResp      :=sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible);
-    var  IdPersonResp       :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
-    var  DbNamePersonResp   :=sgPersonResp.GetCol(TReturnPersonResponsible._SourceDbName);
-    var  ErpCodePersonResp  :=sgPersonResp.GetCol(TReturnPersonResponsible._ErpCode);
+    var ColSourceDbName     :=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
+    var ColPersonResp       :=sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible);
+    var IdPersonResp        :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
+    var DbNamePersonResp    :=sgPersonResp.GetCol(TReturnPersonResponsible._SourceDbName);
+    var ErpCodePersonResp   :=sgPersonResp.GetCol(TReturnPersonResponsible._ErpCode);
     var ColSalesResp        :=sgAgeView.GetCol(TReturnCustSnapshots._SalesResponsible);
     var IdSalesResp         :=sgSalesResp.GetCol(TReturnSalesResponsible._Id);
     var DbNameSalesResp     :=sgSalesResp.GetCol(TReturnSalesResponsible._SourceDbName);
@@ -1460,6 +1472,7 @@ end;
 
 procedure TMainForm.SetPanelBorders();
 begin
+    PanelNavigation.Borders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     AppHeader.Borders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     DebtorsPanel.Borders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     OpenItemsPanel.Borders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
@@ -2239,7 +2252,20 @@ end;
 
 procedure TMainForm.ChromiumAddressChange(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
 begin
-    if Chromium.IsSameBrowser(browser) then EditUrlSection.Text:=url;
+
+    if Chromium.IsSameBrowser(browser) then
+    begin
+
+        var StrUrl: string:=url;
+        EditUrlSection.Text:=StrUrl;
+
+        var Settings: ISettings:=TSettings.Create();
+
+        if StrUrl.Contains('http://') then  imgSSL.Picture.LoadFromFile(Settings.DirAssets + 'Insecure.bmp');
+        if StrUrl.Contains('https://') then imgSSL.Picture.LoadFromFile(Settings.DirAssets + 'Secure.bmp');
+
+    end;
+
 end;
 
 
@@ -2680,15 +2706,20 @@ begin
     // Count current follow-ups and display in notification baloon.
     // ------------------------------------------------------------
     var Sum:=0;
-    for var iCNT:=1 to sgAgeView.RowCount - 1 do
-    if
-        (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
-    and
-        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
-    then
-        Inc(Sum);
+    var ActiveUser:=SessionService.SessionData.AliasName.ToLower();
 
-    if not (Sum = 0) then
+    for var iCNT:=1 to sgAgeView.RowCount - 1 do
+    begin
+
+        var FollowUpDate:=THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]);
+        var CurrentDate :=THelpers.CDate(valCurrentDate.Caption);
+        var AssignedUser:=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible), iCNT].ToLower();
+
+        if (FollowUpDate = CurrentDate) and (ActiveUser = AssignedUser) then Inc(Sum);
+
+    end;
+
+    if Sum > 0 then
     begin
 
         TrayIcon.Visible:=True;
@@ -2710,7 +2741,7 @@ begin
     if FPermitCheckTimer = (FPermitCheckTimeout / TimerPermitCheck.Interval) then
     begin
         TimerPermitCheck.Enabled:=False;
-        THelpers.MsgCall(TAppMessage.Error, 'Active Directory user validation check timeout. Access cannot be granted. Please contact IT Support.');
+        THelpers.MsgCall(TAppMessage.Error, 'Active Directory user validation check is timed out. Access cannot be granted. Please contact IT Support.');
     end;
 
     RedeemAccess();
@@ -2761,6 +2792,32 @@ begin
         Action_CopyToCB.Enabled          :=False;
         Action_AutoColumn.Enabled        :=False;
         Action_TurnRowHighlight.Enabled  :=False;
+    end;
+
+end;
+
+
+procedure TMainForm.PopupLoginPopup(Sender: TObject);
+begin
+
+    if TabSheets.ActivePage = TabSheet9 then
+    begin
+
+        Action_BrowserMode.Enabled  :=True;
+        Action_ClearCoockies.Enabled:=True;
+        Action_ClearCache.Enabled   :=True;
+
+        if Action_BrowserMode.Checked then
+            Action_ShowNavigation.Enabled:=False
+                else Action_ShowNavigation.Enabled:=True;
+
+    end
+    else
+    begin
+        Action_BrowserMode.Enabled   :=False;
+        Action_ShowNavigation.Enabled:=False;
+        Action_ClearCoockies.Enabled :=False;
+        Action_ClearCache.Enabled    :=False;
     end;
 
 end;
@@ -3070,12 +3127,21 @@ begin
 end;
 
 
-procedure TMainForm.Action_ClearCacheClick(Sender: TObject);
+procedure TMainForm.Action_CloseClick(Sender: TObject);
 begin
-    var Settings: ISettings:=TSettings.Create();
-    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
-    Settings.Encode(TAppFiles.Configuration);
-    THelpers.MsgCall(TAppMessage.Info, 'The cache will be cleared next time you start the application.');
+    {Do nonthing}
+end;
+
+
+procedure TMainForm.Action_AccountDetailsClick(Sender: TObject);
+begin
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+end;
+
+
+procedure TMainForm.Action_LoginRedeemClick(Sender: TObject);
+begin
+    RedeemAccess();
 end;
 
 
@@ -3083,6 +3149,15 @@ procedure TMainForm.Action_ClearCoockiesClick(Sender: TObject);
 begin
     if THelpers.MsgCall(TAppMessage.Question2, 'Do you want to clear stored coockies?') = ID_YES then
         Chromium.DeleteCookies();
+end;
+
+
+procedure TMainForm.Action_ClearCacheClick(Sender: TObject);
+begin
+    var Settings: ISettings:=TSettings.Create();
+    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
+    Settings.Encode(TAppFiles.Configuration);
+    THelpers.MsgCall(TAppMessage.Info, 'The cache will be cleared next time you start the application.');
 end;
 
 
@@ -3103,15 +3178,44 @@ begin
 end;
 
 
-procedure TMainForm.Action_CloseClick(Sender: TObject);
+procedure TMainForm.Action_BrowserModeClick(Sender: TObject);
 begin
-    {Do nonthing}
-end;
 
+    if Action_BrowserMode.Checked then
+    begin
 
-procedure TMainForm.Action_LoginRedeemClick(Sender: TObject);
-begin
-    RedeemAccess();
+        TabSheet9.PopupMenu:=nil;
+        Action_BrowserMode.Checked:=not Action_BrowserMode.Checked;
+
+        Action_AccountDetails.Visible:=True;
+        Action_LoginRedeem.Visible:=True;
+        N25.Visible:=True;
+
+        AppMenu.Width:=AppMenuShown;
+        AppHeader.Visible:=True;
+
+    end
+    else
+    begin
+
+        TabSheet9.PopupMenu:=PopupLogin;
+        Action_BrowserMode.Checked:=not Action_BrowserMode.Checked;
+
+        if not Action_ShowNavigation.Checked then
+        begin
+            Action_ShowNavigation.Checked:=not Action_ShowNavigation.Checked;
+            PanelNavigation.Visible:=True;
+        end;
+
+        Action_AccountDetails.Visible:=False;
+        Action_LoginRedeem.Visible:=False;
+        N25.Visible:=False;
+
+        AppMenu.Width:=AppMenuHidden;
+        AppHeader.Visible:=False;
+
+    end;
+
 end;
 
 
@@ -3677,18 +3781,7 @@ end;
 
 procedure TMainForm.imgAppMenuClick(Sender: TObject);
 begin
-
-    if AppMenu.Width = 170 then
-    begin
-        AppMenu.Width:=0;
-        Exit();
-    end;
-
-    if AppMenu.Width = 0 then
-    begin
-        AppMenu.Width:=170;
-    end;
-
+    if AppMenu.Width = AppMenuShown then AppMenu.Width:=AppMenuHidden else AppMenu.Width:=AppMenuShown;
 end;
 
 
@@ -4528,6 +4621,12 @@ procedure TMainForm.sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState
 begin
     Handled:=True;
     sgCustomerGr.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+
+procedure TMainForm.imgLockClick(Sender: TObject);
+begin
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is locked by the administrator.');
 end;
 
 

@@ -178,6 +178,7 @@ object ReportsForm: TReportsForm
               FFFFFFDDF6FEBAEDFEA0E7FE90E3FE87E1FD88E1FD90E3FEA1E7FEBBEEFEDEF6
               FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
               FFFF}
+            OnClick = Report1OverdueClick
             OnMouseEnter = Report1OverdueMouseEnter
             OnMouseLeave = Report1OverdueMouseLeave
           end
@@ -188,6 +189,7 @@ object ReportsForm: TReportsForm
             Height = 13
             AutoSize = False
             Caption = 'Overdue Items'
+            OnClick = Report1OverdueClick
             OnMouseEnter = Report1OverdueMouseEnter
             OnMouseLeave = Report1OverdueMouseLeave
           end
@@ -198,6 +200,7 @@ object ReportsForm: TReportsForm
             Height = 13
             AutoSize = False
             Caption = 'Open this report to see overdue invoices on selected ledger.'
+            OnClick = Report1OverdueClick
             OnMouseEnter = Report1OverdueMouseEnter
             OnMouseLeave = Report1OverdueMouseLeave
           end
@@ -320,6 +323,7 @@ object ReportsForm: TReportsForm
               FFFFFFF4EDC8E7D787DEC859D7BE39D5BA2DD5BA2DD7BE39DEC859E7D787F4ED
               C8FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
               FFFF}
+            OnClick = Report2ExceedersClick
             OnMouseEnter = Report2ExceedersMouseEnter
             OnMouseLeave = Report2ExceedersMouseLeave
           end
@@ -330,6 +334,7 @@ object ReportsForm: TReportsForm
             Height = 13
             AutoSize = False
             Caption = 'Exceeders'
+            OnClick = Report2ExceedersClick
             OnMouseEnter = Report2ExceedersMouseEnter
             OnMouseLeave = Report2ExceedersMouseLeave
           end
@@ -342,6 +347,7 @@ object ReportsForm: TReportsForm
             Caption = 
               'Shows credit balances (issued invoices against agreed limit amou' +
               'nt).'
+            OnClick = Report2ExceedersClick
             OnMouseEnter = Report2ExceedersMouseEnter
             OnMouseLeave = Report2ExceedersMouseLeave
           end
@@ -464,6 +470,7 @@ object ReportsForm: TReportsForm
               FFFFFFCEF0DF96DFBD6DD2A452CA9447C68C47C68C52CA946DD2A496DFBDCEF0
               DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
               FFFF}
+            OnClick = Report3DebtorsClick
             OnMouseEnter = Report3DebtorsMouseEnter
             OnMouseLeave = Report3DebtorsMouseLeave
           end
@@ -474,6 +481,7 @@ object ReportsForm: TReportsForm
             Height = 13
             AutoSize = False
             Caption = 'Debtors Status'
+            OnClick = Report3DebtorsClick
             OnMouseEnter = Report3DebtorsMouseEnter
             OnMouseLeave = Report3DebtorsMouseLeave
           end
@@ -486,6 +494,7 @@ object ReportsForm: TReportsForm
             Caption = 
               'Shows number of sent reminders, statements and calls made by Cre' +
               'dit Controller.'
+            OnClick = Report3DebtorsClick
             OnMouseEnter = Report3DebtorsMouseEnter
             OnMouseLeave = Report3DebtorsMouseLeave
           end
@@ -608,6 +617,7 @@ object ReportsForm: TReportsForm
               FFFFFFD5DCFEA9B8FD899EFD748DFD6A84FC6A84FC748DFD899EFDA9B8FDD5DC
               FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
               FFFF}
+            OnClick = Report4StatusClick
             OnMouseEnter = Report4StatusMouseEnter
             OnMouseLeave = Report4StatusMouseLeave
           end
@@ -618,6 +628,7 @@ object ReportsForm: TReportsForm
             Height = 13
             AutoSize = False
             Caption = 'Control Status'
+            OnClick = Report4StatusClick
             OnMouseEnter = Report4StatusMouseEnter
             OnMouseLeave = Report4StatusMouseLeave
           end
@@ -628,6 +639,7 @@ object ReportsForm: TReportsForm
             Height = 13
             AutoSize = False
             Caption = 'Displays overdue items per given control status.'
+            OnClick = Report4StatusClick
             OnMouseEnter = Report4StatusMouseEnter
             OnMouseLeave = Report4StatusMouseLeave
           end
