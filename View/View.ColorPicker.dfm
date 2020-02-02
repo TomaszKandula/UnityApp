@@ -486,7 +486,7 @@ object ColorsForm: TColorsForm
   object ColorDialog: TColorDialog
     Color = clCream
     Options = [cdFullOpen, cdAnyColor]
-    Left = 200
-    Top = 8
+    Left = 32
+    Top = 280
   end
 end

@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet9
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9582,20 +9582,16 @@ object MainForm: TMainForm
         TabOrder = 0
         DoubleBuffered = False
         ParentDoubleBuffered = False
-        ExplicitLeft = 55
-        ExplicitTop = 118
-        ExplicitWidth = 506
-        ExplicitHeight = 459
       end
       object PanelNavigation: TPanel
         AlignWithMargins = True
-        Left = 20
+        Left = 17
         Top = 20
-        Width = 1246
+        Width = 1252
         Height = 60
-        Margins.Left = 20
+        Margins.Left = 17
         Margins.Top = 20
-        Margins.Right = 20
+        Margins.Right = 17
         Margins.Bottom = 10
         Align = alTop
         BevelOuter = bvNone
@@ -9603,12 +9599,13 @@ object MainForm: TMainForm
         ParentBackground = False
         TabOrder = 1
         Visible = False
-        ExplicitTop = 39
+        ExplicitLeft = 20
+        ExplicitWidth = 1246
         object PanelUrl: TPanel
           AlignWithMargins = True
           Left = 296
           Top = 2
-          Width = 897
+          Width = 903
           Height = 56
           Margins.Left = 2
           Margins.Top = 2
@@ -9617,11 +9614,12 @@ object MainForm: TMainForm
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitWidth = 897
           object shapeUrlSection: TShape
             AlignWithMargins = True
             Left = 21
             Top = 15
-            Width = 871
+            Width = 877
             Height = 26
             Margins.Left = 5
             Margins.Top = 15
@@ -9676,7 +9674,7 @@ object MainForm: TMainForm
             AlignWithMargins = True
             Left = 31
             Top = 20
-            Width = 851
+            Width = 857
             Height = 16
             Margins.Left = 15
             Margins.Top = 20
@@ -9693,10 +9691,7 @@ object MainForm: TMainForm
             ParentFont = False
             TabOrder = 0
             Text = '{URL}'
-            ExplicitLeft = 16
-            ExplicitTop = 13
-            ExplicitWidth = 913
-            ExplicitHeight = 19
+            ExplicitWidth = 851
           end
         end
         object PanelButtons: TPanel
@@ -9714,9 +9709,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitHeight = 60
           object btnNavBack: TImage
             Left = 35
             Top = 8
@@ -10113,7 +10105,7 @@ object MainForm: TMainForm
         end
         object PanelLock: TPanel
           AlignWithMargins = True
-          Left = 1197
+          Left = 1203
           Top = 2
           Width = 47
           Height = 56
@@ -10126,8 +10118,7 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 2
-          ExplicitLeft = 1176
-          ExplicitWidth = 68
+          ExplicitLeft = 1197
           object imgLock: TImage
             AlignWithMargins = True
             Left = 3
@@ -27013,6 +27004,38 @@ object MainForm: TMainForm
     OnPopup = PopupBookPopup
     Left = 1216
     Top = 512
+    object Action_GoogleIt: TMenuItem
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFD4DEED1A4B9E829CCAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFDEE5F1073B952158A71C54A6FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFF2F80B3E
+        962157A70C51A7DBE5F1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFCFDFE1243991E55A61154A9E5ECF5FFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9FCFF18479B1B55A71859
+        ABF4F7FAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0E9E1E7DDD0E2D6C7E2D6C7EC
+        E4D8FFFFFFDDE0E6084BA22168BBFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFBF9F7
+        E2D6C8E3CBA7E4BD81E5B977E4BE84E3CEAEE2D6C6D1B392D9DADDFBFCFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFE2D6C8E3BD84E5B365E4B56CE4B66DE4B56CE5
+        B263E5C595E2D6C6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0EAE2DFC299
+        E5B365E4B66FE5B770E5B770E5B770E5B770E5B263E3CDAEECE4D9FFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFE8DED2DFB06BE7BB79E5B771E4B66FE5B770E5B770E5
+        B770E5B56CE4BE84E2D7C7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE6DDD2DDA758
+        EBC592E7BC7EE4B66DE5B770E5B770E5B770E5B66DE4B977E2D6C7FFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFECE5DFDBA85EEAC289EBC593E4B56CE4B66DE4B66FE5
+        B770E5B56CE4BD81E7DDD0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4F0EEDAB787
+        E3B164ECC899EBC593E7BC7EE5B771E4B66FE5B365E3CBA7F0E9E1FFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFE6DDD4D7A45EE3B064EAC28AEBC693E7BC7AE5
+        B365E3BD84E2D6C8FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFCFBFB
+        E7DED5DAB787DAA75EDDA758DEAF6ADFC197E2D6C7FBF9F7FFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5F1EFECE5E0E6DDD2E8DED2F0
+        EAE3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      Caption = 'Search in Google'
+      Default = True
+      OnClick = Action_GoogleItClick
+    end
     object Action_Copy: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100

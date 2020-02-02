@@ -36,7 +36,6 @@ type
         ProgressBar: TGauge;
         TextFooterA: TLabel;
         TextFooterB: TLabel;
-        MainText1: TLabel;
         TextStatus: TLabel;
         TextSubtitle: TLabel;
         ShapeFooter: TShape;
@@ -48,6 +47,7 @@ type
         LabelVersion: TLabel;
         ShapeLine: TShape;
         imgCover: TImage;
+        imgUnityLogo: TImage;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -600,13 +600,13 @@ end;
 procedure TStartupForm.LabelHideMouseEnter(Sender: TObject);
 begin
     ShapeHide.Brush.Color:=$00EDE6DD;
-    LabelHide.Font.Color:=$FFFFFF;
+    LabelHide.Font.Color:=$00E3B268;
 end;
 
 
 procedure TStartupForm.LabelHideMouseLeave(Sender: TObject);
 begin
-    ShapeHide.Brush.Color:=$FFFFFF;
+    ShapeHide.Brush.Color:=$00E3B268;
     LabelHide.Font.Color:=$00EDE6DD;
 end;
 

@@ -192,7 +192,7 @@ type
         procedure btnCallCustomerMouseLeave(Sender: TObject);
         procedure btnAddCommentClick(Sender: TObject);
         procedure selSendFromSelect(Sender: TObject);
-    procedure btnGoogleItClick(Sender: TObject);
+        procedure btnGoogleItClick(Sender: TObject);
     strict private
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
@@ -558,6 +558,7 @@ begin
         end;
 
         DailyComments.SetColWidth(10, 20, 400);
+        DailyComments.MSort(DailyComments.GetCol(TUserDailyCommentsList._CommentId), TDataType.TInteger, False);
 
     end
     else

@@ -28,7 +28,6 @@ type
 
 
     TRateForm = class(TForm)
-    published
         PanelBottom: TPanel;
         PanelReportMemo: TPanel;
         PanelClient: TPanel;

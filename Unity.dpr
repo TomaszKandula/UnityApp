@@ -14,7 +14,7 @@ program Unity;
 // ---------------------------------------------------------------------- //
 // Target system:          Windows 10 application.                        //
 // Framework used:         VCL (created by Borland).                      //
-// Require web services:   Yes, cloud based (Azure).                      //
+// Require web services:   Yes, cloud based (Microsoft Azure).            //
 // Active Directory:       Yes, via web service.                          //
 // Chromium engine:        CEF4Delphi / embedded, sub-processed           //
 // ---------------------------------------------------------------------- //

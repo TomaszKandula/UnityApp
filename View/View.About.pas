@@ -42,8 +42,6 @@ type
         txtTotMem: TLabel;
         txtMemUse: TLabel;
         txtLicence: TLabel;
-        txtName1: TLabel;
-        txtName2: TLabel;
         valVersion: TLabel;
         valEmail: TLabel;
         valLicence: TLabel;

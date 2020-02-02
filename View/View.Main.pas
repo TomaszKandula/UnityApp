@@ -66,7 +66,7 @@ type
 
 
     TMainForm = class(TForm)
-    published
+        Action_GoogleIt: TMenuItem;
         imgSSL: TImage;
         imgNavCover: TImage;
         Action_BrowserMode: TMenuItem;
@@ -540,6 +540,7 @@ type
         procedure Action_OnTopClick(Sender: TObject);
         procedure Action_AccountDetailsClick(Sender: TObject);
         procedure Action_BrowserModeClick(Sender: TObject);
+        procedure Action_GoogleItClick(Sender: TObject);
         procedure TabSheet8Show(Sender: TObject);
         procedure imgKeyAddMouseEnter(Sender: TObject);
         procedure imgKeyAddMouseLeave(Sender: TObject);
@@ -898,6 +899,7 @@ implementation
 
 
 uses
+    System.NetEncoding,
     View.GridFilter,
     View.InvoiceTracker,
     View.InvoiceList,
@@ -2847,21 +2849,19 @@ end;
 procedure TMainForm.PopupBookPopup(Sender: TObject);
 begin
 
-    Action_Copy.Enabled         :=True;
-    Action_DelRow.Enabled       :=True;
-    Action_SearchBook.Enabled   :=True;
-    Action_ColumnWidth.Enabled  :=True;
-
-    // Check if user select a range (we allow to delete only one line at the time)
-    if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then Action_DelRow.Enabled:=False
-        else Action_DelRow.Enabled:=True;
-
-    if sgAddressBook.RowCount < 3 then
+    if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
     begin
-        Action_Copy.Enabled         :=False;
-        Action_DelRow.Enabled       :=False;
-        Action_SearchBook.Enabled   :=False;
-        Action_ColumnWidth.Enabled  :=False;
+        Action_DelRow.Enabled     :=False;
+        Action_GoogleIt.Enabled   :=False;
+        Action_SearchBook.Enabled :=False;
+        Action_ColumnWidth.Enabled:=False;
+    end
+    else
+    begin
+        Action_DelRow.Enabled     :=True;
+        Action_GoogleIt.Enabled   :=True;
+        Action_SearchBook.Enabled :=True;
+        Action_ColumnWidth.Enabled:=True;
     end;
 
 end;
@@ -2888,23 +2888,45 @@ begin
     end
     else
     begin
-        Action_LyncCall.Enabled      :=True;
-        Action_Tracker.Enabled       :=True;
-        Action_AddToBook.Enabled     :=True;
-        Action_MassMailer.Enabled    :=True;
-        Action_GroupFollowUp.Enabled :=True;
-        Action_FilterAgeView.Enabled :=True;
-        Action_RemoveFilters.Enabled :=True;
-        Action_Overdue.Enabled       :=True;
-        Action_Search.Enabled        :=True;
-        Action_ViewOptions.Enabled   :=True;
-        Action_HideThisColumn.Enabled:=True;
-        Action_ShowAllColumns.Enabled:=True;
-        Action_AutoColumnSize.Enabled:=True;
-    end;
 
-    if FilterForm.InUse then Action_RemoveFilters.Enabled:=True
-        else Action_RemoveFilters.Enabled:=False;
+        if sgAgeView.Selection.Bottom - sgAgeView.Selection.Top > 0 then
+        begin
+            Action_LyncCall.Enabled      :=False;
+            Action_Tracker.Enabled       :=True;
+            Action_AddToBook.Enabled     :=True;
+            Action_MassMailer.Enabled    :=True;
+            Action_GroupFollowUp.Enabled :=False;
+            Action_FilterAgeView.Enabled :=False;
+            Action_RemoveFilters.Enabled :=False;
+            Action_Overdue.Enabled       :=True;
+            Action_Search.Enabled        :=False;
+            Action_ViewOptions.Enabled   :=False;
+            Action_HideThisColumn.Enabled:=True;
+            Action_ShowAllColumns.Enabled:=True;
+            Action_AutoColumnSize.Enabled:=True;
+        end
+        else
+        begin
+
+            Action_LyncCall.Enabled      :=True;
+            Action_Tracker.Enabled       :=True;
+            Action_AddToBook.Enabled     :=True;
+            Action_MassMailer.Enabled    :=True;
+            Action_GroupFollowUp.Enabled :=True;
+            Action_FilterAgeView.Enabled :=True;
+            Action_Overdue.Enabled       :=True;
+            Action_Search.Enabled        :=True;
+            Action_ViewOptions.Enabled   :=True;
+            Action_HideThisColumn.Enabled:=True;
+            Action_ShowAllColumns.Enabled:=True;
+            Action_AutoColumnSize.Enabled:=True;
+
+            if FilterForm.InUse then Action_RemoveFilters.Enabled:=True
+                else Action_RemoveFilters.Enabled:=False;
+
+        end;
+
+    end;
 
 end;
 
@@ -3034,6 +3056,25 @@ begin
 end;
 
 
+procedure TMainForm.Action_GoogleItClick(Sender: TObject);
+begin
+
+    var CustomerName:=sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._CustomerName), sgAddressBook.Row];
+    var Settings: ISettings:=TSettings.Create();
+    var AppParam:='https://google.com/search?q=' + TNetEncoding.URL.Encode(CustomerName);
+
+    ShellExecute(
+        MainForm.Handle,
+        'open',
+        PChar(Settings.DirApplication + TCommon.UnityReader),
+        PChar(AppParam),
+        nil,
+        SW_SHOWNORMAL
+    );
+
+end;
+
+
 procedure TMainForm.Action_CopyClick(Sender: TObject);
 begin
     sgAddressBook.CopyCutPaste(TActions.Copy);
@@ -3073,7 +3114,7 @@ end;
 
 procedure TMainForm.Action_ColumnWidthClick(Sender: TObject);
 begin
-    sgAddressBook.SetColWidth(40, 10, 400);
+    sgAddressBook.SetColWidth(10, 20, 400);
 end;
 
 
@@ -3626,7 +3667,7 @@ end;
 
 procedure TMainForm.sgAddressBookDblClick(Sender: TObject);
 begin
-    {Empty}
+    Action_GoogleItClick(Self);
 end;
 
 

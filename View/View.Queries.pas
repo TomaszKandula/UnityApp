@@ -29,7 +29,7 @@ uses
 type
 
 
-    TQmsForm = class(TForm)
+    TQmsForm = class(TForm)//do not use it until refactored completly!
         MainFrame: TGroupBox;
         BottomPanel: TPanel;
         btnLog: TSpeedButton;

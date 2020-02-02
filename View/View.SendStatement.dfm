@@ -35,7 +35,6 @@ object SendForm: TSendForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 621
     object Text_Custom_Message: TLabel
       AlignWithMargins = True
       Left = 20
@@ -48,8 +47,6 @@ object SendForm: TSendForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom message:'
-      ExplicitLeft = 22
-      ExplicitTop = 19
       ExplicitWidth = 85
     end
     object PanelMessage: TPanel
@@ -67,10 +64,6 @@ object SendForm: TSendForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitLeft = 20
-      ExplicitTop = 38
-      ExplicitWidth = 505
-      ExplicitHeight = 243
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
@@ -95,8 +88,6 @@ object SendForm: TSendForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-        ExplicitWidth = 501
-        ExplicitHeight = 167
       end
     end
     object PanelOption: TPanel
@@ -112,9 +103,6 @@ object SendForm: TSendForm
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitLeft = 6
-      ExplicitTop = 287
-      ExplicitWidth = 525
       object Shape_Dates: TShape
         AlignWithMargins = True
         Left = 240
@@ -492,7 +480,6 @@ object SendForm: TSendForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
-    ExplicitTop = 641
     object Text_Warn: TLabel
       Left = 16
       Top = 18

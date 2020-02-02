@@ -3,8 +3,8 @@ object EventForm: TEventForm
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
-  ClientHeight = 462
-  ClientWidth = 661
+  ClientHeight = 611
+  ClientWidth = 816
   Color = 15855854
   Constraints.MinHeight = 400
   Constraints.MinWidth = 400
@@ -26,8 +26,8 @@ object EventForm: TEventForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 641
-    Height = 410
+    Width = 796
+    Height = 559
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -37,14 +37,12 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 1042
-    ExplicitHeight = 622
     object PanelEventMemo: TPanel
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 621
-      Height = 390
+      Width = 776
+      Height = 539
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -54,14 +52,12 @@ object EventForm: TEventForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 1022
-      ExplicitHeight = 602
       object EventMemo: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
-        Width = 617
-        Height = 386
+        Width = 772
+        Height = 535
         Hint = 'Press F5 to reload'
         Margins.Left = 2
         Margins.Top = 2
@@ -84,16 +80,14 @@ object EventForm: TEventForm
         WantTabs = True
         WordWrap = False
         OnKeyUp = FormKeyUp
-        ExplicitWidth = 1018
-        ExplicitHeight = 598
       end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 430
-    Width = 661
+    Top = 579
+    Width = 816
     Height = 32
     Margins.Left = 0
     Margins.Top = 10
@@ -104,11 +98,9 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 642
-    ExplicitWidth = 1062
     object ImageGrip: TImage
       AlignWithMargins = True
-      Left = 645
+      Left = 800
       Top = 16
       Width = 16
       Height = 16

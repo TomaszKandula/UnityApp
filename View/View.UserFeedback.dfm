@@ -4,7 +4,7 @@ object FeedbackForm: TFeedbackForm
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
   ClientHeight = 403
-  ClientWidth = 451
+  ClientWidth = 625
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,7 +23,7 @@ object FeedbackForm: TFeedbackForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 431
+    Width = 605
     Height = 333
     Margins.Left = 10
     Margins.Top = 10
@@ -38,7 +38,7 @@ object FeedbackForm: TFeedbackForm
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 411
+      Width = 585
       Height = 13
       Margins.Left = 10
       Margins.Top = 10
@@ -54,7 +54,7 @@ object FeedbackForm: TFeedbackForm
       AlignWithMargins = True
       Left = 10
       Top = 38
-      Width = 411
+      Width = 585
       Height = 255
       Margins.Left = 10
       Margins.Top = 10
@@ -69,7 +69,7 @@ object FeedbackForm: TFeedbackForm
         AlignWithMargins = True
         Left = 2
         Top = 2
-        Width = 407
+        Width = 581
         Height = 251
         Margins.Left = 2
         Margins.Top = 2
@@ -94,7 +94,7 @@ object FeedbackForm: TFeedbackForm
       AlignWithMargins = True
       Left = 0
       Top = 303
-      Width = 431
+      Width = 605
       Height = 30
       Margins.Left = 0
       Margins.Top = 0
@@ -131,7 +131,7 @@ object FeedbackForm: TFeedbackForm
     AlignWithMargins = True
     Left = 0
     Top = 353
-    Width = 451
+    Width = 625
     Height = 50
     Margins.Left = 0
     Margins.Top = 5
@@ -185,7 +185,7 @@ object FeedbackForm: TFeedbackForm
     end
     object ImageGrip: TImage
       AlignWithMargins = True
-      Left = 435
+      Left = 609
       Top = 34
       Width = 16
       Height = 16

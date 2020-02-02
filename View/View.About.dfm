@@ -4,7 +4,7 @@ object AboutForm: TAboutForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 470
+  ClientHeight = 449
   ClientWidth = 802
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
@@ -29,7 +29,7 @@ object AboutForm: TAboutForm
     Left = 0
     Top = 0
     Width = 802
-    Height = 78
+    Height = 57
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -39,51 +39,15 @@ object AboutForm: TAboutForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    object txtName1: TLabel
-      Left = 10
-      Top = 15
-      Width = 63
-      Height = 25
-      Cursor = crAppStart
-      Caption = 'Unity'
-      Color = 35565
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -21
-      Font.Name = 'Verdana'
-      Font.Style = [fsBold]
-      Font.Quality = fqAntialiased
-      ParentColor = False
-      ParentFont = False
-      Transparent = False
-    end
-    object txtName2: TLabel
-      Left = 79
-      Top = 15
-      Width = 101
-      Height = 25
-      Cursor = crAppStart
-      Caption = 'Platform'
-      Color = clWhite
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = 11905689
-      Font.Height = -21
-      Font.Name = 'Verdana'
-      Font.Style = [fsBold]
-      Font.Quality = fqAntialiased
-      ParentColor = False
-      ParentFont = False
-      Transparent = True
-    end
     object txtSubtitle: TLabel
       Left = 10
-      Top = 46
-      Width = 295
+      Top = 18
+      Width = 249
       Height = 18
-      Caption = 'Debtors && Creditors Management'
-      Color = 11905689
+      Caption = 'Helping you along the way...'
+      Color = 14922344
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = 11905689
+      Font.Color = clMedGray
       Font.Height = -16
       Font.Name = 'Verdana'
       Font.Style = [fsBold]
@@ -95,7 +59,7 @@ object AboutForm: TAboutForm
   object PanelContent: TPanel
     AlignWithMargins = True
     Left = 10
-    Top = 88
+    Top = 67
     Width = 782
     Height = 317
     Margins.Left = 10
@@ -183,7 +147,7 @@ object AboutForm: TAboutForm
       Caption = 'Programming'
       TabOrder = 1
       object valDeveloper: TLabel
-        Left = 120
+        Left = 80
         Top = 37
         Width = 36
         Height = 13
@@ -198,9 +162,9 @@ object AboutForm: TAboutForm
       object txtDeveloper: TLabel
         Left = 24
         Top = 37
-        Width = 78
+        Width = 37
         Height = 13
-        Caption = 'Lead developer:'
+        Caption = 'Author:'
       end
     end
     object helpGroupBox: TGroupBox
@@ -427,7 +391,7 @@ object AboutForm: TAboutForm
   object PanelFooter: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 415
+    Top = 394
     Width = 802
     Height = 55
     Margins.Left = 0
