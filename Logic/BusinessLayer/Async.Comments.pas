@@ -249,7 +249,7 @@ begin
                     try
                         CallResponse.IsSucceeded:=UserDailyCommentUpdated.IsSucceeded;
                         CallResponse.LastMessage:=UserDailyCommentUpdated.Error.ErrorDesc;
-                        CallResponse.ErrorNumber:=UserDailyCommentUpdated.Error.ErrorNum;
+                        CallResponse.ErrorCode  :=UserDailyCommentUpdated.Error.ErrorCode;
                     finally
                         UserDailyCommentUpdated.Free();
                     end;
@@ -262,7 +262,7 @@ begin
                     try
                         CallResponse.IsSucceeded:=UserDailyCommentAdded.IsSucceeded;
                         CallResponse.LastMessage:=UserDailyCommentAdded.Error.ErrorDesc;
-                        CallResponse.ErrorNumber:=UserDailyCommentAdded.Error.ErrorNum;
+                        CallResponse.ErrorCode  :=UserDailyCommentAdded.Error.ErrorCode;
                     finally
                         UserDailyCommentAdded.Free();
                     end;
@@ -326,12 +326,8 @@ begin
     var CapturedCommentId:=QueryData.CommentId;
 
     var ShouldUpdate: boolean;
-    case CallResponse.ErrorNumber of
-
-        0:    ShouldUpdate:=True;
-        1016: ShouldUpdate:=False;
-
-    end;
+    if CallResponse.ErrorCode = 'no_errors_found' then ShouldUpdate:=True;
+    if CallResponse.ErrorCode = 'comment_already_exists' then ShouldUpdate:=False;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -407,7 +403,7 @@ begin
                     try
                         CallResponse.IsSucceeded:=UserGeneralCommentUpdated.IsSucceeded;
                         CallResponse.LastMessage:=UserGeneralCommentUpdated.Error.ErrorDesc;
-                        CallResponse.ErrorNumber:=UserGeneralCommentUpdated.Error.ErrorNum;
+                        CallResponse.ErrorCode  :=UserGeneralCommentUpdated.Error.ErrorCode;
                     finally
                         UserGeneralCommentUpdated.Free();
                     end;
@@ -420,7 +416,7 @@ begin
                     try
                         CallResponse.IsSucceeded:=UserGeneralCommentAdded.IsSucceeded;
                         CallResponse.LastMessage:=UserGeneralCommentAdded.Error.ErrorDesc;
-                        CallResponse.ErrorNumber:=UserGeneralCommentAdded.Error.ErrorNum;
+                        CallResponse.ErrorCode  :=UserGeneralCommentAdded.Error.ErrorCode;
                     finally
                         UserGeneralCommentAdded.Free();
                     end;
@@ -510,7 +506,7 @@ begin
 
                     CallResponse.IsSucceeded:=UserGeneralComment.IsSucceeded;
                     CallResponse.LastMessage:=UserGeneralComment.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=UserGeneralComment.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=UserGeneralComment.Error.ErrorCode;
                     ThreadFileLog.Log('[GetGeneralCommentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
@@ -590,7 +586,7 @@ begin
                     CommentExists.CommentId:=UserDailyCommentCheck.CommentId;
                     CallResponse.IsSucceeded:=UserDailyCommentCheck.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentCheck.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=UserDailyCommentCheck.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=UserDailyCommentCheck.Error.ErrorCode;
                 finally
                     UserDailyCommentCheck.Free();
                 end;
@@ -685,7 +681,7 @@ begin
 
                     CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=UserDailyCommentsList.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=UserDailyCommentsList.Error.ErrorCode;
                     ThreadFileLog.Log('[GetDailyCommentsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally

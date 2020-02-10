@@ -132,7 +132,7 @@ begin
             try
                 CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                 CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
-                CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
+                CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
                 ThreadFileLog.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
             finally
                 SentEmail.Free();

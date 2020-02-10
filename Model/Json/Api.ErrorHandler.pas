@@ -23,13 +23,13 @@ type
     {$TYPEINFO ON}
     strict private
         var FErrorDesc: string;
-        var FErrorNum: integer;
+        var FErrorCode: string;
     public
         const _ErrorDesc = 'ErrorDesc';
-        const _ErrorNum  = 'ErrorNum';
+        const _ErrorCode = 'ErrorCode';
     published
-        property ErrorDesc: string  read FErrorDesc write FErrorDesc;
-        property ErrorNum:  integer read FErrorNum  write FErrorNum;
+        property ErrorDesc: string read FErrorDesc write FErrorDesc;
+        property ErrorCode: string read FErrorCode write FErrorCode;
     end;
 
 

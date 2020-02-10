@@ -135,7 +135,7 @@ begin
                     GotDateTime:=ReturnSsisData.CustExtractDt;
                     GotStatus:=ReturnSsisData.StatusCode;
                     CallResponse.LastMessage:=ReturnSsisData.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=ReturnSsisData.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=ReturnSsisData.Error.ErrorCode;
 
                     CallResponse.IsSucceeded:=True;
                     ThreadFileLog.Log('[GetSSISDataAwaited]: Returned status code is ' + Restful.StatusCode.ToString());

@@ -34,7 +34,7 @@ type
     /// </summary>
     TCallResponse = record
         LastMessage:  string;
-        ErrorNumber:  integer;
+        ErrorCode:    string;
         IsSucceeded:  boolean;
         ReturnedCode: integer;
     end;

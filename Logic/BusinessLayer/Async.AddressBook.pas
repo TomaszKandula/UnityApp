@@ -292,7 +292,7 @@ begin
                 var AddressBookUpdated:=TJson.JsonToObject<TAddressBookUpdated>(Restful.Content);
                 try
                     CallResponse.IsSucceeded :=AddressBookUpdated.IsSucceeded;
-                    CallResponse.ErrorNumber :=AddressBookUpdated.Error.ErrorNum;
+                    CallResponse.ErrorCode   :=AddressBookUpdated.Error.ErrorCode;
                     CallResponse.LastMessage :=AddressBookUpdated.Error.ErrorDesc;
                 finally
                     AddressBookUpdated.Free();
@@ -383,7 +383,7 @@ begin
                 try
                     ReturnedId:=LAddressBookAdded.Id;
                     CallResponse.IsSucceeded:=LAddressBookAdded.IsSucceeded;
-                    CallResponse.ErrorNumber:=LAddressBookAdded.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=LAddressBookAdded.Error.ErrorCode;
                     CallResponse.LastMessage:=LAddressBookAdded.Error.ErrorDesc;
                 finally
                     LAddressBookAdded.Free();
@@ -456,7 +456,7 @@ begin
                 try
                     CallResponse.IsSucceeded:=AddressBookItemDel.IsSucceeded;
                     CallResponse.LastMessage:=AddressBookItemDel.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=AddressBookItemDel.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=AddressBookItemDel.Error.ErrorCode;
                 finally
                     AddressBookItemDel.Free();
                 end;

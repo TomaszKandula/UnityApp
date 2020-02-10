@@ -236,7 +236,7 @@ begin
                     NewAccessToken:=TokenGranted.AccessToken;
                     CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
                     CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=TokenGranted.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=TokenGranted.Error.ErrorCode;
                     ThreadFileLog.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                 finally
                     TokenGranted.Free();
@@ -310,7 +310,7 @@ begin
                     try
                         CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
                         CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
-                        CallResponse.ErrorNumber:=UserSessionAdded.Error.ErrorNum;
+                        CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
                         ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                     finally
                         UserSessionAdded.Free();
@@ -382,7 +382,7 @@ begin
 
                     CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
                     CallResponse.LastMessage:=UserSessionChecked.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=UserSessionChecked.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=UserSessionChecked.Error.ErrorCode;
 
                     if CallResponse.IsSucceeded then
                     begin
@@ -562,7 +562,7 @@ begin
                     try
                         CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
                         CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
-                        CallResponse.ErrorNumber:=UserSessionLogsSaved.Error.ErrorNum;
+                        CallResponse.ErrorCode  :=UserSessionLogsSaved.Error.ErrorCode;
                         ThreadFileLog.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                         ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
                     finally
@@ -720,7 +720,7 @@ begin
                     TempRating.UserComment:=UserRating.Comment;
 
                     CallResponse.IsSucceeded :=UserRating.IsSucceeded;
-                    CallResponse.ErrorNumber :=UserRating.Error.ErrorNum;
+                    CallResponse.ErrorCode   :=UserRating.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
@@ -805,7 +805,7 @@ begin
                 try
 
                     CallResponse.IsSucceeded :=UserRatingAdded.IsSucceeded;
-                    CallResponse.ErrorNumber :=UserRatingAdded.Error.ErrorNum;
+                    CallResponse.ErrorCode   :=UserRatingAdded.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRatingAdded.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
@@ -892,7 +892,7 @@ begin
                 try
 
                     CallResponse.IsSucceeded :=UserRatingUpdated.IsSucceeded;
-                    CallResponse.ErrorNumber :=UserRatingUpdated.Error.ErrorNum;
+                    CallResponse.ErrorCode   :=UserRatingUpdated.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRatingUpdated.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 

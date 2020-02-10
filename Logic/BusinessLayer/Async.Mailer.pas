@@ -113,7 +113,7 @@ begin
                 try
                     CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                     CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
+                    CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
                     ThreadFileLog.Log('[SendFeedbackAsync]: Returned status code is ' + Restful.StatusCode.ToString());
                 finally
                     SentEmail.Free();

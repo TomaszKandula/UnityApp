@@ -24,7 +24,6 @@ uses
     Vcl.StdCtrls,
     Vcl.Buttons,
     Vcl.ComCtrls,
-    Data.Win.ADODB,
     Unity.Grid,
     Unity.Panel;
 
@@ -131,72 +130,8 @@ end;
 
 
 procedure TTrackerForm.LoadFromGrid();
-
-//    function GetSCUID(position: integer): string;
-//    begin
-//        var CustNumber: string:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), position];
-//        var CoCode: string:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), position];
-//        Result:=CustNumber + THelpers.CoConvert(CoCode);
-//    end;
-
 begin
-
-//    var Item: TListItem;
-//    TrackerForm.CustomerList.Clear();
 //
-//    if (MainForm.sgAgeView.Selection.Top - MainForm.sgAgeView.Selection.Bottom) = 0 then
-//    begin
-//
-//        // One customer
-//        Item:=CustomerList.Items.Add;
-//        Item.Caption:=IntToStr(MainForm.sgAgeView.Row);
-//        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.Cuid), MainForm.sgAgeView.Row]);
-//        Item.SubItems.Add(GetSCUID(MainForm.sgAgeView.Row));
-//        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row]);
-//        Item.SubItems.Add('Not set');
-//        Item.SubItems.Add('Not found!');
-//        Item.SubItems.Add('Not found!');
-//        Item.SubItems.Add('Not set');
-//        Item.SubItems.Add('Not set');
-//        Item.SubItems.Add('Not set');
-//        Item.SubItems.Add('Not set');
-//        Item.SubItems.Add('Not set');
-//        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]);
-//        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]);
-//
-//    end
-//    else
-//    begin
-//
-//        // Many customers
-//        for var iCNT: integer:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
-//        begin
-//
-//            if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
-//            begin
-//
-//                Item:=CustomerList.Items.Add;
-//                Item.Caption:=IntToStr(iCNT);
-//                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.Cuid), iCNT]);
-//                Item.SubItems.Add(GetSCUID(iCNT));
-//                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT]);
-//                Item.SubItems.Add('Not set');
-//                Item.SubItems.Add('Not found!');
-//                Item.SubItems.Add('Not found!');
-//                Item.SubItems.Add('Not set');
-//                Item.SubItems.Add('Not set');
-//                Item.SubItems.Add('Not set');
-//                Item.SubItems.Add('Not set');
-//                Item.SubItems.Add('Not set');
-//                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]);
-//                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), iCNT]);
-//
-//            end;
-//
-//        end;
-//
-//    end;
-
 end;
 
 
@@ -218,72 +153,19 @@ end;
 
 procedure TTrackerForm.GetCompanyEmail(List: TComboBox);
 begin
-
-//    var Companies: ICompanies:=TCompanies.Create();
 //
-//    var TestArr: TArray<TRegisteredEmails>;
-//    var CallResponse: TCallResponse;
-//    CallResponse:=Companies.GetCompanyEmailsAwaited(TArray<integer>.Create(450,2020), TestArr);
-//    var EmailList:=TStringList.Create();
-//    var CoCodeList:=TStringList.Create();
-//    try
-//
-//        THelpers.ReturnCoCodesList(
-//            MainForm.sgAgeView,
-//            MainForm.sgAgeView.GetCol(TSnapshots.fCoCode),
-//            CoCodeList,
-//            True
-//        );
-//
-//        Companies.GetCompanyEmailsAwaited(CoCodeList, EmailList);
-//        List.Items.AddStrings(EmailList);
-//
-//    finally
-//        EmailList.Free();
-//        CoCodeList.Free();
-//    end;
-
-    if List.Items.Count > 0 then
-    begin
-        ErrorEmailFrom.Visible:=False;
-        List.ItemIndex:=0;
-    end
-    else
-    begin
-        ErrorEmailFrom.Visible:=True;
-        List.Items.Clear();
-    end;
-
 end;
 
 
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
 begin
-//    var AddressBook: IAddressBook:=TAddressBook.Create();
-//    var CustomerDetails: TCustomerDetails;
-//    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(Scuid);
-//    FReminderMail :=CustomerDetails.CustMailGen;
-//    FStatementMail:=CustomerDetails.CustMailStat;
+//
 end;
 
 
 procedure TTrackerForm.SetEmailAddresses(List: TListView);
 begin
-
-    if List.Items.Count > 0 then
-    begin
-
-        for var iCNT: integer:=0 to List.Items.Count - 1 do
-        begin
-
-            GetEmailAddress(List.Items[iCNT].SubItems[1]);
-            if not(string.IsNullOrEmpty(FStatementMail)) then List.Items[iCNT].SubItems[4]:=FStatementMail;
-            if not(string.IsNullOrEmpty(FReminderMail)) then List.Items[iCNT].SubItems[5]:=FReminderMail;
-
-        end;
-
-    end;
-
+//
 end;
 
 
