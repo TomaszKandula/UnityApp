@@ -121,6 +121,7 @@ uses
 	Api.ReturnCustSnapshots in 'Model\Json\Responses\Api.ReturnCustSnapshots.pas',
 	Api.TokenGranted in 'Model\Json\Responses\Api.TokenGranted.pas',
 	Api.AddressBookUpdated in 'Model\Json\Responses\Api.AddressBookUpdated.pas',
+	Api.UserGeneralCommentCheck in 'Model\Json\Responses\Api.UserGeneralCommentCheck.pas',
     Unity.RestWrapper in 'Logic\DataLayer\Unity.RestWrapper.pas',
     Sync.Mailer in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Document in 'Logic\BusinessLayer\Sync.Document.pas',
@@ -195,23 +196,15 @@ begin
     // the application lifetime.
     // ------------------------------------------------------
     var Settings: ISettings:=TSettings.Create();
-    var PathAppDir:=ExtractFileDir(Application.ExeName) + '\';
+    var PathAppDir :=Settings.DirApplication;
+    var PathHomeDir:=Settings.DirRoaming;
     if not Settings.CheckConfigFile then
     begin
-
-        var LastErrorMsg: string;
-        if THelpers.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory()
-        else begin
-
-            Application.MessageBox(
-                PCHar(LastErrorMsg + TCommon.AppCaption + ' will be closed. Please contact IT support.'),
-                PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
-            );
-
-            ExitProcess(0);
-
-        end;
-
+        Application.MessageBox(
+            PCHar('Cannot find config.cfg. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
+            PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
+        );
+        ExitProcess(0);
     end;
 
     Settings.MakeNewSessionId();
@@ -264,10 +257,11 @@ begin
 
             // -----------------------------------------------------------------
             // Setup Coockies and Cache folders to allow store web browser data.
+            // Note: Do place those folders in Home path.
             // -----------------------------------------------------------------
             GlobalCEFApp.PersistSessionCookies:=False; // Do not store coockies without expiry/validity date!
-            GlobalCEFApp.Cache  :=PathAppDir + 'cache';
-            GlobalCEFApp.Cookies:=PathAppDir + 'coockies';
+            GlobalCEFApp.Cache  :=PathHomeDir + 'cache';
+            GlobalCEFApp.Cookies:=PathHomeDir + 'coockies';
 
             // -----------------------------------------------------------------------------------------------------------------
             // Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
@@ -278,7 +272,7 @@ begin
             begin
 
                 Application.MessageBox(
-                    PChar('Cannot detect main thread running. Program will be closed. Please contact IT support.'),
+                    PChar('Chromium cannot detect main thread running. Program will be closed. Please contact IT support.'),
                     PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
                 );
 

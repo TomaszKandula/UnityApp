@@ -98,9 +98,9 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables for DailyComments table operations.
+    /// Carries a group of variables for DailyComments/GeneralComments table operations.
     /// </summary>
-    TDailyCommentExists = record
+    TCommentExists = record
         DoesCommentExists: boolean;
         CommentId:         integer;
         UserComment:       string;

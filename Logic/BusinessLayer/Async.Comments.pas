@@ -22,14 +22,21 @@ type
     /// Callback signature for updating (insert/update actions) daily comment.
     /// </summary>
     TEditDailyComment = procedure(CallResponse: TCallResponse) of object;
+
     /// <summary>
     /// Callback signature for updating (insert/update actions) general comment.
     /// </summary>
     TEditGeneralComment = procedure(CallResponse: TCallResponse) of object;
+
     /// <summary>
     /// Callback signature for getting results for daily comments list.
     /// </summary>
-    TGetDailyComments = procedure(ReturnedGrid: TStringGrid; CallResponse: TCallResponse) of object;
+    TGetDailyComments = procedure(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature for getting results for general comments.
+    /// </summary>
+    TGetGeneralComments = procedure(Comments: TGeneralCommentFields; CallResponse: TCallResponse) of object;
 
 
     IComments = interface(IInterface)
@@ -53,12 +60,20 @@ type
         /// </remarks>
         procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
         /// <summary>
-        /// Allow to async. retrive general comment for given company code, customer number and user alias. There is no separate notification.
+        /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
+        /// Note: there is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
+        function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse;
+        /// <summary>
+        /// Allow to async. retrive general comment for given company code, customer number and user alias. There is separate notification.
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
         /// <summary>
         /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
         /// Note: there is no separate notification.
@@ -66,14 +81,14 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse;
         /// <summary>
-        /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
+        /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is separate notification.
         /// </summary>
         /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
+        ///
         /// </remarks>
-        function GetDailyCommentsAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+        procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
         /// <summary>
         /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
         /// if comment does not exists. Note that there is no separate notification.
@@ -109,12 +124,21 @@ type
         /// </remarks>
         procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
         /// <summary>
-        /// Allow to async. retrive general comment for given company code, customer number and user alias. There is no separate notification.
+        /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
+        /// Note: there is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
+        function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse;
+        /// <summary>
+        /// Allow to async. retrive general comment for given company code, customer number and user alias.
+        /// Notification is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
         /// <summary>
         /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
         /// Note: there is no separate notification.
@@ -122,14 +146,15 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse;
         /// <summary>
-        /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
+        /// Allow to async. retrieve daily comments for given company code, customer number and user alias.
+        /// Notification is always executed in main thread.
         /// </summary>
         /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
+        ///
         /// </remarks>
-        function GetDailyCommentsAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+        procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
         /// <summary>
         /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
         /// if comment does not exists. Note that there is no separate notification.
@@ -158,6 +183,7 @@ uses
     Api.UserGeneralCommentAdd,
     Api.UserGeneralCommentUpdate,
     Api.UserGeneralCommentAdded,
+    Api.UserGeneralCommentCheck,
     Api.UserGeneralCommentUpdated,
     Api.UserDailyCommentsList,
     Api.UserDailyCommentAdd,
@@ -315,19 +341,12 @@ end;
 procedure TComments.EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
 begin
 
-    var QueryData: TGeneralCommentFields;
-    var CallResponse:=GetGeneralCommentAwaited(
+    var QueryData: TCommentExists;
+    var CallResponse:=CheckGeneralCommentAwaited(
         PayLoad.SourceDBName,
         PayLoad.CustomerNumber,
-        PayLoad.UserAlias,
         QueryData
     );
-
-    var CapturedCommentId:=QueryData.CommentId;
-
-    var ShouldUpdate: boolean;
-    if CallResponse.ErrorCode = 'no_errors_found' then ShouldUpdate:=True;
-    if CallResponse.ErrorCode = 'comment_already_exists' then ShouldUpdate:=False;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -344,7 +363,7 @@ begin
             + PayLoad.UserAlias
             + '/';
 
-        if ShouldUpdate then
+        if QueryData.DoesCommentExists then
         begin
 
             Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
@@ -359,7 +378,7 @@ begin
                 if not String.IsNullOrEmpty(PayLoad.Free1)       then UserGeneralCommentUpdate.Free3      :=PayLoad.Free3;
                 if not String.IsNullOrEmpty(PayLoad.UserComment) then UserGeneralCommentUpdate.UserComment:=PayLoad.UserComment;
 
-                UserGeneralCommentUpdate.CommentId:=CapturedCommentId;
+                UserGeneralCommentUpdate.CommentId:=QueryData.CommentId;
                 Restful.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentUpdate);
 
             finally
@@ -396,7 +415,7 @@ begin
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
 
-                if ShouldUpdate then
+                if QueryData.DoesCommentExists then
                 begin
 
                     var UserGeneralCommentUpdated:=TJson.JsonToObject<TUserGeneralCommentUpdated>(Restful.Content);
@@ -466,7 +485,83 @@ begin
 end;
 
 
-function TComments.GetGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
+function TComments.CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var DoesCommentExists: TCommentExists;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+            + 'generalcommentaries/'
+            + SourceDBName
+            + '/'
+            + CustNumber.ToString()
+            + '/check/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[CheckGeneralCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var UserGeneralCommentCheck:=TJson.JsonToObject<TUserGeneralCommentCheck>(Restful.Content);
+                try
+                    DoesCommentExists.DoesCommentExists:=UserGeneralCommentCheck.DoesCommentExists;
+                    DoesCommentExists.UserComment:=UserGeneralCommentCheck.UserComment;
+                    DoesCommentExists.CommentId:=UserGeneralCommentCheck.CommentId;
+                    CallResponse.IsSucceeded:=UserGeneralCommentCheck.IsSucceeded;
+                    CallResponse.LastMessage:=UserGeneralCommentCheck.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=UserGeneralCommentCheck.Error.ErrorCode;
+                finally
+                    UserGeneralCommentCheck.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    CommentExists:=DoesCommentExists;
+    Result:=CallResponse;
+
+end;
+
+
+procedure TComments.GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
 begin
 
     var CallResponse: TCallResponse;
@@ -541,21 +636,23 @@ begin
 
         end;
 
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(TempComments, CallResponse);
+        end);
+
     end);
 
     NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Output:=TempComments;
-    Result:=CallResponse;
 
 end;
 
 
-function TComments.CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+function TComments.CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
-    var CommentExists: TDailyCommentExists;
+    var DoesCommentExists: TCommentExists;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -581,9 +678,9 @@ begin
 
                 var UserDailyCommentCheck:=TJson.JsonToObject<TUserDailyCommentCheck>(Restful.Content);
                 try
-                    CommentExists.DoesCommentExists:=UserDailyCommentCheck.DoesCommentExists;
-                    CommentExists.UserComment:=UserDailyCommentCheck.UserComment;
-                    CommentExists.CommentId:=UserDailyCommentCheck.CommentId;
+                    DoesCommentExists.DoesCommentExists:=UserDailyCommentCheck.DoesCommentExists;
+                    DoesCommentExists.UserComment:=UserDailyCommentCheck.UserComment;
+                    DoesCommentExists.CommentId:=UserDailyCommentCheck.CommentId;
                     CallResponse.IsSucceeded:=UserDailyCommentCheck.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentCheck.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserDailyCommentCheck.Error.ErrorCode;
@@ -623,13 +720,13 @@ begin
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-    DailyCommentExists:=CommentExists;
+    CommentExists:=DoesCommentExists;
     Result:=CallResponse;
 
 end;
 
 
-function TComments.GetDailyCommentsAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+procedure TComments.GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
 begin
 
     var CallResponse: TCallResponse;
@@ -716,12 +813,14 @@ begin
 
         end;
 
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(TempComments, CallResponse);
+        end);
+
     end);
 
     NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    TArrayUtils<TDailyCommentFields>.Copy(TempComments, Output);
-    Result:=CallResponse;
 
 end;
 
@@ -732,23 +831,23 @@ begin
     var CallResponse: TCallResponse;
     try
 
-        var DailyCommentExists: TDailyCommentExists;
+        var CommentExists: TCommentExists;
         CheckDailyCommentAwaited(
             SourceDBName,
             CustNumber,
             AgeDate,
-            DailyCommentExists
+            CommentExists
         );
 
         var LocalPayLoad: TDailyCommentFields;
         var ExtendedComment: string;
 
-        if not String.IsNullOrWhiteSpace(DailyCommentExists.UserComment) then
-            ExtendedComment:=DailyCommentExists.UserComment + #13#10 + 'New communication has been sent.'
+        if not String.IsNullOrWhiteSpace(CommentExists.UserComment) then
+            ExtendedComment:=CommentExists.UserComment + #13#10 + 'New communication has been sent.'
         else
             ExtendedComment:='New communication has been sent.';
 
-        LocalPayLoad.CommentId           :=DailyCommentExists.CommentId;
+        LocalPayLoad.CommentId           :=CommentExists.CommentId;
         LocalPayLoad.SourceDBName        :=SourceDBName;
         LocalPayLoad.CustomerNumber      :=CustNumber;
         LocalPayLoad.AgeDate             :=AgeDate;

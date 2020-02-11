@@ -126,7 +126,7 @@ type
         selSendFrom: TComboBox;
         txtSendFrom: TLabel;
         btnAddComment: TSpeedButton;
-    btnGoogleIt: TSpeedButton;
+        btnGoogleIt: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -214,12 +214,14 @@ type
         var CtrlStatusRefs: TFCtrlStatusRefs;
         function  GetRunningApps(SearchName: string): boolean;
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
-        procedure UpdateGeneral(var Text: TMemo);
-        procedure UpdateDaily(var DailyComments: TStringGrid);
         procedure GetFirstComment(var Text: TMemo);
+        procedure UpdateOpenItems();
+        procedure UpdateDaily();
+        procedure UpdateGeneral();
+
         procedure UpdateCustDetails();
         procedure UpdateCompanyDetails();
-        procedure UpdateOpenItems();
+
         procedure UpdateData();
         procedure InitializePanels();
         procedure InitializeSpeedButtons();
@@ -237,6 +239,8 @@ type
         procedure InsertAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
+        procedure GetDailyCommentsAsync_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
+        procedure GetGeneralCommentAsync_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
     public
         property SourceDBName: string read FSourceDBName;
         property CustName: string read FCustName;
@@ -350,8 +354,8 @@ end;
 
 procedure TActionsForm.UpdateData();
 begin
-    UpdateDaily(DailyComGrid);
-    UpdateGeneral(GeneralCom);
+    UpdateDaily();
+    UpdateGeneral();
     UpdateCustDetails();
     UpdateCompanyDetails();
 end;
@@ -522,69 +526,30 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateDaily(var DailyComments: TStringGrid);
+procedure TActionsForm.UpdateDaily();
 begin
 
     var Comments: IComments:=TComments.Create();
-    var LDailyCommentFields: TArray<TDailyCommentFields>;
-    var CallResponse:=Comments.GetDailyCommentsAwaited(
+    Comments.GetDailyCommentsAsync(
         SourceDBName,
         CustNumber,
         SessionService.SessionData.AliasName,
-        LDailyCommentFields
+        GetDailyCommentsAsync_Callback
     );
-
-    var TotalRows:=Length(LDailyCommentFields);
-    if TotalRows > 0 then
-    begin
-
-        DailyComments.RowCount:=TotalRows + 1;
-
-        for var iCNT:=1{Skip header} to TotalRows do
-        begin
-
-            var Col1:=DailyComments.GetCol(TUserDailyCommentsList._CommentId);
-            var Col2:=DailyComments.GetCol(TUserDailyCommentsList._EntryDateTime);
-            var Col3:=DailyComments.GetCol(TUserDailyCommentsList._AgeDate);
-            var Col4:=DailyComments.GetCol(TUserDailyCommentsList._UserComment);
-            var Col5:=DailyComments.GetCol(TUserDailyCommentsList._UserAlias);
-
-            DailyComments.Cells[Col1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
-            DailyComments.Cells[Col2, iCNT]:=THelpers.FormatDateTime(LDailyCommentFields[iCNT - 1].EntryDateTime, TCalendar.DateTime);
-            DailyComments.Cells[Col3, iCNT]:=THelpers.FormatDateTime(LDailyCommentFields[iCNT - 1].AgeDate, TCalendar.DateOnly);
-            DailyComments.Cells[Col4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
-            DailyComments.Cells[Col5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
-
-        end;
-
-        DailyComments.SetColWidth(10, 20, 400);
-        DailyComments.MSort(DailyComments.GetCol(TUserDailyCommentsList._CommentId), TDataType.TInteger, False);
-
-    end
-    else
-    begin
-        DailyComments.ClearAll(2, 1, 1, True);
-    end;
 
 end;
 
 
-procedure TActionsForm.UpdateGeneral(var Text: TMemo);
+procedure TActionsForm.UpdateGeneral();
 begin
 
-    var CallResponse: TCallResponse;
-    var LGeneralComment: TGeneralCommentFields;
     var Comments: IComments:=TComments.Create();
-
-    CallResponse:=Comments.GetGeneralCommentAwaited(
+    Comments.GetGeneralCommentAsync(
         SourceDBName,
         CustNumber,
         SessionService.SessionData.AliasName,
-        LGeneralComment
+        GetGeneralCommentAsync_Callback
     );
-
-    if CallResponse.IsSucceeded then
-        Text.Text:=LGeneralComment.UserComment;
 
 end;
 
@@ -903,7 +868,7 @@ begin
     end;
 
     THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
-    UpdateDaily(DailyComGrid);
+    UpdateDaily();
 
 end;
 
@@ -964,8 +929,68 @@ begin
         Exit();
     end;
 
-    UpdateDaily(DailyComGrid);
+    UpdateDaily();
     ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsList._UserComment), DailyComGrid.Row];
+
+end;
+
+
+procedure TActionsForm.GetDailyCommentsAsync_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[GetDailyCommentsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    var TotalRows:=Length(Comments);
+    if TotalRows > 0 then
+    begin
+
+        DailyComGrid.RowCount:=TotalRows + 1;
+
+        for var iCNT:=1{Skip header} to TotalRows do
+        begin
+
+            var Col1:=DailyComGrid.GetCol(TUserDailyCommentsList._CommentId);
+            var Col2:=DailyComGrid.GetCol(TUserDailyCommentsList._EntryDateTime);
+            var Col3:=DailyComGrid.GetCol(TUserDailyCommentsList._AgeDate);
+            var Col4:=DailyComGrid.GetCol(TUserDailyCommentsList._UserComment);
+            var Col5:=DailyComGrid.GetCol(TUserDailyCommentsList._UserAlias);
+
+            DailyComGrid.Cells[Col1, iCNT]:=Comments[iCNT - 1].CommentId.ToString();
+            DailyComGrid.Cells[Col2, iCNT]:=THelpers.FormatDateTime(Comments[iCNT - 1].EntryDateTime, TCalendar.DateTime);
+            DailyComGrid.Cells[Col3, iCNT]:=THelpers.FormatDateTime(Comments[iCNT - 1].AgeDate, TCalendar.DateOnly);
+            DailyComGrid.Cells[Col4, iCNT]:=Comments[iCNT - 1].UserComment;
+            DailyComGrid.Cells[Col5, iCNT]:=Comments[iCNT - 1].UserAlias;
+
+        end;
+
+        DailyComGrid.SetColWidth(10, 20, 400);
+        DailyComGrid.MSort(DailyComGrid.GetCol(TUserDailyCommentsList._CommentId), TDataType.TInteger, False);
+
+    end
+    else
+    begin
+        DailyComGrid.ClearAll(2, 1, 1, True);
+    end;
+
+end;
+
+
+procedure TActionsForm.GetGeneralCommentAsync_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
+begin
+
+    if (not CallResponse.IsSucceeded) and (CallResponse.ErrorCode <> 'no_comment_found') then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[GetGeneralCommentAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    GeneralCom.Text:=Comments.UserComment;
 
 end;
 

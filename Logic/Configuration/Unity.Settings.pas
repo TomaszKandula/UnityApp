@@ -45,9 +45,9 @@ type
         function GetPathConfig(): string;
         function GetPathLicence(): string;
         function GetDirApplication(): string;
+        function GetDirRoaming(): string;
         function GetDirLayouts(): string;
         function GetDirAssets(): string;
-        function GetDirPackage(): string;
         function GetDirWinTemp(): string;
         function GetNewSessionId(): string;
         function GetUrlReleasePak(): string;
@@ -59,8 +59,8 @@ type
         property PathConfig: string read GetPathConfig;
         property PathLicence: string read GetPathLicence;
         property DirApplication: string read GetDirApplication;
+        property DirRoaming: string read GetDirRoaming;
         property DirLayouts: string read GetDirLayouts;
-        property DirPackage: string read GetDirPackage;
         property DirAssets: string read GetDirAssets;
         property DirWinTemp: string read GetDirWinTemp;
         property UrlReleasePak: string read GetUrlReleasePak;
@@ -109,6 +109,7 @@ type
         var FPathConfig: string;
         var FPathLicence: string;
         var FDirApplication: string;
+        var FDirRoaming: string;
         var FDirLayouts: string;
         var FDirPackage: string;
         var FDirSessions: string;
@@ -139,8 +140,8 @@ type
         function GetPathConfig(): string;
         function GetPathLicence(): string;
         function GetDirApplication(): string;
+        function GetDirRoaming(): string;
         function GetDirLayouts(): string;
-        function GetDirPackage(): string;
         function GetDirAssets(): string;
         function GetDirWinTemp(): string;
         function GetNewSessionId(): string;
@@ -172,8 +173,8 @@ type
         property PathConfig: string read GetPathConfig;
         property PathLicence: string read GetPathLicence;
         property DirApplication: string read GetDirApplication;
+        property DirRoaming: string read GetDirRoaming;
         property DirLayouts: string read GetDirLayouts;
-        property DirPackage: string read GetDirPackage;
         property DirAssets: string read GetDirAssets;
         property DirWinTemp: string read GetDirWinTemp;
         property NewSessioId: string read GetNewSessionId;
@@ -214,6 +215,7 @@ implementation
 
 uses
     System.SysUtils,
+    System.IOUtils,
     Vcl.Forms,
     Unity.Crc32,
     Unity.Constants,
@@ -228,13 +230,15 @@ begin
 
     FWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
     FDirWinTemp    :=GetEnvironmentVariable('TEMP');
-    FDirApplication:=ExtractFileDir(Application.ExeName) + '\';
-    FDirLayouts    :=FDirApplication + 'layouts\';
-    FDirPackage    :=FDirApplication + 'package\';
-    FDirSessions   :=FDirApplication + 'sessions\';
-    FDirAssets     :=FDirApplication + 'assets\';
-    FPathConfig    :=FDirApplication + TCommon.ConfigFile;
-    FPathLicence   :=FDirApplication + TCommon.LicenceFile;
+    FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
+
+    FDirRoaming :=TPath.GetHomePath() + TPath.DirectorySeparatorChar + 'UnityPlatform' + TPath.DirectorySeparatorChar;
+    FDirLayouts :=FDirRoaming + 'layouts' + TPath.DirectorySeparatorChar;
+    FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
+    FPathConfig :=FDirRoaming + TCommon.ConfigFile;
+
+    FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
+    FPathLicence:=FDirApplication + TCommon.LicenceFile;
 
     if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
 
@@ -649,12 +653,6 @@ begin
 end;
 
 
-//function TSettings.GetPathGridImage(): string;
-//begin
-//    Result:=FPathGridImage;
-//end;
-
-
 function TSettings.GetPathEventLog(): string;
 begin
     Result:=FPathEventLog;
@@ -679,15 +677,15 @@ begin
 end;
 
 
-function TSettings.GetDirLayouts(): string;
+function TSettings.GetDirRoaming(): string;
 begin
-    Result:=FDirLayouts;
+    Result:=FDirRoaming;
 end;
 
 
-function TSettings.GetDirPackage(): string;
+function TSettings.GetDirLayouts(): string;
 begin
-    Result:=FDirPackage;
+    Result:=FDirLayouts;
 end;
 
 

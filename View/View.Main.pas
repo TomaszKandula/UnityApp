@@ -1953,22 +1953,22 @@ begin
         var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
 
         var Comments: IComments:=TComments.Create();
-        var DailyCommentExists: TDailyCommentExists;
+        var CommentExists: TCommentExists;
         var CallResponse: TCallResponse;
         CallResponse:=Comments.CheckDailyCommentAwaited(
             SourceDBName,
             CustNumber,
             LoadedAgeDate,
-            DailyCommentExists
+            CommentExists
         );
 
-        var NewComment:=DailyCommentExists.UserComment;
+        var NewComment:=CommentExists.UserComment;
         if String.IsNullOrWhitespace(NewComment) then
             NewComment:='Called customer today.' else
                 NewComment:=NewComment + '#13#10' + 'Called customer today.';
 
         var LDailyCommentFields: TDailyCommentFields;
-        LDailyCommentFields.CommentId           :=DailyCommentExists.CommentId;
+        LDailyCommentFields.CommentId           :=CommentExists.CommentId;
         LDailyCommentFields.SourceDBName        :=SourceDBName;
         LDailyCommentFields.CustomerNumber      :=CustNumber;
         LDailyCommentFields.AgeDate             :=LoadedAgeDate;
