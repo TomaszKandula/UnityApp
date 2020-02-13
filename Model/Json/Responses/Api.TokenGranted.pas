@@ -12,9 +12,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -29,6 +28,7 @@ type
         var FExpiresIn:   integer;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
+        var FMeta:        TMetaData;
     public
         const _AccessToken   = 'AccessToken';
         const _TokenType     = 'TokenType';
@@ -36,6 +36,7 @@ type
         const _ExpiresIn     = 'ExpiresIn';
         const _IsSucceeded   = 'IsSucceeded';
         const _Error         = 'Error';
+        const _Meta          = 'Meta';
         destructor Destroy(); override;
     published
         property AccessToken: string        read FAccessToken write FAccessToken;
@@ -44,6 +45,7 @@ type
         property ExpiresIn:   integer       read FExpiresIn   write FExpiresIn;
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler read FError       write FError;
+        property Meta:        TMetaData     read FMeta        write FMeta;
     end;
 
 
@@ -53,6 +55,7 @@ implementation
 destructor TTokenGranted.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

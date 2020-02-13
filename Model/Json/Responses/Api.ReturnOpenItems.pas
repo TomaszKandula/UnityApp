@@ -12,9 +12,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -61,6 +60,7 @@ type
         var FVoucherDate:       TArray<string>;
         var FIsSucceeded:       boolean;
         var FError:             TErrorHandler;
+        var FMeta:              TMetaData;
 	public
         const _SourceDbName      = 'SourceDbName';
         const _CustNumber        = 'CustomerNumber';
@@ -100,6 +100,7 @@ type
         const _VoucherDate       = 'VoucherDate';
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
+        const _Meta              = 'Meta';
         destructor Destroy(); override;
     published
         property SourceDbName:      TArray<string>  read FSourceDbName      write FSourceDbName;
@@ -140,6 +141,7 @@ type
         property VoucherDate:       TArray<string>  read FVoucherDate       write FVoucherDate;
         property IsSucceeded:       boolean         read FIsSucceeded       write FIsSucceeded;
         property Error:             TErrorHandler   read FError             write FError;
+        property Meta:              TMetaData       read FMeta              write FMeta;
 	end;
 
 
@@ -149,6 +151,7 @@ implementation
 destructor TReturnOpenItems.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

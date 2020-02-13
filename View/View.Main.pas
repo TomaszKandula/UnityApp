@@ -1259,7 +1259,6 @@ begin
 
     // ------------------------------------------------
     // Make asynchronous calls to map all the columns.
-    // Note: do not lock painting of target StringGrid.
     // ------------------------------------------------
 
     UpdateStatusBar(TStatusBar.Mapping);

@@ -232,7 +232,7 @@ begin
     FDirWinTemp    :=GetEnvironmentVariable('TEMP');
     FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
 
-    FDirRoaming :=TPath.GetHomePath() + TPath.DirectorySeparatorChar + 'UnityPlatform' + TPath.DirectorySeparatorChar;
+    FDirRoaming :=TPath.GetPublicPath() + TPath.DirectorySeparatorChar + 'Unity Platform' + TPath.DirectorySeparatorChar;
     FDirLayouts :=FDirRoaming + 'layouts' + TPath.DirectorySeparatorChar;
     FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
     FPathConfig :=FDirRoaming + TCommon.ConfigFile;

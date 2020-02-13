@@ -218,10 +218,8 @@ type
         procedure UpdateOpenItems();
         procedure UpdateDaily();
         procedure UpdateGeneral();
-
         procedure UpdateCustDetails();
         procedure UpdateCompanyDetails();
-
         procedure UpdateData();
         procedure InitializePanels();
         procedure InitializeSpeedButtons();
@@ -241,6 +239,8 @@ type
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
         procedure GetDailyCommentsAsync_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
         procedure GetGeneralCommentAsync_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
+        procedure GetCustomerDetailsAsync_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
+        procedure GetCompanyDetailsAsync_Callback(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse);
     public
         property SourceDBName: string read FSourceDBName;
         property CustName: string read FCustName;
@@ -449,80 +449,16 @@ end;
 
 procedure TActionsForm.UpdateCustDetails();
 begin
-
     FCustDetailsId:=0;
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    var CustomerDetails: TCustomerDetails;
-    var CallResponse: TCallResponse;
-    CallResponse:=AddressBook.GetCustomerDetailsAwaited(CustNumber, SourceDBName, CustomerDetails);
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    var Phones: string;
-
-    FCustDetailsId       :=CustomerDetails.Id;
-    Cust_Person.Text     :=CustomerDetails.ContactPerson;
-    Cust_MailGeneral.Text:=CustomerDetails.RegularEmails;
-    Cust_Mail.Text       :=CustomerDetails.StatementEmails;
-    Phones               :=CustomerDetails.PhoneNumbers;
-
-    if (Phones <> '') or (Phones <> ' ') then
-    begin
-        Cust_Phone.Clear();
-        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
-        Cust_Phone.ItemIndex:=0;
-    end;
-
-    SetControls();
-
+    AddressBook.GetCustomerDetailsAsync(CustNumber, SourceDBName, GetCustomerDetailsAsync_Callback);
 end;
 
 
 procedure TActionsForm.UpdateCompanyDetails();
 begin
-
-    var CallResponse: TCallResponse;
-    var CompanyDetails: TCompanyDetails;
-
     var Companies: ICompanies:=TCompanies.Create();
-    var LbuEmails:=TStringList.Create();
-    try
-
-        CallResponse:=Companies.GetCompanyDetailsAwaited(SourceDBName, CompanyDetails);
-
-        if not CallResponse.IsSucceeded then
-        begin
-            THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-            CompanyDetails.Dispose();
-            LbuEmails.Free();
-            Exit();
-        end;
-
-        FLbuName   :=CompanyDetails.LbuName;
-        FLbuAddress:=CompanyDetails.LbuAddress;
-        FExclusions:=CompanyDetails.Exclusions;
-
-        FLbuPhones   :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
-        FLbuBanksHtml:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
-
-        selSendFrom.Clear();
-        THelpers.StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
-        selSendFrom.Items.AddStrings(LbuEmails);
-        if selSendFrom.Items.Count > 0 then
-        begin
-            selSendFrom.ItemIndex:=0;
-            FLbuSendFrom:=selSendFrom.Text;
-        end;
-
-    finally
-        LbuEmails.Free();
-        CompanyDetails.Dispose();
-    end;
-
+    Companies.GetCompanyDetailsAsync(SourceDBName, GetCompanyDetailsAsync_Callback);
 end;
 
 
@@ -991,6 +927,73 @@ begin
     end;
 
     GeneralCom.Text:=Comments.UserComment;
+
+end;
+
+
+procedure TActionsForm.GetCustomerDetailsAsync_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    var Phones: string;
+
+    FCustDetailsId       :=CustDetails.Id;
+    Cust_Person.Text     :=CustDetails.ContactPerson;
+    Cust_MailGeneral.Text:=CustDetails.RegularEmails;
+    Cust_Mail.Text       :=CustDetails.StatementEmails;
+    Phones               :=CustDetails.PhoneNumbers;
+
+    if (Phones <> '') or (Phones <> ' ') then
+    begin
+        Cust_Phone.Clear();
+        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
+        Cust_Phone.ItemIndex:=0;
+    end;
+
+    SetControls();
+
+end;
+
+
+procedure TActionsForm.GetCompanyDetailsAsync_Callback(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse);
+begin
+
+    var LbuEmails:=TStringList.Create();
+    try
+
+        if not CallResponse.IsSucceeded then
+        begin
+            THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+            CompanyDetails.Dispose();
+            LbuEmails.Free();
+            Exit();
+        end;
+
+        FLbuName   :=CompanyDetails.LbuName;
+        FLbuAddress:=CompanyDetails.LbuAddress;
+        FExclusions:=CompanyDetails.Exclusions;
+
+        FLbuPhones   :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
+        FLbuBanksHtml:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+
+        selSendFrom.Clear();
+        THelpers.StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
+        selSendFrom.Items.AddStrings(LbuEmails);
+        if selSendFrom.Items.Count > 0 then
+        begin
+            selSendFrom.ItemIndex:=0;
+            FLbuSendFrom:=selSendFrom.Text;
+        end;
+
+    finally
+        LbuEmails.Free();
+        CompanyDetails.Dispose();
+    end;
 
 end;
 

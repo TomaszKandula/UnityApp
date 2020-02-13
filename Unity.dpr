@@ -65,6 +65,7 @@ uses
     Unity.Constants in 'Helpers\Unity.Constants.pas',
     Unity.Sorting in 'Helpers\Unity.Sorting.pas',
     Unity.Helpers in 'Helpers\Unity.Helpers.pas',
+	Api.MetaData in 'Model\Json\Api.MetaData.pas',
     Api.ErrorHandler in 'Model\Json\Api.ErrorHandler.pas',
     Api.BankDetails in 'Model\Json\Api.BankDetails.pas',
     Api.RegisteredEmails in 'Model\Json\Api.RegisteredEmails.pas',

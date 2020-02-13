@@ -12,9 +12,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -38,6 +37,7 @@ type
         var FEntryDateTime:        TArray<string>;
         var FIsSucceeded:          boolean;
         var FError:                TErrorHandler;
+        var FMeta:                 TMetaData;
     public
         const _CommentId            = 'CommentId';
         const _SourceDBName         = 'SourceDBName';
@@ -54,6 +54,7 @@ type
         const _EntryDateTime        = 'EntryDateTime';
         const _IsSucceeded          = 'IsSucceeded';
         const _Error                = 'Error';
+        const _Meta                 = 'Meta';
         destructor Destroy(); override;
     published
         property CommentId:            TArray<integer> read FCommentId            write FCommentId;
@@ -71,6 +72,7 @@ type
         property EntryDateTime:        TArray<string>  read FEntryDateTime        write FEntryDateTime;
         property IsSucceeded:          boolean         read FIsSucceeded          write FIsSucceeded;
         property Error:                TErrorHandler   read FError                write FError;
+        property Meta:                 TMetaData       read FMeta                 write FMeta;
     end;
 
 
@@ -80,6 +82,7 @@ implementation
 destructor TUserDailyCommentsList.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

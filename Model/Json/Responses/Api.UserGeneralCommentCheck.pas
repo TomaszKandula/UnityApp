@@ -12,9 +12,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -28,12 +27,14 @@ type
         var FUserComment:       string;
         var FIsSucceeded:       boolean;
         var FError:             TErrorHandler;
+        var FMeta:              TMetaData;
 	public
         const _DoesCommentExists = 'DoesCommentExists';
         const _CommentId         = 'CommentId';
         const _UserComment       = 'UserComment';
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
+        const _Meta              = 'Meta';
         destructor Destroy(); override;
     published
         property DoesCommentExists: boolean       read FDoesCommentExists write FDoesCommentExists;
@@ -41,6 +42,7 @@ type
         property UserComment:       string        read FUserComment       write FUserComment;
         property IsSucceeded:       boolean       read FIsSucceeded       write FIsSucceeded;
         property Error:             TErrorHandler read FError             write FError;
+        property Meta:              TMetaData     read FMeta              write FMeta;
 	end;
 
 
@@ -50,6 +52,7 @@ implementation
 destructor TUserGeneralCommentCheck.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

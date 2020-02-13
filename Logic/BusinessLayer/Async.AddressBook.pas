@@ -20,17 +20,21 @@ type
 
 
     /// <summary>
-    /// Callback signature for getting results of address book open action.
+    /// Callback signature for getting results from address book open action.
     /// </summary>
     TOpenAddressBook = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
     /// <summary>
-    /// Callback signature for getting results of address book update action.
+    /// Callback signature for getting results from address book update action.
     /// </summary>
     TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
     /// <summary>
-    /// Callback signature for getting results of address book insert action.
+    /// Callback signature for getting results from address book insert action.
     /// </summary>
     TAddToAddressBook = procedure(ReturnedId: integer; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for getting results from customer details retrieval.
+    /// </summary>
+    TGetCustomerDetails = procedure(CustDetails: TCustomerDetails; CallResponse: TCallResponse) of object;
 
 
     IAddressBook = interface(IInterface)
@@ -57,19 +61,21 @@ type
         /// </remarks>
         procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
         /// <summary>
-        /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
+        /// Allow to asynchronously remove data from Address Book for given arguments. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function DelFromAddressBookAwaited(Id: integer): TCallResponse;
         /// <summary>
-        /// Load async. address book customer data only for given SCUID. There is no separate notification.
+        /// Load async. address book customer data only for given arguments.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
-        function GetCustomerDetailsAwaited(CustNumber: Int64; SourceDBName: string; var CustDetails: TCustomerDetails): TCallResponse;
+        procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails);
     end;
 
 
@@ -98,19 +104,21 @@ type
         /// </remarks>
         procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
         /// <summary>
-        /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
+        /// Allow to asynchronously remove data from Address Book for given arguments. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function DelFromAddressBookAwaited(Id: integer): TCallResponse;
         /// <summary>
-        /// Load async. address book customer data only for given SCUID. There is no separate notification.
+        /// Load async. address book customer data only for given arguments.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
-        function GetCustomerDetailsAwaited(CustNumber: Int64; SourceDBName: string; var CustDetails: TCustomerDetails): TCallResponse;
+        procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails);
     end;
 
 
@@ -501,7 +509,7 @@ begin
 end;
 
 
-function TAddressBook.GetCustomerDetailsAwaited(CustNumber: Int64; SourceDBName: string; var CustDetails: TCustomerDetails): TCallResponse;
+procedure TAddressBook.GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails);
 begin
 
     var LCustDetails: TCustomerDetails;
@@ -520,7 +528,7 @@ begin
             + CustNumber.ToString()
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetCustomerDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[GetCustomerDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -538,7 +546,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetCustomerDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     AddressBookItem.Free();
@@ -549,12 +557,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
                     if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetCustomerDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -566,18 +574,20 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(LCustDetails, CallResponse);
+        end);
+
     end);
 
     NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    CustDetails:=LCustDetails;
-    Result:=CallResponse;
 
 end;
 

@@ -12,10 +12,9 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
     Api.Errorhandler,
-    Api.RegisteredEmails;
+    Api.RegisteredEmails,
+    Api.MetaData;
 
 
 type
@@ -27,15 +26,18 @@ type
         var FEmailList:   TArray<TRegisteredEmails>;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
+        var FMeta:        TMetaData;
     public
         const _EmailList   = 'EmailList';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
+        const _Meta        = 'Meta';
         destructor Destroy(); override;
     published
         property EmailList:   TArray<TRegisteredEmails> read FEmailList   write FEmailList;
         property IsSucceeded: boolean                   read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler             read FError       write FError;
+        property Meta:        TMetaData                 read FMeta        write FMeta;
     end;
 
 
@@ -45,6 +47,7 @@ implementation
 destructor TCompanyEmailsList.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     for var RegisteredEmails: TRegisteredEmails in FEmailList do RegisteredEmails.Free();
     inherited;
 end;

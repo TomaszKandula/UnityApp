@@ -11,9 +11,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -52,6 +51,7 @@ type
         var FAgeDate:           string;
         var FIsSucceeded:       boolean;
         var FError:             TErrorHandler;
+        var FMeta:              TMetaData;
     public
         const _CustomerName      = 'Customer Name';
         const _CustomerNumber    = 'Customer Number';
@@ -83,6 +83,7 @@ type
         const _AgeDate           = 'Age Date';
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
+        const _Meta              = 'Meta';
         destructor Destroy(); override;
     published
         property CustomerName:      TArray<string>  read FCustomerName      write FCustomerName;
@@ -115,6 +116,7 @@ type
         property AgeDate:           string          read FAgeDate           write FAgeDate;
         property IsSucceeded:       boolean         read FIsSucceeded       write FIsSucceeded;
         property Error:             TErrorHandler   read FError             write FError;
+        property Meta:              TMetaData       read FMeta              write FMeta;
     end;
 
 
@@ -124,6 +126,7 @@ implementation
 destructor TReturnCustSnapshots.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

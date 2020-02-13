@@ -11,9 +11,8 @@ unit Api.ReturnControlStatus;
 interface
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -28,6 +27,7 @@ type
         var FDescription: TArray<string>;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
+        var FMeta:        TMetaData;
     public
         const _Id          = 'Id';
         const _Code        = 'Code';
@@ -35,6 +35,7 @@ type
         const _Description = 'Description';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
+        const _Meta        = 'Meta';
         destructor Destroy(); override;
     published
         property Id:          TArray<integer> read FId          write FId;
@@ -43,6 +44,7 @@ type
         property Description: TArray<string>  read FDescription write FDescription;
         property IsSucceeded: boolean         read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler   read FError       write FError;
+        property Meta:        TMetaData       read FMeta        write FMeta;
     end;
 
 
@@ -52,6 +54,7 @@ implementation
 destructor TReturnControlStatus.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

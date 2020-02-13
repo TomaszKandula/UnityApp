@@ -19,6 +19,12 @@ uses
 type
 
 
+    /// <summary>
+    /// Callback signature for getting results for company details.
+    /// </summary>
+    TGetCompanyDetails = procedure(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse) of object;
+
+
     ICompanies = interface(IInterface)
     ['{E7616759-7564-44A4-BEEF-BDD220040E1E}']
         /// <summary>
@@ -28,6 +34,14 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+        /// <summary>
+        /// Allow to load async. some company data like name, address, phone etc.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails);
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
         /// </summary>
@@ -51,6 +65,14 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+        /// <summary>
+        /// Allow to load async. some company data like name, address, phone etc.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails);
         /// <summary>
         /// Allow to load async. list of primary email(s) for given Company Codes. There is no separate notification.
         /// </summary>
@@ -79,6 +101,8 @@ uses
     Api.CompanyEmailsList;
 
 
+// remove it after mass mailer refactored!
+// use only async version!
 function TCompanies.GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 begin
 
@@ -147,6 +171,82 @@ begin
         CompanyData.Free();
         Result:=CallResponse;
     end;
+
+end;
+
+
+procedure TCompanies.GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails);
+begin
+
+    var CallResponse: TCallResponse;
+    var CompanyDetails: TCompanyDetails;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Settings: ISettings:=TSettings.Create();
+
+        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetCompanyDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
+                try
+                    CompanyDetails.LbuName   :=CompanyData.CompanyName;
+                    CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
+                    CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
+                    CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
+                    CompanyDetails.Exclusions:=CompanyData.Exclusions;
+                    FSetCompanyDetails(CompanyData.CompanyBanks, CompanyDetails.LbuBanks);
+                finally
+                    CompanyData.Free();
+                end;
+
+                CallResponse.IsSucceeded:=True;
+                ThreadFileLog.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CompanyDetails, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 

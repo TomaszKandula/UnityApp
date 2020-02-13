@@ -12,9 +12,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -27,17 +26,20 @@ type
         var FComment:     string;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
+        var FMeta:        TMetaData;
     public
         const _Rating      ='Rating';
         const _Comment     ='Comment';
         const _IsSucceeded ='IsSucceeded';
         const _Error       ='Error';
+        const _Meta        = 'Meta';
         destructor Destroy(); override;
     published
         property Rating:      integer       read FRating      write FRating;
         property Comment:     string        read FComment     write FComment;
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler read FError       write FError;
+        property Meta:        TMetaData     read FMeta        write FMeta;
     end;
 
 
@@ -47,6 +49,7 @@ implementation
 destructor TUserRating.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 

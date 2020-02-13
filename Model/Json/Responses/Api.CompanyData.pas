@@ -12,10 +12,9 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
     Api.BankDetails,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -32,6 +31,7 @@ type
         var FCompanyBanks:   TArray<TBankDetails>;
         var FIsSucceeded:    boolean;
         var FError:          TErrorHandler;
+        var FMeta:           TMetaData;
     public
         const _CompanyName    = 'CompanyName';
         const _CompanyAddress = 'CompanyAddress';
@@ -41,6 +41,7 @@ type
         const _CompanyBanks   = 'CompanyBanks';
         const _IsSucceeded    = 'IsSucceeded';
         const _Error          = 'Error';
+        const _Meta           = 'Meta';
         destructor Destroy(); override;
     published
         property CompanyName:    string               read FCompanyName    write FCompanyName;
@@ -51,6 +52,7 @@ type
         property CompanyBanks:   TArray<TBankDetails> read FCompanyBanks   write FCompanyBanks;
         property IsSucceeded:    boolean              read FIsSucceeded    write FIsSucceeded;
         property Error:          TErrorHandler        read FError          write FError;
+        property Meta:           TMetaData            read FMeta           write FMeta;
     end;
 
 
@@ -60,6 +62,7 @@ implementation
 destructor TCompanyData.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     for var BankDetails: TBankDetails in FCompanyBanks do BankDetails.Free();
     inherited;
 end;

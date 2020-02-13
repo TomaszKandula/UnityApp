@@ -174,6 +174,7 @@
         <DCCReference Include="Helpers\Unity.Constants.pas"/>
         <DCCReference Include="Helpers\Unity.Sorting.pas"/>
         <DCCReference Include="Helpers\Unity.Helpers.pas"/>
+        <DCCReference Include="Model\Json\Api.MetaData.pas"/>
         <DCCReference Include="Model\Json\Api.ErrorHandler.pas"/>
         <DCCReference Include="Model\Json\Api.BankDetails.pas"/>
         <DCCReference Include="Model\Json\Api.RegisteredEmails.pas"/>

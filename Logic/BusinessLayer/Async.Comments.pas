@@ -19,22 +19,22 @@ type
 
 
     /// <summary>
-    /// Callback signature for updating (insert/update actions) daily comment.
+    /// Callback signature for updating/inserting data for daily comment.
     /// </summary>
     TEditDailyComment = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature for updating (insert/update actions) general comment.
+    /// Callback signature for updating/inserting data for general comment.
     /// </summary>
     TEditGeneralComment = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature for getting results for daily comments list.
+    /// Callback signature for getting results from daily comments list request.
     /// </summary>
     TGetDailyComments = procedure(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature for getting results for general comments.
+    /// Callback signature for getting results for general comment single dataset.
     /// </summary>
     TGetGeneralComments = procedure(Comments: TGeneralCommentFields; CallResponse: TCallResponse) of object;
 
@@ -42,8 +42,8 @@ type
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
         /// <summary>
-        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload with comment id
-        /// parameter for update. If comment id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
+        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload with comment Id
+        /// parameter for update. If comment Id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
         /// comment can be added for given customer number, age date and company code.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
@@ -68,10 +68,12 @@ type
         /// </remarks>
         function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse;
         /// <summary>
-        /// Allow to async. retrive general comment for given company code, customer number and user alias. There is separate notification.
+        /// Allow to async. retrive general comment for given company code, customer number and user alias.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
-        ///
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
         procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
         /// <summary>
@@ -83,10 +85,12 @@ type
         /// </remarks>
         function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse;
         /// <summary>
-        /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is separate notification.
+        /// Allow to async. retrieve daily comments for given company code, customer number and user alias.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
-        ///
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
         procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
         /// <summary>
@@ -133,10 +137,11 @@ type
         function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse;
         /// <summary>
         /// Allow to async. retrive general comment for given company code, customer number and user alias.
-        /// Notification is always executed in main thread.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
-        ///
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
         procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
         /// <summary>
@@ -149,10 +154,11 @@ type
         function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse;
         /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias.
-        /// Notification is always executed in main thread.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
-        ///
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
         procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
         /// <summary>
@@ -582,7 +588,7 @@ begin
             + UserAlias
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetGeneralCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[GetGeneralCommentAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -602,7 +608,7 @@ begin
                     CallResponse.IsSucceeded:=UserGeneralComment.IsSucceeded;
                     CallResponse.LastMessage:=UserGeneralComment.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserGeneralComment.Error.ErrorCode;
-                    ThreadFileLog.Log('[GetGeneralCommentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[GetGeneralCommentAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserGeneralComment.Free();
@@ -613,12 +619,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetGeneralCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    CallResponse.LastMessage:='[GetGeneralCommentAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
                     if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[GetGeneralCommentAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[GetGeneralCommentAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetGeneralCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetGeneralCommentAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -630,7 +636,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetGeneralCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[GetGeneralCommentAsync]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
@@ -747,7 +753,7 @@ begin
             + UserAlias
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetDailyCommentsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[GetDailyCommentsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -779,7 +785,7 @@ begin
                     CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserDailyCommentsList.Error.ErrorCode;
-                    ThreadFileLog.Log('[GetDailyCommentsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[GetDailyCommentsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserDailyCommentsList.Free();
@@ -790,12 +796,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetDailyCommentsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    CallResponse.LastMessage:='[GetDailyCommentsAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
                     if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[GetDailyCommentsAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[GetDailyCommentsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetDailyCommentsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetDailyCommentsAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -807,7 +813,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetDailyCommentsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[GetDailyCommentsAsync]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 

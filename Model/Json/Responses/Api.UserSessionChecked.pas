@@ -12,9 +12,8 @@ interface
 
 
 uses
-    Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Api.ErrorHandler,
+    Api.MetaData;
 
 
 type
@@ -31,6 +30,7 @@ type
         var FEmailAddress: string;
         var FIsSucceeded:  boolean;
         var FError:        TErrorHandler;
+        var FMeta:         TMetaData;
 	public
         const _IsValidated  = 'IsValidated';
         const _UserId       = 'UserId';
@@ -40,6 +40,7 @@ type
         const _EmailAddress = 'EmailAddress';
         const _IsSucceeded  = 'IsSucceeded';
         const _Error        = 'Error';
+        const _Meta         = 'Meta';
         destructor Destroy(); override;
     published
         property IsValidated:  boolean       read FIsValidated  write FIsValidated;
@@ -50,7 +51,8 @@ type
         property EmailAddress: string        read FEmailAddress write FEmailAddress;
         property IsSucceeded:  boolean       read FIsSucceeded  write FIsSucceeded;
         property Error:        TErrorHandler read FError        write FError;
-	end;
+        property Meta:         TMetaData     read FMeta         write FMeta;
+    end;
 
 
 implementation
@@ -59,6 +61,7 @@ implementation
 destructor TUserSessionChecked.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    if Assigned(FMeta) then FMeta.Free();
     inherited;
 end;
 
