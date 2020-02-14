@@ -233,11 +233,11 @@
         <DCCReference Include="Model\Json\Responses\Api.AddressBookUpdated.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserGeneralCommentCheck.pas"/>
         <DCCReference Include="Logic\DataLayer\Unity.RestWrapper.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Mediator.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Document.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Accounts.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Utilities.pas"/>
-        <DCCReference Include="Logic\BusinessLayer\Async.Tracker.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Queries.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.AddressBook.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Debtors.pas"/>

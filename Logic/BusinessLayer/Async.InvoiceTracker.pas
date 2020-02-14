@@ -24,6 +24,16 @@ type
     /// </summary>
     TGetInvoiceList = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
+    /// <summary>
+    /// Callback signature for returning reloaded data from invoice tracker database table.
+    /// </summary>
+    TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature for removing item from invoice tracker database table.
+    /// </summary>
+    TDeleteFromTrackerList = procedure(CallResponse: TCallResponse) of object;
+
 
     IInvoiceTracker = interface(IInterface)
     ['{7C1248FC-8FD2-4D71-BC6E-11B605E1CC4B}']
@@ -42,6 +52,23 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveTrackerDataAwaited(PayLoad: TStringGrid): TCallResponse;
+        /// <summary>
+        /// Allow to async. re-load listed customers on invoice tracker database table.
+        /// Callback provides returned data for visual component. Notification is always
+        /// executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
+        /// <summary>
+        /// Allow to async. remove given item from invoice tracker database table.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
     end;
 
 
@@ -62,6 +89,23 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveTrackerDataAwaited(PayLoad: TStringGrid): TCallResponse;
+        /// <summary>
+        /// Allow to async. re-load listed customers on invoice tracker database table.
+        /// Callback provides returned data for visual component. Notification is always
+        /// executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
+        /// <summary>
+        /// Allow to async. remove given item from invoice tracker database table.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
     end;
 
 
@@ -85,6 +129,16 @@ function TInvoiceTracker.SaveTrackerDataAwaited(PayLoad: TStringGrid): TCallResp
 begin
     var NewResult: TCallResponse;
     Result:=NewResult;
+end;
+
+
+procedure TInvoiceTracker.DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
+begin
+end;
+
+
+procedure TInvoiceTracker.RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
+begin
 end;
 
 

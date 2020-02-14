@@ -924,7 +924,6 @@ uses
     Unity.SessionService,
     Sync.Document,
     Async.Utilities,
-    Async.Tracker,
     Async.Queries,
     Async.Debtors,
     Async.OpenItems,
@@ -2394,8 +2393,8 @@ end;
 
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-    var Tracker: ITracker:=TTracker.Create();
-    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
+//    var Tracker: ITracker:=TTracker.Create();
+//    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
 end;
 
 
@@ -3617,15 +3616,15 @@ end;
 
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-    var Tracker: ITracker:=TTracker.Create();
-    Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionData.AliasName), RefreshInvoiceTracker_Callback);
+//    var Tracker: ITracker:=TTracker.Create();
+//    Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionData.AliasName), RefreshInvoiceTracker_Callback);
 end;
 
 
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-    var Tracker: ITracker:=TTracker.Create();
-    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
+//    var Tracker: ITracker:=TTracker.Create();
+//    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
 end;
 
 
