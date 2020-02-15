@@ -11,11 +11,6 @@ unit Api.CompanyCodesList;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

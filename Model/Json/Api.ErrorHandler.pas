@@ -11,11 +11,6 @@ unit Api.ErrorHandler;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

@@ -11,11 +11,6 @@ unit Api.LogSentDocument;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

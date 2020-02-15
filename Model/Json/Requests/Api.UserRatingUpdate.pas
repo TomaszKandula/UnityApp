@@ -11,11 +11,6 @@ unit Api.UserRatingUpdate;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

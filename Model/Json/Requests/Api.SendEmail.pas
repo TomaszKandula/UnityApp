@@ -11,12 +11,6 @@ unit Api.SendEmail;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json,
-    Api.StatementData;
-
-
 type
 
 

@@ -11,11 +11,6 @@ unit Api.BankDetails;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

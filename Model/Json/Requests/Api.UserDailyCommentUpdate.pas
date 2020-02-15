@@ -11,11 +11,6 @@ unit Api.UserDailyCommentUpdate;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

@@ -11,11 +11,6 @@ unit Api.UserCustSnapshotList;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

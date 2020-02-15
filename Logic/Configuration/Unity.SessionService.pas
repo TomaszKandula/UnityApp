@@ -17,7 +17,7 @@ uses
 type
 
 
-    TSessionService = class(TObject)
+    TSessionService = class sealed(TObject)
     {$TYPEINFO ON}
     strict private
         var FSessionId:    string;

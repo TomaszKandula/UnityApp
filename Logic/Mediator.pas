@@ -19,14 +19,42 @@ uses
     Async.InvoiceTracker,
     Async.Mailer,
     Async.OpenItems,
-    Async.Utilities,
-    IMediator;
+    Async.Utilities;
 
 
 type
 
 
-    TContext = class(TInterfacedObject, IContext)
+    IMediator = interface(IInterface)
+    ['{6AE0D0FF-BA65-450C-9972-C226F01CBC99}']
+        // Undisclosed getters
+        function GetAccounts():       IAccounts;
+        function GetAddressBook():    IAddressBook;
+        function GetComments():       IComments;
+        function GetCompanies():      ICompanies;
+        function GetDebtors():        IDebtors;
+        function GetDocuments():      IDocuments;
+        function GetGeneralTables():  IGeneralTables;
+        function GetInvoiceTracker(): IInvoiceTracker;
+        function GetMailer():         IMailer;
+        function GetOpenItems():      IOpenItems;
+        function GetUtilities():      IUtilities;
+        // Disclosed properties
+        property Accounts:       IAccounts       read GetAccounts;
+        property AddressBook:    IAddressBook    read GetAddressBook;
+        property Comments:       IComments       read GetComments;
+        property Companies:      ICompanies      read GetCompanies;
+        property Debtors:        IDebtors        read GetDebtors;
+        property Documents:      IDocuments      read GetDocuments;
+        property GeneralTables:  IGeneralTables  read GetGeneralTables;
+        property InvoiceTracker: IInvoiceTracker read GetInvoiceTracker;
+        property Mailer:         IMailer         read GetMailer;
+        property OpenItems:      IOpenItems      read GetOpenItems;
+        property Utilities:      IUtilities      read GetUtilities;
+    end;
+
+
+    TMediator = class(TInterfacedObject, IMediator)
     {$TYPEINFO ON}
     strict private
         function GetAccounts():       IAccounts;
@@ -52,6 +80,8 @@ type
         var FOpenItems:               IOpenItems;
         var FUtilities:               IUtilities;
     public
+        constructor Create();
+        destructor Destroy(); override;
         property Accounts:       IAccounts       read GetAccounts;
         property AddressBook:    IAddressBook    read GetAddressBook;
         property Comments:       IComments       read GetComments;
@@ -67,6 +97,29 @@ type
 
 
 implementation
+
+
+constructor TMediator.Create();
+begin
+    FAccounts      :=TAccounts.Create();
+    FAddressBook   :=TAddressBook.Create();
+    FComments      :=TComments.Create();
+    FCompanies     :=TCompanies.Create();
+    FDebtors       :=TDebtors.Create();
+    FDocuments     :=TDocuments.Create();
+    FGeneralTables :=TGeneralTables.Create();
+    FInvoiceTracker:=TInvoiceTracker.Create();
+    FMailer        :=TMailer.Create();
+    FOpenItems     :=TOpenItems.Create();
+    FUtilities     :=TUtilities.Create();
+end;
+
+
+destructor TMediator.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 function TMediator.GetAccounts(): IAccounts;

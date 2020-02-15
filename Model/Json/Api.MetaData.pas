@@ -11,11 +11,6 @@ unit Api.MetaData;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

@@ -95,9 +95,7 @@ uses
     Unity.Helpers,
     Unity.EventLogger,
     Unity.SessionService,
-    Async.GeneralTables,
-    Async.Queries,
-    Async.Accounts,
+    Mediator,
     View.Main;
 
 
@@ -233,8 +231,8 @@ begin
             // --------------------------------
             // API call to register session ID.
             // --------------------------------
-            var Accounts: IAccounts:=TAccounts.Create();
-            Accounts.InitiateSessionAwaited(SessionService.SessionId, Settings.WinUserName);
+            var Context: IMediator:=TMediator.Create();
+            Context.Accounts.InitiateSessionAwaited(SessionService.SessionId, Settings.WinUserName);
 
             ThreadFileLog.Log('Unity has been boot up.');
             ChangeProgressBar(50, 'Initializing... done.', ProgressBar);
@@ -315,11 +313,11 @@ begin
 
     Result:=True;
 
-    var Accounts: IAccounts:=TAccounts.Create();
+    var Context: IMediator:=TMediator.Create();
     var CallResponse: TCallResponse;
     var NewAccessToken: string;
 
-    CallResponse:=Accounts.RequestAccessTokenAwaited(NewAccessToken);
+    CallResponse:=Context.Accounts.RequestAccessTokenAwaited(NewAccessToken);
 
     if not CallResponse.IsSucceeded then
     begin
@@ -462,16 +460,16 @@ begin
 
     Result:=True;
 
-    var GeneralTables: IGeneralTables:=TGeneralTables.Create();
+    var Context: IMediator:=TMediator.Create();
     try
-        GeneralTables.GetCompaniesAsync(MainAppForm.sgCoCodes, nil);
-        GeneralTables.GetControlStatusAsync(MainAppForm.sgControlStatus, nil);
-        GeneralTables.GetPaidInfoAsync(MainAppForm.sgPaidInfo, nil);
-        GeneralTables.GetPaymentTermsAsync(MainAppForm.sgPmtTerms, nil);
-        GeneralTables.GetSalesResponsibleAsync(MainAppForm.sgSalesResp, nil);
-        GeneralTables.GetPersonResponsibleAsync(MainAppForm.sgPersonResp, nil);
-        GeneralTables.GetAccountTypeAsync(MainAppForm.sgAccountType, nil);
-        GeneralTables.GetCustomerGroupAsync(MainAppForm.sgCustomerGr, nil);
+        Context.GeneralTables.GetCompaniesAsync(MainAppForm.sgCoCodes, nil);
+        Context.GeneralTables.GetControlStatusAsync(MainAppForm.sgControlStatus, nil);
+        Context.GeneralTables.GetPaidInfoAsync(MainAppForm.sgPaidInfo, nil);
+        Context.GeneralTables.GetPaymentTermsAsync(MainAppForm.sgPmtTerms, nil);
+        Context.GeneralTables.GetSalesResponsibleAsync(MainAppForm.sgSalesResp, nil);
+        Context.GeneralTables.GetPersonResponsibleAsync(MainAppForm.sgPersonResp, nil);
+        Context.GeneralTables.GetAccountTypeAsync(MainAppForm.sgAccountType, nil);
+        Context.GeneralTables.GetCustomerGroupAsync(MainAppForm.sgCustomerGr, nil);
     except
         on E: Exception do
         begin

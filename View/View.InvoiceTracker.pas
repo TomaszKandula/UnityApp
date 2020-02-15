@@ -80,7 +80,7 @@ type
         var FIsDataLoaded:  boolean;
         procedure ClearAll();
         procedure GetCompanyEmail(List: TComboBox);
-        procedure GetEmailAddress(Scuid: string);
+        //procedure GetEmailAddress(Scuid: string);
         procedure SetEmailAddresses(List: TListView);
         procedure GetLayouts(LayoutContainer: TComboBox);
         procedure ApplyTimings(List: TListView);
@@ -157,10 +157,10 @@ begin
 end;
 
 
-procedure TTrackerForm.GetEmailAddress(Scuid: string);
-begin
-//
-end;
+//procedure TTrackerForm.GetEmailAddress(Scuid: string);
+//begin
+////
+//end;
 
 
 procedure TTrackerForm.SetEmailAddresses(List: TListView);

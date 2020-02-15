@@ -11,11 +11,6 @@ unit Api.UserGeneralCommentAdd;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

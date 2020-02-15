@@ -42,7 +42,7 @@ type
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         var FIsLoaded: boolean;
-        procedure GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        //procedure GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
     end;
 
 
@@ -78,33 +78,33 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-procedure TInvoicesForm.GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    InvoicesGrid.Freeze(True);
-    try
-
-        InvoicesGrid.RowCount:=ReturnedData.RowCount;
-        InvoicesGrid.ColCount:=ReturnedData.ColCount;
-
-        for var iCNT:=0 to ReturnedData.RowCount - 1 do
-            for var jCNT:=0 to ReturnedData.ColCount - 1 do
-                InvoicesGrid.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
-
-        InvoicesGrid.Freeze(False);
-        InvoicesGrid.SetColWidth(40, 10, 400);
-
-    finally
-        InvoicesGrid.Freeze(False);
-    end;
-
-end;
+//procedure TInvoicesForm.GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+//begin
+//
+//    if not CallResponse.IsSucceeded then
+//    begin
+//        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+//        Exit();
+//    end;
+//
+//    InvoicesGrid.Freeze(True);
+//    try
+//
+//        InvoicesGrid.RowCount:=ReturnedData.RowCount;
+//        InvoicesGrid.ColCount:=ReturnedData.ColCount;
+//
+//        for var iCNT:=0 to ReturnedData.RowCount - 1 do
+//            for var jCNT:=0 to ReturnedData.ColCount - 1 do
+//                InvoicesGrid.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+//
+//        InvoicesGrid.Freeze(False);
+//        InvoicesGrid.SetColWidth(40, 10, 400);
+//
+//    finally
+//        InvoicesGrid.Freeze(False);
+//    end;
+//
+//end;
 
 
 {$ENDREGION}

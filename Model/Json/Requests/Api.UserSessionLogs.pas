@@ -11,11 +11,6 @@ unit Api.UserSessionLogs;
 interface
 
 
-uses
-    Generics.Collections,
-    Rest.Json;
-
-
 type
 
 

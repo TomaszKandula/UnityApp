@@ -267,7 +267,6 @@ uses
     System.NetEncoding,
     System.Generics.Collections,
     View.Main,
-    View.Queries,
     View.Calendar,
     View.SendStatement,
     View.PhoneList,

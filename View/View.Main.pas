@@ -922,15 +922,7 @@ uses
     Unity.EventLogger,
     Unity.Settings,
     Unity.SessionService,
-    Sync.Document,
-    Async.Utilities,
-    Async.Queries,
-    Async.Debtors,
-    Async.OpenItems,
-    Async.AddressBook,
-    Async.Comments,
-    Async.Accounts,
-    Async.GeneralTables,
+    Mediator,
     uCEFApplication,
     Api.ReturnCompanies,
     Api.ReturnAccountType,
@@ -1079,8 +1071,9 @@ end;
 procedure TMainForm.LoadAgeReport();
 begin
     BusyForm.Show();
-    var Debtors: IDebtors:=TDebtors.Create();
-    Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
+    var Context: IMediator:=TMediator.Create();
+    //var Debtors: IDebtors:=TDebtors.Create();
+    Context.Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 end;
 
 
@@ -1088,7 +1081,8 @@ procedure TMainForm.LoadOpenItems();
 begin
 
     sgOpenItems.Freeze(True);
-    var OpenItems: IOpenItems:=TOpenItems.Create();
+    var Context: IMediator:=TMediator.Create();
+    //var OpenItems: IOpenItems:=TOpenItems.Create();
 
     if LoadedCompanies.Count = 0 then
     begin
@@ -1098,7 +1092,7 @@ begin
     end;
 
     ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
-    OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
+    Context.OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
 
 end;
 
@@ -1261,21 +1255,22 @@ begin
     // ------------------------------------------------
 
     UpdateStatusBar(TStatusBar.Mapping);
-    var Debtors: IDebtors:=TDebtors.Create();
+    var Context: IMediator:=TMediator.Create();
+    //var Debtors: IDebtors:=TDebtors.Create();
 
-    Debtors.MapTableAsync(sgAgeView, sgPersonResp, False, ColPersonResp, IdPersonResp, ColSourceDbName, DbNamePersonResp, ErpCodePersonResp);
+    Context.Debtors.MapTableAsync(sgAgeView, sgPersonResp, False, ColPersonResp, IdPersonResp, ColSourceDbName, DbNamePersonResp, ErpCodePersonResp);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
 
-    Debtors.MapTableAsync(sgAgeView, sgSalesResp, False, ColSalesResp, IdSalesResp, ColSourceDbName, DbNameSalesResp, ErpCodeSalesResp);
+    Context.Debtors.MapTableAsync(sgAgeView, sgSalesResp, False, ColSalesResp, IdSalesResp, ColSourceDbName, DbNameSalesResp, ErpCodeSalesResp);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
 
-    Debtors.MapTableAsync(sgAgeView, sgAccountType, False, ColAccountType, IdAccountType, ColSourceDbName, DbNameAccountType, ErpCodeAccountType);
+    Context.Debtors.MapTableAsync(sgAgeView, sgAccountType, False, ColAccountType, IdAccountType, ColSourceDbName, DbNameAccountType, ErpCodeAccountType);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
 
-    Debtors.MapTableAsync(sgAgeView, sgCustomerGr, False, ColCustomerGroup, IdCustomerGroup, ColSourceDbName, DbNameCustomerGroup, ErpCodeCustomerGroup);
+    Context.Debtors.MapTableAsync(sgAgeView, sgCustomerGr, False, ColCustomerGroup, IdCustomerGroup, ColSourceDbName, DbNameCustomerGroup, ErpCodeCustomerGroup);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
 
-    Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
+    Context.Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
 
 end;
@@ -1447,9 +1442,10 @@ end;
 procedure TMainForm.RedeemAccess();
 begin
 
-    var Accounts: IAccounts:=TAccounts.Create();
+    var Context: IMediator:=TMediator.Create();
+    //var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Accounts.CheckSessionAwaited(SessionService.SessionId);
+    CallResponse:=Context.Accounts.CheckSessionAwaited(SessionService.SessionId);
 
     if CallResponse.IsSucceeded then
     begin
@@ -1710,8 +1706,9 @@ begin
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
 
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
+    var Context: IMediator:=TMediator.Create();
+    //var AddressBook: IAddressBook:=TAddressBook.Create();
+    Context.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
     UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
     BusyForm.Close();
@@ -1950,10 +1947,11 @@ begin
         var SourceDBName:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]);
         var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
 
-        var Comments: IComments:=TComments.Create();
+        var Context: IMediator:=TMediator.Create();
+        //var Comments: IComments:=TComments.Create();
         var CommentExists: TCommentExists;
         var CallResponse: TCallResponse;
-        CallResponse:=Comments.CheckDailyCommentAwaited(
+        CallResponse:=Context.Comments.CheckDailyCommentAwaited(
             SourceDBName,
             CustNumber,
             LoadedAgeDate,
@@ -1979,7 +1977,7 @@ begin
         LDailyCommentFields.UserComment         :=NewComment;
         LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
 
-        Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
+        Context.Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
 
     end;
 
@@ -2120,9 +2118,11 @@ begin
             TThread.Synchronize(nil, procedure
             begin
 
-                var OpenItems: IOpenItems:=TOpenItems.Create();
+                var Context: IMediator:=TMediator.Create();
+                //var OpenItems: IOpenItems:=TOpenItems.Create();
                 var OpenItemsResponse: TCallResponse;
-                OpenItemsResponse:=OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
+
+                OpenItemsResponse:=Context.OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
                 FOpenItemsUpdate:=THelpers.FormatDateTime(FOpenItemsUpdate, TCalendar.DateTime);
 
                 if not OpenItemsResponse.IsSucceeded then
@@ -2140,12 +2140,13 @@ begin
                 valCutOffDate.Caption:='n/a';
 
                 selAgeSorting.Clear();
-                var Debtors: IDebtors:=TDebtors.Create();
+
+                //var Debtors: IDebtors:=TDebtors.Create();
                 var SortingOptions:=TStringList.Create();
                 try
 
                     var DebtorsResponse: TCallResponse;
-                    DebtorsResponse:=Debtors.GetCustSortingOptionsAwaited(SortingOptions);
+                    DebtorsResponse:=Context.Debtors.GetCustSortingOptionsAwaited(SortingOptions);
 
                     if not DebtorsResponse.IsSucceeded then
                     begin
@@ -2292,9 +2293,10 @@ begin
             SwitchTimers(TAppTimers.TurnedOff);
             ChromiumWindow.CloseBrowser(True);
 
-            var Accounts: IAccounts:=TAccounts.Create();
+            var Context: IMediator:=TMediator.Create();
+            //var Accounts: IAccounts:=TAccounts.Create();
             var CallResponse: TCallResponse;
-            CallResponse:=Accounts.SaveUserLogsAwaited();
+            CallResponse:=Context.Accounts.SaveUserLogsAwaited();
 
             if not CallResponse.IsSucceeded then
                 THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
@@ -2752,8 +2754,9 @@ end;
 procedure TMainForm.TimerCustOpenItemsTimer(Sender: TObject);
 begin
     ThreadFileLog.Log('[TimerCustOpenItemsTimer]: Calling open items scanner...');
-    var OpenItems: IOpenItems:=TOpenItems.Create();
-    OpenItems.ScanOpenItemsAsync(FOpenItemsUpdate, ScanOpenItems_Callback);
+    var Context: IMediator:=TMediator.Create();
+    //var OpenItems: IOpenItems:=TOpenItems.Create();
+    Context.OpenItems.ScanOpenItemsAsync(FOpenItemsUpdate, ScanOpenItems_Callback);
 end;
 
 
@@ -3085,9 +3088,10 @@ begin
     var Msg:='Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.';
     if THelpers.MsgCall(TAppMessage.Question2, Msg) = IDNO then Exit();
 
-    var AddressBook: IAddressBook:=TAddressBook.Create();
+    var Context: IMediator:=TMediator.Create();
+    //var AddressBook: IAddressBook:=TAddressBook.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=AddressBook.DelFromAddressBookAwaited(
+    CallResponse:=Context.AddressBook.DelFromAddressBookAwaited(
         sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._Id),
         sgAddressBook.Row].ToInteger()
     );
@@ -3301,8 +3305,9 @@ begin
     CustDetails.StatementEmails:=' ';
     CustDetails.PhoneNumbers   :=' ';
 
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
+    var Context: IMediator:=TMediator.Create();
+    //var AddressBook: IAddressBook:=TAddressBook.Create();
+    Context.AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
 
 end;
 
@@ -3373,8 +3378,9 @@ begin
             LGeneralCommentFields.UserComment   :=String.Empty;
             LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
-            var Comments: IComments:=TComments.Create();
-            Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
+            var Context: IMediator:=TMediator.Create();
+            //var Comments: IComments:=TComments.Create();
+            Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]:=TChars.SPACE;
 
@@ -3959,8 +3965,9 @@ procedure TMainForm.btnOpenAbClick(Sender: TObject);
 begin
     BusyForm.Show();
     UpdateStatusBar(TStatusBar.Processing);
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
+    var Context: IMediator:=TMediator.Create();
+    //var AddressBook: IAddressBook:=TAddressBook.Create();
+    Context.AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
 end;
 
 
@@ -4158,8 +4165,9 @@ begin
             Exit();
         end;
 
-        var Utilities: IUtilities:=TUtilities.Create();
-        Utilities.SetNewPasswordAsync(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
+        var Context: IMediator:=TMediator.Create();
+        //var Utilities: IUtilities:=TUtilities.Create();
+        Context.Utilities.SetNewPasswordAsync(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
 
     end
     else
@@ -4186,8 +4194,9 @@ begin
     end
     else
     begin
-        var Utilities: IUtilities:=TUtilities.Create();
-        Utilities.CheckGivenPasswordAsync(EditPassword.Text, CheckGivenPassword_Callback);
+        var Context: IMediator:=TMediator.Create();
+        //var Utilities: IUtilities:=TUtilities.Create();
+        Context.Utilities.CheckGivenPasswordAsync(EditPassword.Text, CheckGivenPassword_Callback);
     end;
 
 end;

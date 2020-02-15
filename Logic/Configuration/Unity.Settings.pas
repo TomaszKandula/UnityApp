@@ -111,7 +111,6 @@ type
         var FDirApplication: string;
         var FDirRoaming: string;
         var FDirLayouts: string;
-        var FDirPackage: string;
         var FDirSessions: string;
         var FDirAssets: string;
         var FDirWinTemp: string;
