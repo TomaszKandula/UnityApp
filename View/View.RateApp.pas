@@ -91,7 +91,7 @@ implementation
 
 uses
     View.Main,
-    Async.Accounts,
+    Mediator,
     Unity.Settings,
     Unity.Helpers;
 
@@ -177,7 +177,7 @@ end;
 procedure TRateForm.InsertRating();
 begin
 
-    var Accounts: IAccounts:=TAccounts.Create();
+    var Context: IMediator:=TMediator.Create();
     var UserRating: TRating;
 
     UserRating.UserRating:=FSelectedRating;
@@ -187,7 +187,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
+    Context.Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
 
 end;
 
@@ -195,7 +195,7 @@ end;
 procedure TRateForm.UpdateRating();
 begin
 
-    var Accounts: IAccounts:=TAccounts.Create();
+    var Context: IMediator:=TMediator.Create();
     var UserRating: TRating;
 
     UserRating.UserRating:=FSelectedRating;
@@ -205,7 +205,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
+    Context.Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
 
 end;
 
@@ -281,10 +281,10 @@ begin
         THelpers.ExecWithDelay(500, procedure
         begin
 
-            var Accounts: IAccounts:=TAccounts.Create();
+            var Context: IMediator:=TMediator.Create();
             var CallResponse: TCallResponse;
             var Rating: TRating;
-            CallResponse:=Accounts.LoadRatingAwaited(Rating);
+            CallResponse:=Context.Accounts.LoadRatingAwaited(Rating);
 
             if CallResponse.IsSucceeded then
             begin

@@ -110,9 +110,7 @@ uses
     Unity.Settings,
     Unity.EventLogger,
     Unity.SessionService,
-    Async.AddressBook,
-    Async.Companies,
-    Async.InvoiceTracker,
+    Mediator,
     Api.RegisteredEmails;
 
 
@@ -349,8 +347,8 @@ begin
             PayLoad.Cells[15, iCNT]:=List.Items[iCNT].SubItems[5];   // reminder to
         end;
 
-        var InvoiceTracker: IInvoiceTracker:=TInvoiceTracker.Create();
-        CallResponse:=InvoiceTracker.SaveTrackerDataAwaited(PayLoad);
+        var Context: IMediator:=TMediator.Create();
+        CallResponse:=Context.InvoiceTracker.SaveTrackerDataAwaited(PayLoad);
 
     finally
         PayLoad.Free();

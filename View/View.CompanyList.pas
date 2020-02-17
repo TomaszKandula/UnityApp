@@ -72,13 +72,12 @@ implementation
 uses
     System.Generics.Collections,
     View.Main,
-    Async.Debtors,
-    Async.Accounts,
     Unity.Helpers,
     Unity.Grid,
     Unity.Constants,
     Unity.Enums,
-    Unity.Records;
+    Unity.Records,
+    Mediator;
 
 
 var VCompanyListForm: TCompanyListForm;
@@ -118,9 +117,9 @@ begin
 
     end;
 
-    var Accounts: IAccounts:=TAccounts.Create();
+    var Context: IMediator:=TMediator.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Accounts.SaveUserCompanyListAwaited(MainForm.LoadedCompanies);
+    CallResponse:=Context.Accounts.SaveUserCompanyListAwaited(MainForm.LoadedCompanies);
 
     if not CallResponse.IsSucceeded then
     begin
@@ -198,10 +197,10 @@ begin
         begin
 
             FilterList.Clear();
-            var Accounts: IAccounts:=TAccounts.Create();
+            var Context: IMediator:=TMediator.Create();
             var CallResponse: TCallResponse;
 
-            CallResponse:=Accounts.GetUserCompanyListAwaited(FCompaniesHolder);
+            CallResponse:=Context.Accounts.GetUserCompanyListAwaited(FCompaniesHolder);
 
             if CallResponse.IsSucceeded then for var iCNT:=0 to Length(FCompaniesHolder) - 1 do
             begin

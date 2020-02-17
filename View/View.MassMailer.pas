@@ -145,10 +145,7 @@ uses
     Unity.Constants,
     Unity.EventLogger,
     Unity.SessionService,
-    Async.Utilities,
-    Async.Companies,
-    Async.AddressBook,
-    Async.Documents,
+    Mediator,
     Api.ReturnOpenItems,
     Api.ReturnCustSnapshots;
 
@@ -198,7 +195,7 @@ end;
 procedure TMassMailerForm.GetCompanyDetails(LoadedCompanies: TList<string>);
 begin
 
-    var Companies: ICompanies:=TCompanies.Create();
+    var Context: IMediator:=TMediator.Create();
     var CompanyDetails: TCompanyDetails;
     var CallResponse: TCallResponse;
 
@@ -206,7 +203,7 @@ begin
     for var iCNT:=0 to LoadedCompanies.Count - 1 do
     begin
 
-        CallResponse:=Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
+        CallResponse:=Context.Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
 
         if CallResponse.IsSucceeded then
         begin
@@ -421,8 +418,8 @@ begin
     MainForm.UpdateStatusBar(TStatusBar.Processing);
     BusyForm.Show();
 
-    var Documents: IDocuments:=TDocuments.Create();
-    Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentsAsync_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentsAsync_Callback);
 
 end;
 

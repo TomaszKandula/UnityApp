@@ -277,12 +277,7 @@ uses
     Unity.Enums,
     Unity.Sorting,
     Unity.EventLogger,
-    Sync.Document,
-    Async.Utilities,
-    Async.Companies,
-    Async.AddressBook,
-    Async.Comments,
-    Async.Documents,
+    Mediator,
     Api.ReturnOpenItems,
     Api.UserDailyCommentsList,
     Api.ReturnCustSnapshots;
@@ -449,23 +444,23 @@ end;
 procedure TActionsForm.UpdateCustDetails();
 begin
     FCustDetailsId:=0;
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.GetCustomerDetailsAsync(CustNumber, SourceDBName, GetCustomerDetailsAsync_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.AddressBook.GetCustomerDetailsAsync(CustNumber, SourceDBName, GetCustomerDetailsAsync_Callback);
 end;
 
 
 procedure TActionsForm.UpdateCompanyDetails();
 begin
-    var Companies: ICompanies:=TCompanies.Create();
-    Companies.GetCompanyDetailsAsync(SourceDBName, GetCompanyDetailsAsync_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Companies.GetCompanyDetailsAsync(SourceDBName, GetCompanyDetailsAsync_Callback);
 end;
 
 
 procedure TActionsForm.UpdateDaily();
 begin
 
-    var Comments: IComments:=TComments.Create();
-    Comments.GetDailyCommentsAsync(
+    var Context: IMediator:=TMediator.Create();
+    Context.Comments.GetDailyCommentsAsync(
         SourceDBName,
         CustNumber,
         SessionService.SessionData.AliasName,
@@ -478,8 +473,8 @@ end;
 procedure TActionsForm.UpdateGeneral();
 begin
 
-    var Comments: IComments:=TComments.Create();
-    Comments.GetGeneralCommentAsync(
+    var Context: IMediator:=TMediator.Create();
+    Context.Comments.GetGeneralCommentAsync(
         SourceDBName,
         CustNumber,
         SessionService.SessionData.AliasName,
@@ -675,8 +670,8 @@ begin
         LGeneralCommentFields.UserComment   :=String.Empty;
         LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
-        var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
+        var Context: IMediator:=TMediator.Create();
+        Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), MainForm.sgAgeView.Row]:='';
         MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
@@ -702,8 +697,8 @@ begin
         CustomerDetails.StatementEmails:=Cust_Mail.Text;
         CustomerDetails.PhoneNumbers   :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
-        var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.AddToAddressBookAsync(CustomerDetails, InsertAddressBook_Callback);
+        var Context: IMediator:=TMediator.Create();
+        Context.AddressBook.AddToAddressBookAsync(CustomerDetails, InsertAddressBook_Callback);
 
     end
     else
@@ -717,8 +712,8 @@ begin
         CustomerDetails.StatementEmails:=Cust_Mail.Text;
         CustomerDetails.PhoneNumbers   :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
-        var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.UpdateAddressBookAsync(CustomerDetails, UpdateAddressBook_Callback);
+        var Context: IMediator:=TMediator.Create();
+        Context.AddressBook.UpdateAddressBookAsync(CustomerDetails, UpdateAddressBook_Callback);
 
     end;
 
@@ -738,8 +733,8 @@ begin
     LGeneralCommentFields.UserComment   :=GeneralCom.Text;
     LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
-    var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 
@@ -764,8 +759,8 @@ begin
     LDailyCommentFields.UserComment         :=DailyCom.Text;
     LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
 
-    var Comments: IComments:=TComments.Create();
-    Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 
@@ -1247,8 +1242,8 @@ begin
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
     Screen.Cursor:=crHourGlass;
-    var Documents: IDocuments:=TDocuments.Create();
-    Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
 
 end;
 
@@ -1336,8 +1331,8 @@ begin
     LDailyCommentFields.UserComment         :='New action...';
     LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
 
-    var Comments: IComments:=TComments.Create();
-    Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 

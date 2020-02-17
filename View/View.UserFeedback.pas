@@ -65,7 +65,7 @@ implementation
 
 uses
     View.Main,
-    Async.Mailer,
+    Mediator,
     Unity.Helpers;
 
 
@@ -141,8 +141,8 @@ begin
     PanelClient.Enabled:=False;
     Screen.Cursor:=crHourGlass;
 
-    var Mailer: IMailer:=TMailer.Create();
-    Mailer.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
+    var Context: IMediator:=TMediator.Create();
+    Context.Mailer.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
 
 end;
 

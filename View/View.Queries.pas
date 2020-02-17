@@ -101,7 +101,6 @@ uses
     View.Main,
     View.Actions,
     View.Calendar,
-    Sync.Document,
     Unity.Constants,
     Unity.Helpers,
     Unity.Settings,

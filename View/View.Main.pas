@@ -1072,7 +1072,6 @@ procedure TMainForm.LoadAgeReport();
 begin
     BusyForm.Show();
     var Context: IMediator:=TMediator.Create();
-    //var Debtors: IDebtors:=TDebtors.Create();
     Context.Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 end;
 
@@ -1082,7 +1081,6 @@ begin
 
     sgOpenItems.Freeze(True);
     var Context: IMediator:=TMediator.Create();
-    //var OpenItems: IOpenItems:=TOpenItems.Create();
 
     if LoadedCompanies.Count = 0 then
     begin
@@ -1256,7 +1254,6 @@ begin
 
     UpdateStatusBar(TStatusBar.Mapping);
     var Context: IMediator:=TMediator.Create();
-    //var Debtors: IDebtors:=TDebtors.Create();
 
     Context.Debtors.MapTableAsync(sgAgeView, sgPersonResp, False, ColPersonResp, IdPersonResp, ColSourceDbName, DbNamePersonResp, ErpCodePersonResp);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
@@ -1707,7 +1704,6 @@ begin
     LoadOpenItems();
 
     var Context: IMediator:=TMediator.Create();
-    //var AddressBook: IAddressBook:=TAddressBook.Create();
     Context.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
     UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
@@ -1948,7 +1944,6 @@ begin
         var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
 
         var Context: IMediator:=TMediator.Create();
-        //var Comments: IComments:=TComments.Create();
         var CommentExists: TCommentExists;
         var CallResponse: TCallResponse;
         CallResponse:=Context.Comments.CheckDailyCommentAwaited(
@@ -2119,7 +2114,6 @@ begin
             begin
 
                 var Context: IMediator:=TMediator.Create();
-                //var OpenItems: IOpenItems:=TOpenItems.Create();
                 var OpenItemsResponse: TCallResponse;
 
                 OpenItemsResponse:=Context.OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
@@ -2141,7 +2135,6 @@ begin
 
                 selAgeSorting.Clear();
 
-                //var Debtors: IDebtors:=TDebtors.Create();
                 var SortingOptions:=TStringList.Create();
                 try
 
@@ -2294,7 +2287,6 @@ begin
             ChromiumWindow.CloseBrowser(True);
 
             var Context: IMediator:=TMediator.Create();
-            //var Accounts: IAccounts:=TAccounts.Create();
             var CallResponse: TCallResponse;
             CallResponse:=Context.Accounts.SaveUserLogsAwaited();
 
@@ -3089,7 +3081,6 @@ begin
     if THelpers.MsgCall(TAppMessage.Question2, Msg) = IDNO then Exit();
 
     var Context: IMediator:=TMediator.Create();
-    //var AddressBook: IAddressBook:=TAddressBook.Create();
     var CallResponse: TCallResponse;
     CallResponse:=Context.AddressBook.DelFromAddressBookAwaited(
         sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._Id),
@@ -3306,7 +3297,6 @@ begin
     CustDetails.PhoneNumbers   :=' ';
 
     var Context: IMediator:=TMediator.Create();
-    //var AddressBook: IAddressBook:=TAddressBook.Create();
     Context.AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
 
 end;
@@ -3379,7 +3369,6 @@ begin
             LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
             var Context: IMediator:=TMediator.Create();
-            //var Comments: IComments:=TComments.Create();
             Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]:=TChars.SPACE;
@@ -3966,7 +3955,6 @@ begin
     BusyForm.Show();
     UpdateStatusBar(TStatusBar.Processing);
     var Context: IMediator:=TMediator.Create();
-    //var AddressBook: IAddressBook:=TAddressBook.Create();
     Context.AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
 end;
 
@@ -4166,7 +4154,6 @@ begin
         end;
 
         var Context: IMediator:=TMediator.Create();
-        //var Utilities: IUtilities:=TUtilities.Create();
         Context.Utilities.SetNewPasswordAsync(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
 
     end
@@ -4195,7 +4182,6 @@ begin
     else
     begin
         var Context: IMediator:=TMediator.Create();
-        //var Utilities: IUtilities:=TUtilities.Create();
         Context.Utilities.CheckGivenPasswordAsync(EditPassword.Text, CheckGivenPassword_Callback);
     end;
 
