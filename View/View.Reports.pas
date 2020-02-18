@@ -83,7 +83,7 @@ uses
     System.Math,
     View.Main,
     Unity.Enums,
-    Unity.EventLogger,
+    Unity.Service,
     Unity.Helpers;
 
 
@@ -142,7 +142,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
 end;
@@ -156,7 +156,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
 end;
@@ -170,7 +170,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
 end;
@@ -184,7 +184,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
 end;

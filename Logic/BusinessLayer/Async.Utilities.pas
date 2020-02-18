@@ -10,24 +10,11 @@ interface
 
 uses
     System.Threading,
+    Unity.Types,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for getting results from exporting data grid to Excel file.
-    /// </summary>
-    TExcelExport = procedure(CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for getting results from checking supplied local administrator password.
-    /// </summary>
-    TCheckGivenPassword = procedure(CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for getting results from setting new local administrator password.
-    /// </summary>
-    TSetNewPassword = procedure(CallResponse: TCallResponse) of object;
 
 
     IUtilities = interface(IInterface)
@@ -62,6 +49,8 @@ type
     TUtilities = class(TInterfacedObject, IUtilities)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -97,11 +86,23 @@ uses
     System.Classes,
     Unity.Grid,
     Unity.Enums,
+    Unity.Constants,
     Unity.Helpers,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Bcrypt;
+
+
+constructor TUtilities.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TUtilities.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 procedure TUtilities.ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
@@ -127,7 +128,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[ExcelExportAsync]: Cannot execute. Error has been thrown: ' + CallResponse.LastMessage;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -154,14 +155,13 @@ begin
         try
 
             var ReHashed: boolean;
-            var Settings: ISettings:=TSettings.Create;
-            var Hash: string:=Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
+            var Hash: string:=Service.Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
 
             if Hash = '' then
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[CheckGivenPassword]: Missing hash value, check settings file. Please contact IT Support.';
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end
             else
             begin
@@ -171,12 +171,12 @@ begin
                 if CallResponse.IsSucceeded then
                 begin
                     CallResponse.LastMessage:='[CheckGivenPassword]: Administrator password has been validaded.';
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end
                 else
                 begin
                     CallResponse.LastMessage:='[CheckGivenPassword]: Incorrect password, please re-type it and try again';
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -186,7 +186,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[CheckGivenPassword]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -216,7 +216,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='Please provide current password and new password.';
-                ThreadFileLog.Log('[SetNewPassword]: User have not provided current password/new password.');
+                Service.Logger.Log('[SetNewPassword]: User have not provided current password/new password.');
             end
             else
             begin
@@ -225,8 +225,7 @@ begin
                 // Check current password.
                 // -----------------------
                 var ReHashed: boolean;
-                var Settings: ISettings:=TSettings.Create;
-                var Hash: string:=Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
+                var Hash: string:=Service.Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
 
                 if TBcrypt.CheckPassword(CurrentPassword, Hash, ReHashed) then
                 begin
@@ -236,18 +235,18 @@ begin
                     // ------------------------------
                     var HashPasswd: string:=TBcrypt.HashPassword(NewPassword);
 
-                    Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
-                    Settings.Encode(TAppFiles.Configuration);
+                    Service.Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
+                    Service.Settings.Encode(TAppFiles.Configuration);
 
                     CallResponse.IsSucceeded:=True;
-                    ThreadFileLog.Log('[SetNewPassword]: New administrator password has been setup.');
+                    Service.Logger.Log('[SetNewPassword]: New administrator password has been setup.');
 
                 end
                 else
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='Incorrect password, please re-type it and try again.';
-                    ThreadFileLog.Log('[SetNewPassword]: provided current password is incorrect.');
+                    Service.Logger.Log('[SetNewPassword]: provided current password is incorrect.');
                 end;
 
             end;
@@ -257,7 +256,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[SetNewPassword]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;

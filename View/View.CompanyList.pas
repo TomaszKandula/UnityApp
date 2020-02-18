@@ -77,7 +77,7 @@ uses
     Unity.Constants,
     Unity.Enums,
     Unity.Records,
-    Mediator;
+    Unity.Service;
 
 
 var VCompanyListForm: TCompanyListForm;
@@ -117,9 +117,8 @@ begin
 
     end;
 
-    var Context: IMediator:=TMediator.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Context.Accounts.SaveUserCompanyListAwaited(MainForm.LoadedCompanies);
+    CallResponse:=Service.Mediator.Accounts.SaveUserCompanyListAwaited(MainForm.LoadedCompanies);
 
     if not CallResponse.IsSucceeded then
     begin
@@ -197,10 +196,9 @@ begin
         begin
 
             FilterList.Clear();
-            var Context: IMediator:=TMediator.Create();
             var CallResponse: TCallResponse;
 
-            CallResponse:=Context.Accounts.GetUserCompanyListAwaited(FCompaniesHolder);
+            CallResponse:=Service.Mediator.Accounts.GetUserCompanyListAwaited(FCompaniesHolder);
 
             if CallResponse.IsSucceeded then for var iCNT:=0 to Length(FCompaniesHolder) - 1 do
             begin

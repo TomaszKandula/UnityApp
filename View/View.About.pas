@@ -99,7 +99,7 @@ implementation
 
 uses
     View.Main,
-    Unity.SessionService,
+    Unity.Service,
     Unity.Helpers,
     Unity.Enums,
     Unity.Constants,
@@ -246,11 +246,11 @@ begin
         valMemUse.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;
 
-    valDisplayName.Caption:=SessionService.SessionData.DisplayName;
-    valDepartment.Caption :=SessionService.SessionData.Department;
-    valUserEmail.Caption  :=SessionService.SessionData.EmailAddress;
-    valUserNumber.Caption :=SessionService.SessionData.UnityUserId.ToString();
-    valAliasName.Caption  :=SessionService.SessionData.AliasName;
+    valDisplayName.Caption:=Service.SessionData.DisplayName;
+    valDepartment.Caption :=Service.SessionData.Department;
+    valUserEmail.Caption  :=Service.SessionData.EmailAddress;
+    valUserNumber.Caption :=Service.SessionData.UnityUserId.ToString();
+    valAliasName.Caption  :=Service.SessionData.AliasName;
 
 end;
 

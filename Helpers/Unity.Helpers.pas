@@ -23,6 +23,7 @@ uses
     Vcl.Forms,
     Vcl.Menus,
     Vcl.Grids,
+    Unity.Types,
     Unity.Enums,
     Unity.Grid,
     Unity.References,
@@ -32,19 +33,6 @@ uses
 type
 
 
-    /// <summary>
-    /// Define custom type for anonymous method to be passed as parameter.
-    /// </summary>
-    TInputMethod = reference to procedure;
-
-    /// <summary>
-    /// Array definition for SID number calculation. Note that it has 261 characters.
-    /// </summary>
-    TSidArray = array[0..260] of Char;
-
-    /// <summary>
-    /// Generic class exposing helper methods for some basic operations on arrays.
-    /// </summary>
     TArrayUtils<T> = class abstract
     public
         class function Contains(const x: T; const anArray: array of T): boolean; static;
@@ -53,17 +41,11 @@ type
         class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
 
-    /// <summary>
-    /// Record helper that returns field name.
-    /// </summary>
     TRecordUtils<T: record> = class abstract
     public
         class function GetFields(const Struct: T): TList<string>; static;
     end;
 
-    /// <summary>
-    /// Holds various helper methods, shorthands and wrappers.
-    /// </summary>
     THelpers = class abstract
     strict private
         const HtmlBanks = '<p class="p">{ROWS}</p>';

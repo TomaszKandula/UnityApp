@@ -11,22 +11,11 @@ interface
 uses
     System.Classes,
     System.Generics.Collections,
-    Unity.Records,
-    Async.AddressBook;
+    Unity.Types,
+    Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for inserting new user rating.
-    /// </summary>
-    TSubmitRating = procedure(CallResponse: TCallResponse) of object;
-
-    /// <summary>
-    /// Callback signature for updating existing user rating.
-    /// </summary>
-    TUpdateRating = procedure(CallResponse: TCallResponse) of object;
 
 
     IAccounts = interface(IInterface)
@@ -106,6 +95,8 @@ type
     TAccounts = class(TInterfacedObject, IAccounts)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         //  Allow to request access token in exchange of client id and client secrets. It is necessary for further communication.
         /// There is no separate notification.
@@ -187,9 +178,7 @@ uses
     REST.Types,
     REST.Json,
     Unity.Helpers,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Unity.RestWrapper,
     Api.UserSessionAdd,
     Api.UserSessionAdded,
@@ -207,6 +196,19 @@ uses
     Api.TokenGranted;
 
 
+constructor TAccounts.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TAccounts.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
+
+
 function TAccounts.RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
 begin
 
@@ -217,15 +219,14 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(String.Empty, TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
-        var Settings: ISettings:=TSettings.Create();
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[RequestAccessTokenAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
-        Restful.AddParameter('GrantType',    Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
-        Restful.AddParameter('ClientId',     Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
-        Restful.AddParameter('ClientSecret', Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
+        Restful.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
+        Restful.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
+        Restful.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
 
         try
 
@@ -238,7 +239,7 @@ begin
                     CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
                     CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=TokenGranted.Error.ErrorCode;
-                    ThreadFileLog.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                 finally
                     TokenGranted.Free();
                 end;
@@ -257,16 +258,16 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
         except on
                 E: Exception do
             begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -290,12 +291,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
         var UserSessionAdd:=TUserSessionAdd.Create();
         try
@@ -312,7 +312,7 @@ begin
                         CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
                         CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
                         CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
-                        ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                        Service.Logger.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                     finally
                         UserSessionAdded.Free();
                     end;
@@ -331,7 +331,7 @@ begin
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
 
                 end;
 
@@ -340,7 +340,7 @@ begin
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='[InitiateAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -366,12 +366,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -388,7 +387,7 @@ begin
                     if CallResponse.IsSucceeded then
                     begin
 
-                        SessionService.UpdateUserData(
+                        Service.UpdateUserData(
                             UserSessionChecked.UserId,
                             UserSessionChecked.Department,
                             UserSessionChecked.AliasName,
@@ -398,7 +397,7 @@ begin
 
                     end;
 
-                    ThreadFileLog.Log('[CheckAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[CheckAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserSessionChecked.Free();
@@ -418,7 +417,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -427,7 +426,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[CheckAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -450,16 +449,15 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
-            + SessionService.SessionData.UnityUserId.ToString()
+            + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -480,7 +478,7 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    ThreadFileLog.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserCompanyList.Free();
@@ -500,7 +498,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -509,7 +507,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -532,24 +530,22 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
-            + SessionService.SessionData.UnityUserId.ToString()
+            + Service.SessionData.UnityUserId.ToString()
             + '/logs/';
 
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
-        ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
+        Service.Logger.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
         var UserSessionLogs:=TUserSessionLogs.Create();
         try
 
-            var StrEventLog:='Session signature: ' + SessionService.SessionId + '<br>' + THelpers.ListToString(ThreadFileLog.SessionEventLines, '<br>');
+            var StrEventLog:='Session signature: ' + Service.SessionId + '<br>' + THelpers.ListToString(Service.Logger.SessionEventLines, '<br>');
 
-            UserSessionLogs.UserAlias  :=SessionService.SessionData.AliasName.ToUpper();
+            UserSessionLogs.UserAlias  :=Service.SessionData.AliasName.ToUpper();
             UserSessionLogs.AppEventLog:=StrEventLog;
             UserSessionLogs.AppName    :='Unity Platform';
 
@@ -564,8 +560,8 @@ begin
                         CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
                         CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
                         CallResponse.ErrorCode  :=UserSessionLogsSaved.Error.ErrorCode;
-                        ThreadFileLog.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
-                        ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
+                        Service.Logger.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                        Service.Logger.Log('[SaveUserLogsAwaited]: Application shutdown.');
                     finally
                         UserSessionLogsSaved.Free();
                     end;
@@ -584,7 +580,7 @@ begin
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
 
                 end;
 
@@ -593,7 +589,7 @@ begin
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='[SaveUserLogsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -619,16 +615,15 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
-            + SessionService.SessionData.UnityUserId.ToString()
+            + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
@@ -643,7 +638,7 @@ begin
                     var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Restful.Content);
                     try
                         CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                        ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                     finally
                         UserCompaniesUpdated.Free();
                     end;
@@ -662,7 +657,7 @@ begin
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
 
                 end;
 
@@ -671,7 +666,7 @@ begin
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -698,16 +693,15 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
-            + SessionService.SessionData.UnityUserId.ToString()
+            + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[LoadRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -725,7 +719,7 @@ begin
                     CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
-                    ThreadFileLog.Log('[LoadRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserRating.Free();
@@ -745,7 +739,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -754,7 +748,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[LoadRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -777,16 +771,15 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
-            + SessionService.SessionData.UnityUserId.ToString()
+            + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[SubmitRatingAsync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[SubmitRatingAsync]: Executing POST ' + Restful.ClientBaseURL);
 
         var UserRatingAdd:=TUserRatingAdd.Create();
         try
@@ -810,7 +803,7 @@ begin
                     CallResponse.LastMessage :=UserRatingAdded.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
-                    ThreadFileLog.Log('[SubmitRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[SubmitRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserRatingAdded.Free();
@@ -830,7 +823,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -839,7 +832,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[SubmitRatingAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -864,16 +857,15 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
-            + SessionService.SessionData.UnityUserId.ToString()
+            + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        ThreadFileLog.Log('[UpdateRatingAsync]: Executing PATCH ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[UpdateRatingAsync]: Executing PATCH ' + Restful.ClientBaseURL);
 
         var UserRatingUpdate:=TUserRatingUpdate.Create();
         try
@@ -897,7 +889,7 @@ begin
                     CallResponse.LastMessage :=UserRatingUpdated.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
-                    ThreadFileLog.Log('[UpdateRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[UpdateRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserRatingUpdated.Free();
@@ -917,7 +909,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -926,7 +918,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[UpdateRatingAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;

@@ -11,18 +11,13 @@ interface
 uses
     System.Generics.Collections,
     System.Classes,
+    Unity.Types,
     Unity.Records,
     Api.RegisteredEmails,
     Api.BankDetails;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for getting results for company details.
-    /// </summary>
-    TGetCompanyDetails = procedure(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse) of object;
 
 
     ICompanies = interface(IInterface)
@@ -58,6 +53,8 @@ type
         procedure FSetCompanyDetails(Source: TArray<TBankDetails>; var Target: TArray<TBankDetails>);
         procedure FSetCompanyEmails(Source: TArray<TRegisteredEmails>; var Target: TArray<TRegisteredEmails>);
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
         /// </summary>
@@ -91,14 +88,25 @@ uses
     System.SysUtils,
     REST.Types,
     REST.Json,
-    Unity.Settings,
     Unity.RestWrapper,
     Unity.Helpers,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.CompanyData,
     Api.CompanyCodesList,
     Api.CompanyEmailsList;
+
+
+constructor TCompanies.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TCompanies.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 // remove it after mass mailer refactored!
@@ -113,12 +121,11 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            var Settings: ISettings:=TSettings.Create();
+            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-            ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
             try
 
@@ -126,7 +133,7 @@ begin
                 begin
                     CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
                     CallResponse.IsSucceeded:=True;
-                    ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                 end
                 else
                 begin
@@ -141,7 +148,7 @@ begin
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
 
                 end;
 
@@ -150,7 +157,7 @@ begin
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -184,12 +191,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetCompanyDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -209,7 +215,7 @@ begin
                 end;
 
                 CallResponse.IsSucceeded:=True;
-                ThreadFileLog.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -225,7 +231,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -234,7 +240,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -261,12 +267,11 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            var Settings: ISettings:=TSettings.Create();
+            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
+            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
             try
 
@@ -278,7 +283,7 @@ begin
                 begin
                     CompanyEmailsList:=TJson.JsonToObject<TCompanyEmailsList>(Restful.Content);
                     CallResponse.IsSucceeded:=True;
-                    ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                 end
                 else
                 begin
@@ -293,7 +298,7 @@ begin
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
 
                 end;
 
@@ -302,7 +307,7 @@ begin
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;

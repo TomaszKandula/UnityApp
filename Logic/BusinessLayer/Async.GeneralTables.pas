@@ -10,21 +10,12 @@ interface
 
 uses
     System.Classes,
+    Unity.Types,
     Unity.Grid,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for getting results from given database table.
-    /// </summary>
-    /// <remarks>
-    /// Please note that "table" does not necessarily mean that we will get table "as is".
-    /// It depends on underlaying API and the dataset may contain joined tables.
-    /// </remarks>
-    TGetTables = procedure(CallResponse: TCallResponse) of object;
 
 
     IGeneralTables = interface(IInterface)
@@ -123,6 +114,8 @@ type
     TGeneralTables = class(TInterfacedObject, IGeneralTables)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Allow to load async. Permission.Companies table to provided TStringGrids. This method can be executed without
         /// waiting to complete the task, thus allowing parallel execution.
@@ -222,11 +215,10 @@ uses
     System.Threading,
     REST.Types,
     REST.Json,
+    Unity.Constants,
     Unity.RestWrapper,
     Unity.Helpers,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.ReturnCompanies,
     Api.ReturnAccountType,
     Api.ReturnPaidInfo,
@@ -237,6 +229,19 @@ uses
     Api.ReturnCustomerGroup;
 
 
+constructor TGeneralTables.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TGeneralTables.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
+
+
 procedure TGeneralTables.GetCompaniesAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
 begin
 
@@ -245,12 +250,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/companies/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/companies/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetCompaniesAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetCompaniesAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -301,7 +305,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetCompaniesAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompaniesAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnCompanies.Free();
@@ -321,7 +325,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -330,7 +334,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetCompaniesAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -356,12 +360,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/controlstatus/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/controlstatus/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetControlStatusAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetControlStatusAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -392,7 +395,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetControlStatusAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetControlStatusAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnControlStatus.Free();
@@ -412,7 +415,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -421,7 +424,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetControlStatusAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -447,12 +450,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paidinfo/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paidinfo/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetPaidInfoAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetPaidInfoAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -481,7 +483,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetPaidInfoAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetPaidInfoAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnPaidInfo.Free();
@@ -501,7 +503,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -510,7 +512,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetPaidInfoAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -536,12 +538,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paymentterms/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paymentterms/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetPaymentTermsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetPaymentTermsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -580,7 +581,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetPaymentTermsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetPaymentTermsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnPaymentTerms.Free();
@@ -600,7 +601,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -609,7 +610,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetPaymentTermsAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -635,12 +636,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/salesresponsible/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/salesresponsible/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetSalesResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetSalesResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -671,7 +671,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetSalesResponsibleAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetSalesResponsibleAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnSalesResponsible.Free();
@@ -691,7 +691,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -700,7 +700,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetSalesResponsibleAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -726,12 +726,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/personresponsible/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/personresponsible/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetPersonResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetPersonResponsibleAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -762,7 +761,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetPersonResponsibleAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetPersonResponsibleAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnPersonResponsible.Free();
@@ -782,7 +781,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -791,7 +790,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetPersonResponsibleAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -817,12 +816,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/accounttype/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/accounttype/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetAccountTypeAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetAccountTypeAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -853,7 +851,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetAccountTypeAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetAccountTypeAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnAccountType.Free();
@@ -873,7 +871,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -882,7 +880,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetAccountTypeAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -908,12 +906,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/customergroup/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/customergroup/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetCustomerGroupAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetCustomerGroupAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
@@ -944,7 +941,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetCustomerGroupAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCustomerGroupAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnCustomerGroup.Free();
@@ -964,7 +961,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -973,7 +970,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetCustomerGroupAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;

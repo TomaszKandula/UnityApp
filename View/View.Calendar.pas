@@ -72,12 +72,10 @@ implementation
 uses
     System.SysUtils,
     View.Main,
-    Unity.SessionService,
+    Unity.Service,
     Unity.Constants,
     Unity.Helpers,
-    Unity.EventLogger,
     Unity.Settings,
-    Mediator,
     Api.ReturnCustSnapshots;
 
 
@@ -122,10 +120,9 @@ begin
     FGeneralCommentFields.Free2         :=String.Empty;
     FGeneralCommentFields.Free3         :=String.Empty;
     FGeneralCommentFields.UserComment   :=String.Empty;
-    FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+    FGeneralCommentFields.UserAlias     :=Service.SessionData.AliasName;
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
+    Service.Mediator.Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), Row]:=DateToStr(SelectedDate);
     MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
@@ -145,7 +142,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 

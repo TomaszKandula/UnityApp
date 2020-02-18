@@ -18,8 +18,8 @@ type
 
 
     /// <summary>
-    /// Exposes synchronous method with list of properties that allows to setup and send an email via REST API.
-    /// It is recommended to use this method in asynchronous call, so the main thread is not blocked.
+    /// Exposes synchronous methods and properties that allows to configure fields and send email via REST API.
+    /// It is recommended to use this method in asynchronous call, so the main thread is not blocked during sending.
     /// </summary>
     IMailer = Interface(IInterface)
     ['{3D803B98-BE4F-49A4-A2B5-7F323772E5B4}']
@@ -46,7 +46,7 @@ type
 
 
     /// <summary>
-    /// Exposes method with list of properties that allows to configure fields and send email via REST API.
+    /// Implements method and properties that allows to configure fields and send email via REST API.
     /// Do not use direct implementation.
     /// </summary>
     TMailer = class(TInterfacedObject, IMailer)
@@ -71,6 +71,8 @@ type
         function GetMailSubject(): string;
         function GetMailBody(): string;
     public
+        constructor Create();
+        destructor Destroy(); override;
         property MailFrom: string read GetMailFrom write SetMailFrom;
         property MailTo: TArray<string> read GetMailTo write SetMailTo;
         property MailCc: TArray<string> read GetMailCc write SetMailCc;
@@ -89,11 +91,22 @@ uses
     REST.Types,
     REST.Json,
     Unity.RestWrapper,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.SendEmail,
     Api.SentEmail;
+
+
+constructor TMailer.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TMailer.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 function TMailer.SendNowSync(): TCallResponse;
@@ -102,18 +115,17 @@ begin
     var CallResponse: TCallResponse;
     try
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/send/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/send/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
 
         var SendEmail:=TSendEmail.Create();
         try
-            SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
-            SendEmail.SessionId:=SessionService.SessionId;
-            SendEmail.AliasName:=SessionService.SessionData.AliasName;
+            SendEmail.UserId   :=Service.SessionData.UnityUserId.ToString();
+            SendEmail.SessionId:=Service.SessionId;
+            SendEmail.AliasName:=Service.SessionData.AliasName;
             SendEmail.From     :=FMailFrom;
             SendEmail.&To      :=FMailTo;
             SendEmail.Cc       :=FMailCc;
@@ -133,7 +145,7 @@ begin
                 CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                 CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                 CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
-                ThreadFileLog.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
             finally
                 SentEmail.Free();
             end;
@@ -152,7 +164,7 @@ begin
 
             CallResponse.ReturnedCode:=Restful.StatusCode;
             CallResponse.IsSucceeded:=False;
-            ThreadFileLog.Log(CallResponse.LastMessage);
+            Service.Logger.Log(CallResponse.LastMessage);
 
         end;
 
@@ -161,7 +173,7 @@ begin
         begin
             CallResponse.IsSucceeded:=False;
             CallResponse.LastMessage:='[SendNowSync]: Cannot execute. Error has been thrown: ' + E.Message;
-            ThreadFileLog.Log(CallResponse.LastMessage);
+            Service.Logger.Log(CallResponse.LastMessage);
         end;
 
     end;

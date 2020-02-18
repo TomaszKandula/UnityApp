@@ -7,55 +7,18 @@ interface
 type
 
 
-    TAdoDb = class abstract {Legacy}
-        type  TFilters    = (adFilterNone, adFilterPendingRecords, adFilterAffectedRecords, adFilterFetchedRecords, adFilterConflictingRecords);
-        const dbOLEDB     = 'OLEDB';
-        const dbODBC      = 'ODBC';
-        const ERR_MESSAGE = 'Cannot connect with Microsoft SQL Server. Please re-check your server settings or contact IT support.';
-        const ERR_LOGTEXT = 'ADO connection error. Exception thrown: ';
-    end;
-
-
-    TUnknown = class abstract {Legacy}
-        const Null:       string = 'NULL';
-        const Unassigned: string = 'Unassigned item.';
-        const NA:         string = 'N/A';
-        const NotFound:   string = 'Not found!';
-    end;
-
-
-    TSql = class abstract {Legacy}
-        const INSERT       = ' INSERT INTO ';
-        const VAL          = ' VALUES ';
-        const SELECT       = ' SELECT ';
-        const SELECT_DIS   = ' SELECT DISTINCT ';
-        const DISTINCT     = ' DISTINCT ';
-        const _UPDATE      = ' UPDATE ';
-        const DELETE_FROM  = ' DELETE FROM ';
-        const _SET         = ' SET ';
-        const _BEGIN       = ' BEGIN ';
-        const _END         = ' END ';
-        const UNION        = ' UNION ALL ';
-        const EQUAL        = ' = ';
-        const FROM         = ' FROM ';
-        const ALL          = ' * ';
-        const WHERE        = ' WHERE ';
-        const LEFT_JOIN    = ' LEFT JOIN ';
-        const RIGHT_JOIN   = ' RIGHT JOIN ';
-        const INNER_JOIN   = ' INNER JOIN ';
-        const OUTER_JOIN   = ' OUTER JOIN ';
-        const _ON          = ' ON ';
-        const _OR          = ' OR ';
-        const ORDER        = ' ORDER BY ';
-        const ASC          = ' ASC ';
-        const DESC         = ' DESC ';
-        const _AND         = ' AND ';
-        const _AS          = ' AS ';
-        const MAX          = ' MAX ';
-        const SUM          = ' SUM ';
-        const LIKE         = ' LIKE ';
-        const EXECUTE      = ' EXEC ';
-        const MATCHCASE    = ' COLLATE SQL_Latin1_General_CP1_CS_AS ';
+    TConfigSections = class abstract
+        // Use Section.Key schema
+        const PasswordSection    = 'PASSWORD';
+        const ApplicationDetails = 'APPLICATION';
+        const RiskClassDetails   = 'RISK_CLASS_DETAILS';
+        const InvoiceTypes       = 'INVOICE_TYPES';
+        const Unallocated        = 'UNALLOCATED_DEFINITION';
+        const Layouts            = 'EMAIL_LAYOUTS';
+        const TimersSettings     = 'TIMERS_INTERVALS';
+        const FollowUpColors     = 'FOLLOWUPS_COLORS';
+        const AgingRanges        = 'AGEVIEW_BUCKETS';
+        const UserFeedback       = 'USER_FEEDBACK';
     end;
 
 

@@ -119,7 +119,7 @@ uses
     View.Main,
     Unity.Constants,
     Unity.Settings,
-    Unity.SessionService;
+    Unity.Service;
 
 
 var vFilterForm: TFilterForm;

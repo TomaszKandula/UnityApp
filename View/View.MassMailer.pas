@@ -143,9 +143,7 @@ uses
     Unity.Helpers,
     Unity.Settings,
     Unity.Constants,
-    Unity.EventLogger,
-    Unity.SessionService,
-    Mediator,
+    Unity.Service,
     Api.ReturnOpenItems,
     Api.ReturnCustSnapshots;
 
@@ -195,7 +193,6 @@ end;
 procedure TMassMailerForm.GetCompanyDetails(LoadedCompanies: TList<string>);
 begin
 
-    var Context: IMediator:=TMediator.Create();
     var CompanyDetails: TCompanyDetails;
     var CallResponse: TCallResponse;
 
@@ -203,7 +200,7 @@ begin
     for var iCNT:=0 to LoadedCompanies.Count - 1 do
     begin
 
-        CallResponse:=Context.Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
+        CallResponse:=Service.Mediator.Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
 
         if CallResponse.IsSucceeded then
         begin
@@ -418,8 +415,7 @@ begin
     MainForm.UpdateStatusBar(TStatusBar.Processing);
     BusyForm.Show();
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentsAsync_Callback);
+    Service.Mediator.Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentsAsync_Callback);
 
 end;
 
@@ -546,7 +542,7 @@ begin
             SetLbuCompanies(selCompany, FLbuEmails);
 
             MainForm.TimerCustOpenItems.Enabled:=False;
-            ThreadFileLog.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
+            Service.Logger.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
 
             Text_Subject.SetFocus();
             FIsDataLoaded:=True;
@@ -575,7 +571,7 @@ begin
     FIsDataLoaded:=False;
     CustomerList.Clear();
     MainForm.TimerCustOpenItems.Enabled:=True;
-    ThreadFileLog.Log('[TMassMailerForm.FormClose]: Mass mailer has been closed, open items loader is resumed.');
+    Service.Logger.Log('[TMassMailerForm.FormClose]: Mass mailer has been closed, open items loader is resumed.');
 end;
 
 

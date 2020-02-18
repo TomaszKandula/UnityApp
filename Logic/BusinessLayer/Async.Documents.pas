@@ -10,20 +10,11 @@ interface
 
 uses
     System.SysUtils,
+    Unity.Types,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for returning information from sending single account statement.
-    /// </summary>
-    TSendAccDocument = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for returning information from sending many account statements.
-    /// </summary>
-    TSendAccDocuments = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 
 
     IDocuments = interface(IInterface)
@@ -64,6 +55,8 @@ type
     TDocuments = class(TInterfacedObject, IDocuments)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Allow to async. send single account statemnent/reminder. It requires to pass payload with invoice data. Note that method
         /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
@@ -107,15 +100,27 @@ uses
     REST.Types,
     REST.Json,
     Unity.RestWrapper,
+    Unity.Constants,
     Unity.Enums,
     Unity.Helpers,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.LogSentDocument,
     Api.LoggedSentDocument,
     Sync.Document,
     Async.Comments;
+
+
+constructor TDocuments.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TDocuments.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 procedure TDocuments.SendAccDocumentAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocument; WaitToComplete: boolean = False);
@@ -128,9 +133,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            var Settings: ISettings:=TSettings.Create();
             var Statement: IDocument:=TDocument.Create();
-
             Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber.ToString();
             Statement.Exclusions    :=PayLoad.Exclusions;
             Statement.MailFrom      :=PayLoad.SendFrom;
@@ -160,13 +163,13 @@ begin
             // ------------------------------------------------------
             if PayLoad.Layout = TDocMode.Defined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(
-                    Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''),
+                    Service.Settings.DirLayouts + Service.Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''),
                     PayLoad.IsCtrlStatus
                 );
 
             if PayLoad.Layout = TDocMode.Custom then
                 Statement.HTMLLayout:=Statement.LoadTemplate(
-                    Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''),
+                    Service.Settings.DirLayouts + Service.Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''),
                     PayLoad.IsCtrlStatus
                 );
 
@@ -212,7 +215,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[SendAccountStatement]: Account Statement cannot be sent. Please contact IT support.';
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         except
@@ -220,7 +223,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[SendAccountStatement]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -276,14 +279,14 @@ begin
 
             CallResponse.IsSucceeded:=True;
             CallResponse.LastMessage:='Processed.';
-            ThreadFileLog.Log('[SendAccountStatements]: Listed items have been processed successfully!');
+            Service.Logger.Log('[SendAccountStatements]: Listed items have been processed successfully!');
 
         except
             on E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[SendAccountStatements]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -308,21 +311,20 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'documents/'
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.DocumentType;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[LogSentDocumentAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[LogSentDocumentAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
         var LogSentDocument:=TLogSentDocument.Create();
         try
 
-            LogSentDocument.UserAlias         :=SessionService.SessionData.AliasName;
+            LogSentDocument.UserAlias         :=Service.SessionData.AliasName;
             LogSentDocument.ReportedCustomer  :=PayLoad.ReportedCustomer;
             LogSentDocument.ReportedAggrAmount:=PayLoad.ReportedAggrAmount;
             LogSentDocument.ReportedAgeDate   :=PayLoad.ReportedAgeDate;
@@ -345,7 +347,7 @@ begin
 
                     CallResponse.IsSucceeded:=LoggedSentDocument.IsSucceeded;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[LogSentDocumentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[LogSentDocumentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     LoggedSentDocument.Free();
@@ -365,7 +367,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -374,7 +376,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[LogSentDocumentAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;

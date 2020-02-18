@@ -93,9 +93,7 @@ uses
     Unity.Constants,
     Unity.Settings,
     Unity.Helpers,
-    Unity.EventLogger,
-    Unity.SessionService,
-    Mediator,
+    Unity.Service,
     View.Main;
 
 
@@ -188,7 +186,7 @@ begin
         MainAppForm:=View.Main.MainForm;
 
     if not String.IsNullOrEmpty(FCurrentSessionLog) then
-        MainAppForm.InitMainWnd(FCurrentSessionLog);
+        MainAppForm.InitMainWnd();
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -203,13 +201,13 @@ begin
 
         if not GetAccessTokenAsync() then
         begin
-            ThreadFileLog.Log('Critical error has occured [GetAccessTokenSync]: ' + LastErrorMsg);
+            Service.Logger.Log('Critical error has occured [GetAccessTokenSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetAccessTokenSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end
         else
         begin
-            ThreadFileLog.Log('Access token has been granted.');
+            Service.Logger.Log('Access token has been granted.');
             ChangeProgressBar(25, 'Getting access token... done.', ProgressBar);
         end;
 
@@ -221,7 +219,7 @@ begin
 
         if not GetScreenDataSync() then
         begin
-            ThreadFileLog.Log('Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
+            Service.Logger.Log('Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end
@@ -231,10 +229,9 @@ begin
             // --------------------------------
             // API call to register session ID.
             // --------------------------------
-            var Context: IMediator:=TMediator.Create();
-            Context.Accounts.InitiateSessionAwaited(SessionService.SessionId, Settings.WinUserName);
+            Service.Mediator.Accounts.InitiateSessionAwaited(Service.SessionId, Settings.WinUserName);
 
-            ThreadFileLog.Log('Unity has been boot up.');
+            Service.Logger.Log('Unity has been boot up.');
             ChangeProgressBar(50, 'Initializing... done.', ProgressBar);
 
         end;
@@ -247,7 +244,7 @@ begin
 
         if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
         begin
-            ThreadFileLog.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
+            Service.Logger.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
             ExitAppSync();
         end
@@ -256,12 +253,12 @@ begin
 
             if THelpers.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
             begin
-                ThreadFileLog.Log('Html layouts has been synchronized.');
+                Service.Logger.Log('Html layouts has been synchronized.');
                 ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
             end
             else
             begin
-                ThreadFileLog.Log('[UnzippLayouts]: Cannot unzipp resource file.');
+                Service.Logger.Log('[UnzippLayouts]: Cannot unzipp resource file.');
                 THelpers.MsgCall(TAppMessage.Error, 'An error occured [UnzippLayouts]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
                 ExitAppSync();
             end;
@@ -276,13 +273,13 @@ begin
 
         if not GetGeneralTablesAsync() then
         begin
-            ThreadFileLog.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
+            Service.Logger.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end
         else
         begin
-            ThreadFileLog.Log('Calling general tables loaders.');
+            Service.Logger.Log('Calling general tables loaders.');
             ChangeProgressBar(95, 'Calling general tables loaders... executed.', ProgressBar);
         end;
 
@@ -298,7 +295,7 @@ begin
             FIsAppInitialized:=True;
             AnimateWindow(StartupForm.Handle, 750, AW_BLEND or AW_HIDE);
             MainAppForm.Show();
-            ThreadFileLog.Log('[GUI]: Main form has been called.');
+            Service.Logger.Log('[GUI]: Main form has been called.');
         end);
 
     end);
@@ -313,20 +310,19 @@ begin
 
     Result:=True;
 
-    var Context: IMediator:=TMediator.Create();
     var CallResponse: TCallResponse;
     var NewAccessToken: string;
 
-    CallResponse:=Context.Accounts.RequestAccessTokenAwaited(NewAccessToken);
+    CallResponse:=Service.Mediator.Accounts.RequestAccessTokenAwaited(NewAccessToken);
 
     if not CallResponse.IsSucceeded then
     begin
-        ThreadFileLog.Log('[GetAccessTokenSync]: ' + CallResponse.LastMessage);
+        Service.Logger.Log('[GetAccessTokenSync]: ' + CallResponse.LastMessage);
         Result:=False;
         Exit();
     end;
 
-    SessionService.AccessToken:=NewAccessToken;
+    Service.AccessToken:=NewAccessToken;
 
 end;
 
@@ -459,17 +455,15 @@ function TStartupForm.GetGeneralTablesAsync(): boolean;
 begin
 
     Result:=True;
-
-    var Context: IMediator:=TMediator.Create();
     try
-        Context.GeneralTables.GetCompaniesAsync(MainAppForm.sgCoCodes, nil);
-        Context.GeneralTables.GetControlStatusAsync(MainAppForm.sgControlStatus, nil);
-        Context.GeneralTables.GetPaidInfoAsync(MainAppForm.sgPaidInfo, nil);
-        Context.GeneralTables.GetPaymentTermsAsync(MainAppForm.sgPmtTerms, nil);
-        Context.GeneralTables.GetSalesResponsibleAsync(MainAppForm.sgSalesResp, nil);
-        Context.GeneralTables.GetPersonResponsibleAsync(MainAppForm.sgPersonResp, nil);
-        Context.GeneralTables.GetAccountTypeAsync(MainAppForm.sgAccountType, nil);
-        Context.GeneralTables.GetCustomerGroupAsync(MainAppForm.sgCustomerGr, nil);
+        Service.Mediator.GeneralTables.GetCompaniesAsync(MainAppForm.sgCoCodes, nil);
+        Service.Mediator.GeneralTables.GetControlStatusAsync(MainAppForm.sgControlStatus, nil);
+        Service.Mediator.GeneralTables.GetPaidInfoAsync(MainAppForm.sgPaidInfo, nil);
+        Service.Mediator.GeneralTables.GetPaymentTermsAsync(MainAppForm.sgPmtTerms, nil);
+        Service.Mediator.GeneralTables.GetSalesResponsibleAsync(MainAppForm.sgSalesResp, nil);
+        Service.Mediator.GeneralTables.GetPersonResponsibleAsync(MainAppForm.sgPersonResp, nil);
+        Service.Mediator.GeneralTables.GetAccountTypeAsync(MainAppForm.sgAccountType, nil);
+        Service.Mediator.GeneralTables.GetCustomerGroupAsync(MainAppForm.sgCustomerGr, nil);
     except
         on E: Exception do
         begin
@@ -558,8 +552,7 @@ end;
 
 procedure TStartupForm.FormDestroy(Sender: TObject);
 begin
-    DestroyThreadFileLog();
-    DestroySessionService();
+    UnloadService();
 end;
 
 

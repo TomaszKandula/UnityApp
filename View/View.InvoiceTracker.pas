@@ -108,9 +108,7 @@ uses
     Unity.Helpers,
     Unity.Constants,
     Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
-    Mediator,
+    Unity.Service,
     Api.RegisteredEmails;
 
 
@@ -329,7 +327,7 @@ begin
 
         for var iCNT: integer:=0 to List.Items.Count - 1 do
         begin
-            PayLoad.Cells[0,  iCNT]:=SessionService.SessionData.AliasName;  // user alias
+            PayLoad.Cells[0,  iCNT]:=Service.SessionData.AliasName;  // user alias
             PayLoad.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];   // cuid // to be deleted
             PayLoad.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];  // co code
             PayLoad.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];  // branch/agent // to be deleted
@@ -347,8 +345,8 @@ begin
             PayLoad.Cells[15, iCNT]:=List.Items[iCNT].SubItems[5];   // reminder to
         end;
 
-        var Context: IMediator:=TMediator.Create();
-        CallResponse:=Context.InvoiceTracker.SaveTrackerDataAwaited(PayLoad);
+//        var Context: IMediator:=TMediator.Create();
+//        CallResponse:=Service.Mediator.InvoiceTracker.SaveTrackerDataAwaited(PayLoad);
 
     finally
         PayLoad.Free();
@@ -361,7 +359,7 @@ begin
     end;
 
     THelpers.MsgCall(TAppMessage.Info, 'The user list has been saved successfully.');
-    ThreadFileLog.Log('[TTrackerForm.SaveToDb]: The user list has been saved successfully.');
+    Service.Logger.Log('[TTrackerForm.SaveToDb]: The user list has been saved successfully.');
 
 end;
 

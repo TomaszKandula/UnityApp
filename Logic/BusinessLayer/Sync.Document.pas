@@ -23,8 +23,7 @@ type
 
 
     /// <summary>
-    /// Provides methods and properties for setting up and sending new document (account statement or reminder)
-    /// using HTML layout with defined tables for invoice list.
+    /// Provides methods and properties for setting up and sending new document, either account statement or reminder. It uses HTML layout.
     /// </summary>
     IDocument = Interface(IMailer)
     ['{C3D66D48-891B-438B-9EB6-F53B62E2FCAD}']
@@ -105,8 +104,7 @@ type
 
 
     /// <summary>
-    /// Provides methods and properties for setting up and sending new document (account statement or reminder)
-    /// using HTML layout with defined tables for invoice list.
+    /// Provides methods and properties for setting up and sending new document, either account statement or reminder. It uses HTML layout.
     /// Do not use direct implementation.
     /// </summary>
     TDocument = class(TMailer, IDocument)
@@ -193,6 +191,8 @@ type
         function  StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
         procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
     public
+        constructor Create();
+        destructor Destroy(); override;
         property DocumentType: string read GetDocumentType;
         property HTMLTable: string read GetHTMLTable;
         property HTMLTemp: string read GetHTMLTemp;
@@ -229,8 +229,20 @@ uses
     System.StrUtils,
     Unity.Helpers,
     Unity.Constants,
-    Unity.Settings,
-    Unity.SessionService;
+    Unity.Service;
+
+
+constructor TDocument.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TDocument.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 function TDocument.LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
@@ -241,7 +253,6 @@ begin
     // Note: we have two different tables, with Control Status column and without it.
     // ------------------------------------------------------------------------------
     var KeyName: string;
-    var Settings: ISettings:=TSettings.Create();
     var StringList: TStringList:=TStringList.Create();
     try
 
@@ -257,7 +268,7 @@ begin
         else
             KeyName:=KeyName.Replace('%', '2');
 
-        var HtmlTablePath:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        var HtmlTablePath:=Service.Settings.DirLayouts + Service.Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
         StringList.LoadFromFile(HtmlTablePath);
         FCommonHTMLTable:=StringList.Text;
 
@@ -270,7 +281,7 @@ begin
         else
             KeyName:=KeyName.Replace('%', '2');
 
-        var HtmlRowPath:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        var HtmlRowPath:=Service.Settings.DirLayouts + Service.Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
         StringList.LoadFromFile(HtmlRowPath);
         FCommonHTMLRow:=StringList.Text;
 
@@ -320,10 +331,8 @@ begin
 
     if CustMessage <> '' then MailBody:=StringReplace(MailBody, '{TEXT}', CustMessage, [rfReplaceAll]);
 
-    var Settings: ISettings:=TSettings.Create();
-
     case IsUserInCopy of
-        True:  MailBcc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
+        True:  MailBcc:=TArray<string>.Create(Service.SessionData.EmailAddress);
         False: MailBcc:=TArray<string>.Create();
     end;
 

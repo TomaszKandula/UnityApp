@@ -10,16 +10,11 @@ interface
 
 uses
     System.Classes,
+    Unity.Types,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for getting results from sending user email with feedback message.
-    /// </summary>
-    TSendUserFeedback = procedure(CallResponse: TCallResponse) of object;
 
 
     IMailer = interface(IInterface)
@@ -38,6 +33,8 @@ type
     TMailer = class(TInterfacedObject, IMailer)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Async. sending email to CI Team with user feedback.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -58,12 +55,24 @@ uses
     REST.Types,
     REST.Json,
     Unity.RestWrapper,
+    Unity.Constants,
     Unity.Helpers,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.SendEmail,
     Api.SentEmail;
+
+
+constructor TMailer.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TMailer.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 procedure TMailer.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
@@ -75,25 +84,24 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            var Settings: ISettings:=TSettings.Create();
+            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/feedback/';
+            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/feedback/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
-            var SendFrom:=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
-            var SendTo  :=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
+            var SendFrom:=Service.Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
+            var SendTo  :=Service.Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
 
             var ListTo:=TArray<string>.Create(SendTo);
-            var ListCc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
+            var ListCc:=TArray<string>.Create(Service.SessionData.EmailAddress);
 
             var SendEmail:=TSendEmail.Create();
             try
 
-                SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
-                SendEmail.SessionId:=SessionService.SessionId;
-                SendEmail.AliasName:=SessionService.SessionData.AliasName;
+                SendEmail.UserId   :=Service.SessionData.UnityUserId.ToString();
+                SendEmail.SessionId:=Service.SessionId;
+                SendEmail.AliasName:=Service.SessionData.AliasName;
                 SendEmail.From     :=SendFrom;
                 SendEmail.&To      :=ListTo;
                 SendEmail.Cc       :=ListCc;
@@ -114,7 +122,7 @@ begin
                     CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                     CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
-                    ThreadFileLog.Log('[SendFeedbackAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[SendFeedbackAsync]: Returned status code is ' + Restful.StatusCode.ToString());
                 finally
                     SentEmail.Free();
                 end;
@@ -133,7 +141,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -142,7 +150,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[SendFeedbackAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;

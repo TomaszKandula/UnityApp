@@ -65,6 +65,13 @@ uses
     Unity.Constants in 'Helpers\Unity.Constants.pas',
     Unity.Sorting in 'Helpers\Unity.Sorting.pas',
     Unity.Helpers in 'Helpers\Unity.Helpers.pas',
+	Unity.Types in 'Helpers\Unity.Types.pas',
+	Unity.Mediator in 'Logic\Unity.Mediator.pas',
+    Unity.Service in 'Logic\Unity.Service.pas',
+    Unity.RestWrapper in 'Logic\DataLayer\Unity.RestWrapper.pas',
+    Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
+    Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
+    Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
 	Api.MetaData in 'Model\Json\Api.MetaData.pas',
     Api.ErrorHandler in 'Model\Json\Api.ErrorHandler.pas',
     Api.BankDetails in 'Model\Json\Api.BankDetails.pas',
@@ -123,8 +130,6 @@ uses
 	Api.TokenGranted in 'Model\Json\Responses\Api.TokenGranted.pas',
 	Api.AddressBookUpdated in 'Model\Json\Responses\Api.AddressBookUpdated.pas',
 	Api.UserGeneralCommentCheck in 'Model\Json\Responses\Api.UserGeneralCommentCheck.pas',
-    Unity.RestWrapper in 'Logic\DataLayer\Unity.RestWrapper.pas',
-	Mediator in 'Logic\Mediator.pas',
     Sync.Mailer in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Document in 'Logic\BusinessLayer\Sync.Document.pas',
     Async.Accounts in 'Logic\BusinessLayer\Async.Accounts.pas',
@@ -134,14 +139,9 @@ uses
     Async.OpenItems in 'Logic\BusinessLayer\Async.OpenItems.pas',
     Async.Comments in 'Logic\BusinessLayer\Async.Comments.pas',
     Async.Documents in 'Logic\BusinessLayer\Async.Documents.pas',
-    Async.InvoiceTracker in 'Logic\BusinessLayer\Async.InvoiceTracker.pas',
     Async.Companies in 'Logic\BusinessLayer\Async.Companies.pas',
     Async.Mailer in 'Logic\BusinessLayer\Async.Mailer.pas',
     Async.GeneralTables in 'Logic\BusinessLayer\Async.GeneralTables.pas',
-    Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
-    Unity.SessionService in 'Logic\Configuration\Unity.SessionService.pas',
-    Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
-    Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
     View.BusyScreen in 'View\View.BusyScreen.pas' {BusyForm},
     View.Main in 'View\View.Main.pas' {MainForm},
     View.About in 'View\View.About.pas' {AboutForm},
@@ -195,10 +195,9 @@ begin
     // new session service that holds session data throughout
     // the application lifetime.
     // ------------------------------------------------------
-    var Settings: ISettings:=TSettings.Create();
-    var PathAppDir :=Settings.DirApplication;
-    var PathHomeDir:=Settings.DirRoaming;
-    if not Settings.CheckConfigFile then
+    var PathAppDir :=Service.Settings.DirApplication;
+    var PathHomeDir:=Service.Settings.DirRoaming;
+    if not Service.Settings.CheckConfigFile then
     begin
         Application.MessageBox(
             PCHar('Cannot find config.cfg. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
@@ -207,17 +206,20 @@ begin
         ExitProcess(0);
     end;
 
-    Settings.MakeNewSessionId();
-    SessionService.InitializeSession(Settings.NewSessionId, Settings.MakeNewSessionFile(Settings.NewSessionId));
+    Service.Settings.MakeNewSessionId();
+    Service.InitializeSession(
+        Service.Settings.NewSessionId,
+        Service.Settings.MakeNewSessionFile(Service.Settings.NewSessionId)
+    );
 
     // ----------------------------------------------------------------
     // Clear cache directory content if previously ordered by the user.
     // ----------------------------------------------------------------
-    if Settings.GetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', '') = 'yes' then
+    if Service.Settings.GetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', '') = 'yes' then
     begin
         THelpers.RemoveAllInFolder(PathAppDir + 'cache', '*.*');
-        Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'no');
-        Settings.Encode(TAppFiles.Configuration);
+        Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'no');
+        Service.Settings.Encode(TAppFiles.Configuration);
     end;
 
     // -------------------------------------------------------------------------------------------------------
@@ -314,11 +316,11 @@ begin
     // re-assigned to it, so it can act as a main window of the Windows
     // application.
     // ------------------------------------------------------------------
-    StartupForm.SetSessionLog(SessionService.SessionLog);
+    StartupForm.SetSessionLog(Service.SessionLog);
     StartupForm.Show();
 
     Application.Run;{Starts event loop}
-    DestroySessionService();
+    UnloadService();
     GlobalCEFApp.Free();
 
 end.

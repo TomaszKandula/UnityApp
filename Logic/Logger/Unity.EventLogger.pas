@@ -1,15 +1,15 @@
 unit Unity.EventLogger;
 
-// ---------------------------------------------------------------
-// Application event logger. Can be referenced by anyone.
+// ----------------------------------------------------------------
+// Application event logger. Interface can be referenced by anyone.
 // Cannot hold references to View or Logic.
 // Note:
 //     We do use only one instance of the class during application
 //     life time because we must handle parallel calls and save
 //     application events to one session file. Therefore, it is
 //     necessary to use threadpools and queues where multiple
-//     instances cannot be used.
-// ---------------------------------------------------------------
+//     instances cannot be used. Use only interface instance.
+// ----------------------------------------------------------------
 
 interface
 
@@ -25,14 +25,17 @@ uses
 type
 
 
-    /// <summary>
-    /// Pointer to local record.
-    /// </summary>
+    ILogger = interface(IInterface)
+    ['{2AD7B439-1D36-4BA1-9CDC-98E242961A25}']
+        function GetSessionEventLines: TList<string>;
+        property SessionEventLines: TList<string> read GetSessionEventLines;
+        procedure Log(Text: string);
+    end;
+
+
     PLogRequest = ^TLogRequest;
 
-    /// <summary>
-    /// Local record holding filename and text to be written.
-    /// </summary>
+
     TLogRequest = record
         LogText:  string;
         FileName: string;
@@ -43,42 +46,19 @@ type
     /// Supplied text is expanded by date and time signature
     /// for each line.
     /// </summary>
-    TThreadFileLog = class(TObject)
-    private
+    TThreadFileLog = class(TInterfacedObject, ILogger)
+    strict private
         var FLogFileName: string;
         var FThreadPool: TThreadPool;
         var FSessionEventLines: TList<string>;
         procedure HandleLogRequest(Data: Pointer; AThread: TThread);
         function GetSessionEventLines: TList<string>;
     public
-        constructor Create();
+        constructor Create(LogFileName: string);
         destructor Destroy(); override;
-
-        /// <summary>
-        /// List of event texts line by line.
-        /// </summary>
         property SessionEventLines: TList<string> read GetSessionEventLines;
-
-        /// <summary>
-        /// Log file name to be write.
-        /// </summary>
-        property LogFileName: string read FLogFileName write FLogFileName;
-
-        /// <summary>
-        /// Local unit method for writing event log file. This method is upon thread queue,
-        /// thus race condition does not apply here.
-        /// </summary>
-        /// <remarks>
-        /// This method is perfectly encapsulated as it is invisible only outside of the module.
-        /// Only module class can access it.
-        /// </remarks>
         procedure Log(Text: string);
-
     end;
-
-
-    function ThreadFileLog(): TThreadFileLog;
-    procedure DestroyThreadFileLog();
 
 
 implementation
@@ -86,23 +66,6 @@ implementation
 
 uses
     Unity.Constants;
-
-
-var
-    VThreadFileLog: TThreadFileLog;
-
-
-function ThreadFileLog(): TThreadFileLog;
-begin
-    if not(Assigned(VThreadFileLog)) then VThreadFileLog:=TThreadFileLog.Create();
-    Result:=VThreadFileLog;
-end;
-
-
-procedure DestroyThreadFileLog();
-begin
-    if Assigned(VThreadFileLog) then FreeAndNil(VThreadFileLog);
-end;
 
 
 procedure LogToFile(const FileName, Text: String);
@@ -125,8 +88,9 @@ begin
 end;
 
 
-constructor TThreadFileLog.Create();
+constructor TThreadFileLog.Create(LogFileName: string);
 begin
+    FLogFileName:=LogFileName;
     FSessionEventLines:=TList<string>.Create();
     FThreadPool:=TThreadPool.Create(HandleLogRequest, 1);
 end;
@@ -134,8 +98,8 @@ end;
 
 destructor TThreadFileLog.Destroy();
 begin
-    FSessionEventLines.Free;
-    FThreadPool.Free;
+    FSessionEventLines.Free();
+    FThreadPool.Free();
     inherited;
 end;
 

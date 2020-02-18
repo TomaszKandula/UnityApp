@@ -11,30 +11,13 @@ interface
 uses
     System.Classes,
     System.Generics.Collections,
+    Unity.Types,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for getting results from address book open action.
-    /// </summary>
-    TOpenAddressBook = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for getting results from address book update action.
-    /// </summary>
-    TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for getting results from address book insert action.
-    /// </summary>
-    TAddToAddressBook = procedure(ReturnedId: integer; CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for getting results from customer details retrieval.
-    /// </summary>
-    TGetCustomerDetails = procedure(CustDetails: TCustomerDetails; CallResponse: TCallResponse) of object;
 
 
     IAddressBook = interface(IInterface)
@@ -82,6 +65,8 @@ type
     TAddressBook = class(TInterfacedObject, IAddressBook)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Load async. address book content and return it via given callback method that is always executed in main thread.
         /// </summary>
@@ -133,9 +118,7 @@ uses
     Unity.RestWrapper,
     Unity.Constants,
     Unity.Helpers,
-    Unity.Settings,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.UserCompanySelection,
     Api.AddressBookList,
     Api.AddressBookItem,
@@ -146,22 +129,34 @@ uses
     Api.AddressBookAdded;
 
 
+constructor TAddressBook.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TAddressBook.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
+
+
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
         if LoadedCompanies.Count > 0 then
         begin
 
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/selection/';
+            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/selection/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            ThreadFileLog.Log('[OpenAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[OpenAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
 
             var UserCompanySelection:=TUserCompanySelection.Create();
             try
@@ -174,9 +169,9 @@ begin
         end
         else
         begin
-            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-            ThreadFileLog.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
         end;
 
         var CallResponse: TCallResponse;
@@ -217,7 +212,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[OpenAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[OpenAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     AddressBookList.Free();
@@ -237,7 +232,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -246,7 +241,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[OpenAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -270,12 +265,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + PayLoad.Id.ToString();
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + PayLoad.Id.ToString();
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        ThreadFileLog.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Restful.ClientBaseURL);
 
         var LAddressBookUpdate:=TAddressBookUpdate.Create();
         try
@@ -307,7 +301,7 @@ begin
                 end;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
-                ThreadFileLog.Log('[UpdateAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[UpdateAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -323,7 +317,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -332,7 +326,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[UpdateAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -357,12 +351,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[AddToAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[AddToAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
 
         var LAddressBookAdd:=TAddressBookAdd.Create();
         try
@@ -398,7 +391,7 @@ begin
                 end;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
-                ThreadFileLog.Log('[AddToAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[AddToAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -414,7 +407,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -423,7 +416,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[AddToAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -448,12 +441,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + Id.ToString();
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + Id.ToString();
         Restful.RequestMethod:=TRESTRequestMethod.rmDELETE;
-        ThreadFileLog.Log('[DelFromAddressBookAwaited]: Executing DELETE ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[DelFromAddressBookAwaited]: Executing DELETE ' + Restful.ClientBaseURL);
 
         try
 
@@ -470,7 +462,7 @@ begin
                 end;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
-                ThreadFileLog.Log('[DelFromAddressBookAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[DelFromAddressBookAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -486,7 +478,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -495,7 +487,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -518,17 +510,16 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'addressbook/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetCustomerDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetCustomerDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -546,7 +537,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     AddressBookItem.Free();
@@ -566,7 +557,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -575,7 +566,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;

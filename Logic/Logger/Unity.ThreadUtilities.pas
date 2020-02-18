@@ -1,10 +1,13 @@
 unit Unity.ThreadUtilities;
 
-// ----------------------------------------
-// Application event logger.
-// Can be referenced by anyone.
-// Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------
+// Application event logger. Cannot hold references to
+// View or Logic.
+// Note:
+//     Do not use this implementation directly
+//     in the application code. This is the complementary
+//     unit for EventLogger (interfaced object).
+// ------------------------------------------------------
 
 interface
 
@@ -25,62 +28,41 @@ type
 
 
     TThreadQueue = class
-    private
+    strict private
         FFinalized: Boolean;
         FIOQueue: THandle;
     public
-
-        /// <summary>
-        /// Create IO Completion Queue.
-        /// </summary>
         constructor Create();
-
-        /// <summary>
-        /// Destroy Completion Queue.
-        /// </summary>
         destructor Destroy(); override;
-
         /// <summary>
         /// Post a finialize pointer on to the queue.
         /// </summary>
         procedure Finalize();
-
         /// <summary>
         /// If stack is not finalized, add/push a pointer on to the end of the queue.
         /// </summary>
         procedure Push(Data: Pointer);
-
         /// <summary>
         /// Pop will return false if the queue is completed.
         /// </summary>
         function Pop(var Data: Pointer): Boolean;
-
         /// <summary>
         /// Indicates whenever the thread is finilized or not.
         /// </summary>
         property Finalized: Boolean read FFinalized;
-
     end;
 
 
-    /// <summary>
-    /// Defines callback method for thread event.
-    /// </summary>
     TThreadExecuteEvent = procedure(Thread: TThread) of object;
 
 
     TSimpleThread = class(TThread)
-    private
+    strict private
         FExecuteEvent: TThreadExecuteEvent;
     protected
         procedure Execute(); override;
     public
-
-        /// <summary>
-        /// Initialize simple thread and execute thread event.
-        /// </summary>
         constructor Create(CreateSuspended: Boolean; ExecuteEvent: TThreadExecuteEvent; AFreeOnTerminate: Boolean);
-
     end;
 
 
@@ -88,28 +70,15 @@ type
 
 
     TThreadPool = class(TObject)
-    private
+    strict private
         FThreads: TList;
         FThreadQueue: TThreadQueue;
         FHandlePoolEvent: TThreadPoolEvent;
         procedure DoHandleThreadExecute(Thread: TThread);
     public
-
-        /// <summary>
-        /// Initialize thread pool.
-        /// </summary>
         constructor Create(HandlePoolEvent: TThreadPoolEvent; MaxThreads: Integer = 1); virtual;
-
-        /// <summary>
-        /// Remove from memory.
-        /// </summary>
         destructor  Destroy(); override;
-
-        /// <summary>
-        /// Add to the given thread to the actual thread pool.
-        /// </summary>
         procedure Add(const Data: Pointer);
-
     end;
 
 
@@ -238,7 +207,6 @@ begin
 
         try
             FHandlePoolEvent(Data, Thread);
-
         except
             {Do nothing}
         end;

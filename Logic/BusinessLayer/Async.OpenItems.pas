@@ -11,22 +11,13 @@ interface
 uses
     System.Generics.Collections,
     System.Classes,
+    Unity.Types,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for scanning SSIS master table to check if open items have been updated.
-    /// </summary>
-    TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
-    /// <summary>
-    /// Callback signature for reading open items. Payload returned contains summary data from loaded invoices.
-    /// </summary>
-    TReadOpenItems = procedure(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
 
 
     IOpenItems = interface(IInterface)
@@ -63,6 +54,8 @@ type
         function  FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
         procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Returns date and time of the SSIS package transfer from SSIS master database table alongside with transfer status.
         /// </summary>
@@ -98,13 +91,25 @@ uses
     REST.Types,
     REST.Json,
     Unity.RestWrapper,
-    Unity.Settings,
+    Unity.Constants,
     Unity.Helpers,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.UserCompanySelection,
     Api.ReturnSsisData,
     Api.ReturnOpenItems;
+
+
+constructor TOpenItems.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TOpenItems.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 function TOpenItems.GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
@@ -117,12 +122,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetSSISDataAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetSSISDataAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -138,7 +142,7 @@ begin
                     CallResponse.ErrorCode  :=ReturnSsisData.Error.ErrorCode;
 
                     CallResponse.IsSucceeded:=True;
-                    ThreadFileLog.Log('[GetSSISDataAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetSSISDataAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnSsisData.Free();
@@ -158,7 +162,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -167,7 +171,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetSSISDataAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -211,7 +215,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[ScanOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -246,7 +250,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[ReadOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -267,12 +271,11 @@ function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TLi
 begin
 
     var CallResponse: TCallResponse;
-    var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-    var Settings: ISettings:=TSettings.Create();
+    var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-    Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
+    Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
     Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-    ThreadFileLog.Log('[FLoadToGrid]: Executing POST ' + Restful.ClientBaseURL);
+    Service.Logger.Log('[FLoadToGrid]: Executing POST ' + Restful.ClientBaseURL);
 
     try
 
@@ -374,7 +377,7 @@ begin
 
                 CallResponse.IsSucceeded:=True;
                 CallResponse.ReturnedCode:=Restful.StatusCode;
-                ThreadFileLog.Log('[FLoadToGrid]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Restful.StatusCode.ToString());
 
             finally
                 ReturnOpenItems.Free();
@@ -394,7 +397,7 @@ begin
 
             CallResponse.ReturnedCode:=Restful.StatusCode;
             CallResponse.IsSucceeded:=False;
-            ThreadFileLog.Log(CallResponse.LastMessage);
+            Service.Logger.Log(CallResponse.LastMessage);
 
         end;
 
@@ -403,7 +406,7 @@ begin
         begin
             CallResponse.IsSucceeded:=False;
             CallResponse.LastMessage:='[FLoadToGrid]: Cannot execute the request. Description: ' + E.Message;
-            ThreadFileLog.Log(CallResponse.LastMessage);
+            Service.Logger.Log(CallResponse.LastMessage);
         end;
 
     end;
@@ -416,8 +419,7 @@ end;
 procedure TOpenItems.FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
 begin
 
-    var Settings: ISettings:=TSettings.Create;
-    var VoucherNumber:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
+    var VoucherNumber:=Service.Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
     var VoTpCol   :=InputGrid.GetCol(TReturnOpenItems._VoucherType);
     var OpenAmCol :=InputGrid.GetCol(TReturnOpenItems._OpenAmount);

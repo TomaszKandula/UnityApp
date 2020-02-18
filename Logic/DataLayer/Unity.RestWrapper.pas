@@ -98,7 +98,8 @@ type
 
 
     /// <summary>
-    /// Implementation of simple wrapper around REST Client, REST Response, REST Request and HTTPBasicAuthentication classes.
+    /// Implementation of simple wrapper around TRESTClient, TRESTResponse, TRESTRequest classes.
+    /// Do not use it directly.
     /// </summary>
     TRESTful = class(TInterfacedObject, IRESTFul)
     {$TYPEINFO ON}
@@ -198,7 +199,7 @@ uses
     System.SysUtils;
 
 
-constructor TRESTful.Create(AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON);
+constructor TRESTful.Create(AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON);//make argument-less!!!
 begin
 
     restClient  :=TRESTClient.Create('');

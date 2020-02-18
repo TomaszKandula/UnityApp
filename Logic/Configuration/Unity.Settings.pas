@@ -19,8 +19,7 @@ type
 
 
     /// <summary>
-    /// This interface exposes methods and properties for handling application settings
-    /// encoded in configuration file.
+    /// Exposes methods and properties for handling application settings encoded in configuration file.
     /// </summary>
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
@@ -96,7 +95,8 @@ type
 
 
     /// <summary>
-    /// This class exposes methods and properties for configuration handling.
+    /// Implementation for handling the configuration file.
+    /// Do not use it directly.
     /// </summary>
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
@@ -191,24 +191,6 @@ type
     end;
 
 
-    /// <summary>
-    /// This class of constants defines all fields in configuration file.
-    /// </summary>
-    TConfigSections = class abstract
-        // Use Section.Key schema
-        const PasswordSection    = 'PASSWORD';
-        const ApplicationDetails = 'APPLICATION';
-        const RiskClassDetails   = 'RISK_CLASS_DETAILS';
-        const InvoiceTypes       = 'INVOICE_TYPES';
-        const Unallocated        = 'UNALLOCATED_DEFINITION';
-        const Layouts            = 'EMAIL_LAYOUTS';
-        const TimersSettings     = 'TIMERS_INTERVALS';
-        const FollowUpColors     = 'FOLLOWUPS_COLORS';
-        const AgingRanges        = 'AGEVIEW_BUCKETS';
-        const UserFeedback       = 'USER_FEEDBACK';
-    end;
-
-
 implementation
 
 
@@ -217,8 +199,7 @@ uses
     System.IOUtils,
     Vcl.Forms,
     Unity.Crc32,
-    Unity.Constants,
-    Unity.EventLogger;
+    Unity.Constants;
 
 
 constructor TSettings.Create();
@@ -499,7 +480,7 @@ end;
 function TSettings.FindSettingsKey(Section: string; KeyPosition: integer): string;
 begin
 
-    Result:=TUnknown.NA;
+    Result:='N/A';
 
     var SL: TStringList:=TStringList.Create;
     try

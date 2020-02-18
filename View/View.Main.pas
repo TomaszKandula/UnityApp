@@ -875,7 +875,7 @@ type
         procedure UpdateFollowUps(Source: TStringGrid; Col: integer);
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
-        procedure InitMainWnd(SessionFile: string);
+        procedure InitMainWnd();
         procedure SetupMainWnd();
         procedure StartMainWnd();
         procedure SwitchTimers(State: TAppTimers);
@@ -919,10 +919,8 @@ uses
     Unity.Constants,
     Unity.Helpers,
     Unity.Sorting,
-    Unity.EventLogger,
     Unity.Settings,
-    Unity.SessionService,
-    Mediator,
+    Unity.Service,
     uCEFApplication,
     Api.ReturnCompanies,
     Api.ReturnAccountType,
@@ -1071,8 +1069,7 @@ end;
 procedure TMainForm.LoadAgeReport();
 begin
     BusyForm.Show();
-    var Context: IMediator:=TMediator.Create();
-    Context.Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
+    Service.Mediator.Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 end;
 
 
@@ -1080,17 +1077,16 @@ procedure TMainForm.LoadOpenItems();
 begin
 
     sgOpenItems.Freeze(True);
-    var Context: IMediator:=TMediator.Create();
 
     if LoadedCompanies.Count = 0 then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
-        ThreadFileLog.Log('[LoadOpenItems]: No aging report loded while open items requested.');
+        Service.Logger.Log('[LoadOpenItems]: No aging report loded while open items requested.');
         Exit();
     end;
 
-    ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
-    Context.OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
+    Service.Logger.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
+    Service.Mediator.OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
 
 end;
 
@@ -1253,22 +1249,21 @@ begin
     // ------------------------------------------------
 
     UpdateStatusBar(TStatusBar.Mapping);
-    var Context: IMediator:=TMediator.Create();
 
-    Context.Debtors.MapTableAsync(sgAgeView, sgPersonResp, False, ColPersonResp, IdPersonResp, ColSourceDbName, DbNamePersonResp, ErpCodePersonResp);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
+    Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgPersonResp, False, ColPersonResp, IdPersonResp, ColSourceDbName, DbNamePersonResp, ErpCodePersonResp);
+    Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
 
-    Context.Debtors.MapTableAsync(sgAgeView, sgSalesResp, False, ColSalesResp, IdSalesResp, ColSourceDbName, DbNameSalesResp, ErpCodeSalesResp);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
+    Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgSalesResp, False, ColSalesResp, IdSalesResp, ColSourceDbName, DbNameSalesResp, ErpCodeSalesResp);
+    Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
 
-    Context.Debtors.MapTableAsync(sgAgeView, sgAccountType, False, ColAccountType, IdAccountType, ColSourceDbName, DbNameAccountType, ErpCodeAccountType);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
+    Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgAccountType, False, ColAccountType, IdAccountType, ColSourceDbName, DbNameAccountType, ErpCodeAccountType);
+    Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
 
-    Context.Debtors.MapTableAsync(sgAgeView, sgCustomerGr, False, ColCustomerGroup, IdCustomerGroup, ColSourceDbName, DbNameCustomerGroup, ErpCodeCustomerGroup);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
+    Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgCustomerGr, False, ColCustomerGroup, IdCustomerGroup, ColSourceDbName, DbNameCustomerGroup, ErpCodeCustomerGroup);
+    Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
 
-    Context.Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
+    Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
+    Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
 
 end;
 
@@ -1423,14 +1418,14 @@ begin
 
     var Settings: ISettings:=TSettings.Create();
     var BaseUrl:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', '');
-    var Url:=WideString(BaseUrl) + '/?sessiontoken=' + SessionService.SessionId;
+    var Url:=WideString(BaseUrl) + '/?sessiontoken=' + Service.SessionId;
 
     try
         Chromium.LoadURL(Url);
-        ThreadFileLog.Log('[RequestUnityWebWithToken]: Requested URL = "' + Url + '".');
+        Service.Logger.Log('[RequestUnityWebWithToken]: Requested URL = "' + Url + '".');
     except
         on E: exception do
-            ThreadFileLog.Log('[RequestUnityWebWithToken]: Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
+            Service.Logger.Log('[RequestUnityWebWithToken]: Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
     end;
 
 end;
@@ -1439,17 +1434,15 @@ end;
 procedure TMainForm.RedeemAccess();
 begin
 
-    var Context: IMediator:=TMediator.Create();
-    //var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Context.Accounts.CheckSessionAwaited(SessionService.SessionId);
+    CallResponse:=Service.Mediator.Accounts.CheckSessionAwaited(Service.SessionId);
 
     if CallResponse.IsSucceeded then
     begin
         TimerPermitCheck.Enabled:=False;
         FIsAppMenuLocked:=False;
-        valAadUser.Caption:=SessionService.SessionData.DisplayName;
-        ThreadFileLog.Log('[RedeemAccess]: Redeem user access to account has been completed successfully.');
+        valAadUser.Caption:=Service.SessionData.DisplayName;
+        Service.Logger.Log('[RedeemAccess]: Redeem user access to account has been completed successfully.');
     end;
 
 end;
@@ -1601,7 +1594,7 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1623,7 +1616,7 @@ begin
 
     FIsAddressBookOpened:=True;
     MainForm.UpdateStatusBar(TStatusBar.Ready);
-    ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
+    Service.Logger.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;
 
@@ -1634,12 +1627,12 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
-        ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
     THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated successfully.');
-    ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
+    Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
 
 end;
 
@@ -1650,12 +1643,12 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
     THelpers.MsgCall(TAppMessage.Info, 'New data has been added to Address Book successfully.');
-    ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: New data has been inserted to Adddress Book successfully.');
+    Service.Logger.Log('[AddToAddressBookAsync_Callback]: New data has been inserted to Adddress Book successfully.');
 
 end;
 
@@ -1667,7 +1660,7 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         UpdateStatusBar(TStatusBar.Ready);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1681,11 +1674,11 @@ begin
             for var jCNT:=0 to ReturnedData.ColCount - 1 do
                 sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
+        Service.Logger.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
 
     finally
         sgAgeView.Freeze(False);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
+        Service.Logger.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
     end;
 
     sgAgeView.SetColWidth(10, 20, 400);
@@ -1694,7 +1687,7 @@ begin
 
     ClearAgingSummary();
     UpdateAgeSummary(PayLoad);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
+    Service.Logger.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
     AgeViewMapping();
     SwitchTimers(TurnedOn);
@@ -1703,9 +1696,7 @@ begin
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
 
-    var Context: IMediator:=TMediator.Create();
-    Context.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
-
+    Service.Mediator.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
     UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
     BusyForm.Close();
 
@@ -1721,7 +1712,7 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1734,7 +1725,7 @@ begin
 
     sgOpenItems.SetColWidth(10, 20, 400);
     MainForm.UpdateStatusBar(TStatusBar.Ready);
-    ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
+    Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
 
 end;
 
@@ -1746,7 +1737,7 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1763,7 +1754,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[CheckGivenPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[CheckGivenPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1808,7 +1799,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[SetNewPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[SetNewPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1863,7 +1854,7 @@ begin
 
     finally
         MainForm.sgInvoiceTracker.Freeze(False);
-        ThreadFileLog.Log('[RefreshInvoiceTracker_Callback]: Invoice Tracker list updated.');
+        Service.Logger.Log('[RefreshInvoiceTracker_Callback]: Invoice Tracker list updated.');
     end;
 
     if MainForm.sgInvoiceTracker.RowCount > 1 then
@@ -1943,10 +1934,9 @@ begin
         var SourceDBName:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]);
         var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
 
-        var Context: IMediator:=TMediator.Create();
         var CommentExists: TCommentExists;
         var CallResponse: TCallResponse;
-        CallResponse:=Context.Comments.CheckDailyCommentAwaited(
+        CallResponse:=Service.Mediator.Comments.CheckDailyCommentAwaited(
             SourceDBName,
             CustNumber,
             LoadedAgeDate,
@@ -1970,9 +1960,9 @@ begin
         LDailyCommentFields.FixedRemindersSent  :=0;
         LDailyCommentFields.CustomRemindersSent :=0;
         LDailyCommentFields.UserComment         :=NewComment;
-        LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
+        LDailyCommentFields.UserAlias           :=Service.SessionData.AliasName;
 
-        Context.Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
+        Service.Mediator.Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
 
     end;
 
@@ -1989,7 +1979,7 @@ begin
         // ---------------------------
         WM_QUERYENDSESSION:
         begin
-            ThreadFileLog.Log('[WndMessagesWindows]: Detected ' + IntToStr(PassMsg.Msg)
+            Service.Logger.Log('[WndMessagesWindows]: Detected ' + IntToStr(PassMsg.Msg)
                 + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing '
                 + TCommon.AppCaption + '...'
             );
@@ -2002,7 +1992,7 @@ begin
         // -------------------------
         WM_ENDSESSION:
         begin
-            ThreadFileLog.Log('[WndMessagesWindows]: Detected ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
+            Service.Logger.Log('[WndMessagesWindows]: Detected ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
             FAllowClose:=True;
         end;
 
@@ -2018,7 +2008,7 @@ begin
             PBT_APMSUSPEND:
             begin
                 SwitchTimers(TurnedOff);
-                ThreadFileLog.Log('[WndMessagesWindows]: Detected '
+                Service.Logger.Log('[WndMessagesWindows]: Detected '
                     + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.'
                 );
             end;
@@ -2030,7 +2020,7 @@ begin
             PBT_APMRESUMEAUTOMATIC:
             begin
                 SwitchTimers(TurnedOff);
-                ThreadFileLog.Log('[WndMessagesWindows]: Detected '
+                Service.Logger.Log('[WndMessagesWindows]: Detected '
                     + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.'
                 );
             end;
@@ -2056,10 +2046,8 @@ end;
 
 {$REGION 'STARTUP'}
 
-procedure TMainForm.InitMainWnd(SessionFile: string);
+procedure TMainForm.InitMainWnd();
 begin
-
-    ThreadFileLog.LogFileName:=SessionFile;
 
     FStartTime:=Now();
     FormatDateTime('hh:mm:ss', Now());
@@ -2069,8 +2057,8 @@ begin
     valCurrentDate.Caption:=DateToStr(Now);
     valAadUser.Caption:='Guest';
 
-    ThreadFileLog.Log('Application version = ' + THelpers.GetBuildInfoAsString);
-    ThreadFileLog.Log('User SID = ' + THelpers.GetCurrentUserSid);
+    Service.Logger.Log('Application version = ' + THelpers.GetBuildInfoAsString);
+    Service.Logger.Log('User SID = ' + THelpers.GetCurrentUserSid);
 
 end;
 
@@ -2113,10 +2101,9 @@ begin
             TThread.Synchronize(nil, procedure
             begin
 
-                var Context: IMediator:=TMediator.Create();
                 var OpenItemsResponse: TCallResponse;
 
-                OpenItemsResponse:=Context.OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
+                OpenItemsResponse:=Service.Mediator.OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
                 FOpenItemsUpdate:=THelpers.FormatDateTime(FOpenItemsUpdate, TCalendar.DateTime);
 
                 if not OpenItemsResponse.IsSucceeded then
@@ -2125,7 +2112,7 @@ begin
                     Exit();
                 end;
 
-                ThreadFileLog.Log(
+                Service.Logger.Log(
                     '[StartMainWnd]: Open items information loaded (FOpenItemsUpdate = ' +
                     FOpenItemsUpdate + '; FOpenItemsStatus = ' + FOpenItemsStatus + ').'
                 );
@@ -2139,7 +2126,7 @@ begin
                 try
 
                     var DebtorsResponse: TCallResponse;
-                    DebtorsResponse:=Context.Debtors.GetCustSortingOptionsAwaited(SortingOptions);
+                    DebtorsResponse:=Service.Mediator.Debtors.GetCustSortingOptionsAwaited(SortingOptions);
 
                     if not DebtorsResponse.IsSucceeded then
                     begin
@@ -2152,12 +2139,12 @@ begin
                     if selAgeSorting.Items.Count > 0 then
                     begin
                         selAgeSorting.ItemIndex:=0;
-                        ThreadFileLog.Log('[StartMainWnd]: Sorting options for aging report has been loaded.');
+                        Service.Logger.Log('[StartMainWnd]: Sorting options for aging report has been loaded.');
                     end
                     else
                     begin
                         THelpers.MsgCall(TAppMessage.Error, 'No sorting options have been found. Please contact IT Support.');
-                        ThreadFileLog.Log('[StartMainWnd]: No sorting options have been found.');
+                        Service.Logger.Log('[StartMainWnd]: No sorting options have been found.');
                     end;
 
                 finally
@@ -2286,9 +2273,8 @@ begin
             SwitchTimers(TAppTimers.TurnedOff);
             ChromiumWindow.CloseBrowser(True);
 
-            var Context: IMediator:=TMediator.Create();
             var CallResponse: TCallResponse;
-            CallResponse:=Context.Accounts.SaveUserLogsAwaited();
+            CallResponse:=Service.Mediator.Accounts.SaveUserLogsAwaited();
 
             if not CallResponse.IsSucceeded then
                 THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
@@ -2700,7 +2686,7 @@ begin
     // Count current follow-ups and display in notification baloon.
     // ------------------------------------------------------------
     var Sum:=0;
-    var ActiveUser:=SessionService.SessionData.AliasName.ToLower();
+    var ActiveUser:=Service.SessionData.AliasName.ToLower();
 
     for var iCNT:=1 to sgAgeView.RowCount - 1 do
     begin
@@ -2745,10 +2731,8 @@ end;
 
 procedure TMainForm.TimerCustOpenItemsTimer(Sender: TObject);
 begin
-    ThreadFileLog.Log('[TimerCustOpenItemsTimer]: Calling open items scanner...');
-    var Context: IMediator:=TMediator.Create();
-    //var OpenItems: IOpenItems:=TOpenItems.Create();
-    Context.OpenItems.ScanOpenItemsAsync(FOpenItemsUpdate, ScanOpenItems_Callback);
+    Service.Logger.Log('[TimerCustOpenItemsTimer]: Calling open items scanner...');
+    Service.Mediator.OpenItems.ScanOpenItemsAsync(FOpenItemsUpdate, ScanOpenItems_Callback);
 end;
 
 
@@ -3080,9 +3064,8 @@ begin
     var Msg:='Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.';
     if THelpers.MsgCall(TAppMessage.Question2, Msg) = IDNO then Exit();
 
-    var Context: IMediator:=TMediator.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Context.AddressBook.DelFromAddressBookAwaited(
+    CallResponse:=Service.Mediator.AddressBook.DelFromAddressBookAwaited(
         sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._Id),
         sgAddressBook.Row].ToInteger()
     );
@@ -3090,7 +3073,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
-        ThreadFileLog.Log('[Action_DelRowClick]: Cannot delete selected row.');
+        Service.Logger.Log('[Action_DelRowClick]: Cannot delete selected row.');
         Exit();
     end;
 
@@ -3296,8 +3279,7 @@ begin
     CustDetails.StatementEmails:=' ';
     CustDetails.PhoneNumbers   :=' ';
 
-    var Context: IMediator:=TMediator.Create();
-    Context.AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
+    Service.Mediator.AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
 
 end;
 
@@ -3338,7 +3320,7 @@ begin
             if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
                 CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, iCNT);
 
-            ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
+            Service.Logger.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
 
     end;
 
@@ -3366,11 +3348,9 @@ begin
             LGeneralCommentFields.Free2         :=String.Empty;
             LGeneralCommentFields.Free3         :=String.Empty;
             LGeneralCommentFields.UserComment   :=String.Empty;
-            LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+            LGeneralCommentFields.UserAlias     :=Service.SessionData.AliasName;
 
-            var Context: IMediator:=TMediator.Create();
-            Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
-
+            Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]:=TChars.SPACE;
 
         end;
@@ -3378,7 +3358,7 @@ begin
     end;
 
     MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
-    ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
+    Service.Logger.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
 
@@ -3612,7 +3592,7 @@ end;
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
 //    var Tracker: ITracker:=TTracker.Create();
-//    Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionData.AliasName), RefreshInvoiceTracker_Callback);
+//    Tracker.RefreshInvoiceTrackerAsync(UpperCase(Service.SessionData.AliasName), RefreshInvoiceTracker_Callback);
 end;
 
 
@@ -3954,8 +3934,7 @@ procedure TMainForm.btnOpenAbClick(Sender: TObject);
 begin
     BusyForm.Show();
     UpdateStatusBar(TStatusBar.Processing);
-    var Context: IMediator:=TMediator.Create();
-    Context.AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
+    Service.Mediator.AddressBook.OpenAddressBookAsync(String.Empty, OpenAddressBook_Callback, LoadedCompanies);
 end;
 
 
@@ -4153,8 +4132,7 @@ begin
             Exit();
         end;
 
-        var Context: IMediator:=TMediator.Create();
-        Context.Utilities.SetNewPasswordAsync(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
+        Service.Mediator.Utilities.SetNewPasswordAsync(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
 
     end
     else
@@ -4181,8 +4159,7 @@ begin
     end
     else
     begin
-        var Context: IMediator:=TMediator.Create();
-        Context.Utilities.CheckGivenPasswordAsync(EditPassword.Text, CheckGivenPassword_Callback);
+        Service.Mediator.Utilities.CheckGivenPasswordAsync(EditPassword.Text, CheckGivenPassword_Callback);
     end;
 
 end;

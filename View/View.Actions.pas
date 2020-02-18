@@ -271,13 +271,11 @@ uses
     View.SendStatement,
     View.PhoneList,
     Unity.Settings,
-    Unity.SessionService,
+    Unity.Service,
     Unity.Constants,
     Unity.Helpers,
     Unity.Enums,
     Unity.Sorting,
-    Unity.EventLogger,
-    Mediator,
     Api.ReturnOpenItems,
     Api.UserDailyCommentsList,
     Api.ReturnCustSnapshots;
@@ -444,26 +442,23 @@ end;
 procedure TActionsForm.UpdateCustDetails();
 begin
     FCustDetailsId:=0;
-    var Context: IMediator:=TMediator.Create();
-    Context.AddressBook.GetCustomerDetailsAsync(CustNumber, SourceDBName, GetCustomerDetailsAsync_Callback);
+    Service.Mediator.AddressBook.GetCustomerDetailsAsync(CustNumber, SourceDBName, GetCustomerDetailsAsync_Callback);
 end;
 
 
 procedure TActionsForm.UpdateCompanyDetails();
 begin
-    var Context: IMediator:=TMediator.Create();
-    Context.Companies.GetCompanyDetailsAsync(SourceDBName, GetCompanyDetailsAsync_Callback);
+    Service.Mediator.Companies.GetCompanyDetailsAsync(SourceDBName, GetCompanyDetailsAsync_Callback);
 end;
 
 
 procedure TActionsForm.UpdateDaily();
 begin
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Comments.GetDailyCommentsAsync(
+    Service.Mediator.Comments.GetDailyCommentsAsync(
         SourceDBName,
         CustNumber,
-        SessionService.SessionData.AliasName,
+        Service.SessionData.AliasName,
         GetDailyCommentsAsync_Callback
     );
 
@@ -473,11 +468,10 @@ end;
 procedure TActionsForm.UpdateGeneral();
 begin
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Comments.GetGeneralCommentAsync(
+    Service.Mediator.Comments.GetGeneralCommentAsync(
         SourceDBName,
         CustNumber,
-        SessionService.SessionData.AliasName,
+        Service.SessionData.AliasName,
         GetGeneralCommentAsync_Callback
     );
 
@@ -496,33 +490,33 @@ begin
 
     // Cover save button if customer is not registered.
     if
-        (Cust_Person.Text = TUnknown.NotFound)
+        (Cust_Person.Text = 'Not found!')
     or
-        (Cust_Mail.Text = TUnknown.NotFound)
+        (Cust_Mail.Text = 'Not found!')
     or
-        (Cust_MailGeneral.Text = TUnknown.NotFound)
+        (Cust_MailGeneral.Text = 'Not found!')
     then
         imgCoverSaveBtn.Visible:=True
             else
                 imgCoverSaveBtn.Visible:=False;
 
     // Disable text fields if customer is not registered.
-    if Cust_Phone.Text = TUnknown.NotFound then
+    if Cust_Phone.Text = 'Not found!' then
         Cust_Phone.Enabled:=False
             else
                 Cust_Phone.Enabled:=True;
 
-    if Cust_Mail.Text = TUnknown.NotFound then
+    if Cust_Mail.Text = 'Not found!' then
         Cust_Mail.Enabled:=False
             else
                 Cust_Mail.Enabled:=True;
 
-    if Cust_Person.Text = TUnknown.NotFound then
+    if Cust_Person.Text = 'Not found!' then
         Cust_Person.Enabled:=False
             else
                 Cust_Person.Enabled:=True;
 
-    if Cust_MailGeneral.Text = TUnknown.NotFound then
+    if Cust_MailGeneral.Text = 'Not found!' then
         Cust_MailGeneral.Enabled:=False
             else
                 Cust_MailGeneral.Enabled:=True;
@@ -541,14 +535,14 @@ end;
 procedure TActionsForm.ClearAll();
 begin
 
-    Cust_Name.Caption    :=TUnknown.NotFound;
-    Cust_Number.Caption  :=TUnknown.NotFound;
-    Cust_Person.Text     :=TUnknown.NotFound;
-    Cust_Mail.Text       :=TUnknown.NotFound;
-    Cust_MailGeneral.Text:=TUnknown.NotFound;
+    Cust_Name.Caption    :='Not found!';
+    Cust_Number.Caption  :='Not found!';
+    Cust_Person.Text     :='Not found!';
+    Cust_Mail.Text       :='Not found!';
+    Cust_MailGeneral.Text:='Not found!';
 
     Cust_Phone.Clear;
-    Cust_Phone.Items.Add(TUnknown.NotFound);
+    Cust_Phone.Items.Add('Not found!');
     Cust_Phone.ItemIndex:=0;
     selSendFrom.Clear();
 
@@ -668,10 +662,9 @@ begin
         LGeneralCommentFields.Free2         :=String.Empty;
         LGeneralCommentFields.Free3         :=String.Empty;
         LGeneralCommentFields.UserComment   :=String.Empty;
-        LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+        LGeneralCommentFields.UserAlias     :=Service.SessionData.AliasName;
 
-        var Context: IMediator:=TMediator.Create();
-        Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
+        Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), MainForm.sgAgeView.Row]:='';
         MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
@@ -697,8 +690,7 @@ begin
         CustomerDetails.StatementEmails:=Cust_Mail.Text;
         CustomerDetails.PhoneNumbers   :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
-        var Context: IMediator:=TMediator.Create();
-        Context.AddressBook.AddToAddressBookAsync(CustomerDetails, InsertAddressBook_Callback);
+        Service.Mediator.AddressBook.AddToAddressBookAsync(CustomerDetails, InsertAddressBook_Callback);
 
     end
     else
@@ -712,8 +704,7 @@ begin
         CustomerDetails.StatementEmails:=Cust_Mail.Text;
         CustomerDetails.PhoneNumbers   :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
-        var Context: IMediator:=TMediator.Create();
-        Context.AddressBook.UpdateAddressBookAsync(CustomerDetails, UpdateAddressBook_Callback);
+        Service.Mediator.AddressBook.UpdateAddressBookAsync(CustomerDetails, UpdateAddressBook_Callback);
 
     end;
 
@@ -731,10 +722,9 @@ begin
     LGeneralCommentFields.Free2         :=String.Empty;
     LGeneralCommentFields.Free3         :=String.Empty;
     LGeneralCommentFields.UserComment   :=GeneralCom.Text;
-    LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+    LGeneralCommentFields.UserAlias     :=Service.SessionData.AliasName;
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
+    Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 
@@ -757,10 +747,9 @@ begin
     LDailyCommentFields.FixedRemindersSent  :=0;
     LDailyCommentFields.CustomRemindersSent :=0;
     LDailyCommentFields.UserComment         :=DailyCom.Text;
-    LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
+    LDailyCommentFields.UserAlias           :=Service.SessionData.AliasName;
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
+    Service.Mediator.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 
@@ -809,12 +798,12 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
-        ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
     THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated.');
-    ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book has been updated.');
+    Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Address Book has been updated.');
 
 end;
 
@@ -825,13 +814,13 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
-        ThreadFileLog.Log('[InsertAddressBook_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[InsertAddressBook_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
     FCustDetailsId:=ReturnedId;
     THelpers.MsgCall(TAppMessage.Info, 'New customer has been added successfully.');
-    ThreadFileLog.Log('[InsertAddressBook_Callback]: Address Book has been updated.');
+    Service.Logger.Log('[InsertAddressBook_Callback]: Address Book has been updated.');
 
 end;
 
@@ -842,7 +831,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -855,7 +844,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -871,7 +860,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[GetDailyCommentsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[GetDailyCommentsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -916,7 +905,7 @@ begin
     if (not CallResponse.IsSucceeded) and (CallResponse.ErrorCode <> 'no_comment_found') then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[GetGeneralCommentAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[GetGeneralCommentAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1014,14 +1003,14 @@ begin
     DailyComGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
     DailyComGrid.Visible:=True;
 
-    Cust_Name.Caption    :=TUnknown.NotFound;
-    Cust_Number.Caption  :=TUnknown.NotFound;
-    Cust_Person.Text     :=TUnknown.NotFound;
-    Cust_Mail.Text       :=TUnknown.NotFound;
-    Cust_MailGeneral.Text:=TUnknown.NotFound;
+    Cust_Name.Caption    :='Not found!';
+    Cust_Number.Caption  :='Not found!';
+    Cust_Person.Text     :='Not found!';
+    Cust_Mail.Text       :='Not found!';
+    Cust_MailGeneral.Text:='Not found!';
 
     Cust_Phone.Clear;
-    Cust_Phone.Items.Add(TUnknown.NotFound);
+    Cust_Phone.Items.Add('Not found!');
     Cust_Phone.ItemIndex:=0;
 
     ValueOpenAm.Caption:='';
@@ -1051,7 +1040,7 @@ begin
         DailyComGrid.Freeze(True);
 
         MainForm.TimerCustOpenItems.Enabled:=False;
-        ThreadFileLog.Log('[TActionsForm.FormActivate]: Action view has been opened, open items loader is on hold.');
+        Service.Logger.Log('[TActionsForm.FormActivate]: Action view has been opened, open items loader is on hold.');
 
         THelpers.ExecWithDelay(500, procedure
         begin
@@ -1099,7 +1088,7 @@ procedure TActionsForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FIsDataLoaded:=False;
     MainForm.TimerCustOpenItems.Enabled:=True;
-    ThreadFileLog.Log('[TActionsForm.FormActivate]: Action view has been closed, open items loader is resumed.');
+    Service.Logger.Log('[TActionsForm.FormActivate]: Action view has been closed, open items loader is resumed.');
 end;
 
 
@@ -1242,8 +1231,7 @@ begin
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
     Screen.Cursor:=crHourGlass;
-    var Context: IMediator:=TMediator.Create();
-    Context.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
+    Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
 
 end;
 
@@ -1329,10 +1317,9 @@ begin
     LDailyCommentFields.FixedRemindersSent  :=0;
     LDailyCommentFields.CustomRemindersSent :=0;
     LDailyCommentFields.UserComment         :='New action...';
-    LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
+    LDailyCommentFields.UserAlias           :=Service.SessionData.AliasName;
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
+    Service.Mediator.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 

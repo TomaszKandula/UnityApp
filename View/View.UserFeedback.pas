@@ -65,7 +65,7 @@ implementation
 
 uses
     View.Main,
-    Mediator,
+    Unity.Service,
     Unity.Helpers;
 
 
@@ -141,8 +141,7 @@ begin
     PanelClient.Enabled:=False;
     Screen.Cursor:=crHourGlass;
 
-    var Context: IMediator:=TMediator.Create();
-    Context.Mailer.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
+    Service.Mediator.Mailer.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
 
 end;
 

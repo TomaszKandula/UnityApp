@@ -11,32 +11,12 @@ interface
 uses
     System.Classes,
     System.Generics.Collections,
+    Unity.Types,
     Unity.Grid,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for updating/inserting data for daily comment.
-    /// </summary>
-    TEditDailyComment = procedure(CallResponse: TCallResponse) of object;
-
-    /// <summary>
-    /// Callback signature for updating/inserting data for general comment.
-    /// </summary>
-    TEditGeneralComment = procedure(CallResponse: TCallResponse) of object;
-
-    /// <summary>
-    /// Callback signature for getting results from daily comments list request.
-    /// </summary>
-    TGetDailyComments = procedure(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse) of object;
-
-    /// <summary>
-    /// Callback signature for getting results for general comment single dataset.
-    /// </summary>
-    TGetGeneralComments = procedure(Comments: TGeneralCommentFields; CallResponse: TCallResponse) of object;
 
 
     IComments = interface(IInterface)
@@ -107,6 +87,8 @@ type
     TComments = class(TInterfacedObject, IComments)
     {$TYPEINFO ON}
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload and comment id
         /// parameter for update. If comment id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
@@ -182,9 +164,7 @@ uses
     REST.Json,
     Unity.Settings,
     Unity.RestWrapper,
-    Unity.Helpers,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Api.UserGeneralComment,
     Api.UserGeneralCommentAdd,
     Api.UserGeneralCommentUpdate,
@@ -199,13 +179,26 @@ uses
     Api.UserDailyCommentCheck;
 
 
+constructor TComments.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TComments.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
+
+
 procedure TComments.EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
         Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
@@ -221,7 +214,7 @@ begin
         begin
 
             Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-            ThreadFileLog.Log('[EditGeneralComment]: Executing PATCH ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[EditGeneralComment]: Executing PATCH ' + Restful.ClientBaseURL);
 
             var UserDailyCommentUpdate:=TUserDailyCommentUpdate.Create();
             try
@@ -246,7 +239,7 @@ begin
         begin
 
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            ThreadFileLog.Log('[EditGeneralComment]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[EditGeneralComment]: Executing POST ' + Restful.ClientBaseURL);
 
             var UserDailyCommentAdd:=TUserDailyCommentAdd.Create();
             try
@@ -302,7 +295,7 @@ begin
                 end;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
-                ThreadFileLog.Log('[EditGeneralComment]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[EditGeneralComment]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -318,7 +311,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -327,7 +320,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[EditGeneralComment]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -357,7 +350,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
         Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
@@ -373,7 +366,7 @@ begin
         begin
 
             Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-            ThreadFileLog.Log('[EditGeneralComment]: Executing PATCH ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[EditGeneralComment]: Executing PATCH ' + Restful.ClientBaseURL);
 
             var UserGeneralCommentUpdate:=TUserGeneralCommentUpdate.Create();
             try
@@ -396,7 +389,7 @@ begin
         begin
 
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            ThreadFileLog.Log('[EditGeneralComment]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[EditGeneralComment]: Executing POST ' + Restful.ClientBaseURL);
 
             var UserGeneralCommentAdd:=TUserGeneralCommentAdd.Create();
             try
@@ -449,7 +442,7 @@ begin
                 end;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
-                ThreadFileLog.Log('[EditGeneralComment]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[EditGeneralComment]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -465,7 +458,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -474,7 +467,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[EditGeneralComment]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -500,7 +493,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
         Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
@@ -510,7 +503,7 @@ begin
             + CustNumber.ToString()
             + '/check/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[CheckGeneralCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[CheckGeneralCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -543,7 +536,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -552,7 +545,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -576,7 +569,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
         Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
@@ -588,7 +581,7 @@ begin
             + UserAlias
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetGeneralCommentAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetGeneralCommentAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -608,7 +601,7 @@ begin
                     CallResponse.IsSucceeded:=UserGeneralComment.IsSucceeded;
                     CallResponse.LastMessage:=UserGeneralComment.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserGeneralComment.Error.ErrorCode;
-                    ThreadFileLog.Log('[GetGeneralCommentAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetGeneralCommentAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserGeneralComment.Free();
@@ -628,7 +621,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -637,7 +630,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetGeneralCommentAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -663,7 +656,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
         Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
@@ -675,7 +668,7 @@ begin
             + AgeDate
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[CheckDailyCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[CheckDailyCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -708,7 +701,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -717,7 +710,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -741,7 +734,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
         var Settings: ISettings:=TSettings.Create();
 
         Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
@@ -753,7 +746,7 @@ begin
             + UserAlias
             + '/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetDailyCommentsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[GetDailyCommentsAsync]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -785,7 +778,7 @@ begin
                     CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserDailyCommentsList.Error.ErrorCode;
-                    ThreadFileLog.Log('[GetDailyCommentsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetDailyCommentsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserDailyCommentsList.Free();
@@ -805,7 +798,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -814,7 +807,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[GetDailyCommentsAsync]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -864,7 +857,7 @@ begin
         LocalPayLoad.FixedRemindersSent  :=0;
         LocalPayLoad.CustomRemindersSent :=0;
         LocalPayLoad.UserComment         :=ExtendedComment;
-        LocalPayLoad.UserAlias           :=SessionService.SessionData.AliasName;
+        LocalPayLoad.UserAlias           :=Service.SessionData.AliasName;
 
         EditDailyCommentAsync(LocalPayLoad);
         CallResponse.IsSucceeded:=True;
@@ -874,7 +867,7 @@ begin
         begin
             CallResponse.IsSucceeded:=False;
             CallResponse.LastMessage:='[UpdateDailyCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
-            ThreadFileLog.Log(CallResponse.LastMessage);
+            Service.Logger.Log(CallResponse.LastMessage);
         end;
 
     end;

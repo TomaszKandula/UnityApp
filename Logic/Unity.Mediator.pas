@@ -1,4 +1,4 @@
-unit Mediator;
+unit Unity.Mediator;
 
 // -------------------------------------------------------
 // Application logic (business layer). Anyone can call it.
@@ -16,17 +16,44 @@ uses
     Async.Debtors,
     Async.Documents,
     Async.GeneralTables,
-    Async.InvoiceTracker,
     Async.Mailer,
     Async.OpenItems,
-    Async.Utilities,
-    IMediator;
+    Async.Utilities;
 
 
 type
 
 
-    TContext = class(TInterfacedObject, IContext)
+    IMediator = interface;
+    TMediator = class;
+
+
+    IMediator = interface(IInterface)
+    ['{6AE0D0FF-BA65-450C-9972-C226F01CBC99}']
+        function GetAccounts():       IAccounts;
+        function GetAddressBook():    IAddressBook;
+        function GetComments():       IComments;
+        function GetCompanies():      ICompanies;
+        function GetDebtors():        IDebtors;
+        function GetDocuments():      IDocuments;
+        function GetGeneralTables():  IGeneralTables;
+        function GetMailer():         IMailer;
+        function GetOpenItems():      IOpenItems;
+        function GetUtilities():      IUtilities;
+        property Accounts:       IAccounts       read GetAccounts;
+        property AddressBook:    IAddressBook    read GetAddressBook;
+        property Comments:       IComments       read GetComments;
+        property Companies:      ICompanies      read GetCompanies;
+        property Debtors:        IDebtors        read GetDebtors;
+        property Documents:      IDocuments      read GetDocuments;
+        property GeneralTables:  IGeneralTables  read GetGeneralTables;
+        property Mailer:         IMailer         read GetMailer;
+        property OpenItems:      IOpenItems      read GetOpenItems;
+        property Utilities:      IUtilities      read GetUtilities;
+    end;
+
+
+    TMediator = class(TInterfacedObject, IMediator)
     {$TYPEINFO ON}
     strict private
         function GetAccounts():       IAccounts;
@@ -36,7 +63,6 @@ type
         function GetDebtors():        IDebtors;
         function GetDocuments():      IDocuments;
         function GetGeneralTables():  IGeneralTables;
-        function GetInvoiceTracker(): IInvoiceTracker;
         function GetMailer():         IMailer;
         function GetOpenItems():      IOpenItems;
         function GetUtilities():      IUtilities;
@@ -47,11 +73,12 @@ type
         var FDebtors:                 IDebtors;
         var FDocuments:               IDocuments;
         var FGeneralTables:           IGeneralTables;
-        var FInvoiceTracker:          IInvoiceTracker;
         var FMailer:                  IMailer;
         var FOpenItems:               IOpenItems;
         var FUtilities:               IUtilities;
     public
+        constructor Create();
+        destructor Destroy(); override;
         property Accounts:       IAccounts       read GetAccounts;
         property AddressBook:    IAddressBook    read GetAddressBook;
         property Comments:       IComments       read GetComments;
@@ -59,7 +86,6 @@ type
         property Debtors:        IDebtors        read GetDebtors;
         property Documents:      IDocuments      read GetDocuments;
         property GeneralTables:  IGeneralTables  read GetGeneralTables;
-        property InvoiceTracker: IInvoiceTracker read GetInvoiceTracker;
         property Mailer:         IMailer         read GetMailer;
         property OpenItems:      IOpenItems      read GetOpenItems;
         property Utilities:      IUtilities      read GetUtilities;
@@ -67,6 +93,28 @@ type
 
 
 implementation
+
+
+constructor TMediator.Create();
+begin
+    FAccounts      :=TAccounts.Create();
+    FAddressBook   :=TAddressBook.Create();
+    FComments      :=TComments.Create();
+    FCompanies     :=TCompanies.Create();
+    FDebtors       :=TDebtors.Create();
+    FDocuments     :=TDocuments.Create();
+    FGeneralTables :=TGeneralTables.Create();
+    FMailer        :=TMailer.Create();
+    FOpenItems     :=TOpenItems.Create();
+    FUtilities     :=TUtilities.Create();
+end;
+
+
+destructor TMediator.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 function TMediator.GetAccounts(): IAccounts;
@@ -108,12 +156,6 @@ end;
 function TMediator.GetGeneralTables(): IGeneralTables;
 begin
     Result:=FGeneralTables;
-end;
-
-
-function TMediator.GetInvoiceTracker(): IInvoiceTracker;
-begin
-    Result:=FInvoiceTracker;
 end;
 
 

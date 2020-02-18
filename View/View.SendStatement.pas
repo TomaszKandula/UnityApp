@@ -101,7 +101,7 @@ uses
     Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
-    Mediator;
+    Unity.Service;
 
 
 var vSendForm: TSendForm;
@@ -165,8 +165,7 @@ begin
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
     Screen.Cursor:=crHourGlass;
-    var Context: IMediator:=TMediator.Create();
-    Context.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
+    Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
 
     Close();
 

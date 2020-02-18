@@ -10209,6 +10209,10 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object DebtorsHeader: TPanel
         AlignWithMargins = True
         Left = 0
@@ -12817,6 +12821,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GeneralTablesHeader: TPanel
         Left = 0
         Top = 0
@@ -16850,7 +16858,7 @@ object MainForm: TMainForm
       Left = 52
       Top = 10
       Width = 195
-      Height = 33
+      Height = 29
       Margins.Left = 0
       Margins.Top = 10
       Margins.Right = 0
@@ -16863,7 +16871,6 @@ object MainForm: TMainForm
       Font.Name = 'Verdana'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitHeight = 29
     end
     object imgAADUser: TImage
       AlignWithMargins = True
@@ -17015,7 +17022,7 @@ object MainForm: TMainForm
       Left = 1350
       Top = 18
       Width = 73
-      Height = 25
+      Height = 14
       Hint = 'Redeem access'
       Margins.Left = 0
       Margins.Top = 18
@@ -17033,7 +17040,6 @@ object MainForm: TMainForm
       ParentShowHint = False
       PopupMenu = PopupLogin
       ShowHint = True
-      ExplicitHeight = 14
     end
   end
   object PopupMenu: TPopupMenu

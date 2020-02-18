@@ -174,6 +174,13 @@
         <DCCReference Include="Helpers\Unity.Constants.pas"/>
         <DCCReference Include="Helpers\Unity.Sorting.pas"/>
         <DCCReference Include="Helpers\Unity.Helpers.pas"/>
+        <DCCReference Include="Helpers\Unity.Types.pas"/>
+        <DCCReference Include="Logic\Unity.Mediator.pas"/>
+        <DCCReference Include="Logic\Unity.Service.pas"/>
+        <DCCReference Include="Logic\DataLayer\Unity.RestWrapper.pas"/>
+        <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
+        <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
+        <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
         <DCCReference Include="Model\Json\Api.MetaData.pas"/>
         <DCCReference Include="Model\Json\Api.ErrorHandler.pas"/>
         <DCCReference Include="Model\Json\Api.BankDetails.pas"/>
@@ -232,8 +239,6 @@
         <DCCReference Include="Model\Json\Responses\Api.TokenGranted.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.AddressBookUpdated.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserGeneralCommentCheck.pas"/>
-        <DCCReference Include="Logic\DataLayer\Unity.RestWrapper.pas"/>
-        <DCCReference Include="Logic\Mediator.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Document.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Accounts.pas"/>
@@ -243,14 +248,9 @@
         <DCCReference Include="Logic\BusinessLayer\Async.OpenItems.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Comments.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Documents.pas"/>
-        <DCCReference Include="Logic\BusinessLayer\Async.InvoiceTracker.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Companies.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.GeneralTables.pas"/>
-        <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
-        <DCCReference Include="Logic\Configuration\Unity.SessionService.pas"/>
-        <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
-        <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="View\View.BusyScreen.pas">
             <Form>BusyForm</Form>
         </DCCReference>
@@ -371,10 +371,9 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Images\UnityIcon_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
-                        <RemoteDir>Assets\</RemoteDir>
-                        <RemoteName>Logo44x44.png</RemoteName>
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -405,9 +404,10 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Images\UnityIcon_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

@@ -105,7 +105,7 @@ uses
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
-    Unity.SessionService;
+    Unity.Service;
 
 
 var vQmsForm: TQmsForm;

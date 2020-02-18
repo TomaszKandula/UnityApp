@@ -61,7 +61,7 @@ uses
     Unity.Enums,
     Unity.Constants,
     Unity.Settings,
-    Unity.SessionService;
+    Unity.Service;
 
 
 var vInvoicesForm: TInvoicesForm;

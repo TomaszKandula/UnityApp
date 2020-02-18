@@ -91,7 +91,7 @@ implementation
 
 uses
     View.Main,
-    Mediator,
+    Unity.Service,
     Unity.Settings,
     Unity.Helpers;
 
@@ -177,7 +177,6 @@ end;
 procedure TRateForm.InsertRating();
 begin
 
-    var Context: IMediator:=TMediator.Create();
     var UserRating: TRating;
 
     UserRating.UserRating:=FSelectedRating;
@@ -187,7 +186,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Context.Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
+    Service.Mediator.Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
 
 end;
 
@@ -195,7 +194,6 @@ end;
 procedure TRateForm.UpdateRating();
 begin
 
-    var Context: IMediator:=TMediator.Create();
     var UserRating: TRating;
 
     UserRating.UserRating:=FSelectedRating;
@@ -205,7 +203,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Context.Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
+    Service.Mediator.Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
 
 end;
 
@@ -281,10 +279,9 @@ begin
         THelpers.ExecWithDelay(500, procedure
         begin
 
-            var Context: IMediator:=TMediator.Create();
             var CallResponse: TCallResponse;
             var Rating: TRating;
-            CallResponse:=Context.Accounts.LoadRatingAwaited(Rating);
+            CallResponse:=Service.Mediator.Accounts.LoadRatingAwaited(Rating);
 
             if CallResponse.IsSucceeded then
             begin

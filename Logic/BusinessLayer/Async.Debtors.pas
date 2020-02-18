@@ -11,18 +11,13 @@ interface
 uses
     System.Classes,
     System.Generics.Collections,
+    Unity.Types,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
 
 
 type
-
-
-    /// <summary>
-    /// Callback signature for reading current age report from SQL database.
-    /// </summary>
-    TReadAgeView = procedure(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
 
 
     IDebtors = interface(IInterface)
@@ -62,6 +57,8 @@ type
         procedure FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
         procedure FComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
     public
+        constructor Create();
+        destructor Destroy(); override;
         /// <summary>
         /// Allow to read async. current age report from database for given CoCodes and sorting option.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -100,14 +97,25 @@ uses
     REST.Json,
     Unity.RestWrapper,
     Unity.Helpers,
-    Unity.Settings,
     Unity.Sorting,
-    Unity.EventLogger,
-    Unity.SessionService,
+    Unity.Service,
     Unity.Constants,
     Api.CustSortingOptions,
     Api.UserCustSnapshotList,
     Api.ReturnCustSnapshots;
+
+
+constructor TDebtors.Create();
+begin
+    {Empty}
+end;
+
+
+destructor TDebtors.Destroy();
+begin
+    {Empty}
+    inherited;
+end;
 
 
 procedure TDebtors.ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
@@ -120,12 +128,11 @@ begin
         var CallResponse: TCallResponse;
         var Grid: TStringGrid:=TStringGrid.Create(nil);
 
-        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-        var Settings: ISettings:=TSettings.Create();
+        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-        Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
+        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[ReadAgeViewAsync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Logger.Log('[ReadAgeViewAsync]: Executing POST ' + Restful.ClientBaseURL);
 
         var UserCustSnapshotList:=TUserCustSnapshotList.Create();
         try
@@ -210,14 +217,14 @@ begin
                     PayLoad.AgeDate:=ReturnCustSnapshots.AgeDate;
 
                     FComputeAgeSummary(Grid, PayLoad);
-                    ThreadFileLog.Log('[ReadAgeViewAsync]: Aging summary has been calculated.');
+                    Service.Logger.Log('[ReadAgeViewAsync]: Aging summary has been calculated.');
 
                     FComputeRiskClass(Grid, PayLoad, RiskClassGroup);
-                    ThreadFileLog.Log('[ReadAgeViewAsync]: Risk class data has been calculated.');
+                    Service.Logger.Log('[ReadAgeViewAsync]: Risk class data has been calculated.');
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
-                    ThreadFileLog.Log('[ReadAgeViewAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     ReturnCustSnapshots.Free();
@@ -237,7 +244,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
@@ -246,7 +253,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                Service.Logger.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -319,12 +326,11 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
-            var Settings: ISettings:=TSettings.Create();
+            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-            Restful.ClientBaseURL:=Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
+            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-            ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+            Service.Logger.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
             try
 
@@ -338,7 +344,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CustSortingOptions.Free();
-                    ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 end
                 else
@@ -354,7 +360,7 @@ begin
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
 
                 end;
 
@@ -363,7 +369,7 @@ begin
                 begin
                     CallResponse.IsSucceeded:=False;
                     CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
+                    Service.Logger.Log(CallResponse.LastMessage);
                 end;
 
             end;
