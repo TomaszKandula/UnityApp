@@ -20,7 +20,6 @@ type
 
 
     TReturnAccountType = class
-    {$TYPEINFO ON}
     strict private
         var FId:               TArray<integer>;
         var FSourceDbName:     TArray<string>;
@@ -32,6 +31,7 @@ type
         var FError:            TErrorHandler;
         var FMeta:             TMetaData;
     public
+        destructor Destroy(); override;
         const _Id               = 'Id';
         const _SourceDbName     = 'SourceDbName';
         const _ErpCode          = 'ErpCode';
@@ -41,8 +41,6 @@ type
         const _IsSucceeded      = 'IsSucceeded';
         const _Error            = 'Error';
         const _Meta             = 'Meta';
-        destructor Destroy(); override;
-    published
         property Id:               TArray<integer>   read FId               write FId;
         property SourceDbName:     TArray<string>    read FSourceDbName     write FSourceDbName;
         property ErpCode:          TArray<string>    read FErpCode          write FErpCode;

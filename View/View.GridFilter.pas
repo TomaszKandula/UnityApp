@@ -345,7 +345,7 @@ begin
 
     // Filter selected items
     for var iCNT: integer:=0 to High(FFilter) - 1 do
-        for var jCNT: integer:=1 { Skip header } to FGrid.RowCount - 1 do
+        for var jCNT: integer:=1 to FGrid.RowCount - 1 do
         begin
 
             if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
@@ -414,12 +414,12 @@ begin
         begin
             FilterList.Checked[iCNT]:=True;
 
-            for var jCNT: integer:=1 {skip header} to FGrid.RowCount - 1 do
+            for var jCNT: integer:=1 to FGrid.RowCount - 1 do
             begin
 
                 if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
                 begin
-                {unhide row}
+                    // Unhide row
                     if
                     (
                         FFilter[iCNT, 1] = 'False'

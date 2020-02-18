@@ -54,7 +54,6 @@ type
 
 
     TMediator = class(TInterfacedObject, IMediator)
-    {$TYPEINFO ON}
     strict private
         function GetAccounts():       IAccounts;
         function GetAddressBook():    IAddressBook;
@@ -112,7 +111,6 @@ end;
 
 destructor TMediator.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

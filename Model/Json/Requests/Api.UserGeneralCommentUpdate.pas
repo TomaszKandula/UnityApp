@@ -15,7 +15,6 @@ type
 
 
 	TUserGeneralCommentUpdate = class
-    {$TYPEINFO ON}
 	strict private
         var FCommentId:   integer;
         var FFollowUp:    string;
@@ -30,7 +29,6 @@ type
         const _Free2       = 'Free2';
         const _Free3       = 'Free3';
         const _UserComment = 'UserComment';
-    published
         property CommentId:   integer read FCommentId   write FCommentId;
         property FollowUp:    string  read FFollowUp    write FFollowUp;
         property Free1:       string  read FFree1       write FFree1;

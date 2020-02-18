@@ -46,35 +46,16 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TUtilities = class(TInterfacedObject, IUtilities)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
-        /// <summary>
-        /// Allow to async. check provided local administrator password.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
-        /// <summary>
-        /// Allow to async. setup newly provided local administrator password that works only for given program installed on local machine.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
+        procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport); virtual;
+        procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
+        procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
     end;
 
 
@@ -94,13 +75,11 @@ uses
 
 constructor TUtilities.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TUtilities.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 
@@ -114,12 +93,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            var Temp: TStringGrid:=TStringGrid.Create(nil);
-            try
-                Temp.ToExcel('Age Report', FileName, GroupId, AgeDate);
-            finally
-                Temp.Free;
-            end;
+            // New implementation here
 
             CallResponse.IsSucceeded:=True;
 

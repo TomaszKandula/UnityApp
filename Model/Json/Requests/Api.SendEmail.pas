@@ -15,7 +15,6 @@ type
 
 
 	TSendEmail = class
-    {$TYPEINFO ON}
 	strict private
         var FUserId:    string;
         var FSessionId: string;
@@ -36,7 +35,6 @@ type
         const _Bcc       = 'Bcc';
         const _Subject   = 'Subject';
         const _HtmlBody  = 'HtmlBody';
-	published
         property UserId:    string         read FUserId    write FUserId;
         property SessionId: string         read FSessionId write FSessionId;
         property AliasName: string         read FAliasName write FAliasName;

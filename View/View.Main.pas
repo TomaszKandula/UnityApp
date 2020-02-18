@@ -901,8 +901,6 @@ implementation
 uses
     System.NetEncoding,
     View.GridFilter,
-    View.InvoiceTracker,
-    View.InvoiceList,
     View.Actions,
     View.Calendar,
     View.About,
@@ -1481,8 +1479,8 @@ procedure TMainForm.SetGridColumnWidths();
 begin
     sgOpenItems.SetColWidth     (10, 20, 400);
     sgAddressBook.SetColWidth   (10, 20, 400);
-    {sgListValue.SetColWidth     (25, 20, 400);}
-    {sgListSection.SetColWidth   (25, 20, 400);}
+    //sgListValue.SetColWidth     (25, 20, 400);
+    //sgListSection.SetColWidth   (25, 20, 400);
     sgInvoiceTracker.SetColWidth(10, 20, 400);
     sgCoCodes.SetColWidth       (10, 30, 400);
     sgControlStatus.SetColWidth (10, 30, 400);
@@ -1785,8 +1783,8 @@ begin
         List.Free();
     end;
 
-    {sgListValue.SetColWidth(25, 30, 400);}
-    {sgListSection.SetColWidth(25, 30, 400);}
+    //sgListValue.SetColWidth(25, 30, 400);
+    //sgListSection.SetColWidth(25, 30, 400);
 
     EditPassword.Text:='';
 
@@ -2219,13 +2217,12 @@ procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject;
 begin
 
     // Execute on "before popup" - ignore listed
+    // Optional: WOD_NEW_POPUP, WOD_NEW_WINDOW
     Result:=(
                 targetDisposition in
                 [
                     WOD_NEW_FOREGROUND_TAB,
                     WOD_NEW_BACKGROUND_TAB
-                    {WOD_NEW_POPUP,}
-                    {WOD_NEW_WINDOW}
                 ]
             );
 end;
@@ -2309,13 +2306,13 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-    {Do nothing}
+    // Do nothing
 end;
 
 
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
 begin
-    {Do nothing}
+    // Do nothing
 end;
 
 
@@ -2359,7 +2356,7 @@ begin
     finally
         Keys.Free();
         Values.Free();
-        {sgListValue.SetColWidth(25, 30, 400);}
+        //sgListValue.SetColWidth(25, 30, 400);
     end;
 
 end;
@@ -2373,20 +2370,19 @@ end;
 
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-//    var Tracker: ITracker:=TTracker.Create();
-//    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
+    // Call to InvoiceTracker
 end;
 
 
 procedure TMainForm.TabSheet5Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.TabSheet7Show(Sender: TObject);
 begin
-    {SetGridColumnWidths();}
+    //SetGridColumnWidths();
 end;
 
 
@@ -2404,49 +2400,49 @@ end;
 
 procedure TMainForm.Page1Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page2Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page3Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page6Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page7Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page8Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page9Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Page10Show(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
@@ -2993,8 +2989,8 @@ begin
     if sgCoCodes.Focused        then sgCoCodes.SetColWidth(10, 20, 400);
     if sgPaidInfo.Focused       then sgPaidInfo.SetColWidth(10, 20, 400);
     if sgPmtTerms.Focused       then sgPmtTerms.SetColWidth(10, 20, 400);
-    {if sgListValue.Focused     then sgListValue.SetColWidth(25, 20, 400);}
-    {if sgListSection.Focused   then sgListSection.SetColWidth(25, 20, 400);}
+    //if sgListValue.Focused     then sgListValue.SetColWidth(25, 20, 400);
+    //if sgListSection.Focused   then sgListSection.SetColWidth(25, 20, 400);
     if sgInvoiceTracker.Focused then sgInvoiceTracker.SetColWidth(10, 20, 400);
     if sgPersonResp.Focused     then sgPersonResp.SetColWidth(10, 20, 400);
     if sgSalesResp.Focused      then sgSalesResp.SetColWidth(10, 20, 400);
@@ -3017,8 +3013,8 @@ begin
     if sgCoCodes.Focused        then THelpers.TurnRowHighlight(sgCoCodes, Action_TurnRowHighlight);
     if sgPaidInfo.Focused       then THelpers.TurnRowHighlight(sgPaidInfo, Action_TurnRowHighlight);
     if sgPmtTerms.Focused       then THelpers.TurnRowHighlight(sgPmtTerms, Action_TurnRowHighlight);
-    {if sgListValue.Focused     then THelpers.TurnRowHighlight(sgListValue, Action_TurnRowHighlight);}
-    {if sgListSection.Focused   then THelpers.TurnRowHighlight(sgListSection, Action_TurnRowHighlight);}
+    //if sgListValue.Focused     then THelpers.TurnRowHighlight(sgListValue, Action_TurnRowHighlight);
+    //if sgListSection.Focused   then THelpers.TurnRowHighlight(sgListSection, Action_TurnRowHighlight);
     if sgInvoiceTracker.Focused then THelpers.TurnRowHighlight(sgInvoiceTracker, Action_TurnRowHighlight);
     if sgPersonResp.Focused     then THelpers.TurnRowHighlight(sgPersonResp, Action_TurnRowHighlight);
     if sgSalesResp.Focused      then THelpers.TurnRowHighlight(sgSalesResp, Action_TurnRowHighlight);
@@ -3134,7 +3130,7 @@ end;
 
 procedure TMainForm.Action_HelpClick(Sender: TObject);
 begin
-    {Do nothing}
+    // Empty
 end;
 
 
@@ -3146,7 +3142,7 @@ end;
 
 procedure TMainForm.Action_CloseClick(Sender: TObject);
 begin
-    {Do nonthing}
+    // Empty
 end;
 
 
@@ -3249,14 +3245,14 @@ end;
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
-    {THelpers.WndCall(TrackerForm, TWindowState.Modal);}
+    //THelpers.WndCall(TrackerForm, TWindowState.Modal);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
 procedure TMainForm.Action_ViewOptionsClick(Sender: TObject);
 begin
-    {Do nothing}
+    // Empty
 end;
 
 
@@ -3350,7 +3346,7 @@ begin
             LGeneralCommentFields.UserComment   :=String.Empty;
             LGeneralCommentFields.UserAlias     :=Service.SessionData.AliasName;
 
-            Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
+            Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil);
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]:=TChars.SPACE;
 
         end;
@@ -3501,9 +3497,9 @@ end;
 
 procedure TMainForm.Action_SearchClick(Sender: TObject);
 begin
-    GridSearchForm.FGrid     :=MainForm.sgAgeView;
-    GridSearchForm.FColName  :=TReturnCustSnapshots._CustomerName;
-    GridSearchForm.FColNumber:=TReturnCustSnapshots._CustomerNumber;
+    GridSearchForm.Grid     :=MainForm.sgAgeView;
+    GridSearchForm.ColName  :=TReturnCustSnapshots._CustomerName;
+    GridSearchForm.ColNumber:=TReturnCustSnapshots._CustomerNumber;
     THelpers.WndCall(GridSearchForm, TWindowState.Modeless);
 end;
 
@@ -3579,27 +3575,25 @@ end;
 
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-    THelpers.WndCall(InvoicesForm, TWindowState.Modal);
+    // Call to Invoice Tracker
 end;
 
 
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-//    var Tracker: ITracker:=TTracker.Create();
-//    Tracker.RefreshInvoiceTrackerAsync(UpperCase(Service.SessionData.AliasName), RefreshInvoiceTracker_Callback);
+    // Call to Invoice Tracker
 end;
 
 
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-//    var Tracker: ITracker:=TTracker.Create();
-//    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
+    // Call to Invoice Tracker
 end;
 
 
@@ -3646,25 +3640,25 @@ end;
 
 procedure TMainForm.sgAddressBookClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
-    THelpers.WndCall(InvoicesForm, TWindowState.Modal)
+    // Call to Invoice Tracker
 end;
 
 
 procedure TMainForm.sgLBUviewClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.sgFSCviewClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
@@ -3826,7 +3820,7 @@ end;
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
-    {SetActiveTabsheet(TabSheet4);}
+    //SetActiveTabsheet(TabSheet4);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -3848,7 +3842,7 @@ end;
 procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
-    {SetActiveTabsheet(TabSheet6);}
+    //SetActiveTabsheet(TabSheet6);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -3856,7 +3850,7 @@ end;
 procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
-    {SetActiveTabsheet(TabSheet5);}
+    //SetActiveTabsheet(TabSheet5);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -3952,7 +3946,7 @@ end;
 
 procedure TMainForm.btnSearchAbClick(Sender: TObject);
 begin
-    {THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);}
+    //THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -3973,19 +3967,19 @@ end;
 
 procedure TMainForm.btnFscApproveClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.btnFscRejectClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.btnLbuUpdateClick(Sender: TObject);
 begin
-    {Empty}
+    // Empty
 end;
 
 
@@ -4917,7 +4911,7 @@ end;
 
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    {Empty}
+    // Empty
 end;
 
 
@@ -4941,13 +4935,13 @@ end;
 
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    {Empty}
+    // Empty
 end;
 
 
 procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    {Empty}
+    // Empty
 end;
 
 

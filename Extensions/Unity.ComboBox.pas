@@ -48,7 +48,7 @@ begin
         end;
 
     except
-        {Exception handler}
+        // Exception handler
     end;
 
 end;

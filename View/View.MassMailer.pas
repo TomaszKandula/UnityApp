@@ -577,7 +577,7 @@ end;
 
 procedure TMassMailerForm.FormDestroy(Sender: TObject);
 begin
-    {Do nonthing}
+    // Do nonthing
 end;
 
 

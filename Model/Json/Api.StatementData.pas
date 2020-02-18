@@ -15,14 +15,12 @@ type
 
 
 	TStatementData = class
-    {$TYPEINFO ON}
 	strict private
         var FReportedAggrAmount: double;
         var FReportedAgeDate:    string;
 	public
         const _ReportedAggrAmount = 'ReportedAggrAmount';
         const _ReportedAgeDate    = 'ReportedAgeDate';
-    published
         property ReportedAggrAmount: double read FReportedAggrAmount write FReportedAggrAmount;
         property ReportedAgeDate:    string read FReportedAgeDate    write FReportedAgeDate;
 	end;

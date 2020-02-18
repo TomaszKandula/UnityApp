@@ -47,36 +47,19 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TCompanies = class(TInterfacedObject, ICompanies)
-    {$TYPEINFO ON}
     strict private
         procedure FSetCompanyDetails(Source: TArray<TBankDetails>; var Target: TArray<TBankDetails>);
         procedure FSetCompanyEmails(Source: TArray<TRegisteredEmails>; var Target: TArray<TRegisteredEmails>);
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
-        /// <summary>
-        /// Allow to load async. some company data like name, address, phone etc.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails);
-        /// <summary>
-        /// Allow to load async. list of primary email(s) for given Company Codes. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
+        function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse; virtual;
+        procedure GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails); virtual;
+        function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse; virtual;
     end;
 
 
@@ -98,13 +81,11 @@ uses
 
 constructor TCompanies.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TCompanies.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

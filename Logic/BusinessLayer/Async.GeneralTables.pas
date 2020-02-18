@@ -111,99 +111,21 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TGeneralTables = class(TInterfacedObject, IGeneralTables)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Allow to load async. Permission.Companies table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetCompaniesAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Customer.ControlStatus table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetControlStatusAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Common.PaidInfo table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetPaidInfoAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Erp.PaymentTerms table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetPaymentTermsAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Erp.SalesResponsible table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetSalesResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Erp.PersonResponsible table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetPersonResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Erp.AccountType table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetAccountTypeAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to load async. Erp.CustomerGroup table to provided TStringGrids. This method can be executed without
-        /// waiting to complete the task, thus allowing parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Warning! Please make sure that TargetGrid (if visible component) is not painted durng the processing.
-        /// Repaint control after the thread work is done.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetCustomerGroupAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
+        procedure GetCompaniesAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetControlStatusAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetPaidInfoAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetPaymentTermsAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetSalesResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetPersonResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetAccountTypeAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure GetCustomerGroupAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
     end;
 
 
@@ -231,13 +153,11 @@ uses
 
 constructor TGeneralTables.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TGeneralTables.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

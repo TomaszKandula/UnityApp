@@ -15,7 +15,6 @@ type
 
 
     TAddressBookAdd = class
-    {$TYPEINFO ON}
     strict private
         var FSourceDbName:    string;
         var FCustomerNumber:  Int64;
@@ -32,7 +31,6 @@ type
         const _RegularEmails   = 'RegularEmails';
         const _StatementEmails = 'StatementEmails';
         const _PhoneNumbers    = 'PhoneNumbers';
-    published
         property SourceDbName:    string read FSourceDbName    write FSourceDbName;
         property CustomerNumber:  Int64  read FCustomerNumber  write FCustomerNumber;
         property CustomerName:    string read FCustomerName    write FCustomerName;

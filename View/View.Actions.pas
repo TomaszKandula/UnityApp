@@ -756,7 +756,7 @@ end;
 
 procedure TActionsForm.InitializePanels();
 begin
-    {PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);}
+    //PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
 end;
 
 
@@ -870,7 +870,7 @@ begin
 
         DailyComGrid.RowCount:=TotalRows + 1;
 
-        for var iCNT:=1{Skip header} to TotalRows do
+        for var iCNT:=1 to TotalRows do
         begin
 
             var Col1:=DailyComGrid.GetCol(TUserDailyCommentsList._CommentId);
@@ -1025,7 +1025,7 @@ end;
 
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
-    {Do nothing}
+    // Empty
 end;
 
 
@@ -1101,7 +1101,7 @@ end;
 
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-    {Do nothing}
+    // Empty
 end;
 
 
@@ -1538,7 +1538,7 @@ end;
 
 procedure TActionsForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    {if (Key = VK_F5) and (Shift=[ssCtrl]) then}
+    //if (Key = VK_F5) and (Shift=[ssCtrl]) then
 end;
 
 

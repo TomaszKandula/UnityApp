@@ -50,7 +50,6 @@ type
     /// Do not use direct implementation.
     /// </summary>
     TMailer = class(TInterfacedObject, IMailer)
-    {$TYPEINFO ON}
     strict private
         var FMailFrom: string;
         var FMailTo: TArray<string>;
@@ -98,13 +97,11 @@ uses
 
 constructor TMailer.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TMailer.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

@@ -124,7 +124,7 @@ end;
 
 procedure TReportsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-    {Do nothing}
+    // Do nothing
 end;
 
 

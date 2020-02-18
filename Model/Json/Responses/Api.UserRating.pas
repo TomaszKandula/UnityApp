@@ -20,7 +20,6 @@ type
 
 
     TUserRating = class
-    {$TYPEINFO ON}
     strict private
         var FRating:      integer;
         var FComment:     string;
@@ -28,13 +27,12 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        destructor Destroy(); override;
         const _Rating      ='Rating';
         const _Comment     ='Comment';
         const _IsSucceeded ='IsSucceeded';
         const _Error       ='Error';
         const _Meta        = 'Meta';
-        destructor Destroy(); override;
-    published
         property Rating:      integer       read FRating      write FRating;
         property Comment:     string        read FComment     write FComment;
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;

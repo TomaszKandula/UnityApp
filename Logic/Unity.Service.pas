@@ -22,7 +22,6 @@ type
 
 
     TService = class(TObject)
-    {$TYPEINFO ON}
     strict private
         var FSessionId:    string;
         var FSessionLog:   string;
@@ -77,6 +76,7 @@ constructor TService.Create();
 begin
     if not Assigned(FMediator) then FMediator:=TMediator.Create();
     if not Assigned(FSettings) then FSettings:=TSettings.Create();
+    //if not Assigned(FRest)     then FRest    :=TRESTful.Create();
 end;
 
 

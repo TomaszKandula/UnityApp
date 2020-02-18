@@ -15,12 +15,10 @@ type
 
 
 	TUserCompanySelection = class
-    {$TYPEINFO ON}
 	strict private
         var FSelectedCoCodes: TArray<string>;
     public
         const _SelectedCoCodes = 'SelectedCoCodes';
-	published
         property SelectedCoCodes: TArray<string> read FSelectedCoCodes write FSelectedCoCodes;
 	end;
 

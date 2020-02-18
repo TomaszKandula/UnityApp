@@ -3,7 +3,7 @@ object FeedbackForm: TFeedbackForm
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
-  ClientHeight = 403
+  ClientHeight = 511
   ClientWidth = 625
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
@@ -24,7 +24,7 @@ object FeedbackForm: TFeedbackForm
     Left = 10
     Top = 10
     Width = 605
-    Height = 333
+    Height = 441
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -34,11 +34,12 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 333
     object Caption: TLabel
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 140
+      Width = 585
       Height = 13
       Margins.Left = 10
       Margins.Top = 10
@@ -48,13 +49,14 @@ object FeedbackForm: TFeedbackForm
       Caption = 'Your message to developers:'
       Color = clWhite
       ParentColor = False
+      ExplicitWidth = 140
     end
     object PanelReportMemo: TPanel
       AlignWithMargins = True
       Left = 10
       Top = 38
       Width = 585
-      Height = 255
+      Height = 363
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -64,12 +66,13 @@ object FeedbackForm: TFeedbackForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitHeight = 255
       object ReportMemo: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
         Width = 581
-        Height = 251
+        Height = 359
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -87,12 +90,13 @@ object FeedbackForm: TFeedbackForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = ReportMemoKeyUp
+        ExplicitHeight = 251
       end
     end
     object PanelText: TPanel
       AlignWithMargins = True
       Left = 0
-      Top = 303
+      Top = 411
       Width = 605
       Height = 30
       Margins.Left = 0
@@ -104,6 +108,7 @@ object FeedbackForm: TFeedbackForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
+      ExplicitTop = 303
       object TotalWords: TLabel
         Left = 94
         Top = 3
@@ -129,7 +134,7 @@ object FeedbackForm: TFeedbackForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 353
+    Top = 461
     Width = 625
     Height = 50
     Margins.Left = 0
@@ -141,6 +146,7 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 353
     object btnSendReport: TSpeedButton
       Left = 22
       Top = 12

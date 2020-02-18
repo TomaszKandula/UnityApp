@@ -19,7 +19,6 @@ type
 
 
     TReturnCustSnapshots = class
-    {$TYPEINFO ON}
     strict private
         var FCustomerName:      TArray<string>;
         var FCustomerNumber:    TArray<integer>;
@@ -53,6 +52,7 @@ type
         var FError:             TErrorHandler;
         var FMeta:              TMetaData;
     public
+        destructor Destroy(); override;
         const _CustomerName      = 'Customer Name';
         const _CustomerNumber    = 'Customer Number';
         const _CountryCode       = 'Country Code';
@@ -84,8 +84,6 @@ type
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
         const _Meta              = 'Meta';
-        destructor Destroy(); override;
-    published
         property CustomerName:      TArray<string>  read FCustomerName      write FCustomerName;
         property CustomerNumber:    TArray<integer> read FCustomerNumber    write FCustomerNumber;
         property CountryCode:       TArray<integer> read FCountryCode       write FCountryCode;

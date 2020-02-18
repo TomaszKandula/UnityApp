@@ -178,7 +178,6 @@ procedure TRateForm.InsertRating();
 begin
 
     var UserRating: TRating;
-
     UserRating.UserRating:=FSelectedRating;
     UserRating.UserComment:=ReportMemo.Text;
 
@@ -195,7 +194,6 @@ procedure TRateForm.UpdateRating();
 begin
 
     var UserRating: TRating;
-
     UserRating.UserRating:=FSelectedRating;
     UserRating.UserComment:=ReportMemo.Text;
 

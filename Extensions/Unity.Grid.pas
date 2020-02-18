@@ -13,7 +13,6 @@ uses
     Vcl.Grids,
     Vcl.Graphics,
     Vcl.Dialogs,
-    Data.Win.ADODB,
     Unity.Enums;
 
 
@@ -120,15 +119,6 @@ type
         /// </summary>
         procedure Freeze(PaintWnd: boolean);
         /// <summary>
-        /// Export string grid content to Microsoft Excel file.
-        /// </summary>
-        /// <remarks>
-        /// User must have installed Microsoft Excel with VBA installed before exporting string grid to excel file.
-        /// otherwise error message "invalid string class" will occur.
-        /// This method should be run in worker thread.
-        /// </remarks>
-        function ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string): boolean;
-        /// <summary>
         /// Parse CSV data into grids.
         /// </summary>
         function ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
@@ -169,7 +159,7 @@ uses
     Unity.Settings;
 
 
-procedure TStringGrid.CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False{Option});
+procedure TStringGrid.CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
 begin
 
     // Paste data into string grid
@@ -484,7 +474,7 @@ begin
         for var iCNT: integer:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
 
         // Return highest value
-        if not (ColWidths[jCNT] = -1) then {Skip hidden columns}
+        if not (ColWidths[jCNT] = -1) then // Skip hidden columns
         begin
 
             NewWidth:=MaxIntValue(tblArray) + AddSpace;
@@ -521,7 +511,8 @@ begin
 
     if goRowSelect in Options then Exit();
 
-    for var iCNT:=1{Skip lp} to ColCount - 1 do
+    // Skip header
+    for var iCNT:=1 to ColCount - 1 do
         if ColWidths[iCNT] = -1 then ColWidths[iCNT]:=100;
 
 end;
@@ -630,83 +621,6 @@ begin
         with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
         Self.Repaint;
     end;
-
-end;
-
-
-function TStringGrid.ToExcel(ASheetName: string; AFileName: string; GroupId: string; AgeDate: string): boolean;
-begin
-
-    Result:=False;
-
-//    var DataTables: TDataTables:=TDataTables.Create(ActiveConn);
-//    try
-//        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE + QuotedStr(GroupId) + TChars.COMMA + QuotedStr(AgeDate);
-//        DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
-//    finally
-//        DataTables.Free;
-//    end;
-//
-//    // Initiate Excel application
-//    try
-//
-//        var XLApp: OLEVariant:=CreateOleObject('Excel.Application');
-//        var Sheet: OLEVariant;
-//
-//        try
-//
-//            XLApp.Visible:=False;
-//            XLApp.Caption:='Unity For Debt Management - Data Export';
-//            XLApp.DisplayAlerts:=False;
-//            XLApp.Workbooks.Add(xlWBatWorkSheet);
-//
-//            Sheet:=XLApp.Workbooks[1].WorkSheets[1];
-//            Sheet.Name:=ASheetName;
-//
-//            /// <remarks>Offsets cannot be less than one.</remarks>
-//            var RowOffset: integer:=1;
-//            var ColOffset: integer:=1;
-//
-//            // To Excel sheet
-//            for var Col: integer:=0 to Self.ColCount - 1 do
-//                for var Row: integer:=0 to Self.RowCount - 1 do
-//                    // We mitt first string grid column
-//                    Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
-//
-//            // Simple formatting (this can be extended
-//            for var Col: integer:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
-//            for var Row: integer:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
-//
-//            // Save to file
-//            XLApp.Workbooks[1].SaveAs(AFileName);
-//            Result:=True;
-//
-//        finally
-//
-//            if not VarIsEmpty(XLApp) then
-//            begin
-//
-//                XLApp.DisplayAlerts:=False;
-//                XLApp.Quit;
-//                XLAPP:=Unassigned;
-//                Sheet:=Unassigned;
-//
-//                if Result then
-//                    FToExcelResult:='The data has been successfully transferred to Excel.';
-//
-//            end;
-//        end;
-//
-//    except
-//        on E: Exception do
-//        begin
-//            if E.Message = xlWARN_MESSAGE then
-//                FToExcelResult:='The data cannot be exported because Microsoft Excel cannot be found.'
-//            else
-//                FToExcelResult:='The data cannot be exported, error message has been thrown: ' + E.Message;
-//        end;
-//
-//    end;
 
 end;
 

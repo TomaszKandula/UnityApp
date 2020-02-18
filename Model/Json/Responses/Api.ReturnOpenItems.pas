@@ -20,7 +20,6 @@ type
 
 
 	TReturnOpenItems = class
-    {$TYPEINFO ON}
 	strict private
         var FSourceDbName:      TArray<string>;
         var FCustNumber:        TArray<integer>;
@@ -62,6 +61,7 @@ type
         var FError:             TErrorHandler;
         var FMeta:              TMetaData;
 	public
+        destructor Destroy(); override;
         const _SourceDbName      = 'SourceDbName';
         const _CustNumber        = 'CustomerNumber';
         const _VoucherType       = 'VoucherType';
@@ -101,8 +101,6 @@ type
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
         const _Meta              = 'Meta';
-        destructor Destroy(); override;
-    published
         property SourceDbName:      TArray<string>  read FSourceDbName      write FSourceDbName;
         property CustNumber:        TArray<integer> read FCustNumber        write FCustNumber;
         property VoucherType:       TArray<integer> read FVoucherType       write FVoucherType;

@@ -20,7 +20,6 @@ type
 
 
 	TReturnSsisData = class
-    {$TYPEINFO ON}
 	strict private
         var FStatusCode:    string;
         var FCustExtractDt: string;
@@ -28,13 +27,12 @@ type
         var FError:         TErrorHandler;
         var FMeta:          TMetaData;
 	public
+        destructor Destroy(); override;
         const _StatusCode    = 'StatusCode';
         const _CustExtractAt = 'CustExtractDt';
         const _IsSucceeded   = 'IsSucceeded';
         const _Error         = 'Error';
         const _Meta          = 'Meta';
-        destructor Destroy(); override;
-    published
         property StatusCode:    string        read FStatusCode    write FStatusCode;
         property CustExtractDt: string        read FCustExtractDt write FCustExtractDt;
         property IsSucceeded:   boolean       read FIsSucceeded   write FIsSucceeded;

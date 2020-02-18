@@ -20,7 +20,6 @@ type
 
 
     TReturnCompanies = class
-    {$TYPEINFO ON}
     strict private
         var FSourceDbName:   TArray<string>;
         var FCompanyCode:    TArray<integer>;
@@ -40,6 +39,7 @@ type
         var FError:          TErrorHandler;
         var FMeta:           TMetaData;
     public
+        destructor Destroy(); override;
         const _SourceDbName    = 'SourceDbName';
         const _CompanyCode     = 'CompanyCode';
         const _CompanyName     = 'CompanyName';
@@ -57,8 +57,6 @@ type
         const _IsSucceeded     = 'IsSucceeded';
         const _Error           = 'Error';
         const _Meta            = 'Meta';
-        destructor Destroy(); override;
-    published
         property SourceDbName:   TArray<string>  read FSourceDbName   write FSourceDbName;
         property CompanyCode:    TArray<integer> read FCompanyCode    write FCompanyCode;
         property CompanyName:    TArray<string>  read FCompanyName    write FCompanyName;

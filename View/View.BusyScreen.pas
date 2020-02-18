@@ -86,7 +86,7 @@ end;
 
 procedure TBusyForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    {Do nothing}
+    // Empty
 end;
 
 

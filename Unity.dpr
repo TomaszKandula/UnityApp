@@ -142,26 +142,23 @@ uses
     Async.Companies in 'Logic\BusinessLayer\Async.Companies.pas',
     Async.Mailer in 'Logic\BusinessLayer\Async.Mailer.pas',
     Async.GeneralTables in 'Logic\BusinessLayer\Async.GeneralTables.pas',
-    View.BusyScreen in 'View\View.BusyScreen.pas' {BusyForm},
-    View.Main in 'View\View.Main.pas' {MainForm},
-    View.About in 'View\View.About.pas' {AboutForm},
-    View.Actions in 'View\View.Actions.pas' {ActionsForm},
-    View.Calendar in 'View\View.Calendar.pas' {CalendarForm},
-    View.ColorPicker in 'View\View.ColorPicker.pas' {ColorsForm},
-    View.EventLog in 'View\View.EventLog.pas' {EventForm},
-    View.UserFeedback in 'View\View.UserFeedback.pas' {FeedbackForm},
-    View.GridFilter in 'View\View.GridFilter.pas' {FilterForm},
-    View.GridSearch in 'View\View.GridSearch.pas' {GridSearchForm},
-    View.InvoiceList in 'View\View.InvoiceList.pas' {InvoicesForm},
-    View.MassMailer in 'View\View.MassMailer.pas' {MassMailerForm},
-    View.PhoneList in 'View\View.PhoneList.pas' {PhoneListForm},
-    View.Reports in 'View\View.Reports.pas' {ReportsForm},
-    View.Queries in 'View\View.Queries.pas' {QmsForm},
-    View.SendStatement in 'View\View.SendStatement.pas' {SendForm},
-    View.Startup in 'View\View.Startup.pas' {StartupForm},
-    View.InvoiceTracker in 'View\View.InvoiceTracker.pas' {TrackerForm},
-    View.CompanyList in 'View\View.CompanyList.pas' {CompanyListForm},
-    View.RateApp in 'View\View.RateApp.pas' {RateForm};
+    View.BusyScreen in 'View\View.BusyScreen.pas', // BusyForm
+    View.Main in 'View\View.Main.pas', // MainForm
+    View.About in 'View\View.About.pas', // AboutForm
+    View.Actions in 'View\View.Actions.pas', // ActionsForm
+    View.Calendar in 'View\View.Calendar.pas', // CalendarForm
+    View.ColorPicker in 'View\View.ColorPicker.pas', // ColorsForm
+    View.EventLog in 'View\View.EventLog.pas', // EventForm
+    View.UserFeedback in 'View\View.UserFeedback.pas', // FeedbackForm
+    View.GridFilter in 'View\View.GridFilter.pas', // FilterForm
+    View.GridSearch in 'View\View.GridSearch.pas', // GridSearchForm
+    View.MassMailer in 'View\View.MassMailer.pas', // MassMailerForm
+    View.PhoneList in 'View\View.PhoneList.pas', // PhoneListForm
+    View.Reports in 'View\View.Reports.pas', // ReportsForm
+    View.SendStatement in 'View\View.SendStatement.pas', // SendForm
+    View.Startup in 'View\View.Startup.pas', // StartupForm
+    View.CompanyList in 'View\View.CompanyList.pas', // CompanyListForm
+    View.RateApp in 'View\View.RateApp.pas'; // RateForm
 
 
 {$R *.res}
@@ -170,7 +167,7 @@ uses
 begin
 
     {$WARN SYMBOL_PLATFORM OFF}
-    {Microsoft Windows only}
+    // Microsoft Windows only
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     var RegSettings: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
@@ -319,7 +316,7 @@ begin
     StartupForm.SetSessionLog(Service.SessionLog);
     StartupForm.Show();
 
-    Application.Run;{Starts event loop}
+    Application.Run; // Starts event loop
     UnloadService();
     GlobalCEFApp.Free();
 

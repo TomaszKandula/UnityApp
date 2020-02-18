@@ -30,19 +30,14 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TMailer = class(TInterfacedObject, IMailer)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Async. sending email to CI Team with user feedback.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
+        procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback); virtual;
     end;
 
 
@@ -64,13 +59,11 @@ uses
 
 constructor TMailer.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TMailer.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

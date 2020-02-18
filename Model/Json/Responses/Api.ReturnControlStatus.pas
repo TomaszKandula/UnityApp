@@ -19,7 +19,6 @@ type
 
 
     TReturnControlStatus = class
-    {$TYPEINFO ON}
     strict private
         var FId:          TArray<integer>;
         var FCode:        TArray<integer>;
@@ -29,6 +28,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        destructor Destroy(); override;
         const _Id          = 'Id';
         const _Code        = 'Code';
         const _Text        = 'Text';
@@ -36,8 +36,6 @@ type
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        destructor Destroy(); override;
-    published
         property Id:          TArray<integer> read FId          write FId;
         property Code:        TArray<integer> read FCode        write FCode;
         property Text:        TArray<string>  read FText        write FText;

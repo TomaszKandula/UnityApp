@@ -108,7 +108,6 @@ type
     /// Do not use direct implementation.
     /// </summary>
     TDocument = class(TMailer, IDocument)
-    {$TYPEINFO ON}
     strict private
         var FHTMLStat: string;
         var FPos: integer;
@@ -234,13 +233,11 @@ uses
 
 constructor TDocument.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TDocument.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 
@@ -253,7 +250,7 @@ begin
     // Note: we have two different tables, with Control Status column and without it.
     // ------------------------------------------------------------------------------
     var KeyName: string;
-    var StringList: TStringList:=TStringList.Create();
+    var StringList:=TStringList.Create();
     try
 
         // ------------------------

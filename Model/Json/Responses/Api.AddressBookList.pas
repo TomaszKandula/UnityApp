@@ -20,7 +20,6 @@ type
 
 
     TAddressBookList = class
-    {$TYPEINFO ON}
     strict private
         var FId:              TArray<integer>;
         var FSourceDbName:    TArray<string>;
@@ -34,6 +33,7 @@ type
         var FError:           TErrorHandler;
         var FMeta:            TMetaData;
     public
+        destructor Destroy(); override;
         const _Id              = 'Id';
         const _SourceDbName    = 'SourceDbName';
         const _CustomerNumber  = 'CustomerNumber';
@@ -45,8 +45,6 @@ type
         const _IsSucceeded     = 'IsSucceeded';
         const _Error           = 'Error';
         const _Meta            = 'Meta';
-        destructor Destroy(); override;
-    published
         property Id:              TArray<integer> read FId              write FId;
         property SourceDbName:    TArray<string>  read FSourceDbName    write FSourceDbName;
         property CustomerNumber:  TArray<Int64>   read FCustomerNumber  write FCustomerNumber;

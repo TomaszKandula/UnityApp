@@ -102,9 +102,9 @@ type
     /// Do not use it directly.
     /// </summary>
     TRESTful = class(TInterfacedObject, IRESTFul)
-    {$TYPEINFO ON}
     strict private
         var FContentType: TRESTContentType;
+        var FAccessToken: string;
         var restClient: TRESTClient;
         var restRequest: TRESTRequest;
         var restResponse: TRESTResponse;
@@ -114,6 +114,7 @@ type
         var FResponseContent: string;
         var FCustomBody: string;
         var FExecuteError: string;
+        function GetAccessToken(): string;
         function GetExecuteError(): string;
         function GetStatusCode(): integer;
         function GetCustomBody(): string;
@@ -138,6 +139,7 @@ type
         function GetRequestMethod(): TRESTRequestMethod;
         function GetRequestSynchronizedEvents(): boolean;
         function GetRequestTimeout(): integer;
+        procedure SetAccessToken(NewValue: string);
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
@@ -160,12 +162,13 @@ type
         procedure SetRequestTimeout(NewValue: integer);
         procedure TrimContent(var TextStr: string);
     public
-        constructor Create(AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON);
+        constructor Create(); //AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON
         destructor Destroy; override;
         property ExecuteError: string read GetExecuteError;
         property StatusCode: integer read GetStatusCode;
         property Content: string read GetContent;
         property Headers: string read GetHeaders;
+        property AccessToken: string read GetAccessToken write SetAccessToken;
         property CustomBody: string read GetCustomBody write SetCustomBody;
         property ClientAccept: string read GetClientAccept write SetClientAccept;
         property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
@@ -199,7 +202,7 @@ uses
     System.SysUtils;
 
 
-constructor TRESTful.Create(AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON);//make argument-less!!!
+constructor TRESTful.Create();
 begin
 
     restClient  :=TRESTClient.Create('');
@@ -208,32 +211,32 @@ begin
     restRequest.Client:=restClient;
     restRequest.Response:=restResponse;
 
-    FContentType:=ContentType;
-    case FContentType of
-
-        TRESTContentType.ctAPPLICATION_JSON:
-        begin
-
-            ClientAccept     :='application/json, text/plain; q=0.9, text/html;q=0.8,';
-            ClientContentType:='application/json';
-
-            if not String.IsNullOrEmpty(AccessToken) then
-                restRequest.AddAuthParameter(
-                    'Authorization',
-                    'Bearer ' + AccessToken,
-                    TREStRequestParameterKind.pkHTTPHEADER,
-                    [poDoNotEncode]
-                );
-
-        end;
-
-        TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED:
-        begin
-            ClientAccept     :='*/*';
-            ClientContentType:='application/x-www-form-urlencoded';
-        end;
-
-    end;
+//    FContentType:=ContentType;
+//    case FContentType of
+//
+//        TRESTContentType.ctAPPLICATION_JSON:
+//        begin
+//
+//            ClientAccept     :='application/json, text/plain; q=0.9, text/html;q=0.8,';
+//            ClientContentType:='application/json';
+//
+//            if not String.IsNullOrEmpty(AccessToken) then
+//                restRequest.AddAuthParameter(
+//                    'Authorization',
+//                    'Bearer ' + AccessToken,
+//                    TREStRequestParameterKind.pkHTTPHEADER,
+//                    [poDoNotEncode]
+//                );
+//
+//        end;
+//
+//        TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED:
+//        begin
+//            ClientAccept     :='*/*';
+//            ClientContentType:='application/x-www-form-urlencoded';
+//        end;
+//
+//    end;
 
     queryList:=TList<string>.Create();
     paramList:=TList<string>.Create();
@@ -384,6 +387,12 @@ begin
 end;
 
 
+function TRESTful.GetAccessToken(): string;
+begin
+    Result:=FAccessToken;
+end;
+
+
 function TRESTful.GetExecuteError(): string;
 begin
     Result:=FExecuteError;
@@ -525,6 +534,12 @@ end;
 function TRESTful.GetRequestTimeout(): integer;
 begin
     if Assigned(restRequest) then Result:=restRequest.Timeout else Result:=30000 {30 seconds};
+end;
+
+
+procedure TRESTful.SetAccessToken(NewValue: string);
+begin
+    FAccessToken:=NewValue;
 end;
 
 

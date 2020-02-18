@@ -21,7 +21,6 @@ type
 
 
     TCompanyData = class
-    {$TYPEINFO ON}
     strict private
         var FCompanyName:    string;
         var FCompanyAddress: string;
@@ -33,6 +32,7 @@ type
         var FError:          TErrorHandler;
         var FMeta:           TMetaData;
     public
+        destructor Destroy(); override;
         const _CompanyName    = 'CompanyName';
         const _CompanyAddress = 'CompanyAddress';
         const _CompanyEmails  = 'CompanyEmails';
@@ -42,8 +42,6 @@ type
         const _IsSucceeded    = 'IsSucceeded';
         const _Error          = 'Error';
         const _Meta           = 'Meta';
-        destructor Destroy(); override;
-    published
         property CompanyName:    string               read FCompanyName    write FCompanyName;
         property CompanyAddress: string               read FCompanyAddress write FCompanyAddress;
         property CompanyEmails:  TArray<string>       read FCompanyEmails  write FCompanyEmails;

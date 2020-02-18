@@ -15,12 +15,10 @@ type
 
 
 	TUserSessionAdd = class
-    {$TYPEINFO ON}
 	strict private
         var FAliasName: string;
 	public
         const _AliasName = 'AliasName';
-    published
         property AliasName: string read FAliasName write FAliasName;
 	end;
 

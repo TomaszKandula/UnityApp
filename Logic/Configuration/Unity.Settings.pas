@@ -99,7 +99,6 @@ type
     /// Do not use it directly.
     /// </summary>
     TSettings = class(TInterfacedObject, ISettings)
-    {$TYPEINFO ON}
     strict private
         var FTMIG: TMemIniFile;
         var FTMIL: TMemIniFile;

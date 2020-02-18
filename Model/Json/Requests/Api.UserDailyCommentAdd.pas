@@ -15,7 +15,6 @@ type
 
 
     TUserDailyCommentAdd = class
-    {$TYPEINFO ON}
     strict private
         var FAgeDate:              string;
         var FCallEvent:            integer;
@@ -34,7 +33,6 @@ type
         const _FixedRemindersSent   = 'FixedRemindersSent';
         const _CustomRemindersSent  = 'CustomRemindersSent';
         const _UserComment          = 'UserComment';
-    published
         property AgeDate:              string  read FAgeDate              write FAgeDate;
         property CallEvent:            integer read FCallEvent            write FCallEvent;
         property CallDuration:         integer read FCallDuration         write FCallDuration;

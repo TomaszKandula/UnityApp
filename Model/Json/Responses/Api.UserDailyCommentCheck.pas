@@ -20,7 +20,6 @@ type
 
 
 	TUserDailyCommentCheck = class
-    {$TYPEINFO ON}
 	strict private
         var FDoesCommentExists: boolean;
         var FCommentId:         integer;
@@ -29,14 +28,13 @@ type
         var FError:             TErrorHandler;
         var FMeta:              TMetaData;
 	public
+        destructor Destroy(); override;
         const _DoesCommentExists = 'DoesCommentExists';
         const _CommentId         = 'CommentId';
         const _UserComment       = 'UserComment';
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
         const _Meta              = 'Meta';
-        destructor Destroy(); override;
-    published
         property DoesCommentExists: boolean       read FDoesCommentExists write FDoesCommentExists;
         property CommentId:         integer       read FCommentId         write FCommentId;
         property UserComment:       string        read FUserComment       write FUserComment;

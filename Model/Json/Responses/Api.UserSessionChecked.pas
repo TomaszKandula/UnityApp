@@ -20,7 +20,6 @@ type
 
 
 	TUserSessionChecked = class
-    {$TYPEINFO ON}
 	strict private
         var FIsValidated:  boolean;
         var FUserId:       integer;
@@ -32,6 +31,7 @@ type
         var FError:        TErrorHandler;
         var FMeta:         TMetaData;
 	public
+        destructor Destroy(); override;
         const _IsValidated  = 'IsValidated';
         const _UserId       = 'UserId';
         const _Department   = 'Department';
@@ -41,8 +41,6 @@ type
         const _IsSucceeded  = 'IsSucceeded';
         const _Error        = 'Error';
         const _Meta         = 'Meta';
-        destructor Destroy(); override;
-    published
         property IsValidated:  boolean       read FIsValidated  write FIsValidated;
         property UserId:       integer       read FUserId       write FUserId;
         property Department:   string        read FDepartment   write FDepartment;

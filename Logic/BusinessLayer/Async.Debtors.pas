@@ -50,8 +50,10 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TDebtors = class(TInterfacedObject, IDebtors)
-    {$TYPEINFO ON}
     strict private
         function  FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
         procedure FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
@@ -59,31 +61,11 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Allow to read async. current age report from database for given CoCodes and sorting option.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
-        /// <summary>
-        /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
-        /// It writes data to target grid when synchronized with main thread. Thus, it is not necessary to lock (hold painting) visual component.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
+        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView); virtual;
         procedure MapTableAsync(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetName: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
-            const ColSourceDbName: integer; const ColSourceDesc: integer);
-        /// <summary>
-        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse;
+            const ColSourceDbName: integer; const ColSourceDesc: integer); virtual;
+        function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse; virtual;
     end;
 
 
@@ -107,13 +89,11 @@ uses
 
 constructor TDebtors.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TDebtors.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 
@@ -311,7 +291,6 @@ begin
     end);
 
     NewTask.Start();
-    //TTask.WaitForAll(NewTask);
 
 end;
 

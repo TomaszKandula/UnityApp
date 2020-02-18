@@ -180,7 +180,6 @@ end;
 
 procedure TCalendarForm.MyCalendarClick(Sender: TObject);
 begin
-    // Reset all check boxes.
     DaysOne.Checked   :=False;
     DaysThreen.Checked:=False;
     DaysSeven.Checked :=False;
@@ -189,21 +188,18 @@ end;
 
 procedure TCalendarForm.DaysOneClick(Sender: TObject);
 begin
-    // Set next day.
     MyCalendar.Date:=MakeMyDay(1);
 end;
 
 
 procedure TCalendarForm.DaysThreenClick(Sender: TObject);
 begin
-    // Set next three days.
     MyCalendar.Date:=MakeMyDay(3);
 end;
 
 
 procedure TCalendarForm.DaysSevenClick(Sender: TObject);
 begin
-    // Set next sevenm days.
     MyCalendar.Date:=MakeMyDay(7);
 end;
 

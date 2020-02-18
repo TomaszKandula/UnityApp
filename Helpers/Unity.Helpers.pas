@@ -41,10 +41,12 @@ type
         class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
 
+
     TRecordUtils<T: record> = class abstract
     public
         class function GetFields(const Struct: T): TList<string>; static;
     end;
+
 
     THelpers = class abstract
     strict private
@@ -68,7 +70,6 @@ type
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
         class function WndCall(WinForm: TForm; Mode: TWindowState): integer; static;
         class function MsgCall(WndType: TAppMessage; WndText: string): integer; static;
-        class function OleGetStr(RecordsetField: variant): string; static;
         class function CDate(StrDate: string): TDate; static;
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
@@ -394,19 +395,6 @@ begin
         TAppMessage.Question2: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
     end;
 
-end;
-
-
-class function THelpers.OleGetStr(RecordsetField: variant): string; {Legacy}
-begin
-    {$D-}
-    try
-        OleGetStr:=RecordsetField;
-    except
-        {case of null field}
-        OleGetStr:=VarToStr(RecordsetField);
-    end;
-    {$D+}
 end;
 
 

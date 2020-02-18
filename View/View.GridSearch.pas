@@ -61,15 +61,18 @@ type
         var FCompareValue: string;
         var FSearchColumn: integer;
         var FActualRow:    integer;
+        var FGrid:      TStringGrid;
+        var FColName:   string;
+        var FColNumber: string;
         procedure InitSearch;
         function  TryToInt(StrInput: string): boolean;
         function  SearchPartialPrepare(ActualRow: integer): string;
         procedure SearchPartialShowAll(ActualRow: integer);
         procedure SearchPartialNextBreak();
     public
-        var FGrid:      TStringGrid;
-        var FColName:   string;
-        var FColNumber: string;
+        property Grid:      TStringGrid read FGrid      write FGrid;
+        property ColName:   string      read FColName   write FColName;
+        property ColNumber: string      read FColNumber write FColNumber;
         procedure PerformSearch();
     end;
 

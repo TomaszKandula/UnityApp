@@ -20,19 +20,17 @@ type
 
 
     TAddressBookAdded = class
-    {$TYPEINFO ON}
     strict private
         var FId:          integer;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        destructor Destroy(); override;
         const _Id          = 'Id';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        destructor Destroy(); override;
-    published
         property Id:          integer       read FId          write FId;
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler read FError       write FError;

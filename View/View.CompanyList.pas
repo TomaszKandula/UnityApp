@@ -156,7 +156,7 @@ begin
         end;
 
     except
-        {Do nothing}
+        // Do nothing
     end;
 
     CheckEvent:=False;
@@ -180,7 +180,7 @@ end;
 
 procedure TCompanyListForm.FormShow(Sender: TObject);
 begin
-    {Do nothing}
+    // Empty
 end;
 
 

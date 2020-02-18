@@ -20,7 +20,6 @@ type
 
 
     TTokenGranted = class
-    {$TYPEINFO ON}
     strict private
         var FAccessToken: string;
         var FTokenType:   string;
@@ -30,6 +29,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        destructor Destroy(); override;
         const _AccessToken   = 'AccessToken';
         const _TokenType     = 'TokenType';
         const _GrantType     = 'GrantType';
@@ -37,8 +37,6 @@ type
         const _IsSucceeded   = 'IsSucceeded';
         const _Error         = 'Error';
         const _Meta          = 'Meta';
-        destructor Destroy(); override;
-    published
         property AccessToken: string        read FAccessToken write FAccessToken;
         property TokenType:   string        read FTokenType   write FTokenType;
         property GrantType:   string        read FGrantType   write FGrantType;

@@ -52,41 +52,16 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TDocuments = class(TInterfacedObject, IDocuments)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Allow to async. send single account statemnent/reminder. It requires to pass payload with invoice data. Note that method
-        /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use nil in this method.
-        /// </remarks>
-        procedure SendAccDocumentAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocument; WaitToComplete: boolean = False);
-        /// <summary>
-        /// Allow to async. send many account statemnents/reminders. It requires to pass payload with invoice data. It uses SendAccountStatement
-        /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use nil in this method.
-        /// </remarks>
-        procedure SendAccDocumentsAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocuments);
-        /// <summary>
-        /// Allow to async. post newly sent document (statement/reminder) in the database history table. It requires to pass payload with document details.
-        /// There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function LogSentDocumentAwaited(PayLoad: TSentDocument): TCallResponse;
+        procedure SendAccDocumentAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocument; WaitToComplete: boolean = False); virtual;
+        procedure SendAccDocumentsAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocuments); virtual;
+        function LogSentDocumentAwaited(PayLoad: TSentDocument): TCallResponse; virtual;
     end;
 
 
@@ -112,13 +87,11 @@ uses
 
 constructor TDocuments.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TDocuments.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

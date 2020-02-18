@@ -62,48 +62,18 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TAddressBook = class(TInterfacedObject, IAddressBook)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Load async. address book content and return it via given callback method that is always executed in main thread.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
-        /// <summary>
-        /// Update async. address book content and notify via given callback method that is always executed in main thread.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook);
-        /// <summary>
-        /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for Callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook);
-        /// <summary>
-        /// Allow to asynchronously remove data from Address Book for given arguments. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function DelFromAddressBookAwaited(Id: integer): TCallResponse;
-        /// <summary>
-        /// Load async. address book customer data only for given arguments.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use nil in this method.
-        /// </remarks>
-        procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails);
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil); virtual;
+        procedure UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook); virtual;
+        procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook); virtual;
+        function DelFromAddressBookAwaited(Id: integer): TCallResponse; virtual;
+        procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails); virtual;
     end;
 
 
@@ -131,13 +101,11 @@ uses
 
 constructor TAddressBook.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TAddressBook.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

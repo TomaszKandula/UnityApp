@@ -21,19 +21,17 @@ type
 
 
     TCompanyEmailsList = class
-    {$TYPEINFO ON}
     strict private
         var FEmailList:   TArray<TRegisteredEmails>;
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        destructor Destroy(); override;
         const _EmailList   = 'EmailList';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        destructor Destroy(); override;
-    published
         property EmailList:   TArray<TRegisteredEmails> read FEmailList   write FEmailList;
         property IsSucceeded: boolean                   read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler             read FError       write FError;

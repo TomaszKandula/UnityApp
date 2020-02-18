@@ -44,8 +44,8 @@ begin
     var Lo:    integer;
     var Hi:    integer;
     var Pivot: double;
-    var T1:    double;  {For sorting column}
-    var T2:    integer; {For associated column}
+    var T1:    double;  // For sorting column
+    var T2:    integer; // For associated column
 
     Lo:=iLo;
     Hi:=iHi;

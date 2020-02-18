@@ -18,6 +18,7 @@ uses
 type
 
 
+    // Interface definition
     IAccounts = interface(IInterface)
     ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
         /// <summary>
@@ -92,80 +93,22 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TAccounts = class(TInterfacedObject, IAccounts)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        //  Allow to request access token in exchange of client id and client secrets. It is necessary for further communication.
-        /// There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
-        /// <summary>
-        /// Allow to initiate new user session by loggin user data in the database via Unity API.
-        /// This user session entry is later used by other service that uses Active Directory.
-        /// There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
-        /// <summary>
-        /// Allow to check if user has been validated by Active Directory. We relay on assigned session token.
-        /// There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function CheckSessionAwaited(SessionId: string): TCallResponse;
-        /// <summary>
-        /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse;
-        /// <summary>
-        /// Allow to write async. user logs to database. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function SaveUserLogsAwaited(): TCallResponse;
-        /// <summary>
-        /// Allow to write async. user choice of comapny codes to load. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
-        /// <summary>
-        /// Allow to load async. user rating with optional comment. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function LoadRatingAwaited(var Rating: TRating): TCallResponse;
-        /// <summary>
-        /// Allow to write async. user rating with optional comment.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
-        /// <summary>
-        /// Allow to re-write async. user rating with optional comment.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
+        function RequestAccessTokenAwaited(var AccessToken: string): TCallResponse; virtual;
+        function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse; virtual;
+        function CheckSessionAwaited(SessionId: string): TCallResponse; virtual;
+        function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse; virtual;
+        function SaveUserLogsAwaited(): TCallResponse; virtual;
+        function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse; virtual;
+        function LoadRatingAwaited(var Rating: TRating): TCallResponse; virtual;
+        procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating); virtual;
+        procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating); virtual;
     end;
 
 
@@ -198,13 +141,11 @@ uses
 
 constructor TAccounts.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TAccounts.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

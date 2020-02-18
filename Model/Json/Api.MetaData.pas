@@ -15,7 +15,6 @@ type
 
 
     TMetaData = class
-    {$TYPEINFO ON}
     strict private
         var FRowsAffected:       integer;
         var FProcessingTimeSpan: string;
@@ -24,7 +23,6 @@ type
         const _RowsAffected       = 'RowsAffected';
         const _ProcessingTimeSpan = 'ProcessingTimeSpan';
         const _RequesterIpAddress = 'RequesterIpAddress';
-    published
         property RowsAffected:       integer read FRowsAffected       write FRowsAffected;
         property ProcessingTimeSpan: string  read FProcessingTimeSpan write FProcessingTimeSpan;
         property RequesterIpAddress: string  read FRequesterIpAddress write FRequesterIpAddress;

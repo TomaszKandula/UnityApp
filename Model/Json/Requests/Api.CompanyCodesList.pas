@@ -15,12 +15,10 @@ type
 
 
     TCompanyCodesList = class
-    {$TYPEINFO ON}
     strict private
         var FSourceDBName: TArray<string>;
     public
         const _SourceDBName = 'SourceDBName';
-    published
         property SourceDBName: TArray<string> read FSourceDBName write FSourceDBName;
     end;
 

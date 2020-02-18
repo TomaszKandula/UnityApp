@@ -20,7 +20,6 @@ type
 
 
     TUserDailyCommentsList = class
-    {$TYPEINFO ON}
     strict private
         var FCommentId:            TArray<integer>;
         var FSourceDBName:         TArray<string>;
@@ -39,6 +38,7 @@ type
         var FError:                TErrorHandler;
         var FMeta:                 TMetaData;
     public
+        destructor Destroy(); override;
         const _CommentId            = 'CommentId';
         const _SourceDBName         = 'SourceDBName';
         const _CustomerNumber       = 'CustomerNumber';
@@ -55,8 +55,6 @@ type
         const _IsSucceeded          = 'IsSucceeded';
         const _Error                = 'Error';
         const _Meta                 = 'Meta';
-        destructor Destroy(); override;
-    published
         property CommentId:            TArray<integer> read FCommentId            write FCommentId;
         property SourceDBName:         TArray<string>  read FSourceDBName         write FSourceDBName;
         property CustomerNumber:       TArray<integer> read FCustomerNumber       write FCustomerNumber;

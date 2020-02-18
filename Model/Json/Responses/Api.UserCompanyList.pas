@@ -19,7 +19,6 @@ type
 
 
 	TUserCompanyList = class
-    {$TYPEINFO ON}
 	strict private
         var FCompanies:   TArray<string>;
         var FIsSelected:  TArray<boolean>;
@@ -27,13 +26,12 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
+        destructor Destroy(); override;
         const _Companies   = 'Companies';
         const _IsSelected  = 'IsSelected';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        destructor Destroy(); override;
-    published
         property Companies:   TArray<string>  read FCompanies   write FCompanies;
         property IsSelected:  TArray<boolean> read FIsSelected  write FIsSelected;
         property IsSucceeded: boolean         read FIsSucceeded write FIsSucceeded;

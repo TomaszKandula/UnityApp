@@ -89,7 +89,6 @@ begin
     // -----------------------------------------------------------------
     // Setup caption and default colors for backgrounds and foregrounds.
     // -----------------------------------------------------------------
-
     if (ColorList1.Items.Count > 0) and (ColorList2.Items.Count > 0) and (ColorList3.Items.Count > 0) then
     begin
         ColorList1.ItemIndex:=0;

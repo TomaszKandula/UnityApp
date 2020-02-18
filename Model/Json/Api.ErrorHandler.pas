@@ -15,14 +15,12 @@ type
 
 
     TErrorHandler = class
-    {$TYPEINFO ON}
     strict private
         var FErrorDesc: string;
         var FErrorCode: string;
     public
         const _ErrorDesc = 'ErrorDesc';
         const _ErrorCode = 'ErrorCode';
-    published
         property ErrorDesc: string read FErrorDesc write FErrorDesc;
         property ErrorCode: string read FErrorCode write FErrorCode;
     end;

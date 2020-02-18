@@ -20,7 +20,6 @@ type
 
 
     TReturnPaidInfo = class
-    {$TYPEINFO ON}
     strict private
         var FId:          TArray<integer>;
         var FErpCode:     TArray<string>;
@@ -29,14 +28,13 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        destructor Destroy(); override;
         const _Id          = 'Id';
         const _ErpCode     = 'ErpCode';
         const _Description = 'Description';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        destructor Destroy(); override;
-    published
         property Id:          TArray<integer> read FId          write FId;
         property ErpCode:     TArray<string>  read FErpCode     write FErpCode;
         property Description: TArray<string>  read FDescription write FDescription;

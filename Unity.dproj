@@ -261,7 +261,7 @@
             <Form>AboutForm</Form>
         </DCCReference>
         <DCCReference Include="View\View.Actions.pas">
-            <Form>ActionsForm</Form>
+            <Form>/ ActionsForm},</Form>
         </DCCReference>
         <DCCReference Include="View\View.Calendar.pas">
             <Form>CalendarForm</Form>
@@ -281,9 +281,6 @@
         <DCCReference Include="View\View.GridSearch.pas">
             <Form>GridSearchForm</Form>
         </DCCReference>
-        <DCCReference Include="View\View.InvoiceList.pas">
-            <Form>InvoicesForm</Form>
-        </DCCReference>
         <DCCReference Include="View\View.MassMailer.pas">
             <Form>MassMailerForm</Form>
         </DCCReference>
@@ -293,17 +290,11 @@
         <DCCReference Include="View\View.Reports.pas">
             <Form>ReportsForm</Form>
         </DCCReference>
-        <DCCReference Include="View\View.Queries.pas">
-            <Form>QmsForm</Form>
-        </DCCReference>
         <DCCReference Include="View\View.SendStatement.pas">
             <Form>SendForm</Form>
         </DCCReference>
         <DCCReference Include="View\View.Startup.pas">
             <Form>StartupForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\View.InvoiceTracker.pas">
-            <Form>TrackerForm</Form>
         </DCCReference>
         <DCCReference Include="View\View.CompanyList.pas">
             <Form>CompanyListForm</Form>

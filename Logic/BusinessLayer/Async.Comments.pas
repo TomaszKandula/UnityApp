@@ -84,73 +84,20 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TComments = class(TInterfacedObject, IComments)
-    {$TYPEINFO ON}
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload and comment id
-        /// parameter for update. If comment id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
-        /// comment can be added for given customer number, age date and company code.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// Note: this method defines callback as nil be default.
-        /// </remarks>
-        procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
-        /// <summary>
-        /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// Note: this method defines callback as nil be default.
-        /// </remarks>
-        procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
-        /// <summary>
-        /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
-        /// Note: there is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse;
-        /// <summary>
-        /// Allow to async. retrive general comment for given company code, customer number and user alias.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use nil in this method.
-        /// </remarks>
-        procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
-        /// <summary>
-        /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
-        /// Note: there is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse;
-        /// <summary>
-        /// Allow to async. retrieve daily comments for given company code, customer number and user alias.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use nil in this method.
-        /// </remarks>
-        procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
-        /// <summary>
-        /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
-        /// if comment does not exists. Note that there is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse;
+        procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
+        procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
+        function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
+        procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments); virtual;
+        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse; virtual;
+        procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments); virtual;
+        function UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse; virtual;
     end;
 
 
@@ -181,13 +128,11 @@ uses
 
 constructor TComments.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TComments.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 

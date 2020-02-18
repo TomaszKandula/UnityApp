@@ -48,37 +48,19 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// </remarks>
     TOpenItems = class(TInterfacedObject, IOpenItems)
-    {$TYPEINFO ON}
     strict private
-        function  FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
+        function  FLoadToGridSync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
         procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
     public
         constructor Create();
         destructor Destroy(); override;
-        /// <summary>
-        /// Returns date and time of the SSIS package transfer from SSIS master database table alongside with transfer status.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
-        /// <summary>
-        /// Allow to async. query SSIS master table to check if open items have been updated.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
-        /// <summary>
-        /// Allow to async. load current open items from SQL database.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems);
+        function GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse; virtual;
+        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems); virtual;
+        procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems); virtual;
     end;
 
 
@@ -101,13 +83,11 @@ uses
 
 constructor TOpenItems.Create();
 begin
-    {Empty}
 end;
 
 
 destructor TOpenItems.Destroy();
 begin
-    {Empty}
     inherited;
 end;
 
@@ -242,7 +222,7 @@ begin
         var OpenItemsData: TOpenItemsPayLoad;
 
         try
-            FLoadToGrid(OpenItemsGrid, LoadedCompanies);
+            FLoadToGridSync(OpenItemsGrid, LoadedCompanies);
             FCalculateOpenItems(OpenItemsGrid, OpenItemsData);
             CallResponse.IsSucceeded:=True;
         except
@@ -267,7 +247,7 @@ begin
 end;
 
 
-function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
+function TOpenItems.FLoadToGridSync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;

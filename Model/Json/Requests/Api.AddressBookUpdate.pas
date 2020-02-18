@@ -15,7 +15,6 @@ type
 
 
     TAddressBookUpdate = class
-    {$TYPEINFO ON}
     strict private
         var FId:              integer;
         var FContactPerson:   string;
@@ -28,7 +27,6 @@ type
         const _RegularEmails   = 'RegularEmails';
         const _StatementEmails = 'StatementEmails';
         const _PhoneNumbers    = 'PhoneNumbers';
-    published
         property Id:              integer read FId              write FId;
         property ContactPerson:   string  read FContactPerson   write FContactPerson;
         property RegularEmails:   string  read FRegularEmails   write FRegularEmails;
