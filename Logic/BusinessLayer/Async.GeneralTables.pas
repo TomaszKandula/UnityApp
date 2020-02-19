@@ -139,7 +139,6 @@ uses
     REST.Types,
     REST.Json,
     Unity.Constants,
-    Unity.RestWrapper,
     Unity.Helpers,
     Unity.Service,
     Api.ReturnCompanies,
@@ -171,20 +170,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/companies/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetCompaniesAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/companies/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetCompaniesAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnCompanies:=TJson.JsonToObject<TReturnCompanies>(Service.Rest.Content);
+                var ReturnCompanies:=TJson.JsonToObject<TReturnCompanies>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnCompanies.SourceDbName);
@@ -226,8 +226,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetCompaniesAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetCompaniesAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnCompanies.Free();
@@ -237,15 +237,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompaniesAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCompaniesAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetCompaniesAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCompaniesAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetCompaniesAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -282,20 +282,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/controlstatus/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetControlStatusAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/controlstatus/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetControlStatusAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnControlStatus:=TJson.JsonToObject<TReturnControlStatus>(Service.Rest.Content);
+                var ReturnControlStatus:=TJson.JsonToObject<TReturnControlStatus>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnControlStatus.Id);
@@ -317,8 +318,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetControlStatusAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetControlStatusAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnControlStatus.Free();
@@ -328,15 +329,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetControlStatusAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetControlStatusAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetControlStatusAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetControlStatusAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetControlStatusAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -373,20 +374,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paidinfo/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetPaidInfoAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paidinfo/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetPaidInfoAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnPaidInfo:=TJson.JsonToObject<TReturnPaidInfo>(Service.Rest.Content);
+                var ReturnPaidInfo:=TJson.JsonToObject<TReturnPaidInfo>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnPaidInfo.Id);
@@ -406,8 +408,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetPaidInfoAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetPaidInfoAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnPaidInfo.Free();
@@ -417,15 +419,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetPaidInfoAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetPaidInfoAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetPaidInfoAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetPaidInfoAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetPaidInfoAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -462,20 +464,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paymentterms/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetPaymentTermsAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/paymentterms/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetPaymentTermsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnPaymentTerms:=TJson.JsonToObject<TReturnPaymentTerms>(Service.Rest.Content);
+                var ReturnPaymentTerms:=TJson.JsonToObject<TReturnPaymentTerms>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnPaymentTerms.Id);
@@ -505,8 +508,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetPaymentTermsAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetPaymentTermsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnPaymentTerms.Free();
@@ -516,15 +519,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetPaymentTermsAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetPaymentTermsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetPaymentTermsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetPaymentTermsAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetPaymentTermsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -561,20 +564,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/salesresponsible/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetSalesResponsibleAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/salesresponsible/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetSalesResponsibleAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnSalesResponsible:=TJson.JsonToObject<TReturnSalesResponsible>(Service.Rest.Content);
+                var ReturnSalesResponsible:=TJson.JsonToObject<TReturnSalesResponsible>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnSalesResponsible.Id);
@@ -596,8 +600,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetSalesResponsibleAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetSalesResponsibleAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnSalesResponsible.Free();
@@ -607,15 +611,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetSalesResponsibleAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetSalesResponsibleAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetSalesResponsibleAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetSalesResponsibleAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetSalesResponsibleAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -652,20 +656,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/personresponsible/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetPersonResponsibleAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/personresponsible/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetPersonResponsibleAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnPersonResponsible:=TJson.JsonToObject<TReturnPersonResponsible>(Service.Rest.Content);
+                var ReturnPersonResponsible:=TJson.JsonToObject<TReturnPersonResponsible>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnPersonResponsible.Id);
@@ -687,8 +692,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetPersonResponsibleAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetPersonResponsibleAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnPersonResponsible.Free();
@@ -698,15 +703,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetPersonResponsibleAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetPersonResponsibleAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetPersonResponsibleAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetPersonResponsibleAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetPersonResponsibleAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -743,20 +748,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/accounttype/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetAccountTypeAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/accounttype/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetAccountTypeAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnAccountType:=TJson.JsonToObject<TReturnAccountType>(Service.Rest.Content);
+                var ReturnAccountType:=TJson.JsonToObject<TReturnAccountType>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnAccountType.Id);
@@ -778,8 +784,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetAccountTypeAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetAccountTypeAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnAccountType.Free();
@@ -789,15 +795,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetAccountTypeAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetAccountTypeAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetAccountTypeAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetAccountTypeAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetAccountTypeAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -834,20 +840,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/customergroup/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetCustomerGroupAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generaltables/customergroup/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetCustomerGroupAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnCustomerGroup:=TJson.JsonToObject<TReturnCustomerGroup>(Service.Rest.Content);
+                var ReturnCustomerGroup:=TJson.JsonToObject<TReturnCustomerGroup>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnCustomerGroup.Id);
@@ -869,8 +876,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[GetCustomerGroupAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[GetCustomerGroupAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnCustomerGroup.Free();
@@ -880,15 +887,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCustomerGroupAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCustomerGroupAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetCustomerGroupAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCustomerGroupAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetCustomerGroupAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

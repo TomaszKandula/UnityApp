@@ -50,7 +50,6 @@ uses
     System.Threading,
     REST.Types,
     REST.Json,
-    Unity.RestWrapper,
     Unity.Constants,
     Unity.Helpers,
     Unity.Service,
@@ -78,12 +77,13 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            Service.Rest.AccessToken:=Service.AccessToken;
-            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+            var Rest:=Service.InvokeRest();
+			Rest.AccessToken:=Service.AccessToken;
+            Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/feedback/';
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
+            Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/feedback/';
+            Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
             var SendFrom:=Service.Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
             var SendTo  :=Service.Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
@@ -103,21 +103,21 @@ begin
                 SendEmail.Subject  :='User feedback (Unity Platform, ver. ' + THelpers.GetBuildInfoAsString + ')';
                 SendEmail.HtmlBody :=Text.Replace(#13#10,'<br>');
 
-                Service.Rest.CustomBody:=TJson.ObjectToJsonString(SendEmail);
+                Rest.CustomBody:=TJson.ObjectToJsonString(SendEmail);
 
             finally
 
             end;
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Service.Rest.Content);
+                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Rest.Content);
                 try
                     CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                     CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
-                    Service.Logger.Log('[SendFeedbackAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[SendFeedbackAsync]: Returned status code is ' + Rest.StatusCode.ToString());
                 finally
                     SentEmail.Free();
                 end;
@@ -126,15 +126,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[SendFeedbackAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

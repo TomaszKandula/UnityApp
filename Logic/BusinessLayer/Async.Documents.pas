@@ -75,7 +75,6 @@ uses
     System.Generics.Collections,
     REST.Types,
     REST.Json,
-    Unity.RestWrapper,
     Unity.Constants,
     Unity.Enums,
     Unity.Helpers,
@@ -285,16 +284,17 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'documents/'
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.DocumentType;
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[LogSentDocumentAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[LogSentDocumentAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
         var LogSentDocument:=TLogSentDocument.Create();
         try
@@ -306,7 +306,7 @@ begin
             LogSentDocument.PreservedEmail    :=PayLoad.PreservedEmail;
             LogSentDocument.DocumentType      :=PayLoad.DocumentType;
 
-            Service.Rest.CustomBody:=TJson.ObjectToJsonString(LogSentDocument);
+            Rest.CustomBody:=TJson.ObjectToJsonString(LogSentDocument);
 
         finally
             LogSentDocument.Free();
@@ -314,15 +314,15 @@ begin
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var LoggedSentDocument:=TJson.JsonToObject<TLoggedSentDocument>(Service.Rest.Content);
+                var LoggedSentDocument:=TJson.JsonToObject<TLoggedSentDocument>(Rest.Content);
                 try
 
                     CallResponse.IsSucceeded:=LoggedSentDocument.IsSucceeded;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[LogSentDocumentAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[LogSentDocumentAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     LoggedSentDocument.Free();
@@ -332,15 +332,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[LogSentDocumentAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[LogSentDocumentAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[LogSentDocumentAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[LogSentDocumentAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[LogSentDocumentAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

@@ -73,7 +73,6 @@ uses
     System.SysUtils,
     REST.Types,
     REST.Json,
-    Unity.RestWrapper,
     Unity.Constants,
     Unity.Helpers,
     Unity.Service,
@@ -103,19 +102,20 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetSSISDataAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetSSISDataAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnSsisData:=TJson.JsonToObject<TReturnSsisData>(Service.Rest.Content);
+                var ReturnSsisData:=TJson.JsonToObject<TReturnSsisData>(Rest.Content);
                 try
 
                     GotDateTime:=ReturnSsisData.CustExtractDt;
@@ -124,7 +124,7 @@ begin
                     CallResponse.ErrorCode  :=ReturnSsisData.Error.ErrorCode;
 
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetSSISDataAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetSSISDataAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnSsisData.Free();
@@ -134,15 +134,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetSSISDataAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetSSISDataAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetSSISDataAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetSSISDataAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetSSISDataAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -254,27 +254,28 @@ begin
 
     var CallResponse: TCallResponse;
 
-    Service.Rest.AccessToken:=Service.AccessToken;
-    Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+    var Rest:=Service.InvokeRest();
+	Rest.AccessToken:=Service.AccessToken;
+    Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-    Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
-    Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-    Service.Logger.Log('[FLoadToGrid]: Executing POST ' + Service.Rest.ClientBaseURL);
+    Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
+    Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+    Service.Logger.Log('[FLoadToGrid]: Executing POST ' + Rest.ClientBaseURL);
 
     try
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
             UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
-            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
         finally
             UserCompanySelection.Free();
         end;
 
-        if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+        if (Rest.Execute) and (Rest.StatusCode = 200) then
         begin
 
-            var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Service.Rest.Content);
+            var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Rest.Content);
             try
 
                 var RowCount:=Length(ReturnOpenItems.SourceDbName);
@@ -360,8 +361,8 @@ begin
                 end;
 
                 CallResponse.IsSucceeded:=True;
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Rest.StatusCode.ToString());
 
             finally
                 ReturnOpenItems.Free();
@@ -371,15 +372,15 @@ begin
         else
         begin
 
-            if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                CallResponse.LastMessage:='[FLoadToGrid]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+            if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                CallResponse.LastMessage:='[FLoadToGrid]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
             else
-                if String.IsNullOrEmpty(Service.Rest.Content) then
+                if String.IsNullOrEmpty(Rest.Content) then
                     CallResponse.LastMessage:='[FLoadToGrid]: Invalid server response. Please contact IT Support.'
                 else
-                    CallResponse.LastMessage:='[FLoadToGrid]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                    CallResponse.LastMessage:='[FLoadToGrid]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-            CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+            CallResponse.ReturnedCode:=Rest.StatusCode;
             CallResponse.IsSucceeded:=False;
             Service.Logger.Log(CallResponse.LastMessage);
 

@@ -72,7 +72,6 @@ uses
     System.SysUtils,
     REST.Types,
     REST.Json,
-    Unity.RestWrapper,
     Unity.Helpers,
     Unity.Service,
     Api.CompanyData,
@@ -103,33 +102,34 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            Service.Rest.AccessToken:=Service.AccessToken;
-            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+            var Rest:=Service.InvokeRest();
+			Rest.AccessToken:=Service.AccessToken;
+            Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-            Service.Logger.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+            Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+            Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+            Service.Logger.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
             try
 
-                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+                if (Rest.Execute) and (Rest.StatusCode = 200) then
                 begin
-                    CompanyData:=TJson.JsonToObject<TCompanyData>(Service.Rest.Content);
+                    CompanyData:=TJson.JsonToObject<TCompanyData>(Rest.Content);
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
                 end
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Service.Rest.Content) then
+                        if String.IsNullOrEmpty(Rest.Content) then
                             CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -174,19 +174,20 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var CompanyData:=TJson.JsonToObject<TCompanyData>(Service.Rest.Content);
+                var CompanyData:=TJson.JsonToObject<TCompanyData>(Rest.Content);
                 try
                     CompanyDetails.LbuName   :=CompanyData.CompanyName;
                     CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
@@ -199,21 +200,21 @@ begin
                 end;
 
                 CallResponse.IsSucceeded:=True;
-                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -251,37 +252,38 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            Service.Rest.AccessToken:=Service.AccessToken;
-            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+            var Rest:=Service.InvokeRest();
+			Rest.AccessToken:=Service.AccessToken;
+            Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
+            Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
+            Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
             try
 
                 var CompanyCodesList:=TCompanyCodesList.Create();
                 CompanyCodesList.SourceDBName:=SourceList;
-                Service.Rest.CustomBody:=TJson.ObjectToJsonString(CompanyCodesList);
+                Rest.CustomBody:=TJson.ObjectToJsonString(CompanyCodesList);
 
-                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+                if (Rest.Execute) and (Rest.StatusCode = 200) then
                 begin
-                    CompanyEmailsList:=TJson.JsonToObject<TCompanyEmailsList>(Service.Rest.Content);
+                    CompanyEmailsList:=TJson.JsonToObject<TCompanyEmailsList>(Rest.Content);
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
                 end
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Service.Rest.Content) then
+                        if String.IsNullOrEmpty(Rest.Content) then
                             CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                            CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 

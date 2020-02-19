@@ -17,7 +17,6 @@ uses
 
 type
 
-
     /// <summary>
     /// Exposes properties and methods that allows easy utilisation of WebApi service throught REST.
     /// </summary>

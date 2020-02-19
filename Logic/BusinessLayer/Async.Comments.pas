@@ -111,7 +111,6 @@ uses
     REST.Types,
     REST.Json,
     Unity.Settings,
-    Unity.RestWrapper,
     Unity.Service,
     Api.UserGeneralComment,
     Api.UserGeneralCommentAdd,
@@ -144,10 +143,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'dailycommentaries/'
             + PayLoad.SourceDBName
             + '/'
@@ -159,8 +159,8 @@ begin
         if PayLoad.CommentId > 0 then
         begin
 
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
-            Service.Logger.Log('[EditGeneralComment]: Executing PATCH ' + Service.Rest.ClientBaseURL);
+            Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+            Service.Logger.Log('[EditGeneralComment]: Executing PATCH ' + Rest.ClientBaseURL);
 
             var UserDailyCommentUpdate:=TUserDailyCommentUpdate.Create();
             try
@@ -174,7 +174,7 @@ begin
                 UserDailyCommentUpdate.UserComment         :=PayLoad.UserComment;
                 UserDailyCommentUpdate.CommentId           :=PayLoad.CommentId;
 
-                Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentUpdate);
+                Rest.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentUpdate);
 
             finally
                 UserDailyCommentUpdate.Free();
@@ -184,8 +184,8 @@ begin
         else
         begin
 
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[EditGeneralComment]: Executing POST ' + Service.Rest.ClientBaseURL);
+            Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[EditGeneralComment]: Executing POST ' + Rest.ClientBaseURL);
 
             var UserDailyCommentAdd:=TUserDailyCommentAdd.Create();
             try
@@ -199,7 +199,7 @@ begin
                 UserDailyCommentAdd.AgeDate             :=PayLoad.AgeDate;
                 UserDailyCommentAdd.UserComment         :=PayLoad.UserComment;
 
-                Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentAdd);
+                Rest.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentAdd);
 
             finally
                 UserDailyCommentAdd.Free();
@@ -210,13 +210,13 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
                 if not PayLoad.CommentId = 0 then
                 begin
 
-                    var UserDailyCommentUpdated:=TJson.JsonToObject<TUserDailyCommentUpdated>(Service.Rest.Content);
+                    var UserDailyCommentUpdated:=TJson.JsonToObject<TUserDailyCommentUpdated>(Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserDailyCommentUpdated.IsSucceeded;
                         CallResponse.LastMessage:=UserDailyCommentUpdated.Error.ErrorDesc;
@@ -229,7 +229,7 @@ begin
                 else
                 begin
 
-                    var UserDailyCommentAdded:=TJson.JsonToObject<TUserDailyCommentAdded>(Service.Rest.Content);
+                    var UserDailyCommentAdded:=TJson.JsonToObject<TUserDailyCommentAdded>(Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserDailyCommentAdded.IsSucceeded;
                         CallResponse.LastMessage:=UserDailyCommentAdded.Error.ErrorDesc;
@@ -240,22 +240,22 @@ begin
 
                 end;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                Service.Logger.Log('[EditGeneralComment]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                Service.Logger.Log('[EditGeneralComment]: Returned status code is ' + Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[EditGeneralComment]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[EditGeneralComment]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[EditGeneralComment]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[EditGeneralComment]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[EditGeneralComment]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -296,10 +296,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'generalcommentaries/'
             + PayLoad.SourceDBName
             + '/'
@@ -311,8 +312,8 @@ begin
         if QueryData.DoesCommentExists then
         begin
 
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
-            Service.Logger.Log('[EditGeneralComment]: Executing PATCH ' + Service.Rest.ClientBaseURL);
+            Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+            Service.Logger.Log('[EditGeneralComment]: Executing PATCH ' + Rest.ClientBaseURL);
 
             var UserGeneralCommentUpdate:=TUserGeneralCommentUpdate.Create();
             try
@@ -324,7 +325,7 @@ begin
                 if not String.IsNullOrEmpty(PayLoad.UserComment) then UserGeneralCommentUpdate.UserComment:=PayLoad.UserComment;
 
                 UserGeneralCommentUpdate.CommentId:=QueryData.CommentId;
-                Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentUpdate);
+                Rest.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentUpdate);
 
             finally
                 UserGeneralCommentUpdate.Free();
@@ -334,8 +335,8 @@ begin
         else
         begin
 
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[EditGeneralComment]: Executing POST ' + Service.Rest.ClientBaseURL);
+            Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[EditGeneralComment]: Executing POST ' + Rest.ClientBaseURL);
 
             var UserGeneralCommentAdd:=TUserGeneralCommentAdd.Create();
             try
@@ -346,7 +347,7 @@ begin
                 if not String.IsNullOrEmpty(PayLoad.Free1)    then UserGeneralCommentAdd.Free3   :=PayLoad.Free3;
 
                 UserGeneralCommentAdd.UserComment:=PayLoad.UserComment;
-                Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentAdd);
+                Rest.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentAdd);
 
             finally
                 UserGeneralCommentAdd.Free();
@@ -357,13 +358,13 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
                 if QueryData.DoesCommentExists then
                 begin
 
-                    var UserGeneralCommentUpdated:=TJson.JsonToObject<TUserGeneralCommentUpdated>(Service.Rest.Content);
+                    var UserGeneralCommentUpdated:=TJson.JsonToObject<TUserGeneralCommentUpdated>(Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserGeneralCommentUpdated.IsSucceeded;
                         CallResponse.LastMessage:=UserGeneralCommentUpdated.Error.ErrorDesc;
@@ -376,7 +377,7 @@ begin
                 else
                 begin
 
-                    var UserGeneralCommentAdded:=TJson.JsonToObject<TUserGeneralCommentAdded>(Service.Rest.Content);
+                    var UserGeneralCommentAdded:=TJson.JsonToObject<TUserGeneralCommentAdded>(Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserGeneralCommentAdded.IsSucceeded;
                         CallResponse.LastMessage:=UserGeneralCommentAdded.Error.ErrorDesc;
@@ -387,22 +388,22 @@ begin
 
                 end;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                Service.Logger.Log('[EditGeneralComment]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                Service.Logger.Log('[EditGeneralComment]: Returned status code is ' + Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[EditGeneralComment]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[EditGeneralComment]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[EditGeneralComment]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[EditGeneralComment]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[EditGeneralComment]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -439,24 +440,25 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'generalcommentaries/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/check/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckGeneralCommentAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[CheckGeneralCommentAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserGeneralCommentCheck:=TJson.JsonToObject<TUserGeneralCommentCheck>(Service.Rest.Content);
+                var UserGeneralCommentCheck:=TJson.JsonToObject<TUserGeneralCommentCheck>(Rest.Content);
                 try
                     DoesCommentExists.DoesCommentExists:=UserGeneralCommentCheck.DoesCommentExists;
                     DoesCommentExists.UserComment:=UserGeneralCommentCheck.UserComment;
@@ -472,15 +474,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -515,10 +517,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'generalcommentaries/'
             + SourceDBName
             + '/'
@@ -526,15 +529,15 @@ begin
             + '/comment/'
             + UserAlias
             + '/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetGeneralCommentAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetGeneralCommentAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Service.Rest.Content);
+                var UserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Rest.Content);
                 try
 
                     TempComments.CommentId  :=UserGeneralComment.CommentId;
@@ -547,7 +550,7 @@ begin
                     CallResponse.IsSucceeded:=UserGeneralComment.IsSucceeded;
                     CallResponse.LastMessage:=UserGeneralComment.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserGeneralComment.Error.ErrorCode;
-                    Service.Logger.Log('[GetGeneralCommentAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetGeneralCommentAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserGeneralComment.Free();
@@ -557,15 +560,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetGeneralCommentAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetGeneralCommentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetGeneralCommentAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetGeneralCommentAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetGeneralCommentAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -602,10 +605,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'dailycommentaries/'
             + SourceDBName
             + '/'
@@ -613,15 +617,15 @@ begin
             + '/check/'
             + AgeDate
             + '/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckDailyCommentAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[CheckDailyCommentAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserDailyCommentCheck:=TJson.JsonToObject<TUserDailyCommentCheck>(Service.Rest.Content);
+                var UserDailyCommentCheck:=TJson.JsonToObject<TUserDailyCommentCheck>(Rest.Content);
                 try
                     DoesCommentExists.DoesCommentExists:=UserDailyCommentCheck.DoesCommentExists;
                     DoesCommentExists.UserComment:=UserDailyCommentCheck.UserComment;
@@ -637,15 +641,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -680,10 +684,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'dailycommentaries/'
             + SourceDBName
             + '/'
@@ -691,15 +696,15 @@ begin
             + '/comments/'
             + UserAlias
             + '/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetDailyCommentsAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetDailyCommentsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Service.Rest.Content);
+                var UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Rest.Content);
                 try
 
                     SetLength(TempComments, Length(UserDailyCommentsList.CommentId));
@@ -724,7 +729,7 @@ begin
                     CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserDailyCommentsList.Error.ErrorCode;
-                    Service.Logger.Log('[GetDailyCommentsAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetDailyCommentsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserDailyCommentsList.Free();
@@ -734,15 +739,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetDailyCommentsAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetDailyCommentsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetDailyCommentsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetDailyCommentsAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetDailyCommentsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

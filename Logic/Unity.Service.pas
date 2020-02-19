@@ -30,7 +30,6 @@ type
         var FMediator:     IMediator;
         var FLogger:       ILogger;
         var FSettings:     ISettings;
-        var FRest:         IRESTFul;
         procedure RegisterAccessToken(NewValue: string);
     public
         constructor Create();
@@ -42,7 +41,7 @@ type
         property Mediator:     IMediator    read FMediator;
         property Logger:       ILogger      read FLogger;
         property Settings:     ISettings    read FSettings;
-        property Rest:         IRESTFul     read FRest;
+        function InvokeRest(): IRESTFul;
         procedure InitializeSession(GenSessionId: string; SessionLog: string);
         procedure UpdateUserData(UnityUserId: integer; Department: string; AliasName: string; DisplayName: string; EmailAddress: string);
     end;
@@ -82,7 +81,6 @@ begin
     end;
 
     if not Assigned(FSettings) then FSettings:=TSettings.Create();
-    if not Assigned(FRest)     then FRest    :=TRESTful.Create();
 
 end;
 
@@ -90,6 +88,12 @@ end;
 destructor TService.Destroy();
 begin
     inherited;
+end;
+
+
+function TService.InvokeRest(): IRESTFul;
+begin
+    Result:=TRESTful.Create();
 end;
 
 

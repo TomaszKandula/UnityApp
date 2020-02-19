@@ -123,7 +123,6 @@ uses
     REST.Json,
     Unity.Helpers,
     Unity.Service,
-    Unity.RestWrapper,
     Api.UserSessionAdd,
     Api.UserSessionAdded,
     Api.UserSessionChecked,
@@ -160,29 +159,30 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=String.Empty;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
+        var Rest:=Service.InvokeRest();
+        Rest.AccessToken:=String.Empty;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
-        Service.Rest.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
-        Service.Rest.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
-        Service.Rest.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
+        Rest.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
+        Rest.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
+        Rest.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Service.Rest.Content);
+                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Rest.Content);
                 try
                     NewAccessToken:=TokenGranted.AccessToken;
                     CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
                     CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=TokenGranted.Error.ErrorCode;
-                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
                 finally
                     TokenGranted.Free();
                 end;
@@ -191,15 +191,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -234,32 +234,33 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[InitiateSessionAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[InitiateSessionAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
         var UserSessionAdd:=TUserSessionAdd.Create();
         try
             UserSessionAdd.AliasName:=AliasName;
-            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
         finally
             UserSessionAdd.Free();
         end;
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Service.Rest.Content);
+                var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Rest.Content);
                 try
                     CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
                     CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
-                    Service.Logger.Log('[InitiateSessionAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[InitiateSessionAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
                 finally
                     UserSessionAdded.Free();
                 end;
@@ -268,15 +269,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[InitiateSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[InitiateSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[InitiateSessionAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[InitiateSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[InitiateSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -309,19 +310,20 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckSessionAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[CheckSessionAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Service.Rest.Content);
+                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Rest.Content);
                 try
 
                     CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
@@ -341,7 +343,7 @@ begin
 
                     end;
 
-                    Service.Logger.Log('[CheckSessionAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[CheckSessionAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserSessionChecked.Free();
@@ -351,15 +353,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[CheckSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[CheckSessionAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[CheckSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[CheckSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -393,24 +395,25 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetUserCompanyListAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetUserCompanyListAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
 
-                var UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Service.Rest.Content);
+                var UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Rest.Content);
                 try
 
                     var ItemCount:=Length(UserCompanyList.Companies);
@@ -423,7 +426,7 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserCompanyList.Free();
@@ -433,15 +436,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -475,16 +478,17 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/logs/';
 
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[SaveUserLogsAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[SaveUserLogsAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
         var UserSessionLogs:=TUserSessionLogs.Create();
         try
@@ -495,18 +499,18 @@ begin
             UserSessionLogs.AppEventLog:=StrEventLog;
             UserSessionLogs.AppName    :='Unity Platform';
 
-            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
             try
 
-                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+                if (Rest.Execute) and (Rest.StatusCode = 200) then
                 begin
 
-                    var UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Service.Rest.Content);
+                    var UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
                         CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
                         CallResponse.ErrorCode  :=UserSessionLogsSaved.Error.ErrorCode;
-                        Service.Logger.Log('[SaveUserLogsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                        Service.Logger.Log('[SaveUserLogsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
                         Service.Logger.Log('[SaveUserLogsAwaited]: Application shutdown.');
                     finally
                         UserSessionLogsSaved.Free();
@@ -516,15 +520,15 @@ begin
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[SaveUserLogsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserLogsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Service.Rest.Content) then
+                        if String.IsNullOrEmpty(Rest.Content) then
                             CallResponse.LastMessage:='[SaveUserLogsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[SaveUserLogsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                            CallResponse.LastMessage:='[SaveUserLogsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -561,31 +565,32 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Rest.ClientBaseURL);
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
 
             UserCompanySelection.SelectedCoCodes:=UserSelection.ToArray();
-            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             try
 
-                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+                if (Rest.Execute) and (Rest.StatusCode = 200) then
                 begin
 
-                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Service.Rest.Content);
+                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
                     finally
                         UserCompaniesUpdated.Free();
                     end;
@@ -594,15 +599,15 @@ begin
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Service.Rest.Content) then
+                        if String.IsNullOrEmpty(Rest.Content) then
                             CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -640,23 +645,24 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserRating:=TJson.JsonToObject<TUserRating>(Service.Rest.Content);
+                var UserRating:=TJson.JsonToObject<TUserRating>(Rest.Content);
                 try
 
                     TempRating.UserRating:=UserRating.Rating;
@@ -665,9 +671,9 @@ begin
                     CallResponse.IsSucceeded :=UserRating.IsSucceeded;
                     CallResponse.ErrorCode   :=UserRating.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
 
-                    Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserRating.Free();
@@ -677,15 +683,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[LoadRatingAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -719,40 +725,41 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[SubmitRatingAsync]: Executing POST ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[SubmitRatingAsync]: Executing POST ' + Rest.ClientBaseURL);
 
         var UserRatingAdd:=TUserRatingAdd.Create();
         try
             UserRatingAdd.UserRating:=Rating.UserRating;
             UserRatingAdd.Comment   :=Rating.UserComment;
-            Service.Rest.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
+            Rest.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
         finally
             UserRatingAdd.Free();
         end;
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserRatingAdded:=TJson.JsonToObject<TUserRatingAdded>(Service.Rest.Content);
+                var UserRatingAdded:=TJson.JsonToObject<TUserRatingAdded>(Rest.Content);
                 try
 
                     CallResponse.IsSucceeded :=UserRatingAdded.IsSucceeded;
                     CallResponse.ErrorCode   :=UserRatingAdded.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRatingAdded.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
 
-                    Service.Logger.Log('[SubmitRatingAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[SubmitRatingAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserRatingAdded.Free();
@@ -762,15 +769,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[SubmitRatingAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[SubmitRatingAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[SubmitRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SubmitRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[SubmitRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -806,40 +813,41 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[UpdateRatingAsync]: Executing PATCH ' + Service.Rest.ClientBaseURL);
+        Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        Service.Logger.Log('[UpdateRatingAsync]: Executing PATCH ' + Rest.ClientBaseURL);
 
         var UserRatingUpdate:=TUserRatingUpdate.Create();
         try
             UserRatingUpdate.UserRating:=Rating.UserRating;
             UserRatingUpdate.Comment   :=Rating.UserComment;
-            Service.Rest.CustomBody         :=TJson.ObjectToJsonString(UserRatingUpdate);
+            Rest.CustomBody         :=TJson.ObjectToJsonString(UserRatingUpdate);
         finally
             UserRatingUpdate.Free();
         end;
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var UserRatingUpdated:=TJson.JsonToObject<TUserRatingUpdated>(Service.Rest.Content);
+                var UserRatingUpdated:=TJson.JsonToObject<TUserRatingUpdated>(Rest.Content);
                 try
 
                     CallResponse.IsSucceeded :=UserRatingUpdated.IsSucceeded;
                     CallResponse.ErrorCode   :=UserRatingUpdated.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRatingUpdated.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
 
-                    Service.Logger.Log('[UpdateRatingAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[UpdateRatingAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     UserRatingUpdated.Free();
@@ -849,15 +857,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[UpdateRatingAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[UpdateRatingAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[UpdateRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[UpdateRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[UpdateRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

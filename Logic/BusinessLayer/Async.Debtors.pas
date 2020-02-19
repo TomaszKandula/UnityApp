@@ -78,7 +78,6 @@ uses
     System.Threading,
     REST.Types,
     REST.Json,
-    Unity.RestWrapper,
     Unity.Helpers,
     Unity.Sorting,
     Unity.Service,
@@ -109,28 +108,29 @@ begin
         var CallResponse: TCallResponse;
         var Grid:=TStringGrid.Create(nil);
 
-        Service.Rest.AccessToken:=Service.AccessToken;
-        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
-        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[ReadAgeViewAsync]: Executing POST ' + Service.Rest.ClientBaseURL);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[ReadAgeViewAsync]: Executing POST ' + Rest.ClientBaseURL);
 
         var UserCustSnapshotList:=TUserCustSnapshotList.Create();
         try
             UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
             UserCustSnapshotList.SortMode:=SortMode;
-            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
         finally
             UserCustSnapshotList.Free();
         end;
 
         try
 
-            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
-                var ReturnCustSnapshots:=TJson.JsonToObject<TReturnCustSnapshots>(Service.Rest.Content);
+                var ReturnCustSnapshots:=TJson.JsonToObject<TReturnCustSnapshots>(Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnCustSnapshots.SourceDbName);
@@ -205,8 +205,8 @@ begin
                     Service.Logger.Log('[ReadAgeViewAsync]: Risk class data has been calculated.');
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
-                    Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnCustSnapshots.Free();
@@ -216,15 +216,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                    if String.IsNullOrEmpty(Rest.Content) then
                         CallResponse.LastMessage:='[ReadAgeViewAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[ReadAgeViewAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                        CallResponse.LastMessage:='[ReadAgeViewAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -307,40 +307,41 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            Service.Rest.AccessToken:=Service.AccessToken;
-            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+            var Rest:=Service.InvokeRest();
+			Rest.AccessToken:=Service.AccessToken;
+            Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
-            Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-            Service.Logger.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
+            Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
+            Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+            Service.Logger.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
             try
 
-                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+                if (Rest.Execute) and (Rest.StatusCode = 200) then
                 begin
 
-                    var CustSortingOptions: TCustSortingOptions:=TJson.JsonToObject<TCustSortingOptions>(Service.Rest.Content);
+                    var CustSortingOptions: TCustSortingOptions:=TJson.JsonToObject<TCustSortingOptions>(Rest.Content);
 
                     for var iCNT:=0 to Length(CustSortingOptions.SortingOptions) - 1 do
                         TempList.Add(CustSortingOptions.SortingOptions[iCNT]);
 
                     CallResponse.IsSucceeded:=True;
                     CustSortingOptions.Free();
-                    Service.Logger.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 end
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
+                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Service.Rest.Content) then
+                        if String.IsNullOrEmpty(Rest.Content) then
                             CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
+                            CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
