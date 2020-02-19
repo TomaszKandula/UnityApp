@@ -31,7 +31,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TMailer = class(TInterfacedObject, IMailer)
     public
@@ -77,11 +78,12 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+            Service.Rest.AccessToken:=Service.AccessToken;
+            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/feedback/';
-            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/feedback/';
+            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
 
             var SendFrom:=Service.Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
             var SendTo  :=Service.Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
@@ -101,21 +103,21 @@ begin
                 SendEmail.Subject  :='User feedback (Unity Platform, ver. ' + THelpers.GetBuildInfoAsString + ')';
                 SendEmail.HtmlBody :=Text.Replace(#13#10,'<br>');
 
-                Restful.CustomBody:=TJson.ObjectToJsonString(SendEmail);
+                Service.Rest.CustomBody:=TJson.ObjectToJsonString(SendEmail);
 
             finally
 
             end;
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Service.Rest.Content);
                 try
                     CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                     CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
-                    Service.Logger.Log('[SendFeedbackAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[SendFeedbackAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
                 finally
                     SentEmail.Free();
                 end;
@@ -124,15 +126,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[SendFeedbackAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

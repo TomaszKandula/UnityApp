@@ -48,7 +48,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TCompanies = class(TInterfacedObject, ICompanies)
     strict private
@@ -102,32 +103,33 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+            Service.Rest.AccessToken:=Service.AccessToken;
+            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
-            Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-            Service.Logger.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+            Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+            Service.Logger.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
 
             try
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
                 begin
-                    CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
+                    CompanyData:=TJson.JsonToObject<TCompanyData>(Service.Rest.Content);
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
                 end
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
+                        if String.IsNullOrEmpty(Service.Rest.Content) then
                             CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -172,18 +174,19 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
+                var CompanyData:=TJson.JsonToObject<TCompanyData>(Service.Rest.Content);
                 try
                     CompanyDetails.LbuName   :=CompanyData.CompanyName;
                     CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
@@ -196,21 +199,21 @@ begin
                 end;
 
                 CallResponse.IsSucceeded:=True;
-                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -248,36 +251,37 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+            Service.Rest.AccessToken:=Service.AccessToken;
+            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
-            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
+            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
 
             try
 
                 var CompanyCodesList:=TCompanyCodesList.Create();
                 CompanyCodesList.SourceDBName:=SourceList;
-                Restful.CustomBody:=TJson.ObjectToJsonString(CompanyCodesList);
+                Service.Rest.CustomBody:=TJson.ObjectToJsonString(CompanyCodesList);
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
                 begin
-                    CompanyEmailsList:=TJson.JsonToObject<TCompanyEmailsList>(Restful.Content);
+                    CompanyEmailsList:=TJson.JsonToObject<TCompanyEmailsList>(Service.Rest.Content);
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
                 end
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
+                        if String.IsNullOrEmpty(Service.Rest.Content) then
                             CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                            CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 

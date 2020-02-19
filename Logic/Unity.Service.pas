@@ -74,9 +74,16 @@ end;
 
 constructor TService.Create();
 begin
-    if not Assigned(FMediator) then FMediator:=TMediator.Create();
+
+    if not Assigned(FMediator) then
+    begin
+        FMediator:=TMediator.Create();
+        FMediator.ForceInitialize();
+    end;
+
     if not Assigned(FSettings) then FSettings:=TSettings.Create();
-    //if not Assigned(FRest)     then FRest    :=TRESTful.Create();
+    if not Assigned(FRest)     then FRest    :=TRESTful.Create();
+
 end;
 
 

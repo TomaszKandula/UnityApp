@@ -53,7 +53,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TDocuments = class(TInterfacedObject, IDocuments)
     public
@@ -284,15 +285,16 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'documents/'
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.DocumentType;
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[LogSentDocumentAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[LogSentDocumentAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var LogSentDocument:=TLogSentDocument.Create();
         try
@@ -304,7 +306,7 @@ begin
             LogSentDocument.PreservedEmail    :=PayLoad.PreservedEmail;
             LogSentDocument.DocumentType      :=PayLoad.DocumentType;
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(LogSentDocument);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(LogSentDocument);
 
         finally
             LogSentDocument.Free();
@@ -312,15 +314,15 @@ begin
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var LoggedSentDocument:=TJson.JsonToObject<TLoggedSentDocument>(Restful.Content);
+                var LoggedSentDocument:=TJson.JsonToObject<TLoggedSentDocument>(Service.Rest.Content);
                 try
 
                     CallResponse.IsSucceeded:=LoggedSentDocument.IsSucceeded;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    Service.Logger.Log('[LogSentDocumentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    Service.Logger.Log('[LogSentDocumentAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     LoggedSentDocument.Free();
@@ -330,15 +332,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[LogSentDocumentAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[LogSentDocumentAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[LogSentDocumentAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[LogSentDocumentAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[LogSentDocumentAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

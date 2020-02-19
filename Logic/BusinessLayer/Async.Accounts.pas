@@ -94,7 +94,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TAccounts = class(TInterfacedObject, IAccounts)
     public
@@ -159,28 +160,29 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(String.Empty, TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
+        Service.Rest.AccessToken:=String.Empty;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
 
-        Restful.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
-        Restful.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
-        Restful.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
+        Service.Rest.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
+        Service.Rest.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
+        Service.Rest.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Restful.Content);
+                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Service.Rest.Content);
                 try
                     NewAccessToken:=TokenGranted.AccessToken;
                     CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
                     CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
                     CallResponse.ErrorCode  :=TokenGranted.Error.ErrorCode;
-                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
                 finally
                     TokenGranted.Free();
                 end;
@@ -189,15 +191,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -232,62 +234,62 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[InitiateSessionAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var UserSessionAdd:=TUserSessionAdd.Create();
         try
-
             UserSessionAdd.AliasName:=AliasName;
-            Restful.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
-            try
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
+        finally
+            UserSessionAdd.Free();
+        end;
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
-                begin
+        try
 
-                    var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Restful.Content);
-                    try
-                        CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
-                        CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
-                        CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
-                        Service.Logger.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
-                    finally
-                        UserSessionAdded.Free();
-                    end;
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
+            begin
 
-                end
+                var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Service.Rest.Content);
+                try
+                    CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
+                    CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
+                    Service.Logger.Log('[InitiateSessionAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
+                finally
+                    UserSessionAdded.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[InitiateSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                begin
-
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[InitiateAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                        CallResponse.LastMessage:='[InitiateSessionAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
-                            CallResponse.LastMessage:='[InitiateAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[InitiateAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[InitiateSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    Service.Logger.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[InitiateAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    Service.Logger.Log(CallResponse.LastMessage);
-                end;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
 
             end;
 
-        finally
-            UserSessionAdd.Free();
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[InitiateSessionAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
         end;
 
     end);
@@ -307,18 +309,19 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[CheckSessionAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Restful.Content);
+                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Service.Rest.Content);
                 try
 
                     CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
@@ -338,7 +341,7 @@ begin
 
                     end;
 
-                    Service.Logger.Log('[CheckAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[CheckSessionAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     UserSessionChecked.Free();
@@ -348,15 +351,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[CheckAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[CheckAwaited]: Invalid server response. Please contact IT Support.'
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
+                        CallResponse.LastMessage:='[CheckSessionAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[CheckAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[CheckSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -366,7 +369,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[CheckAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[CheckSessionAwaited]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 
@@ -390,23 +393,24 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetUserCompanyListAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
 
-                var UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Restful.Content);
+                var UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Service.Rest.Content);
                 try
 
                     var ItemCount:=Length(UserCompanyList.Companies);
@@ -419,7 +423,7 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     UserCompanyList.Free();
@@ -429,15 +433,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -471,15 +475,16 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/logs/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[SaveUserLogsAwaited]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var UserSessionLogs:=TUserSessionLogs.Create();
         try
@@ -490,18 +495,18 @@ begin
             UserSessionLogs.AppEventLog:=StrEventLog;
             UserSessionLogs.AppName    :='Unity Platform';
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
             try
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
                 begin
 
-                    var UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Restful.Content);
+                    var UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Service.Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
                         CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
                         CallResponse.ErrorCode  :=UserSessionLogsSaved.Error.ErrorCode;
-                        Service.Logger.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                        Service.Logger.Log('[SaveUserLogsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
                         Service.Logger.Log('[SaveUserLogsAwaited]: Application shutdown.');
                     finally
                         UserSessionLogsSaved.Free();
@@ -511,15 +516,15 @@ begin
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[SaveUserLogsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserLogsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
+                        if String.IsNullOrEmpty(Service.Rest.Content) then
                             CallResponse.LastMessage:='[SaveUserLogsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[SaveUserLogsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                            CallResponse.LastMessage:='[SaveUserLogsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -556,30 +561,31 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Service.Rest.ClientBaseURL);
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
 
             UserCompanySelection.SelectedCoCodes:=UserSelection.ToArray();
-            Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             try
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
                 begin
 
-                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Restful.Content);
+                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Service.Rest.Content);
                     try
                         CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
                     finally
                         UserCompaniesUpdated.Free();
                     end;
@@ -588,15 +594,15 @@ begin
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
+                        if String.IsNullOrEmpty(Service.Rest.Content) then
                             CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -634,22 +640,23 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var UserRating:=TJson.JsonToObject<TUserRating>(Restful.Content);
+                var UserRating:=TJson.JsonToObject<TUserRating>(Service.Rest.Content);
                 try
 
                     TempRating.UserRating:=UserRating.Rating;
@@ -658,9 +665,9 @@ begin
                     CallResponse.IsSucceeded :=UserRating.IsSucceeded;
                     CallResponse.ErrorCode   :=UserRating.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
 
-                    Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     UserRating.Free();
@@ -670,15 +677,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[LoadRatingAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -712,39 +719,40 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[SubmitRatingAsync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[SubmitRatingAsync]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var UserRatingAdd:=TUserRatingAdd.Create();
         try
             UserRatingAdd.UserRating:=Rating.UserRating;
             UserRatingAdd.Comment   :=Rating.UserComment;
-            Restful.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
+            Service.Rest.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
         finally
             UserRatingAdd.Free();
         end;
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var UserRatingAdded:=TJson.JsonToObject<TUserRatingAdded>(Restful.Content);
+                var UserRatingAdded:=TJson.JsonToObject<TUserRatingAdded>(Service.Rest.Content);
                 try
 
                     CallResponse.IsSucceeded :=UserRatingAdded.IsSucceeded;
                     CallResponse.ErrorCode   :=UserRatingAdded.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRatingAdded.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
 
-                    Service.Logger.Log('[SubmitRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[SubmitRatingAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     UserRatingAdded.Free();
@@ -754,15 +762,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[SubmitRatingAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[SubmitRatingAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[SubmitRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SubmitRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[SubmitRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -798,39 +806,40 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'accounts/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[UpdateRatingAsync]: Executing PATCH ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        Service.Logger.Log('[UpdateRatingAsync]: Executing PATCH ' + Service.Rest.ClientBaseURL);
 
         var UserRatingUpdate:=TUserRatingUpdate.Create();
         try
             UserRatingUpdate.UserRating:=Rating.UserRating;
             UserRatingUpdate.Comment   :=Rating.UserComment;
-            Restful.CustomBody         :=TJson.ObjectToJsonString(UserRatingUpdate);
+            Service.Rest.CustomBody         :=TJson.ObjectToJsonString(UserRatingUpdate);
         finally
             UserRatingUpdate.Free();
         end;
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var UserRatingUpdated:=TJson.JsonToObject<TUserRatingUpdated>(Restful.Content);
+                var UserRatingUpdated:=TJson.JsonToObject<TUserRatingUpdated>(Service.Rest.Content);
                 try
 
                     CallResponse.IsSucceeded :=UserRatingUpdated.IsSucceeded;
                     CallResponse.ErrorCode   :=UserRatingUpdated.Error.ErrorCode;
                     CallResponse.LastMessage :=UserRatingUpdated.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
 
-                    Service.Logger.Log('[UpdateRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[UpdateRatingAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     UserRatingUpdated.Free();
@@ -840,15 +849,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[UpdateRatingAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[UpdateRatingAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[UpdateRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[UpdateRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[UpdateRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

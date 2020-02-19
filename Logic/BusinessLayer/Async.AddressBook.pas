@@ -63,7 +63,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TAddressBook = class(TInterfacedObject, IAddressBook)
     public
@@ -116,20 +117,21 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         if LoadedCompanies.Count > 0 then
         begin
 
 
-            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/selection/';
-            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[OpenAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
+            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/selection/';
+            Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+            Service.Logger.Log('[OpenAddressBookAsync]: Executing POST ' + Service.Rest.ClientBaseURL);
 
             var UserCompanySelection:=TUserCompanySelection.Create();
             try
                 UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
-                Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+                Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             finally
                 UserCompanySelection.Free();
             end;
@@ -137,19 +139,19 @@ begin
         end
         else
         begin
-            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
-            Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-            Service.Logger.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
+            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+            Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+            Service.Logger.Log('[OpenAddressBookAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
         end;
 
         var CallResponse: TCallResponse;
         var ReturnedData:=TStringGrid.Create(nil);
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var AddressBookList:=TJson.JsonToObject<TAddressBookList>(Restful.Content);
+                var AddressBookList:=TJson.JsonToObject<TAddressBookList>(Service.Rest.Content);
                 try
 
                     ReturnedData.RowCount:=Length(AddressBookList.Id) + 1{Header};
@@ -179,8 +181,8 @@ begin
                     end;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    Service.Logger.Log('[OpenAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    Service.Logger.Log('[OpenAddressBookAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     AddressBookList.Free();
@@ -190,15 +192,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[OpenAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[OpenAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[OpenAddressBookAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[OpenAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[OpenAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -233,11 +235,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + PayLoad.Id.ToString();
-        Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + PayLoad.Id.ToString();
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        Service.Logger.Log('[UpdateAddressBookAsync]: Executing PATCH ' + Service.Rest.ClientBaseURL);
 
         var LAddressBookUpdate:=TAddressBookUpdate.Create();
         try
@@ -247,7 +250,7 @@ begin
             LAddressBookUpdate.StatementEmails:=PayLoad.StatementEmails;
             LAddressBookUpdate.PhoneNumbers   :=PayLoad.PhoneNumbers;
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(LAddressBookUpdate);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(LAddressBookUpdate);
 
         finally
             LAddressBookUpdate.Free();
@@ -256,10 +259,10 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var AddressBookUpdated:=TJson.JsonToObject<TAddressBookUpdated>(Restful.Content);
+                var AddressBookUpdated:=TJson.JsonToObject<TAddressBookUpdated>(Service.Rest.Content);
                 try
                     CallResponse.IsSucceeded :=AddressBookUpdated.IsSucceeded;
                     CallResponse.ErrorCode   :=AddressBookUpdated.Error.ErrorCode;
@@ -268,22 +271,22 @@ begin
                     AddressBookUpdated.Free();
                 end;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                Service.Logger.Log('[UpdateAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                Service.Logger.Log('[UpdateAddressBookAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[UpdateAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[UpdateAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[UpdateAddressBookAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[UpdateAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[UpdateAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -319,11 +322,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[AddToAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/';
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[AddToAddressBookAsync]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var LAddressBookAdd:=TAddressBookAdd.Create();
         try
@@ -336,7 +340,7 @@ begin
             LAddressBookAdd.StatementEmails:=PayLoad.StatementEmails;
             LAddressBookAdd.PhoneNumbers   :=PayLoad.PhoneNumbers;
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(LAddressBookAdd);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(LAddressBookAdd);
 
         finally
             LAddressBookAdd.Free();
@@ -345,10 +349,10 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var LAddressBookAdded:=TJson.JsonToObject<TAddressBookAdded>(Restful.Content);
+                var LAddressBookAdded:=TJson.JsonToObject<TAddressBookAdded>(Service.Rest.Content);
                 try
                     ReturnedId:=LAddressBookAdded.Id;
                     CallResponse.IsSucceeded:=LAddressBookAdded.IsSucceeded;
@@ -358,22 +362,22 @@ begin
                     LAddressBookAdded.Free();
                 end;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                Service.Logger.Log('[AddToAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                Service.Logger.Log('[AddToAddressBookAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[AddToAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[AddToAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[AddToAddressBookAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[AddToAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[AddToAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -409,18 +413,19 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + Id.ToString();
-        Restful.RequestMethod:=TRESTRequestMethod.rmDELETE;
-        Service.Logger.Log('[DelFromAddressBookAwaited]: Executing DELETE ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/' + Id.ToString();
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmDELETE;
+        Service.Logger.Log('[DelFromAddressBookAwaited]: Executing DELETE ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var AddressBookItemDel:=TJson.JsonToObject<TAddressBookItemDel>(Restful.Content);
+                var AddressBookItemDel:=TJson.JsonToObject<TAddressBookItemDel>(Service.Rest.Content);
                 try
                     CallResponse.IsSucceeded:=AddressBookItemDel.IsSucceeded;
                     CallResponse.LastMessage:=AddressBookItemDel.Error.ErrorDesc;
@@ -429,22 +434,22 @@ begin
                     AddressBookItemDel.Free();
                 end;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                Service.Logger.Log('[DelFromAddressBookAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                Service.Logger.Log('[DelFromAddressBookAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
             end
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[DelFromAddressBookAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[DelFromAddressBookAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[DelFromAddressBookAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -478,23 +483,24 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
             + 'addressbook/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetCustomerDetailsAsync]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetCustomerDetailsAsync]: Executing GET ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Restful.Content);
+                var AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Service.Rest.Content);
                 try
 
                     LCustDetails.Id             :=AddressBookItem.Id;
@@ -504,8 +510,8 @@ begin
                     LCustDetails.PhoneNumbers   :=AddressBookItem.PhoneNumbers;
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    Service.Logger.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    Service.Logger.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     AddressBookItem.Free();
@@ -515,15 +521,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCustomerDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetCustomerDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 

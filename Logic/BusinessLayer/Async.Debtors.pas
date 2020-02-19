@@ -51,7 +51,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TDebtors = class(TInterfacedObject, IDebtors)
     strict private
@@ -106,29 +107,30 @@ begin
 
         var PayLoad: TAgingPayLoad;
         var CallResponse: TCallResponse;
-        var Grid: TStringGrid:=TStringGrid.Create(nil);
+        var Grid:=TStringGrid.Create(nil);
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[ReadAgeViewAsync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/';
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[ReadAgeViewAsync]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var UserCustSnapshotList:=TUserCustSnapshotList.Create();
         try
             UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
             UserCustSnapshotList.SortMode:=SortMode;
-            Restful.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
         finally
             UserCustSnapshotList.Free();
         end;
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var ReturnCustSnapshots:=TJson.JsonToObject<TReturnCustSnapshots>(Restful.Content);
+                var ReturnCustSnapshots:=TJson.JsonToObject<TReturnCustSnapshots>(Service.Rest.Content);
                 try
 
                     var RowCount:=Length(ReturnCustSnapshots.SourceDbName);
@@ -203,8 +205,8 @@ begin
                     Service.Logger.Log('[ReadAgeViewAsync]: Risk class data has been calculated.');
 
                     CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                    Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     ReturnCustSnapshots.Free();
@@ -214,15 +216,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[ReadAgeViewAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[ReadAgeViewAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[ReadAgeViewAsync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -305,39 +307,40 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+            Service.Rest.AccessToken:=Service.AccessToken;
+            Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-            Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
-            Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-            Service.Logger.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+            Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/options/';
+            Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+            Service.Logger.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
 
             try
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
                 begin
 
-                    var CustSortingOptions: TCustSortingOptions:=TJson.JsonToObject<TCustSortingOptions>(Restful.Content);
+                    var CustSortingOptions: TCustSortingOptions:=TJson.JsonToObject<TCustSortingOptions>(Service.Rest.Content);
 
                     for var iCNT:=0 to Length(CustSortingOptions.SortingOptions) - 1 do
                         TempList.Add(CustSortingOptions.SortingOptions[iCNT]);
 
                     CallResponse.IsSucceeded:=True;
                     CustSortingOptions.Free();
-                    Service.Logger.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 end
                 else
                 begin
 
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
+                        if String.IsNullOrEmpty(Service.Rest.Content) then
                             CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                            CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                     CallResponse.IsSucceeded:=False;
                     Service.Logger.Log(CallResponse.LastMessage);
 
@@ -381,7 +384,7 @@ end;
 procedure TDebtors.FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
 begin
 
-    for var iCNT:=1 to Grid.RowCount - 1 do {if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then}
+    for var iCNT:=1 to Grid.RowCount - 1 do //if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
     begin
 
         AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._NotDue), iCNT], 0);
@@ -424,7 +427,7 @@ begin
 
     // Move totals and its positions into array
     for var iCNT:=1 to Grid.RowCount do
-    {if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then}
+    //if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
     begin
         SetLength(ListPosition, Rows + 1);
         SetLength(TotalPerItem, Rows + 1);

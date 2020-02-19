@@ -49,7 +49,8 @@ type
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from and extend upon.
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or and extend them.
     /// </remarks>
     TOpenItems = class(TInterfacedObject, IOpenItems)
     strict private
@@ -102,18 +103,19 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetSSISDataAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetSSISDataAwaited]: Executing GET ' + Service.Rest.ClientBaseURL);
 
         try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
             begin
 
-                var ReturnSsisData:=TJson.JsonToObject<TReturnSsisData>(Restful.Content);
+                var ReturnSsisData:=TJson.JsonToObject<TReturnSsisData>(Service.Rest.Content);
                 try
 
                     GotDateTime:=ReturnSsisData.CustExtractDt;
@@ -122,7 +124,7 @@ begin
                     CallResponse.ErrorCode  :=ReturnSsisData.Error.ErrorCode;
 
                     CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetSSISDataAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    Service.Logger.Log('[GetSSISDataAwaited]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
                 finally
                     ReturnSsisData.Free();
@@ -132,15 +134,15 @@ begin
             else
             begin
 
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetSSISDataAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetSSISDataAwaited]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
+                    if String.IsNullOrEmpty(Service.Rest.Content) then
                         CallResponse.LastMessage:='[GetSSISDataAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetSSISDataAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetSSISDataAwaited]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
                 Service.Logger.Log(CallResponse.LastMessage);
 
@@ -251,26 +253,28 @@ function TOpenItems.FLoadToGridSync(OpenItemsGrid: TStringGrid; LoadedCompanies:
 begin
 
     var CallResponse: TCallResponse;
-    var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
 
-    Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
-    Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-    Service.Logger.Log('[FLoadToGrid]: Executing POST ' + Restful.ClientBaseURL);
+    Service.Rest.AccessToken:=Service.AccessToken;
+    Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+    Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/';
+    Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+    Service.Logger.Log('[FLoadToGrid]: Executing POST ' + Service.Rest.ClientBaseURL);
 
     try
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
             UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
-            Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            Service.Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
         finally
             UserCompanySelection.Free();
         end;
 
-        if (Restful.Execute) and (Restful.StatusCode = 200) then
+        if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
         begin
 
-            var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Restful.Content);
+            var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Service.Rest.Content);
             try
 
                 var RowCount:=Length(ReturnOpenItems.SourceDbName);
@@ -356,8 +360,8 @@ begin
                 end;
 
                 CallResponse.IsSucceeded:=True;
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Restful.StatusCode.ToString());
+                CallResponse.ReturnedCode:=Service.Rest.StatusCode;
+                Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Service.Rest.StatusCode.ToString());
 
             finally
                 ReturnOpenItems.Free();
@@ -367,15 +371,15 @@ begin
         else
         begin
 
-            if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                CallResponse.LastMessage:='[FLoadToGrid]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+            if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                CallResponse.LastMessage:='[FLoadToGrid]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
             else
-                if String.IsNullOrEmpty(Restful.Content) then
+                if String.IsNullOrEmpty(Service.Rest.Content) then
                     CallResponse.LastMessage:='[FLoadToGrid]: Invalid server response. Please contact IT Support.'
                 else
-                    CallResponse.LastMessage:='[FLoadToGrid]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                    CallResponse.LastMessage:='[FLoadToGrid]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-            CallResponse.ReturnedCode:=Restful.StatusCode;
+            CallResponse.ReturnedCode:=Service.Rest.StatusCode;
             CallResponse.IsSucceeded:=False;
             Service.Logger.Log(CallResponse.LastMessage);
 

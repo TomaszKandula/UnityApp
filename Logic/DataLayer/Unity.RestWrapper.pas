@@ -23,6 +23,7 @@ type
     /// </summary>
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
+        function GetAccessToken(): string;
         function GetExecuteError(): string;
         function GetStatusCode(): integer;
         function GetCustomBody(): string;
@@ -47,6 +48,7 @@ type
         function GetRequestMethod(): TRESTRequestMethod;
         function GetRequestSynchronizedEvents(): boolean;
         function GetRequestTimeout(): integer;
+        procedure SetAccessToken(NewValue: string);
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
@@ -71,6 +73,7 @@ type
         property StatusCode: integer read GetStatusCode;
         property Content: string read GetContent;
         property Headers: string read GetHeaders;
+        property AccessToken: string read GetAccessToken write SetAccessToken;
         property CustomBody: string read GetCustomBody write SetCustomBody;
         property ClientAccept: string read GetClientAccept write SetClientAccept;
         property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
@@ -94,6 +97,7 @@ type
         function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
+        procedure SelectContentType(LContentType: TRESTContentType);
     end;
 
 
@@ -105,11 +109,11 @@ type
     strict private
         var FContentType: TRESTContentType;
         var FAccessToken: string;
-        var restClient: TRESTClient;
-        var restRequest: TRESTRequest;
-        var restResponse: TRESTResponse;
-        var queryList: TList<string>;
-        var paramList: TList<string>;
+        var FRestClient: TRESTClient;
+        var FRestRequest: TRESTRequest;
+        var FRestResponse: TRESTResponse;
+        var FQueryList: TList<string>;
+        var FParamList: TList<string>;
         var FStatusCode: integer;
         var FResponseContent: string;
         var FCustomBody: string;
@@ -162,7 +166,7 @@ type
         procedure SetRequestTimeout(NewValue: integer);
         procedure TrimContent(var TextStr: string);
     public
-        constructor Create(); //AccessToken: string = ''; ContentType: TRESTContentType = TRESTContentType.ctAPPLICATION_JSON
+        constructor Create();
         destructor Destroy; override;
         property ExecuteError: string read GetExecuteError;
         property StatusCode: integer read GetStatusCode;
@@ -192,6 +196,7 @@ type
         function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
+        procedure SelectContentType(ContentType: TRESTContentType);
     end;
 
 
@@ -205,41 +210,15 @@ uses
 constructor TRESTful.Create();
 begin
 
-    restClient  :=TRESTClient.Create('');
-    restResponse:=TRESTResponse.Create(nil);
-    restRequest :=TRESTRequest.Create(nil);
-    restRequest.Client:=restClient;
-    restRequest.Response:=restResponse;
+    FRestClient  :=TRESTClient.Create('');
+    FRestResponse:=TRESTResponse.Create(nil);
+    FRestRequest :=TRESTRequest.Create(nil);
 
-//    FContentType:=ContentType;
-//    case FContentType of
-//
-//        TRESTContentType.ctAPPLICATION_JSON:
-//        begin
-//
-//            ClientAccept     :='application/json, text/plain; q=0.9, text/html;q=0.8,';
-//            ClientContentType:='application/json';
-//
-//            if not String.IsNullOrEmpty(AccessToken) then
-//                restRequest.AddAuthParameter(
-//                    'Authorization',
-//                    'Bearer ' + AccessToken,
-//                    TREStRequestParameterKind.pkHTTPHEADER,
-//                    [poDoNotEncode]
-//                );
-//
-//        end;
-//
-//        TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED:
-//        begin
-//            ClientAccept     :='*/*';
-//            ClientContentType:='application/x-www-form-urlencoded';
-//        end;
-//
-//    end;
+    FRestRequest.Client  :=FRestClient;
+    FRestRequest.Response:=FRestResponse;
 
-    queryList:=TList<string>.Create();
-    paramList:=TList<string>.Create();
+    FQueryList:=TList<string>.Create();
+    FParamList:=TList<string>.Create();
 
     ClientAcceptCharset      :='UTF-8, *;q=0.8';
     ClientAcceptEncoding     :='gzip, deflate';
@@ -249,9 +228,10 @@ begin
     ClientRaiseExceptionOn500:=True;
     ClientSynchronizedEvents :=True;
     ClientUserAgent          :='Unity Platform RESTClient/1.0';
-    RequestAccept            :=restClient.Accept;
-    RequestAcceptCharset     :=restClient.AcceptCharset;
-    RequestAutoCreateParams  :=restClient.AutoCreateParams;
+
+    RequestAccept            :=FRestClient.Accept;
+    RequestAcceptCharset     :=FRestClient.AcceptCharset;
+    RequestAutoCreateParams  :=FRestClient.AutoCreateParams;
     RequestHandleRedirects   :=True;
     RequestSynchronizedEvents:=False;
     RequestTimeout           :=120000;
@@ -261,11 +241,11 @@ end;
 
 destructor TRESTful.Destroy();
 begin
-    queryList.Free();
-    paramList.Free();
-    restClient.Free();
-    restResponse.Free();
-    restRequest.Free();
+    FQueryList.Free();
+    FParamList.Free();
+    FRestClient.Free();
+    FRestResponse.Free();
+    FRestRequest.Free();
     inherited;
 end;
 
@@ -275,54 +255,57 @@ begin
 
     Result:=False;
 
-    if (restRequest.Method = TRESTRequestMethod.rmGET)
-    or (restRequest.Method = TRESTRequestMethod.rmDELETE) then
+    if (FRestRequest.Method = TRESTRequestMethod.rmGET)
+    or (FRestRequest.Method = TRESTRequestMethod.rmDELETE) then
     begin
 
-        if ((queryList.Count > 0) and (paramList.Count > 0)) and (queryList.Count = paramList.Count) then
+        if ((FQueryList.Count > 0) and (FParamList.Count > 0)) and (FQueryList.Count = FParamList.Count) then
         begin
-            restRequest.Params.Clear;
-            for var iCNT:=0 to queryList.Count - 1 do
-                restRequest.AddParameter(queryList.Items[iCNT], paramList.Items[iCNT]);
+
+            FRestRequest.Params.Clear;
+            for var iCNT:=0 to FQueryList.Count - 1 do
+                FRestRequest.AddParameter(FQueryList.Items[iCNT], FParamList.Items[iCNT]);
         end;
 
     end;
 
-    if (restRequest.Method = TRESTRequestMethod.rmPOST)
-    or (restRequest.Method = TRESTRequestMethod.rmPUT)
-    or (restRequest.Method = TRESTRequestMethod.rmPATCH) then
+    if (FRestRequest.Method = TRESTRequestMethod.rmPOST)
+    or (FRestRequest.Method = TRESTRequestMethod.rmPUT)
+    or (FRestRequest.Method = TRESTRequestMethod.rmPATCH) then
     begin
 
-        if (restRequest.Method = TRESTRequestMethod.rmPOST) then
+        if (FRestRequest.Method = TRESTRequestMethod.rmPOST) then
         begin
 
-            if ((queryList.Count > 0) and (paramList.Count > 0)) and (queryList.Count = paramList.Count) then
+            if ((FQueryList.Count > 0) and (FParamList.Count > 0)) and (FQueryList.Count = FParamList.Count) then
             begin
-                restRequest.Params.Clear;
-                for var iCNT:=0 to queryList.Count - 1 do
-                    restRequest.AddParameter(queryList.Items[iCNT], paramList.Items[iCNT]);
+
+                FRestRequest.Params.Clear;
+                for var iCNT:=0 to FQueryList.Count - 1 do
+                    FRestRequest.AddParameter(FQueryList.Items[iCNT], FParamList.Items[iCNT]);
+
             end;
 
         end;
 
-        if not(String.IsNullOrEmpty(CustomBody)) then
+        if not(String.IsNullOrEmpty(FCustomBody)) then
         begin
-            restRequest.Body.ClearBody;
-            restRequest.Body.Add(GetCustomBody, FContentType);
+            FRestRequest.Body.ClearBody;
+            FRestRequest.Body.Add(FCustomBody, FContentType);
         end;
 
     end;
 
     try
 
-        restRequest.Execute();
+        FRestRequest.Execute();
 
-        if restResponse.StatusCode > 0 then
+        if FRestResponse.StatusCode > 0 then
         begin
 
-            FStatusCode:=restResponse.StatusCode;
+            FStatusCode:=FRestResponse.StatusCode;
 
-            if (not String.IsNullOrEmpty(restResponse.Content)) and (not String.IsNullOrWhiteSpace(restResponse.Content)) then
+            if (not String.IsNullOrEmpty(FRestResponse.Content)) and (not String.IsNullOrWhiteSpace(FRestResponse.Content)) then
             begin
 
                 // -----------------------------------------------------------------------------------------------
@@ -331,7 +314,7 @@ begin
                 // content serialized twice (it adds quotes to the start and end of the content), in such case it
                 // requires further treatment on quotes inside string.
                 // -----------------------------------------------------------------------------------------------
-                FResponseContent:=restResponse.Content;
+                FResponseContent:=FRestResponse.Content;
                 FResponseContent:=FResponseContent.Replace('\"','"');
                 TrimContent(FResponseContent);
 
@@ -355,10 +338,10 @@ begin
 
     if (string.IsNullOrEmpty(QueryName) or string.IsNullOrEmpty(ParamValue)) then Exit();
 
-    if (Assigned(queryList) and Assigned(paramList)) then
+    if (Assigned(FQueryList) and Assigned(FParamList)) then
     begin
-        queryList.Add(QueryName);
-        paramList.Add(ParamValue);
+        FQueryList.Add(QueryName);
+        FParamList.Add(ParamValue);
     end;
 
 end;
@@ -367,11 +350,13 @@ end;
 procedure TRESTful.ClearParameters();
 begin
 
-    if (Assigned(queryList) and Assigned(paramList)) then
+    if (Assigned(FQueryList) and Assigned(FParamList)) then
     begin
-        queryList.Clear();
-        paramList.Clear();
+        FQueryList.Clear();
+        FParamList.Clear();
     end;
+
+    FRestRequest.Params.Clear();
 
 end;
 
@@ -384,6 +369,42 @@ begin
     // ---------------------------------------------------------
     if TextStr[1] = #34 then TextStr[1]:=#32;
     if TextStr[TextStr.Length - 1] = #34 then TextStr[TextStr.Length - 1]:=#32;
+end;
+
+
+procedure TRESTful.SelectContentType(ContentType: TRESTContentType);
+begin
+
+    // Ensure all parameters are cleared when Content Type is changed
+    ClearParameters();
+
+    FContentType:=ContentType;
+    case ContentType of
+
+        TRESTContentType.ctAPPLICATION_JSON:
+        begin
+
+            ClientAccept     :='application/json, text/plain; q=0.9, text/html;q=0.8,';
+            ClientContentType:='application/json';
+
+            if not String.IsNullOrEmpty(AccessToken) then
+                FRestRequest.AddAuthParameter(
+                    'Authorization',
+                    'Bearer ' + FAccessToken,
+                    TREStRequestParameterKind.pkHTTPHEADER,
+                    [poDoNotEncode]
+                );
+
+        end;
+
+        TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED:
+        begin
+            ClientAccept     :='*/*';
+            ClientContentType:='application/x-www-form-urlencoded';
+        end;
+
+    end;
+
 end;
 
 
@@ -419,121 +440,121 @@ end;
 
 function TRESTful.GetHeaders(): string;
 begin
-    if Assigned(restResponse) then Result:=restResponse.Headers.Text;
+    if Assigned(FRestResponse) then Result:=FRestResponse.Headers.Text;
 end;
 
 
 function TRESTful.GetClientAccept(): string;
 begin
-    if Assigned(restClient) then Result:=restClient.Accept;
+    if Assigned(FRestClient) then Result:=FRestClient.Accept;
 end;
 
 
 function TRESTful.GetClientAcceptCharset(): string;
 begin
-    if Assigned(restClient) then Result:=restClient.AcceptCharset;
+    if Assigned(FRestClient) then Result:=FRestClient.AcceptCharset;
 end;
 
 
 function TRESTful.GetClientAcceptEncoding(): string;
 begin
-    if Assigned(restClient) then Result:=restClient.AcceptEncoding;
+    if Assigned(FRestClient) then Result:=FRestClient.AcceptEncoding;
 end;
 
 
 function TRESTful.GetClientAllowCookies(): boolean;
 begin
-    if Assigned(restClient) then Result:=restClient.AllowCookies else Result:=False;
+    if Assigned(FRestClient) then Result:=FRestClient.AllowCookies else Result:=False;
 end;
 
 
 function TRESTful.GetClientAutoCreateParams(): boolean;
 begin
-    if Assigned(restClient) then Result:=restClient.AutoCreateParams else Result:=False;
+    if Assigned(FRestClient) then Result:=FRestClient.AutoCreateParams else Result:=False;
 end;
 
 
 function TRESTful.GetClientBaseURL(): string;
 begin
-    if Assigned(restClient) then Result:=restClient.BaseURL;
+    if Assigned(FRestClient) then Result:=FRestClient.BaseURL;
 end;
 
 
 function TRESTful.GetClientContentType(): string;
 begin
-    if Assigned(restClient) then restClient.ContentType;
+    if Assigned(FRestClient) then Result:=FRestClient.ContentType;
 end;
 
 
 function TRESTful.GetClientFallbackCharsetEncoding(): string;
 begin
-    if Assigned(restClient) then Result:=restClient.FallbackCharsetEncoding;
+    if Assigned(FRestClient) then Result:=FRestClient.FallbackCharsetEncoding;
 end;
 
 
 function TRESTful.GetClientHandleRedirects(): boolean;
 begin
-    if Assigned(restClient) then Result:=restClient.HandleRedirects else Result:=False;
+    if Assigned(FRestClient) then Result:=FRestClient.HandleRedirects else Result:=False;
 end;
 
 
 function TRESTful.GetClientRaiseExceptionOn500(): boolean;
 begin
-    if Assigned(restClient) then Result:=restClient.RaiseExceptionOn500 else Result:=False;
+    if Assigned(FRestClient) then Result:=FRestClient.RaiseExceptionOn500 else Result:=False;
 end;
 
 
 function TRESTful.GetClientSynchronizedEvents(): boolean;
 begin
-    if Assigned(restClient) then Result:=restClient.SynchronizedEvents else Result:=False;
+    if Assigned(FRestClient) then Result:=FRestClient.SynchronizedEvents else Result:=False;
 end;
 
 
 function TRESTful.GetClientUserAgent(): string;
 begin
-    if Assigned(restClient) then Result:=restClient.UserAgent;
+    if Assigned(FRestClient) then Result:=FRestClient.UserAgent;
 end;
 
 
 function TRESTful.GetRequestAccept(): string;
 begin
-    if Assigned(restRequest) then Result:=restRequest.Accept;
+    if Assigned(FRestRequest) then Result:=FRestRequest.Accept;
 end;
 
 
 function TRESTful.GetRequestAcceptCharset(): string;
 begin
-    if Assigned(restRequest) then Result:=restRequest.AcceptCharset;
+    if Assigned(FRestRequest) then Result:=FRestRequest.AcceptCharset;
 end;
 
 
 function TRESTful.GetRequestAutoCreateParams(): boolean;
 begin
-    if Assigned(restRequest) then Result:=restRequest.AutoCreateParams else Result:=False;
+    if Assigned(FRestRequest) then Result:=FRestRequest.AutoCreateParams else Result:=False;
 end;
 
 
 function TRESTful.GetRequestHandleRedirects(): boolean;
 begin
-    if Assigned(restRequest) then Result:=restRequest.HandleRedirects else Result:=False;
+    if Assigned(FRestRequest) then Result:=FRestRequest.HandleRedirects else Result:=False;
 end;
 
 
 function TRESTful.GetRequestMethod(): TRESTRequestMethod;
 begin
-    if Assigned(restRequest) then Result:=restRequest.Method else Result:=TRESTRequestMethod.rmGET;
+    if Assigned(FRestRequest) then Result:=FRestRequest.Method else Result:=TRESTRequestMethod.rmGET;
 end;
 
 
 function TRESTful.GetRequestSynchronizedEvents(): boolean;
 begin
-    if Assigned(restRequest) then Result:=restRequest.SynchronizedEvents else Result:=False;
+    if Assigned(FRestRequest) then Result:=FRestRequest.SynchronizedEvents else Result:=False;
 end;
 
 
 function TRESTful.GetRequestTimeout(): integer;
 begin
-    if Assigned(restRequest) then Result:=restRequest.Timeout else Result:=30000 {30 seconds};
+    if Assigned(FRestRequest) then Result:=FRestRequest.Timeout else Result:=30000 {30 seconds};
 end;
 
 
@@ -551,115 +572,115 @@ end;
 
 procedure TRESTful.SetClientAccept(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.Accept:=NewValue;
+    if Assigned(FRestClient) then FRestClient.Accept:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientAcceptCharset(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.AcceptCharset:=NewValue;
+    if Assigned(FRestClient) then FRestClient.AcceptCharset:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientAcceptEncoding(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.AcceptEncoding:=NewValue;
+    if Assigned(FRestClient) then FRestClient.AcceptEncoding:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientAllowCookies(NewValue: boolean);
 begin
-    if Assigned(restClient) then restClient.AllowCookies:=NewValue;
+    if Assigned(FRestClient) then FRestClient.AllowCookies:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientAutoCreateParams(NewValue: boolean);
 begin
-    if Assigned(restClient) then restClient.AutoCreateParams:=NewValue;
+    if Assigned(FRestClient) then FRestClient.AutoCreateParams:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientBaseURL(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.BaseURL:=NewValue;
+    if Assigned(FRestClient) then FRestClient.BaseURL:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientContentType(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.ContentType:=NewValue;
+    if Assigned(FRestClient) then FRestClient.ContentType:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientFallbackCharsetEncoding(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.FallbackCharsetEncoding:=NewValue;
+    if Assigned(FRestClient) then FRestClient.FallbackCharsetEncoding:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientHandleRedirects(NewValue: boolean);
 begin
-    if Assigned(restClient) then restClient.HandleRedirects:=NewValue;
+    if Assigned(FRestClient) then FRestClient.HandleRedirects:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientRaiseExceptionOn500(NewValue: boolean);
 begin
-    if Assigned(restClient) then restClient.RaiseExceptionOn500:=NewValue;
+    if Assigned(FRestClient) then FRestClient.RaiseExceptionOn500:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientSynchronizedEvents(NewValue: boolean);
 begin
-    if Assigned(restClient) then restClient.SynchronizedEvents:=NewValue;
+    if Assigned(FRestClient) then FRestClient.SynchronizedEvents:=NewValue;
 end;
 
 
 procedure TRESTful.SetClientUserAgent(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.UserAgent:=NewValue;
+    if Assigned(FRestClient) then FRestClient.UserAgent:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestAccept(NewValue: string);
 begin
-    if Assigned(restRequest) then restRequest.Accept:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.Accept:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestAcceptCharset(NewValue: string);
 begin
-    if Assigned(restRequest) then restRequest.AcceptCharset:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.AcceptCharset:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestAutoCreateParams(NewValue: boolean);
 begin
-    if Assigned(restRequest) then restRequest.AutoCreateParams:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.AutoCreateParams:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestHandleRedirects(NewValue: boolean);
 begin
-    if Assigned(restRequest) then restRequest.HandleRedirects:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.HandleRedirects:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestMethod(NewValue: TRESTRequestMethod);
 begin
-    if Assigned(restRequest) then restRequest.Method:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.Method:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestSynchronizedEvents(NewValue: boolean);
 begin
-    if Assigned(restRequest) then restRequest.SynchronizedEvents:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.SynchronizedEvents:=NewValue;
 end;
 
 
 procedure TRESTful.SetRequestTimeout(NewValue: integer);
 begin
-    if Assigned(restRequest) then restRequest.Timeout:=NewValue;
+    if Assigned(FRestRequest) then FRestRequest.Timeout:=NewValue;
 end;
 
 

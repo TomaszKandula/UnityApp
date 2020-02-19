@@ -112,11 +112,12 @@ begin
     var CallResponse: TCallResponse;
     try
 
-        var Restful: IRESTful:=TRESTful.Create(Service.AccessToken);
+        Service.Rest.AccessToken:=Service.AccessToken;
+        Service.Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Restful.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/send/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
+        Service.Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'mailer/send/';
+        Service.Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[SendNowSync]: Executing POST ' + Service.Rest.ClientBaseURL);
 
         var SendEmail:=TSendEmail.Create();
         try
@@ -129,20 +130,20 @@ begin
             SendEmail.Bcc      :=FMailBcc;
             SendEmail.Subject  :=MailSubject;
             SendEmail.HtmlBody :=MailBody;
-            Restful.CustomBody :=TJson.ObjectToJsonString(SendEmail);
+            Service.Rest.CustomBody :=TJson.ObjectToJsonString(SendEmail);
         finally
             SendEmail.Free();
         end;
 
-        if (Restful.Execute) and (Restful.StatusCode = 200) then
+        if (Service.Rest.Execute) and (Service.Rest.StatusCode = 200) then
         begin
 
-            var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+            var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Service.Rest.Content);
             try
                 CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                 CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                 CallResponse.ErrorCode  :=SentEmail.Error.ErrorCode;
-                Service.Logger.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
+                Service.Logger.Log('[SendNowSync]: Returned status code is ' + Service.Rest.StatusCode.ToString());
             finally
                 SentEmail.Free();
             end;
@@ -151,15 +152,15 @@ begin
         else
         begin
 
-            if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                CallResponse.LastMessage:='[SendNowSync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+            if not String.IsNullOrEmpty(Service.Rest.ExecuteError) then
+                CallResponse.LastMessage:='[SendNowSync]: Critical error. Please contact IT Support. Description: ' + Service.Rest.ExecuteError
             else
-                if String.IsNullOrEmpty(Restful.Content) then
+                if String.IsNullOrEmpty(Service.Rest.Content) then
                     CallResponse.LastMessage:='[SendNowSync]: Invalid server response. Please contact IT Support.'
                 else
-                    CallResponse.LastMessage:='[SendNowSync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                    CallResponse.LastMessage:='[SendNowSync]: An error has occured. Please contact IT Support. Description: ' + Service.Rest.Content;
 
-            CallResponse.ReturnedCode:=Restful.StatusCode;
+            CallResponse.ReturnedCode:=Service.Rest.StatusCode;
             CallResponse.IsSucceeded:=False;
             Service.Logger.Log(CallResponse.LastMessage);
 
