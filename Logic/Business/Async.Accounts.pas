@@ -18,7 +18,6 @@ uses
 type
 
 
-    // Interface definition
     IAccounts = interface(IInterface)
     ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
         /// <summary>

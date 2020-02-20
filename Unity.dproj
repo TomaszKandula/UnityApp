@@ -177,7 +177,7 @@
         <DCCReference Include="Helpers\Unity.Types.pas"/>
         <DCCReference Include="Logic\Unity.Mediator.pas"/>
         <DCCReference Include="Logic\Unity.Service.pas"/>
-        <DCCReference Include="Logic\DataLayer\Unity.RestWrapper.pas"/>
+        <DCCReference Include="Logic\Communication\Unity.RestWrapper.pas"/>
         <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
         <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>

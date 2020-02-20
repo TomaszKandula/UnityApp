@@ -863,9 +863,6 @@ type
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
-        procedure ExcelExport_Callback(CallResponse: TCallResponse);
-        procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
-        procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
@@ -1811,73 +1808,6 @@ begin
     EditCurrentPassword.Text:='';
     EditNewPassword.Text:='';
     EditNewPasswordConfirmation.Text:='';
-
-end;
-
-
-procedure TMainForm.ExcelExport_Callback(CallResponse: TCallResponse);
-begin
-
-    MainForm.UpdateStatusBar(TStatusBar.Ready);
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    THelpers.MsgCall(TAppMessage.Info, 'Data has been exported successfully!');
-
-end;
-
-
-procedure TMainForm.RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    MainForm.sgInvoiceTracker.Freeze(True);
-    try
-
-        MainForm.sgInvoiceTracker.RowCount  :=InvoiceList.RowCount;
-        MainForm.sgInvoiceTracker.ColCount  :=InvoiceList.ColCount;
-
-        for var iCNT:=0 to InvoiceList.RowCount - 1 do
-            for var jCNT:=0 to InvoiceList.ColCount - 1 do
-                MainForm.sgInvoiceTracker.Cells[jCNT, iCNT]:=InvoiceList.Cells[jCNT, iCNT];
-
-    finally
-        MainForm.sgInvoiceTracker.Freeze(False);
-        Service.Logger.Log('[RefreshInvoiceTracker_Callback]: Invoice Tracker list updated.');
-    end;
-
-    if MainForm.sgInvoiceTracker.RowCount > 1 then
-    begin
-        MainForm.sgInvoiceTracker.SetColWidth(10, 20, 400);
-        MainForm.sgInvoiceTracker.Visible:=True;
-    end
-    else
-    begin
-        MainForm.sgInvoiceTracker.Visible:=False;
-    end;
-
-end;
-
-
-procedure TMainForm.DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    MainForm.sgInvoiceTracker.DeleteRowFrom(1, 1);
 
 end;
 
