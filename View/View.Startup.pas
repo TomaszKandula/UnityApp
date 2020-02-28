@@ -236,6 +236,9 @@ begin
 
         end;
 
+        // check release here...
+
+
         // --------------------------------------
         // Load/Sync all html layouts for emails.
         // --------------------------------------

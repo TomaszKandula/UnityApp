@@ -7,6 +7,13 @@ unit Unity.Types;
 
 interface
 
+// -----------------------------------------------------------------------------------
+// Note:
+//    Some types may have the same signature, the reason why we have individual
+//    types for the same signature rather than one common is that, there is easier
+//    to extend, just add argument to the existing signature for given specific method
+//    and it can be use right away by given implementation and by callback consumer.
+// -----------------------------------------------------------------------------------
 
 uses
     Unity.Grid,
@@ -123,6 +130,10 @@ type
     /// Callback signature for getting results from setting new local administrator password.
     /// </summary>
     TSetNewPassword = procedure(CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for method returning information on the lates available version of Unity Platform.
+    /// </summary>
+    TCheckRelease = procedure(ClientInfo: TClientInfo; CallResponse: TCallResponse) of object;
 
 
 implementation

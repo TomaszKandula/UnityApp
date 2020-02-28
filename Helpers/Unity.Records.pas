@@ -40,6 +40,15 @@ type
     end;
 
     /// <summary>
+    /// Group of variables that carries information about latest available release of the Unity Platform.
+    /// </summary>
+    TClientInfo = record
+        Version: string;
+        Date:    string;
+        Status:  string;
+    end;
+
+    /// <summary>
     /// Group of variables that carries user rating with optional comment.
     /// </summary>
     TRating = record

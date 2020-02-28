@@ -65,14 +65,14 @@ uses
     Unity.Constants in 'Helpers\Unity.Constants.pas',
     Unity.Sorting in 'Helpers\Unity.Sorting.pas',
     Unity.Helpers in 'Helpers\Unity.Helpers.pas',
-	Unity.Types in 'Helpers\Unity.Types.pas',
-	Unity.Mediator in 'Logic\Unity.Mediator.pas',
+    Unity.Types in 'Helpers\Unity.Types.pas',
+    Unity.Mediator in 'Logic\Unity.Mediator.pas',
     Unity.Service in 'Logic\Unity.Service.pas',
     Unity.RestWrapper in 'Logic\Communication\Unity.RestWrapper.pas',
     Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
     Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
     Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
-	Api.MetaData in 'Model\Api.MetaData.pas',
+    Api.MetaData in 'Model\Api.MetaData.pas',
     Api.ErrorHandler in 'Model\Api.ErrorHandler.pas',
     Api.BankDetails in 'Model\Api.BankDetails.pas',
     Api.RegisteredEmails in 'Model\Api.RegisteredEmails.pas',
@@ -88,7 +88,7 @@ uses
     Api.UserDailyCommentUpdate in 'Model\Requests\Api.UserDailyCommentUpdate.pas',
     Api.LogSentDocument in 'Model\Requests\Api.LogSentDocument.pas',
     Api.AddressBookAdd in 'Model\Requests\Api.AddressBookAdd.pas',
-	Api.AddressBookUpdate in 'Model\Requests\Api.AddressBookUpdate.pas',
+    Api.AddressBookUpdate in 'Model\Requests\Api.AddressBookUpdate.pas',
     Api.UserCustSnapshotList in 'Model\Requests\Api.UserCustSnapshotList.pas',
     Api.UserSessionAdded in 'Model\Responses\Api.UserSessionAdded.pas',
     Api.UserSessionChecked in 'Model\Responses\Api.UserSessionChecked.pas',
@@ -126,10 +126,11 @@ uses
     Api.ReturnCustomerGroup in 'Model\Responses\Api.ReturnCustomerGroup.pas',
     Api.ReturnSsisData in 'Model\Responses\Api.ReturnSsisData.pas',
     Api.ReturnOpenItems in 'Model\Responses\Api.ReturnOpenItems.pas',
-	Api.ReturnCustSnapshots in 'Model\Responses\Api.ReturnCustSnapshots.pas',
-	Api.TokenGranted in 'Model\Responses\Api.TokenGranted.pas',
-	Api.AddressBookUpdated in 'Model\Responses\Api.AddressBookUpdated.pas',
-	Api.UserGeneralCommentCheck in 'Model\Responses\Api.UserGeneralCommentCheck.pas',
+    Api.ReturnCustSnapshots in 'Model\Responses\Api.ReturnCustSnapshots.pas',
+    Api.TokenGranted in 'Model\Responses\Api.TokenGranted.pas',
+    Api.AddressBookUpdated in 'Model\Responses\Api.AddressBookUpdated.pas',
+    Api.UserGeneralCommentCheck in 'Model\Responses\Api.UserGeneralCommentCheck.pas',
+    Api.ReturnClientInfo in 'Model\Responses\Api.ReturnClientInfo.pas',
     Sync.Mailer in 'Logic\Business\Sync.Mailer.pas',
     Sync.Document in 'Logic\Business\Sync.Document.pas',
     Async.Accounts in 'Logic\Business\Async.Accounts.pas',
@@ -142,23 +143,23 @@ uses
     Async.Companies in 'Logic\Business\Async.Companies.pas',
     Async.Mailer in 'Logic\Business\Async.Mailer.pas',
     Async.GeneralTables in 'Logic\Business\Async.GeneralTables.pas',
-    View.BusyScreen in 'View\View.BusyScreen.pas', // BusyForm
-    View.Main in 'View\View.Main.pas', // MainForm
-    View.About in 'View\View.About.pas', // AboutForm
-    View.Actions in 'View\View.Actions.pas', // ActionsForm
-    View.Calendar in 'View\View.Calendar.pas', // CalendarForm
-    View.ColorPicker in 'View\View.ColorPicker.pas', // ColorsForm
-    View.EventLog in 'View\View.EventLog.pas', // EventForm
-    View.UserFeedback in 'View\View.UserFeedback.pas', // FeedbackForm
-    View.GridFilter in 'View\View.GridFilter.pas', // FilterForm
-    View.GridSearch in 'View\View.GridSearch.pas', // GridSearchForm
-    View.MassMailer in 'View\View.MassMailer.pas', // MassMailerForm
-    View.PhoneList in 'View\View.PhoneList.pas', // PhoneListForm
-    View.Reports in 'View\View.Reports.pas', // ReportsForm
-    View.SendStatement in 'View\View.SendStatement.pas', // SendForm
-    View.Startup in 'View\View.Startup.pas', // StartupForm
-    View.CompanyList in 'View\View.CompanyList.pas', // CompanyListForm
-    View.RateApp in 'View\View.RateApp.pas'; // RateForm
+    View.BusyScreen in 'View\View.BusyScreen.pas',
+    View.Main in 'View\View.Main.pas',
+    View.About in 'View\View.About.pas',
+    View.Actions in 'View\View.Actions.pas',
+    View.Calendar in 'View\View.Calendar.pas',
+    View.ColorPicker in 'View\View.ColorPicker.pas',
+    View.EventLog in 'View\View.EventLog.pas',
+    View.UserFeedback in 'View\View.UserFeedback.pas',
+    View.GridFilter in 'View\View.GridFilter.pas',
+    View.GridSearch in 'View\View.GridSearch.pas',
+    View.MassMailer in 'View\View.MassMailer.pas',
+    View.PhoneList in 'View\View.PhoneList.pas',
+    View.Reports in 'View\View.Reports.pas',
+    View.SendStatement in 'View\View.SendStatement.pas',
+    View.Startup in 'View\View.Startup.pas',
+    View.CompanyList in 'View\View.CompanyList.pas',
+    View.RateApp in 'View\View.RateApp.pas';
 
 
 {$R *.res}
