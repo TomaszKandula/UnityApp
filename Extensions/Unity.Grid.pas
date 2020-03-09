@@ -139,6 +139,14 @@ type
         /// Show all grids (along with header grids).
         /// </summary>
         procedure ShowGrids();
+        /// <summary>
+        ///
+        /// </summary>
+        procedure AllowEditing();
+        /// <summary>
+        ///
+        /// </summary>
+        procedure QuitEditing();
     end;
 
 
@@ -783,6 +791,20 @@ begin
         - [goFixedHorzLine]
         - [goVertLine]
         - [goHorzLine];
+end;
+
+
+procedure TStringGrid.AllowEditing();
+begin
+    Self.Options:=Self.Options + [goEditing];
+    Self.EditorMode:=True;
+end;
+
+
+procedure TStringGrid.QuitEditing();
+begin
+    Self.Options:=Self.Options - [goEditing];
+    Self.EditorMode:=False;
 end;
 
 

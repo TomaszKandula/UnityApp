@@ -59,6 +59,7 @@ type
     protected
         procedure CreateParams(var Params: TCreateParams); override;
     strict private
+        var IsAppCurrent: boolean;
         var LastErrorMsg: string;
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
@@ -66,6 +67,7 @@ type
         procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
         procedure ExitAppSync();
         procedure ApplicationStart();
+        function GetReleaseAsync(): boolean;
         function GetAccessTokenAsync(): boolean;
         function GetScreenDataSync(): boolean;
         function GetGeneralTablesAsync(): boolean;
@@ -202,7 +204,10 @@ begin
         if not GetAccessTokenAsync() then
         begin
             Service.Logger.Log('Critical error has occured [GetAccessTokenSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetAccessTokenSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            THelpers.MsgCall(
+                TAppMessage.Error,
+                'An error has occured [GetAccessTokenSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
+            );
             ExitAppSync();
         end
         else
@@ -236,8 +241,38 @@ begin
 
         end;
 
-        // check release here...
+        // -----------------------------------------
+        // Check current release of the application.
+        // -----------------------------------------
+        Sleep(50);
+        ChangeProgressBar(55, 'Checking for updates...', ProgressBar);
 
+        if not GetReleaseAsync() then
+        begin
+            Service.Logger.Log('Critical error has occured [GetReleaseAsync]: ' + LastErrorMsg);
+            THelpers.MsgCall(
+                TAppMessage.Error,
+                'An error has occured [GetReleaseAsync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
+            );
+            ExitAppSync();
+        end
+        else
+        begin
+
+            if not IsAppCurrent then
+            begin
+                Service.Logger.Log('[GetReleaseAsync]: There is newer version available.');
+                THelpers.MsgCall(
+                    TAppMessage.Warn,
+                    'There is newer version available, please update it from Software Centre. Application will be closed.'
+                );
+                ExitAppSync();
+            end;
+
+            Service.Logger.Log('No update has been found.');
+            ChangeProgressBar(60, 'Checking for updates... done.', ProgressBar);
+
+        end;
 
         // --------------------------------------
         // Load/Sync all html layouts for emails.
@@ -248,7 +283,10 @@ begin
         if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
         begin
             Service.Logger.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
+            THelpers.MsgCall(
+                TAppMessage.Error,
+                'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.'
+            );
             ExitAppSync();
         end
         else
@@ -262,7 +300,10 @@ begin
             else
             begin
                 Service.Logger.Log('[UnzippLayouts]: Cannot unzipp resource file.');
-                THelpers.MsgCall(TAppMessage.Error, 'An error occured [UnzippLayouts]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
+                THelpers.MsgCall(
+                    TAppMessage.Error,
+                    'An error occured [UnzippLayouts]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.'
+                );
                 ExitAppSync();
             end;
 
@@ -277,7 +318,10 @@ begin
         if not GetGeneralTablesAsync() then
         begin
             Service.Logger.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            THelpers.MsgCall(
+                TAppMessage.Error,
+                'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
+            );
             ExitAppSync();
         end
         else
@@ -308,6 +352,29 @@ begin
 end;
 
 
+function TStartupForm.GetReleaseAsync(): boolean;
+begin
+
+    Result:=True;
+
+    var LCallResponse: TCallResponse;
+    var LClientInfo: TClientInfo;
+
+    LCallResponse:=Service.Mediator.Utilities.CheckReleaseAwaited(LClientInfo);
+
+    if not LCallResponse.IsSucceeded then
+    begin
+        Service.Logger.Log('[GetReleaseAsync]: ' + LCallResponse.LastMessage);
+        Result:=False;
+        Exit();
+    end;
+
+    if LClientInfo.Version > Service.Settings.ReleaseNumber.ToString() then
+        IsAppCurrent:=False else IsAppCurrent:=True;
+
+end;
+
+
 function TStartupForm.GetAccessTokenAsync(): boolean;
 begin
 
@@ -320,7 +387,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        Service.Logger.Log('[GetAccessTokenSync]: ' + CallResponse.LastMessage);
+        Service.Logger.Log('[GetAccessTokenAsync]: ' + CallResponse.LastMessage);
         Result:=False;
         Exit();
     end;

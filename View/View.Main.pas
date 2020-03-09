@@ -927,7 +927,8 @@ uses
     Api.ReturnCustomerGroup,
     Api.ReturnOpenItems,
     Api.AddressBookList,
-    Api.ReturnCustSnapshots;
+    Api.ReturnCustSnapshots,
+    Api.UserGeneralCommentUpdate;
 
 
 var VMainForm: TMainForm;
@@ -4841,7 +4842,95 @@ end;
 
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    // Empty
+
+    if (sgAgeView.Col <> sgAgeView.GetCol(TUserGeneralCommentUpdate._Free1))
+        and (sgAgeView.Col <> sgAgeView.GetCol(TUserGeneralCommentUpdate._Free2))
+            and (sgAgeView.Col <> sgAgeView.GetCol(TUserGeneralCommentUpdate._Free3))
+                then Exit();
+
+    if (Key = 86) and (Shift = [ssCtrl]) then
+        sgAgeView.CopyCutPaste(TActions.Paste, True);
+
+    if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
+    begin
+        Key:=0;
+        sgAgeView.QuitEditing();
+        Exit();
+    end;
+
+    if CharInSet(Char(Key), [#48..#57{A..Z}, #65..#90{a..z}, #97..#122{0..9}]) then
+    begin
+        Key:=0;
+        sgAgeView.AllowEditing();
+        Exit();
+    end;
+
+    if Key = VK_ESCAPE then
+    begin
+        Key:=0;
+        sgAgeView.QuitEditing();
+        Exit();
+    end;
+
+    var SourceDBNames:=TList<string>.Create();
+    var CustomerNumbers:=TList<Int64>.Create();
+    try
+
+        for var iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+        begin
+            SourceDBNames.Add(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT]);
+            CustomerNumbers.Add(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT].ToInt64);
+        end;
+
+        if Key = VK_RETURN then
+        begin
+
+            Key:=0;
+            sgAgeView.QuitEditing();
+
+            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free1) then
+              // Send REST request to update the field for specified SourceDBName, CustomerNumber
+
+            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free2) then
+              // Send REST request to update the field for specified SourceDBName, CustomerNumber
+
+            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free3) then
+              // Send REST request to update the field for specified SourceDBName, CustomerNumber
+
+            Exit();
+
+        end;
+
+        if Key = VK_DELETE then
+        begin
+
+            Key:=0;
+
+            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free1) then
+            begin
+                // Send REST request to update the field for specified SourceDBName, CustomerNumber
+                sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+            end;
+
+            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free2) then
+            begin
+                // Send REST request to update the field for specified SourceDBName, CustomerNumber
+                sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+            end;
+
+            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free3) then
+            begin
+                // Send REST request to update the field for specified SourceDBName, CustomerNumber
+                sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+            end;
+
+        end;
+
+    finally
+        SourceDBNames.Free();
+        CustomerNumbers.Free();
+    end;
+
 end;
 
 
