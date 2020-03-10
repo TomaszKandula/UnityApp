@@ -861,6 +861,7 @@ type
         procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
+        procedure FreeFieldsUpdate_Callback(CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
     public
@@ -1726,6 +1727,18 @@ begin
 end;
 
 
+procedure TMainForm.FreeFieldsUpdate_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[FreeFieldsUpdate_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+    end;
+
+end;
+
+
 procedure TMainForm.ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
 begin
 
@@ -2383,7 +2396,7 @@ end;
 {$REGION 'VIEW DRAWING EVENTS'}
 
 
-procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);//(-100) on GetCol
 begin
 
     // Skip header
@@ -4843,25 +4856,15 @@ end;
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if (sgAgeView.Col <> sgAgeView.GetCol(TUserGeneralCommentUpdate._Free1))
-        and (sgAgeView.Col <> sgAgeView.GetCol(TUserGeneralCommentUpdate._Free2))
-            and (sgAgeView.Col <> sgAgeView.GetCol(TUserGeneralCommentUpdate._Free3))
+    if (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free1))
+        and (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free2))
+            and (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free3))
                 then Exit();
-
-    if (Key = 86) and (Shift = [ssCtrl]) then
-        sgAgeView.CopyCutPaste(TActions.Paste, True);
 
     if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
     begin
         Key:=0;
         sgAgeView.QuitEditing();
-        Exit();
-    end;
-
-    if CharInSet(Char(Key), [#48..#57{A..Z}, #65..#90{a..z}, #97..#122{0..9}]) then
-    begin
-        Key:=0;
-        sgAgeView.AllowEditing();
         Exit();
     end;
 
@@ -4872,63 +4875,90 @@ begin
         Exit();
     end;
 
-    var SourceDBNames:=TList<string>.Create();
-    var CustomerNumbers:=TList<Int64>.Create();
-    try
+    if (Key = 86) and (Shift = [ssCtrl]) then
+    begin
 
+        sgAgeView.CopyCutPaste(TActions.Paste, True);
+
+        var FreeFields: TFreeFieldsPayLoad;
+        var Counts:=sgAgeView.Selection.Bottom - sgAgeView.Selection.Top;
+
+        var SourceDBNames:   TArray<string>;
+        var CustomerNumbers: TArray<Int64>;
+        var Free1:           TArray<string>;
+        var Free2:           TArray<string>;
+        var Free3:           TArray<string>;
+
+        SetLength(SourceDBNames, Counts);
+        SetLength(CustomerNumbers, Counts);
+        SetLength(Free1, Counts);
+        SetLength(Free2, Counts);
+        SetLength(Free3, Counts);
+
+        var jCNT:=0;
         for var iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
         begin
-            SourceDBNames.Add(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT]);
-            CustomerNumbers.Add(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT].ToInt64);
-        end;
 
-        if Key = VK_RETURN then
-        begin
+            SourceDBNames[jCNT]  :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT];
+            CustomerNumbers[jCNT]:=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT].ToInt64;
+            Free1[jCNT]          :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Free1), iCNT];
+            Free2[jCNT]          :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Free2), iCNT];
+            Free3[jCNT]          :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Free3), iCNT];
 
-            Key:=0;
-            sgAgeView.QuitEditing();
-
-            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free1) then
-              // Send REST request to update the field for specified SourceDBName, CustomerNumber
-
-            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free2) then
-              // Send REST request to update the field for specified SourceDBName, CustomerNumber
-
-            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free3) then
-              // Send REST request to update the field for specified SourceDBName, CustomerNumber
-
-            Exit();
+            Inc(jCNT);
 
         end;
 
-        if Key = VK_DELETE then
-        begin
+        FreeFields.SourceDBNames  :=SourceDBNames;
+        FreeFields.CustomerNumbers:=CustomerNumbers;
+        FreeFields.Free1          :=Free1;
+        FreeFields.Free2          :=Free2;
+        FreeFields.Free3          :=Free3;
 
-            Key:=0;
+        Service.Mediator.Comments.FreeFieldsUpdateAsync(FreeFields, FreeFieldsUpdate_Callback);
+        Exit();
 
-            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free1) then
-            begin
-                // Send REST request to update the field for specified SourceDBName, CustomerNumber
-                sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-            end;
+    end;
 
-            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free2) then
-            begin
-                // Send REST request to update the field for specified SourceDBName, CustomerNumber
-                sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-            end;
+    if CharInSet(Char(Key), [#48..#57{A..Z}, #65..#90{a..z}, #97..#122{0..9}]) then
+    begin
+        Key:=0;
+        sgAgeView.AllowEditing();
+        Exit();
+    end;
 
-            if sgAgeView.Col = sgAgeView.GetCol(TUserGeneralCommentUpdate._Free3) then
-            begin
-                // Send REST request to update the field for specified SourceDBName, CustomerNumber
-                sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-            end;
 
-        end;
+    if Key = VK_RETURN then
+    begin
+        Key:=0;
+//        sgAgeView.QuitEditing();
+//        Service.Mediator.Comments.FreeFieldsUpdateAsync(FreeFields, FreeFieldsUpdate_Callback);
+//        Exit();
+    end;
 
-    finally
-        SourceDBNames.Free();
-        CustomerNumbers.Free();
+    if Key = VK_DELETE then
+    begin
+
+        Key:=0;
+
+//        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free1) then
+//        begin
+//            // Send REST request to update the field for specified SourceDBName, CustomerNumber
+//            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+//        end;
+//
+//        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free2) then
+//        begin
+//            // Send REST request to update the field for specified SourceDBName, CustomerNumber
+//            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+//        end;
+//
+//        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free3) then
+//        begin
+//            // Send REST request to update the field for specified SourceDBName, CustomerNumber
+//            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+//        end;
+
     end;
 
 end;

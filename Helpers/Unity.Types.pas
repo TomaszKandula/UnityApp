@@ -9,8 +9,8 @@ interface
 
 // -----------------------------------------------------------------------------------
 // Note:
-//    Some types may have the same signature, the reason why we have individual
-//    types for the same signature rather than one common is that, there is easier
+//    Some types may have the same signature. The reason why we have individual
+//    types for the same signature rather than one common is that, this is easier
 //    to extend, just add argument to the existing signature for given specific method
 //    and it can be use right away by given implementation and by callback consumer.
 // -----------------------------------------------------------------------------------
@@ -134,6 +134,10 @@ type
     /// Callback signature for method returning information on the lates available version of Unity Platform.
     /// </summary>
     TCheckRelease = procedure(ClientInfo: TClientInfo; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for method updating free fields in General Comment table.
+    /// </summary>
+    TFreeFieldsUpdate = procedure(CallResponse: TCallResponse) of object;
 
 
 implementation

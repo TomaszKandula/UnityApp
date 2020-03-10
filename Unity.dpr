@@ -3,7 +3,7 @@ program Unity;
 // ====================================================================== //
 // Application full name:  Unity Platform.                                //
 // Application shortname:  Unity.                                         //
-// Major version name:     Cadiz.                                         //
+// Major version name:     Callisto.                                      //
 // ---------------------------------------------------------------------- //
 // Introduced:             Mid 2016 (concept).                            //
 // First test release:     2017-07-10.                                    //
@@ -72,6 +72,7 @@ uses
     Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
     Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
     Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
+	Api.FreeFields in 'Model\Api.FreeFields.pas',
     Api.MetaData in 'Model\Api.MetaData.pas',
     Api.ErrorHandler in 'Model\Api.ErrorHandler.pas',
     Api.BankDetails in 'Model\Api.BankDetails.pas',
@@ -91,6 +92,7 @@ uses
     Api.AddressBookUpdate in 'Model\Requests\Api.AddressBookUpdate.pas',
     Api.UserCustSnapshotList in 'Model\Requests\Api.UserCustSnapshotList.pas',
     Api.UserSessionAdded in 'Model\Responses\Api.UserSessionAdded.pas',
+	Api.UpdateFreeFields in 'Model\Requests\Api.UpdateFreeFields.pas',
     Api.UserSessionChecked in 'Model\Responses\Api.UserSessionChecked.pas',
     Api.UserCompanyList in 'Model\Responses\Api.UserCompanyList.pas',
     Api.UserRatingAdd in 'Model\Requests\Api.UserRatingAdd.pas',

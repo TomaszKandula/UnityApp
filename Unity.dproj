@@ -181,6 +181,7 @@
         <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
         <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
+        <DCCReference Include="Model\Api.FreeFields.pas"/>
         <DCCReference Include="Model\Api.MetaData.pas"/>
         <DCCReference Include="Model\Api.ErrorHandler.pas"/>
         <DCCReference Include="Model\Api.BankDetails.pas"/>
@@ -200,6 +201,7 @@
         <DCCReference Include="Model\Requests\Api.AddressBookUpdate.pas"/>
         <DCCReference Include="Model\Requests\Api.UserCustSnapshotList.pas"/>
         <DCCReference Include="Model\Responses\Api.UserSessionAdded.pas"/>
+        <DCCReference Include="Model\Requests\Api.UpdateFreeFields.pas"/>
         <DCCReference Include="Model\Responses\Api.UserSessionChecked.pas"/>
         <DCCReference Include="Model\Responses\Api.UserCompanyList.pas"/>
         <DCCReference Include="Model\Requests\Api.UserRatingAdd.pas"/>

@@ -22,6 +22,15 @@ type
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
         /// <summary>
+        /// Allow to async. update free fields in General Comment table. PayLoad requires list of updated items. If specified item
+        /// does not exist, it will be created.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil);
+        /// <summary>
         /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload with comment Id
         /// parameter for update. If comment Id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
         /// comment can be added for given customer number, age date and company code.
@@ -92,6 +101,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
+        procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil); virtual;
         procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
         procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
         function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
@@ -123,7 +133,9 @@ uses
     Api.UserDailyCommentAdded,
     Api.UserDailyCommentUpdate,
     Api.UserDailyCommentUpdated,
-    Api.UserDailyCommentCheck;
+    Api.UserDailyCommentCheck,
+    Api.FreeFields,
+    Api.UpdateFreeFields;
 
 
 constructor TComments.Create();
@@ -134,6 +146,102 @@ end;
 destructor TComments.Destroy();
 begin
     inherited;
+end;
+
+
+procedure TComments.FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var CallResponse: TCallResponse;
+        var Rest:=Service.InvokeRest();
+
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generalcommentaries/freefields';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[FreeFieldsUpdateAsync]: Executing POST ' + Rest.ClientBaseURL);
+
+        var UpdateFreeFields:=TUpdateFreeFields.Create();
+        try
+
+            var FreeFields:=TFreeFields.Create();
+            var FreeFieldsObj: TArray<TFreeFields>;
+            var Count:=Length(PayLoad.SourceDBNames);
+
+            SetLength(FreeFieldsObj, Count);
+
+            for var iCNT:=0 to Count - 1 do
+            begin
+
+                FreeFields.SourceDbNames  :=PayLoad.SourceDBNames[iCNT];
+                FreeFields.CustomerNumbers:=PayLoad.CustomerNumbers[iCNT];
+                FreeFields.Free1          :=PayLoad.Free1[iCNT];
+                FreeFields.Free2          :=PayLoad.Free2[iCNT];
+                FreeFields.Free3          :=PayLoad.Free3[iCNT];
+
+                FreeFieldsObj[iCNT]:=FreeFields;
+
+            end;
+
+            UpdateFreeFields.UserAlias:=Service.SessionData.AliasName;
+            UpdateFreeFields.FreeFields:=FreeFieldsObj;
+            Rest.CustomBody:=TJson.ObjectToJsonString(UpdateFreeFields);
+
+        finally
+            //UpdateFreeFields.Free();
+        end;
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+
+
+
+
+
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[FreeFieldsUpdateAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[FreeFieldsUpdateAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[FreeFieldsUpdateAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[FreeFieldsUpdateAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
+
 end;
 
 

@@ -135,6 +135,17 @@ type
     end;
 
     /// <summary>
+    /// Carries a group of variables for updating Free1..3 fields stored in GeneralComment table.
+    /// </summary>
+    TFreeFieldsPayLoad = record
+        SourceDBNames:   TArray<string>;
+        CustomerNumbers: TArray<Int64>;
+        Free1:           TArray<string>;
+        Free2:           TArray<string>;
+        Free3:           TArray<string>;
+    end;
+
+    /// <summary>
     /// Carries a group of variables for GeneralComment table.
     /// </summary>
     TGeneralCommentFields = record
