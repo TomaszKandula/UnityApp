@@ -855,6 +855,7 @@ type
         procedure LoadOpenItems();
         procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
         procedure AgeViewMapping();
+        function UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
@@ -1261,6 +1262,33 @@ begin
 
     Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
     Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
+
+end;
+
+
+function TMainForm.UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
+begin
+
+    var Count:=(Source.Selection.Bottom - Source.Selection.Top) + 1;
+
+    var FreeFields: TFreeFieldsPayLoad;
+    FreeFields.Initialize(Count);
+
+    var Index:=0;
+    for var SelIndex:=Source.Selection.Top to Source.Selection.Bottom do
+    begin
+
+        FreeFields.SourceDBNames[Index]  :=Source.Cells[Source.GetCol(TReturnCustSnapshots._SourceDbName), SelIndex];
+        FreeFields.CustomerNumbers[Index]:=Source.Cells[Source.GetCol(TReturnCustSnapshots._CustomerNumber), SelIndex].ToInt64;
+        FreeFields.Free1[Index]          :=Source.Cells[Source.GetCol(TReturnCustSnapshots._Free1), SelIndex];
+        FreeFields.Free2[Index]          :=Source.Cells[Source.GetCol(TReturnCustSnapshots._Free2), SelIndex];
+        FreeFields.Free3[Index]          :=Source.Cells[Source.GetCol(TReturnCustSnapshots._Free3), SelIndex];
+
+        Inc(Index);
+
+    end;
+
+    Result:=FreeFields;
 
 end;
 
@@ -4877,47 +4905,9 @@ begin
 
     if (Key = 86) and (Shift = [ssCtrl]) then
     begin
-
         sgAgeView.CopyCutPaste(TActions.Paste, True);
-
-        var FreeFields: TFreeFieldsPayLoad;
-        var Counts:=sgAgeView.Selection.Bottom - sgAgeView.Selection.Top;
-
-        var SourceDBNames:   TArray<string>;
-        var CustomerNumbers: TArray<Int64>;
-        var Free1:           TArray<string>;
-        var Free2:           TArray<string>;
-        var Free3:           TArray<string>;
-
-        SetLength(SourceDBNames, Counts);
-        SetLength(CustomerNumbers, Counts);
-        SetLength(Free1, Counts);
-        SetLength(Free2, Counts);
-        SetLength(Free3, Counts);
-
-        var jCNT:=0;
-        for var iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-        begin
-
-            SourceDBNames[jCNT]  :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT];
-            CustomerNumbers[jCNT]:=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT].ToInt64;
-            Free1[jCNT]          :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Free1), iCNT];
-            Free2[jCNT]          :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Free2), iCNT];
-            Free3[jCNT]          :=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Free3), iCNT];
-
-            Inc(jCNT);
-
-        end;
-
-        FreeFields.SourceDBNames  :=SourceDBNames;
-        FreeFields.CustomerNumbers:=CustomerNumbers;
-        FreeFields.Free1          :=Free1;
-        FreeFields.Free2          :=Free2;
-        FreeFields.Free3          :=Free3;
-
-        Service.Mediator.Comments.FreeFieldsUpdateAsync(FreeFields, FreeFieldsUpdate_Callback);
+        Service.Mediator.Comments.FreeFieldsUpdateAsync(UpdateFreeFields(sgAgeView), FreeFieldsUpdate_Callback);
         Exit();
-
     end;
 
     if CharInSet(Char(Key), [#48..#57{A..Z}, #65..#90{a..z}, #97..#122{0..9}]) then
@@ -4931,9 +4921,9 @@ begin
     if Key = VK_RETURN then
     begin
         Key:=0;
-//        sgAgeView.QuitEditing();
-//        Service.Mediator.Comments.FreeFieldsUpdateAsync(FreeFields, FreeFieldsUpdate_Callback);
-//        Exit();
+        sgAgeView.QuitEditing();
+        Service.Mediator.Comments.FreeFieldsUpdateAsync(UpdateFreeFields(sgAgeView), FreeFieldsUpdate_Callback);
+        Exit();
     end;
 
     if Key = VK_DELETE then
@@ -4941,23 +4931,23 @@ begin
 
         Key:=0;
 
-//        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free1) then
-//        begin
-//            // Send REST request to update the field for specified SourceDBName, CustomerNumber
-//            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-//        end;
-//
-//        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free2) then
-//        begin
-//            // Send REST request to update the field for specified SourceDBName, CustomerNumber
-//            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-//        end;
-//
-//        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free3) then
-//        begin
-//            // Send REST request to update the field for specified SourceDBName, CustomerNumber
-//            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-//        end;
+        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free1) then
+        begin
+            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:=' ';
+            Service.Mediator.Comments.FreeFieldsUpdateAsync(UpdateFreeFields(sgAgeView), FreeFieldsUpdate_Callback);
+        end;
+
+        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free2) then
+        begin
+            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:=' ';
+            Service.Mediator.Comments.FreeFieldsUpdateAsync(UpdateFreeFields(sgAgeView), FreeFieldsUpdate_Callback);
+        end;
+
+        if sgAgeView.Col = sgAgeView.GetCol(TReturnCustSnapshots._Free3) then
+        begin
+            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:=' ';
+            Service.Mediator.Comments.FreeFieldsUpdateAsync(UpdateFreeFields(sgAgeView), FreeFieldsUpdate_Callback);
+        end;
 
     end;
 

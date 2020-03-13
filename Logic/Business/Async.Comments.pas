@@ -135,7 +135,8 @@ uses
     Api.UserDailyCommentUpdated,
     Api.UserDailyCommentCheck,
     Api.FreeFields,
-    Api.UpdateFreeFields;
+    Api.UpdateFreeFields,
+    Api.FreeFieldsUpdated;
 
 
 constructor TComments.Create();
@@ -164,34 +165,24 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[FreeFieldsUpdateAsync]: Executing POST ' + Rest.ClientBaseURL);
 
-        var UpdateFreeFields:=TUpdateFreeFields.Create();
+        var Count:=Length(PayLoad.SourceDBNames);
+        var UpdateFreeFields:=TUpdateFreeFields.Create(Count);
         try
 
-            var FreeFields:=TFreeFields.Create();
-            var FreeFieldsObj: TArray<TFreeFields>;
-            var Count:=Length(PayLoad.SourceDBNames);
-
-            SetLength(FreeFieldsObj, Count);
-
-            for var iCNT:=0 to Count - 1 do
+            for var Index:=0 to Count - 1 do
             begin
-
-                FreeFields.SourceDbNames  :=PayLoad.SourceDBNames[iCNT];
-                FreeFields.CustomerNumbers:=PayLoad.CustomerNumbers[iCNT];
-                FreeFields.Free1          :=PayLoad.Free1[iCNT];
-                FreeFields.Free2          :=PayLoad.Free2[iCNT];
-                FreeFields.Free3          :=PayLoad.Free3[iCNT];
-
-                FreeFieldsObj[iCNT]:=FreeFields;
-
+                UpdateFreeFields.FreeFields[Index].SourceDbNames  :=PayLoad.SourceDBNames[Index];
+                UpdateFreeFields.FreeFields[Index].CustomerNumbers:=PayLoad.CustomerNumbers[Index];
+                UpdateFreeFields.FreeFields[Index].Free1          :=PayLoad.Free1[Index];
+                UpdateFreeFields.FreeFields[Index].Free2          :=PayLoad.Free2[Index];
+                UpdateFreeFields.FreeFields[Index].Free3          :=PayLoad.Free3[Index];
             end;
 
             UpdateFreeFields.UserAlias:=Service.SessionData.AliasName;
-            UpdateFreeFields.FreeFields:=FreeFieldsObj;
             Rest.CustomBody:=TJson.ObjectToJsonString(UpdateFreeFields);
 
         finally
-            //UpdateFreeFields.Free();
+            UpdateFreeFields.Free();
         end;
 
         try
@@ -199,11 +190,17 @@ begin
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
 
+                var FreeFieldsUpdated:=TJson.JsonToObject<TFreeFieldsUpdated>(Rest.Content);
+                try
+                    CallResponse.IsSucceeded:=FreeFieldsUpdated.IsSucceeded;
+                    CallResponse.LastMessage:=FreeFieldsUpdated.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=FreeFieldsUpdated.Error.ErrorCode;
+                    Service.Logger.Log('[FreeFieldsUpdateAsync]: Rows affected: ' + FreeFieldsUpdated.Meta.RowsAffected.ToString());
+                finally
+                    FreeFieldsUpdated.Free();
+                end;
 
-
-
-
-
+                Service.Logger.Log('[FreeFieldsUpdateAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
             end
             else

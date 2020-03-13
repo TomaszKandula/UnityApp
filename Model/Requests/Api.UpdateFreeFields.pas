@@ -1,5 +1,12 @@
 unit Api.UpdateFreeFields;
 
+// -------------------------------------------------------------
+// JSON model for REST. Can be referenced by anyone. Cannot hold
+// references to View or Logic. Cannot have any implementation
+// apart from fields/class initialization/release.
+// Note: Do not use TList in model, instead use TArray<T> and
+// use TList.ToArray to pass prepared data to the target model.
+// -------------------------------------------------------------
 
 interface
 
@@ -16,6 +23,7 @@ type
         var FUserAlias:  string;
         var FFreeFields: TArray<TFreeFields>;
 	public
+        constructor Create(Count: cardinal);
         destructor Destroy(); override;
         const _UserAlias  = 'UserAlias';
         const _FreeFields = 'FreeFields';
@@ -27,9 +35,16 @@ type
 implementation
 
 
+constructor TUpdateFreeFields.Create(Count: cardinal);
+begin
+    SetLength(FFreeFields, Count);
+    for var Index:=0 to Count - 1 do FFreeFields[Index]:=TFreeFields.Create();
+end;
+
+
 destructor TUpdateFreeFields.Destroy();
 begin
-    for var FreeFields: TFreeFields in FFreeFields do FreeFields.Free();
+    for var FreeFields: TFreeFields in FFreeFields do if Assigned(FreeFields) then FreeFields.Free();
     inherited;
 end;
 

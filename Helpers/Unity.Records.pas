@@ -143,6 +143,7 @@ type
         Free1:           TArray<string>;
         Free2:           TArray<string>;
         Free3:           TArray<string>;
+        procedure Initialize(Count: cardinal);
     end;
 
     /// <summary>
@@ -249,6 +250,16 @@ type
 
 
 implementation
+
+
+procedure TFreeFieldsPayLoad.Initialize(Count: cardinal);
+begin
+    SetLength(SourceDBNames, Count);
+    SetLength(CustomerNumbers, Count);
+    SetLength(Free1, Count);
+    SetLength(Free2, Count);
+    SetLength(Free3, Count);
+end;
 
 
 procedure TCompanyDetails.Dispose();

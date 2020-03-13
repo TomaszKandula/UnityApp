@@ -242,6 +242,7 @@
         <DCCReference Include="Model\Responses\Api.AddressBookUpdated.pas"/>
         <DCCReference Include="Model\Responses\Api.UserGeneralCommentCheck.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnClientInfo.pas"/>
+        <DCCReference Include="Model\Responses\Api.FreeFieldsUpdated.pas"/>
         <DCCReference Include="Logic\Business\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\Business\Sync.Document.pas"/>
         <DCCReference Include="Logic\Business\Async.Accounts.pas"/>

@@ -133,6 +133,7 @@ uses
     Api.AddressBookUpdated in 'Model\Responses\Api.AddressBookUpdated.pas',
     Api.UserGeneralCommentCheck in 'Model\Responses\Api.UserGeneralCommentCheck.pas',
     Api.ReturnClientInfo in 'Model\Responses\Api.ReturnClientInfo.pas',
+	Api.FreeFieldsUpdated in 'Model\Responses\Api.FreeFieldsUpdated.pas',
     Sync.Mailer in 'Logic\Business\Sync.Mailer.pas',
     Sync.Document in 'Logic\Business\Sync.Document.pas',
     Async.Accounts in 'Logic\Business\Async.Accounts.pas',
