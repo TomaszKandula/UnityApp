@@ -838,7 +838,7 @@ type
         var FFollowsToday: integer;
         var FFollowsPast: integer;
         var FFollowsNext: integer;
-        function CanAccessAppMenu(): boolean;
+        function  CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
         procedure RedeemAccess();
         procedure PermitCheckInit();
@@ -855,7 +855,7 @@ type
         procedure LoadOpenItems();
         procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
         procedure AgeViewMapping();
-        function UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
+        function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);

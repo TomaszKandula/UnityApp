@@ -102,6 +102,7 @@ type
         constructor Create();
         destructor Destroy(); override;
         procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil); virtual;
+        procedure BulkFollowupUpdateAsync(); virtual;
         procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
         procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
         function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
@@ -238,6 +239,17 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+procedure TComments.BulkFollowupUpdateAsync();
+begin
+
+
+
+
+
 
 end;
 
