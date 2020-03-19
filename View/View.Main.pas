@@ -855,6 +855,8 @@ type
         procedure LoadOpenItems();
         procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
         procedure AgeViewMapping();
+        procedure SkypeCallUpdate(CallTime: cardinal);
+        procedure FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
         function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
@@ -865,6 +867,7 @@ type
         procedure FreeFieldsUpdate_Callback(CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
+        procedure BulkFollowUpUpdate_Callback(CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
@@ -1262,6 +1265,87 @@ begin
 
     Service.Mediator.Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
     Service.Logger.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
+
+end;
+
+
+procedure TMainForm.SkypeCallUpdate(CallTime: cardinal);
+begin
+
+    var SourceDBName:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]);
+    var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
+
+    var CommentExists: TCommentExists;
+    var CallResponse: TCallResponse;
+    CallResponse:=Service.Mediator.Comments.CheckDailyCommentAwaited(
+        SourceDBName,
+        CustNumber,
+        LoadedAgeDate,
+        CommentExists
+    );
+
+    var NewComment:=CommentExists.UserComment;
+    if String.IsNullOrWhiteSpace(NewComment) then
+        NewComment:='Called customer today.' else
+            NewComment:=NewComment + #13#10 + 'Called customer today.';
+
+    var LDailyCommentFields: TDailyCommentFields;
+    LDailyCommentFields.CommentId           :=CommentExists.CommentId;
+    LDailyCommentFields.SourceDBName        :=SourceDBName;
+    LDailyCommentFields.CustomerNumber      :=CustNumber;
+    LDailyCommentFields.AgeDate             :=LoadedAgeDate;
+    LDailyCommentFields.CallDuration        :=CallTime;
+    LDailyCommentFields.CallEvent           :=1;
+    LDailyCommentFields.FixedStatementsSent :=0;
+    LDailyCommentFields.CustomStatementsSent:=0;
+    LDailyCommentFields.FixedRemindersSent  :=0;
+    LDailyCommentFields.CustomRemindersSent :=0;
+    LDailyCommentFields.UserComment         :=NewComment;
+    LDailyCommentFields.UserAlias           :=Service.SessionData.AliasName;
+
+    Service.Mediator.Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
+
+end;
+
+
+procedure TMainForm.FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
+begin
+
+    var Col1:=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
+    var Col2:=sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber);
+    var Col3:=sgAgeView.GetCol(TReturnCustSnapshots._FollowUp);
+
+    var Count:=(Source.Selection.Bottom - Source.Selection.Top) + 1;
+
+    var FollowUpsPayLoad: TFollowUpsPayLoad;
+    FollowUpsPayLoad.Initialize(Count);
+
+    var Index:=0;
+    if CalendarForm.FSelectedDate <> TDtFormat.NullDate then
+    begin
+
+        for var SelIndex:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+        begin
+
+            if sgAgeView.RowHeights[Index] <> sgAgeView.sgRowHidden then
+            begin
+
+                sgAgeView.Cells[Col3, SelIndex]:=CommonDate;
+
+                FollowUpsPayLoad.SourceDBNames[Index]  :=sgAgeView.Cells[Col1, SelIndex];
+                FollowUpsPayLoad.CustomerNumbers[Index]:=sgAgeView.Cells[Col2, SelIndex].ToInt64();
+                FollowUpsPayLoad.FollowUps[Index]      :=CommonDate;
+
+                Inc(Index);
+
+            end;
+
+        end;
+
+    end;
+
+    Service.Mediator.Comments.BulkFollowUpUpdateAsync(FollowUpsPayLoad, BulkFollowUpUpdate_Callback);
+    Service.Logger.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
 
 end;
 
@@ -1854,6 +1938,19 @@ begin
 end;
 
 
+procedure TMainForm.BulkFollowUpUpdate_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[BulkFollowUpUpdate_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+end;
+
+
 {$ENDREGION}
 
 
@@ -1894,47 +1991,13 @@ end;
 procedure TMainForm.WndMessagesExternal(PassMsg: TMessage);
 begin
 
-    if PassMsg.Msg <> THelpers.WM_EXTINFO then Exit();
+    if PassMsg.Msg <> THelpers.WM_EXTINFO then
+        Exit();
+
     OutputDebugString(PChar('WM_EXTINFO RECEIVED'));
 
-    // Log time (seconds) in database "general comment" table
     if PassMsg.LParam > 0 then
-    begin
-
-        var SourceDBName:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]);
-        var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
-
-        var CommentExists: TCommentExists;
-        var CallResponse: TCallResponse;
-        CallResponse:=Service.Mediator.Comments.CheckDailyCommentAwaited(
-            SourceDBName,
-            CustNumber,
-            LoadedAgeDate,
-            CommentExists
-        );
-
-        var NewComment:=CommentExists.UserComment;
-        if String.IsNullOrWhitespace(NewComment) then
-            NewComment:='Called customer today.' else
-                NewComment:=NewComment + '#13#10' + 'Called customer today.';
-
-        var LDailyCommentFields: TDailyCommentFields;
-        LDailyCommentFields.CommentId           :=CommentExists.CommentId;
-        LDailyCommentFields.SourceDBName        :=SourceDBName;
-        LDailyCommentFields.CustomerNumber      :=CustNumber;
-        LDailyCommentFields.AgeDate             :=LoadedAgeDate;
-        LDailyCommentFields.CallDuration        :=PassMsg.LParam;
-        LDailyCommentFields.CallEvent           :=1;
-        LDailyCommentFields.FixedStatementsSent :=0;
-        LDailyCommentFields.CustomStatementsSent:=0;
-        LDailyCommentFields.FixedRemindersSent  :=0;
-        LDailyCommentFields.CustomRemindersSent :=0;
-        LDailyCommentFields.UserComment         :=NewComment;
-        LDailyCommentFields.UserAlias           :=Service.SessionData.AliasName;
-
-        Service.Mediator.Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
-
-    end;
+        SkypeCallUpdate(PassMsg.LParam);
 
 end;
 
@@ -2840,7 +2903,7 @@ begin
             Action_Tracker.Enabled       :=True;
             Action_AddToBook.Enabled     :=True;
             Action_MassMailer.Enabled    :=True;
-            Action_GroupFollowUp.Enabled :=False;
+            Action_GroupFollowUp.Enabled :=True;
             Action_FilterAgeView.Enabled :=False;
             Action_RemoveFilters.Enabled :=False;
             Action_Overdue.Enabled       :=True;
@@ -3274,62 +3337,15 @@ end;
 
 procedure TMainForm.Action_AddFollowUpGroupClick(Sender: TObject);
 begin
-
-    Screen.Cursor:=crHourGlass;
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
     THelpers.WndCall(CalendarForm, TWindowState.Modal);
-
-    // If selected more than one customer, assign given date to selected customers
-    if CalendarForm.FSelectedDate <> TDtFormat.NullDate then
-    begin
-
-        for var iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-
-            if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
-                CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, iCNT);
-
-            Service.Logger.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
-
-    end;
-
-    Screen.Cursor:=crDefault;
-
+    FollowUpsUpdate(sgAgeView, DateToStr(CalendarForm.FSelectedDate));
 end;
 
 
 procedure TMainForm.Action_RemoveFollowUpsClick(Sender: TObject);
 begin
-
-    Screen.Cursor:=crHourGlass;
-
-    for var iCNT: integer:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-    begin
-
-        if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
-        begin
-
-            var LGeneralCommentFields: TGeneralCommentFields;
-            LGeneralCommentFields.SourceDBName  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT]);
-            LGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT]).ToInteger();
-            LGeneralCommentFields.FollowUp      :=' ';
-            LGeneralCommentFields.Free1         :=String.Empty;
-            LGeneralCommentFields.Free2         :=String.Empty;
-            LGeneralCommentFields.Free3         :=String.Empty;
-            LGeneralCommentFields.UserComment   :=String.Empty;
-            LGeneralCommentFields.UserAlias     :=Service.SessionData.AliasName;
-
-            Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil);
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]:=TChars.SPACE;
-
-        end;
-
-    end;
-
-    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
-    Service.Logger.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
-
-    Screen.Cursor:=crDefault;
-
+    FollowUpsUpdate(sgAgeView, ' ');
 end;
 
 

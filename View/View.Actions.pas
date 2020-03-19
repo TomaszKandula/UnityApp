@@ -278,7 +278,8 @@ uses
     Unity.Sorting,
     Api.ReturnOpenItems,
     Api.UserDailyCommentsList,
-    Api.ReturnCustSnapshots;
+    Api.ReturnCustSnapshots,
+    Api.AddressBookList;
 
 
 var vActionsForm: TActionsForm;
@@ -480,8 +481,12 @@ end;
 
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
 begin
+
     var GetColumn:=DailyComGrid.GetCol(TUserDailyCommentsList._UserComment);
-    if GetColumn <> -100 then Text.Text:=DailyComGrid.Cells[GetColumn, 1];
+
+    if GetColumn <> -100 then
+        Text.Text:=DailyComGrid.Cells[GetColumn, 1] else DailyCom.Text:='';
+
 end;
 
 
@@ -496,30 +501,20 @@ begin
     or
         (Cust_MailGeneral.Text = 'Not found!')
     then
-        imgCoverSaveBtn.Visible:=True
-            else
-                imgCoverSaveBtn.Visible:=False;
+        imgCoverSaveBtn.Visible:=True else imgCoverSaveBtn.Visible:=False;
 
     // Disable text fields if customer is not registered.
     if Cust_Phone.Text = 'Not found!' then
-        Cust_Phone.Enabled:=False
-            else
-                Cust_Phone.Enabled:=True;
+        Cust_Phone.Enabled:=False else Cust_Phone.Enabled:=True;
 
     if Cust_Mail.Text = 'Not found!' then
-        Cust_Mail.Enabled:=False
-            else
-                Cust_Mail.Enabled:=True;
+        Cust_Mail.Enabled:=False else Cust_Mail.Enabled:=True;
 
     if Cust_Person.Text = 'Not found!' then
-        Cust_Person.Enabled:=False
-            else
-                Cust_Person.Enabled:=True;
+        Cust_Person.Enabled:=False else Cust_Person.Enabled:=True;
 
     if Cust_MailGeneral.Text = 'Not found!' then
-        Cust_MailGeneral.Enabled:=False
-            else
-                Cust_MailGeneral.Enabled:=True;
+        Cust_MailGeneral.Enabled:=False else Cust_MailGeneral.Enabled:=True;
 
 end;
 
@@ -641,7 +636,7 @@ begin
         Initialize();
         UpdateOpenItems();
         UpdateData();
-        GetFirstComment(DailyCom);
+        //GetFirstComment(DailyCom);
         Screen.Cursor:=crDefault;
     end);
 
@@ -802,6 +797,31 @@ begin
         Exit();
     end;
 
+    var Col1:=MainForm.sgAddressBook.GetCol(TAddressBookList._SourceDbName);
+    var Col2:=MainForm.sgAddressBook.GetCol(TAddressBookList._CustomerNumber);
+    var Col3:=MainForm.sgAddressBook.GetCol(TAddressBookList._ContactPerson);
+    var Col4:=MainForm.sgAddressBook.GetCol(TAddressBookList._RegularEmails);
+    var Col5:=MainForm.sgAddressBook.GetCol(TAddressBookList._StatementEmails);
+    var Col6:=MainForm.sgAddressBook.GetCol(TAddressBookList._PhoneNumbers);
+
+    // Start with 1 to sip the header
+    for var Index:=1 to MainForm.sgAddressBook.RowCount - 1 do
+    begin
+
+        var SourceDbNm:=MainForm.sgAddressBook.Cells[Col1, Index];
+        var CustomerNo:=MainForm.sgAddressBook.Cells[Col2, Index].ToInt64();
+
+        if (SourceDBName = SourceDbNm) and (CustNumber = CustomerNo) then
+        begin
+            MainForm.sgAddressBook.Cells[Col3, Index]:=Cust_Person.Text;
+            MainForm.sgAddressBook.Cells[Col4, Index]:=Cust_MailGeneral.Text;
+            MainForm.sgAddressBook.Cells[Col5, Index]:=Cust_Mail.Text;
+            MainForm.sgAddressBook.Cells[Col6, Index]:=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+            Break;
+        end;
+
+    end;
+
     THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated.');
     Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Address Book has been updated.');
 
@@ -817,6 +837,25 @@ begin
         Service.Logger.Log('[InsertAddressBook_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
+
+    var Col1:=MainForm.sgAddressBook.GetCol(TAddressBookList._SourceDbName);
+    var Col2:=MainForm.sgAddressBook.GetCol(TAddressBookList._CustomerNumber);
+    var Col3:=MainForm.sgAddressBook.GetCol(TAddressBookList._CustomerName);
+    var Col4:=MainForm.sgAddressBook.GetCol(TAddressBookList._ContactPerson);
+    var Col5:=MainForm.sgAddressBook.GetCol(TAddressBookList._RegularEmails);
+    var Col6:=MainForm.sgAddressBook.GetCol(TAddressBookList._StatementEmails);
+    var Col7:=MainForm.sgAddressBook.GetCol(TAddressBookList._PhoneNumbers);
+
+    var RowCount:=MainForm.sgAddressBook.RowCount + 1;
+    MainForm.sgAddressBook.RowCount:=RowCount;
+
+    MainForm.sgAddressBook.Cells[Col1, RowCount - 1]:=FSourceDBName;
+    MainForm.sgAddressBook.Cells[Col2, RowCount - 1]:=FCustNumber.ToString();
+    MainForm.sgAddressBook.Cells[Col3, RowCount - 1]:=FCustName;
+    MainForm.sgAddressBook.Cells[Col4, RowCount - 1]:=Cust_Person.Text;
+    MainForm.sgAddressBook.Cells[Col5, RowCount - 1]:=Cust_MailGeneral.Text;
+    MainForm.sgAddressBook.Cells[Col6, RowCount - 1]:=Cust_Mail.Text;
+    MainForm.sgAddressBook.Cells[Col7, RowCount - 1]:=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
     FCustDetailsId:=ReturnedId;
     THelpers.MsgCall(TAppMessage.Info, 'New customer has been added successfully.');
@@ -849,7 +888,6 @@ begin
     end;
 
     UpdateDaily();
-    ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsList._UserComment), DailyComGrid.Row];
 
 end;
 
@@ -889,6 +927,7 @@ begin
 
         DailyComGrid.SetColWidth(10, 20, 400);
         DailyComGrid.MSort(DailyComGrid.GetCol(TUserDailyCommentsList._CommentId), TDataType.TInteger, False);
+        ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsList._UserComment), DailyComGrid.Row];
 
     end
     else

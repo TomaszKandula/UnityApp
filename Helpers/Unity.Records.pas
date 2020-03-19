@@ -135,6 +135,16 @@ type
     end;
 
     /// <summary>
+    /// Carries a group of variables for updating FollowUp field stored in GeneralComment table.
+    /// </summary>
+    TFollowUpsPayLoad = record
+        SourceDBNames:   TArray<string>;
+        CustomerNumbers: TArray<Int64>;
+        FollowUps:       TArray<string>;
+        procedure Initialize(Count: cardinal);
+    end;
+
+    /// <summary>
     /// Carries a group of variables for updating Free1..3 fields stored in GeneralComment table.
     /// </summary>
     TFreeFieldsPayLoad = record
@@ -250,6 +260,14 @@ type
 
 
 implementation
+
+
+procedure TFollowUpsPayLoad.Initialize(Count: cardinal);
+begin
+    SetLength(SourceDBNames, Count);
+    SetLength(CustomerNumbers, Count);
+    SetLength(FollowUps, Count);
+end;
 
 
 procedure TFreeFieldsPayLoad.Initialize(Count: cardinal);

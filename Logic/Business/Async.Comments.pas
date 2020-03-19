@@ -31,6 +31,15 @@ type
         /// </remarks>
         procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil);
         /// <summary>
+        /// Allow to async. update FollowUp field in General Comment table. PayLoad requires list of updated items. If specified item
+        /// does not exist, it will be created.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFolloUpUpdate = nil);
+        /// <summary>
         /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload with comment Id
         /// parameter for update. If comment Id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
         /// comment can be added for given customer number, age date and company code.
@@ -102,7 +111,7 @@ type
         constructor Create();
         destructor Destroy(); override;
         procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil); virtual;
-        procedure BulkFollowupUpdateAsync(); virtual;
+        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFolloUpUpdate = nil); virtual;
         procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
         procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
         function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
@@ -137,7 +146,10 @@ uses
     Api.UserDailyCommentCheck,
     Api.FreeFields,
     Api.UpdateFreeFields,
-    Api.FreeFieldsUpdated;
+    Api.FreeFieldsUpdated,
+    Api.FollowUpData,
+    Api.FollowUpsUpdate,
+    Api.FollowUpsUpdated;
 
 
 constructor TComments.Create();
@@ -243,13 +255,92 @@ begin
 end;
 
 
-procedure TComments.BulkFollowupUpdateAsync();
+procedure TComments.BulkFollowupUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFolloUpUpdate = nil);
 begin
 
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
+        var CallResponse: TCallResponse;
+        var Rest:=Service.InvokeRest();
 
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generalcommentaries/followups';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[BulkFollowupUpdateAsync]: Executing POST ' + Rest.ClientBaseURL);
 
+        var Count:=Length(PayLoad.SourceDBNames);
+        var FollowUpsUpdate:=TFollowUpsUpdate.Create(Count);
+        try
 
+            for var Index:=0 to Count - 1 do
+            begin
+                FollowUpsUpdate.FollowUpsData[Index].FollowUps    :=PayLoad.FollowUps[Index];
+                FollowUpsUpdate.FollowUpsData[Index].SourceDbNames:=PayLoad.SourceDBNames[Index];
+                FollowUpsUpdate.FollowUpsData[Index].CustNumbers  :=PayLoad.CustomerNumbers[Index];
+            end;
+
+            FollowUpsUpdate.UserAlias:=Service.SessionData.AliasName;
+            Rest.CustomBody:=TJson.ObjectToJsonString(FollowUpsUpdate);
+
+        finally
+            FollowUpsUpdate.Free();
+        end;
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var FollowUpsUpdated:=TJson.JsonToObject<TFollowUpsUpdated>(Rest.Content);
+                try
+                    CallResponse.IsSucceeded:=FollowUpsUpdated.IsSucceeded;
+                    CallResponse.LastMessage:=FollowUpsUpdated.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=FollowUpsUpdated.Error.ErrorCode;
+                    Service.Logger.Log('[BulkFollowupUpdateAsync]: Rows affected: ' + FollowUpsUpdated.Meta.RowsAffected.ToString());
+                finally
+                    FollowUpsUpdated.Free();
+                end;
+
+                Service.Logger.Log('[BulkFollowupUpdateAsync]: Returned status code is ' + Rest.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[BulkFollowupUpdateAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[BulkFollowupUpdateAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[BulkFollowupUpdateAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[BulkFollowupUpdateAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 
@@ -909,10 +1000,10 @@ begin
         var LocalPayLoad: TDailyCommentFields;
         var ExtendedComment: string;
 
-        if not String.IsNullOrWhiteSpace(CommentExists.UserComment) then
-            ExtendedComment:=CommentExists.UserComment + #13#10 + 'New communication has been sent.'
+        if String.IsNullOrWhiteSpace(CommentExists.UserComment) then
+            ExtendedComment:='New communication has been sent.'
         else
-            ExtendedComment:='New communication has been sent.';
+            ExtendedComment:=CommentExists.UserComment + #13#10 + 'New communication has been sent.';
 
         LocalPayLoad.CommentId           :=CommentExists.CommentId;
         LocalPayLoad.SourceDBName        :=SourceDBName;
