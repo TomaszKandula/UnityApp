@@ -1321,24 +1321,19 @@ begin
     FollowUpsPayLoad.Initialize(Count);
 
     var Index:=0;
-    if CalendarForm.FSelectedDate <> TDtFormat.NullDate then
+    for var SelIndex:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
     begin
 
-        for var SelIndex:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+        if sgAgeView.RowHeights[Index] <> sgAgeView.sgRowHidden then
         begin
 
-            if sgAgeView.RowHeights[Index] <> sgAgeView.sgRowHidden then
-            begin
+            sgAgeView.Cells[Col3, SelIndex]:=CommonDate;
 
-                sgAgeView.Cells[Col3, SelIndex]:=CommonDate;
+            FollowUpsPayLoad.SourceDBNames[Index]  :=sgAgeView.Cells[Col1, SelIndex];
+            FollowUpsPayLoad.CustomerNumbers[Index]:=sgAgeView.Cells[Col2, SelIndex].ToInt64();
+            FollowUpsPayLoad.FollowUps[Index]      :=CommonDate;
 
-                FollowUpsPayLoad.SourceDBNames[Index]  :=sgAgeView.Cells[Col1, SelIndex];
-                FollowUpsPayLoad.CustomerNumbers[Index]:=sgAgeView.Cells[Col2, SelIndex].ToInt64();
-                FollowUpsPayLoad.FollowUps[Index]      :=CommonDate;
-
-                Inc(Index);
-
-            end;
+            Inc(Index);
 
         end;
 
@@ -1947,6 +1942,8 @@ begin
         Service.Logger.Log('[BulkFollowUpUpdate_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
+
+    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
 
 end;
 
