@@ -662,7 +662,7 @@ begin
         Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), MainForm.sgAgeView.Row]:='';
-        MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
+        MainForm.UpdateFollowUps(MainForm.sgAgeView);
 
     end;
 
@@ -1204,7 +1204,7 @@ end;
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=DateToDB;
-    THelpers.WndCall(CalendarForm, TWindowState.Modal);
+    THelpers.WndCall(CalendarForm, TWindowState.Modal, ActionsForm);
 end;
 
 
@@ -1217,7 +1217,7 @@ end;
 procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=True;
-    //THelpers.WndCall(QmsForm, Modal);
+    //THelpers.WndCall(QmsForm, Modal, ActionsForm);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -1225,14 +1225,14 @@ end;
 procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=False;
-    //THelpers.WndCall(QmsForm, Modal);
+    //THelpers.WndCall(QmsForm, Modal, ActionsForm);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
-    THelpers.WndCall(SendForm, TWindowState.Modal);
+    THelpers.WndCall(SendForm, TWindowState.Modal, ActionsForm);
 end;
 
 
@@ -1331,7 +1331,7 @@ end;
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-    THelpers.WndCall(PhoneListForm, TWindowState.Modal);
+    THelpers.WndCall(PhoneListForm, TWindowState.Modal, ActionsForm);
 end;
 
 

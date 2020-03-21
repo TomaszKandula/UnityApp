@@ -10,6 +10,7 @@ interface
 
 uses
     System.Threading,
+    Unity.Grid,
     Unity.Types,
     Unity.Records;
 
@@ -48,6 +49,14 @@ type
         /// than available for download, then we will prompt the user and exit the application.
         /// </summary>
         function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse;
+        /// <summary>
+        /// Allows to recalculate async. aging summary and risk class based on provided age grid.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary);
     end;
 
 
@@ -63,6 +72,7 @@ type
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
         function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
+        procedure RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary); virtual;
     end;
 
 
@@ -74,7 +84,6 @@ uses
     System.Classes,
     REST.Types,
     REST.Json,
-    Unity.Grid,
     Unity.Enums,
     Unity.Constants,
     Unity.Helpers,
@@ -331,6 +340,30 @@ begin
 
     AClientInfo:=LClientInfo;
     Result:=LCallResponse;
+
+end;
+
+
+procedure TUtilities.RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var CallResponse: TCallResponse;
+        var PayLoad: TAgingPayLoad;
+
+        THelpers.ComputeAgeSummary(Source, PayLoad);
+        THelpers.ComputeRiskClass(Source, PayLoad, RiskClassGroup);
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(PayLoad, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 

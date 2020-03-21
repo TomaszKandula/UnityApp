@@ -181,6 +181,7 @@
         <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
         <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
+        <DCCReference Include="Model\Api.CustomerSnapshot.pas"/>
         <DCCReference Include="Model\Api.FollowUpData.pas"/>
         <DCCReference Include="Model\Api.FreeFields.pas"/>
         <DCCReference Include="Model\Api.MetaData.pas"/>
@@ -246,6 +247,7 @@
         <DCCReference Include="Model\Responses\Api.ReturnClientInfo.pas"/>
         <DCCReference Include="Model\Responses\Api.FreeFieldsUpdated.pas"/>
         <DCCReference Include="Model\Responses\Api.FollowUpsUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCustomerReport.pas"/>
         <DCCReference Include="Logic\Business\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\Business\Sync.Document.pas"/>
         <DCCReference Include="Logic\Business\Async.Accounts.pas"/>

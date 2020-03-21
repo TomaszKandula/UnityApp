@@ -642,8 +642,8 @@ object MassMailerForm: TMassMailerForm
           04C418B60000000049454E44AE426082}
       end
       object cbNonOverdue: TCheckBox
-        Left = 38
-        Top = 100
+        Left = 39
+        Top = 92
         Width = 163
         Height = 17
         Cursor = crHandPoint
@@ -654,8 +654,8 @@ object MassMailerForm: TMassMailerForm
         OnKeyUp = cbNonOverdueKeyUp
       end
       object cbOverdueOnly: TCheckBox
-        Left = 38
-        Top = 77
+        Left = 39
+        Top = 69
         Width = 163
         Height = 17
         Cursor = crHandPoint
@@ -667,7 +667,7 @@ object MassMailerForm: TMassMailerForm
       end
       object cbShowAll: TCheckBox
         Left = 39
-        Top = 52
+        Top = 44
         Width = 163
         Height = 17
         Cursor = crHandPoint
@@ -678,6 +678,18 @@ object MassMailerForm: TMassMailerForm
         TabOrder = 2
         OnClick = cbShowAllClick
         OnKeyUp = cbShowAllKeyUp
+      end
+      object cbNotDueOnly: TCheckBox
+        Left = 39
+        Top = 115
+        Width = 163
+        Height = 17
+        Cursor = crHandPoint
+        TabStop = False
+        Caption = 'Show not due items only'
+        TabOrder = 3
+        OnClick = cbNotDueOnlyClick
+        OnKeyUp = cbNotDueOnlyKeyUp
       end
     end
   end

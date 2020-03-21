@@ -58,6 +58,7 @@ type
         Text_End: TLabel;
         ValBeginDate: TLabel;
         ValEndDate: TLabel;
+        cbNotDueOnly: TCheckBox;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -75,6 +76,8 @@ type
         procedure btnEndDateClick(Sender: TObject);
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
+        procedure cbNotDueOnlyClick(Sender: TObject);
+        procedure cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
@@ -133,6 +136,7 @@ begin
     if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
+    if cbNotDueOnly.Checked  then InvFilter:=TInvoiceFilter.SendNotDue;
 
     var TempStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
@@ -230,11 +234,12 @@ begin
     begin
         cbOverdueOnly.Checked:=False;
         cbNonOverdue.Checked:=False;
+        cbNotDueOnly.Checked:=False;
         ImgCover.Visible:=True;
     end;
 
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and not(cbNonOverdue.Checked)
-        then cbShowAll.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbShowAll.Checked:=True;
 
 end;
 
@@ -246,11 +251,12 @@ begin
     begin
         cbShowAll.Checked:=False;
         cbNonOverdue.Checked:=False;
+        cbNotDueOnly.Checked:=False;
         ImgCover.Visible:=True;
     end;
 
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and not(cbNonOverdue.Checked)
-        then cbOverdueOnly.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked)
+        and not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbOverdueOnly.Checked:=True;
 
 end;
 
@@ -262,11 +268,29 @@ begin
     begin
         cbShowAll.Checked:=False;
         cbOverdueOnly.Checked:=False;
+        cbNotDueOnly.Checked:=False;
         ImgCover.Visible:=False;
     end;
 
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and not(cbNonOverdue.Checked)
-        then cbNonOverdue.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNonOverdue.Checked:=True;
+
+end;
+
+
+procedure TSendForm.cbNotDueOnlyClick(Sender: TObject);
+begin
+
+    if cbNotDueOnly.Checked then
+    begin
+        cbShowAll.Checked:=False;
+        cbOverdueOnly.Checked:=False;
+        cbNonOverdue.Checked:=False;
+        ImgCover.Visible:=True;
+    end;
+
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNotDueOnly.Checked:=True;
 
 end;
 
@@ -342,6 +366,12 @@ end;
 
 
 procedure TSendForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then cbNotDueOnly.SetFocus();
+end;
+
+
+procedure TSendForm.cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then Text_Message.SetFocus();
 end;

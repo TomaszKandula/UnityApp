@@ -72,6 +72,7 @@ uses
     Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
     Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
     Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
+	Api.CustomerSnapshot in 'Model\Api.CustomerSnapshot.pas',
 	Api.FollowUpData in 'Model\Api.FollowUpData.pas',
 	Api.FreeFields in 'Model\Api.FreeFields.pas',
     Api.MetaData in 'Model\Api.MetaData.pas',
@@ -137,6 +138,7 @@ uses
     Api.ReturnClientInfo in 'Model\Responses\Api.ReturnClientInfo.pas',
 	Api.FreeFieldsUpdated in 'Model\Responses\Api.FreeFieldsUpdated.pas',
 	Api.FollowUpsUpdated in 'Model\Responses\Api.FollowUpsUpdated.pas',
+    Api.ReturnCustomerReport in 'Model\Responses\Api.ReturnCustomerReport.pas',
     Sync.Mailer in 'Logic\Business\Sync.Mailer.pas',
     Sync.Document in 'Logic\Business\Sync.Document.pas',
     Async.Accounts in 'Logic\Business\Async.Accounts.pas',
@@ -316,9 +318,8 @@ begin
     // various assets and/or data (including database supporting tables).
     // It will automatically handle main user window.
     // Warning! Main application window (mian form) is View.Startup, and
-    // therefore the user main form (View.Main) must have taskbar icon
-    // re-assigned to it, so it can act as a main window of the Windows
-    // application.
+    // therefore we must re-assigned the user main window to View.Main,
+    // so it can act as a main window of the Windows application.
     // ------------------------------------------------------------------
     StartupForm.SetSessionLog(Service.SessionLog);
     StartupForm.Show();

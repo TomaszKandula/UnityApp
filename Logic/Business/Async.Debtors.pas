@@ -23,8 +23,16 @@ type
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
         /// <summary>
-        /// Allow to read async. current age report from SQL database. Notification is always executed in main thread
-        /// as long as callback is provided.
+        /// Allow to read async. current age report from SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetAgingReportAsync(SelectedCompanies: TList<string>; Callback: TGetAgingReport);
+        /// <summary>
+        /// Allow to read async. current age report from SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
@@ -57,11 +65,10 @@ type
     TDebtors = class(TInterfacedObject, IDebtors)
     strict private
         function  FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
-        procedure FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
-        procedure FComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
     public
         constructor Create();
         destructor Destroy(); override;
+        procedure GetAgingReportAsync(SelectedCompanies: TList<string>; Callback: TGetAgingReport);
         procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView); virtual;
         procedure MapTableAsync(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetName: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
@@ -84,7 +91,9 @@ uses
     Unity.Constants,
     Api.CustSortingOptions,
     Api.UserCustSnapshotList,
-    Api.ReturnCustSnapshots;
+    Api.ReturnCustSnapshots,
+    Api.CustomerSnapshot,
+    Api.ReturnCustomerReport;
 
 
 constructor TDebtors.Create();
@@ -95,6 +104,162 @@ end;
 destructor TDebtors.Destroy();
 begin
     inherited;
+end;
+
+
+procedure TDebtors.GetAgingReportAsync(SelectedCompanies: TList<string>; Callback: TGetAgingReport);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var CallResponse: TCallResponse;
+        var Grid:=TStringGrid.Create(nil);
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'snapshots/customers/report/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[GetAgingReportAsync]: Executing POST ' + Rest.ClientBaseURL);
+
+        var UserCustSnapshotList:=TUserCustSnapshotList.Create();
+        try
+            UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
+            UserCustSnapshotList.SortMode:=String.Empty;
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
+        finally
+            UserCustSnapshotList.Free();
+        end;
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var ReturnCustomerReport:=TJson.JsonToObject<TReturnCustomerReport>(Rest.Content);
+                try
+
+                    var RowCount:=Length(ReturnCustomerReport.CustomerSnapshot);
+                    Grid.RowCount:=RowCount;
+                    Grid.ColCount:=29;
+
+                    Grid.Cells[0, 0]:='';
+                    Grid.Cells[1, 0]:=TCustomerSnapshot._CustomerName;
+                    Grid.Cells[2, 0]:=TCustomerSnapshot._CustomerNumber;
+                    Grid.Cells[3, 0]:=TCustomerSnapshot._SourceDbName;
+                    Grid.Cells[4, 0]:=TCustomerSnapshot._Overdue;
+                    Grid.Cells[5, 0]:=TCustomerSnapshot._NotDue;
+                    Grid.Cells[6, 0]:=TCustomerSnapshot._Range1;
+                    Grid.Cells[7, 0]:=TCustomerSnapshot._Range2;
+                    Grid.Cells[8, 0]:=TCustomerSnapshot._Range3;
+                    Grid.Cells[9, 0]:=TCustomerSnapshot._Range4;
+                    Grid.Cells[10,0]:=TCustomerSnapshot._Range5;
+                    Grid.Cells[11,0]:=TCustomerSnapshot._Range6;
+                    Grid.Cells[12,0]:=TCustomerSnapshot._Total;
+                    Grid.Cells[13,0]:=TCustomerSnapshot._CreditLimit;
+                    Grid.Cells[14,0]:=TCustomerSnapshot._CreditBalance;
+                    Grid.Cells[15,0]:=TCustomerSnapshot._LedgerIso;
+                    Grid.Cells[16,0]:=TCustomerSnapshot._FollowUp;
+                    Grid.Cells[17,0]:=TCustomerSnapshot._Free1;
+                    Grid.Cells[18,0]:=TCustomerSnapshot._Free2;
+                    Grid.Cells[19,0]:=TCustomerSnapshot._Free3;
+                    Grid.Cells[20,0]:=TCustomerSnapshot._PersonResponsible;
+                    Grid.Cells[21,0]:=TCustomerSnapshot._SalesResponsible;
+                    Grid.Cells[22,0]:=TCustomerSnapshot._CustomerGroup;
+                    Grid.Cells[23,0]:=TCustomerSnapshot._AccountType;
+                    Grid.Cells[24,0]:=TCustomerSnapshot._PaymentTerms;
+                    Grid.Cells[25,0]:=TCustomerSnapshot._Inf4;
+                    Grid.Cells[26,0]:=TCustomerSnapshot._Group3;
+                    Grid.Cells[27,0]:=TCustomerSnapshot._GeneralComment;
+                    Grid.Cells[28,0]:=TCustomerSnapshot._DailyComment;
+
+                    for var Index:=1 to RowCount - 1 do
+                    begin
+                        Grid.Cells[1, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].CustomerName;
+                        Grid.Cells[2, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].CustomerNumber.ToString();
+                        Grid.Cells[3, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].SourceDbName;
+                        Grid.Cells[4, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Overdue.ToString();
+                        Grid.Cells[5, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].NotDue.ToString();
+                        Grid.Cells[6, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Range1.ToString();
+                        Grid.Cells[7, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Range2.ToString();
+                        Grid.Cells[8, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Range3.ToString();
+                        Grid.Cells[9, Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Range4.ToString();
+                        Grid.Cells[10,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Range5.ToString();
+                        Grid.Cells[11,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Range6.ToString();
+                        Grid.Cells[12,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Total.ToString();
+                        Grid.Cells[13,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].CreditLimit.ToString();
+                        Grid.Cells[14,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].CreditBalance.ToString();
+                        Grid.Cells[15,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].LedgerIso;
+                        Grid.Cells[16,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].FollowUp;
+                        Grid.Cells[17,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Free1;
+                        Grid.Cells[18,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Free2;
+                        Grid.Cells[19,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Free3;
+                        Grid.Cells[20,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].PersonResponsible;
+                        Grid.Cells[21,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].SalesResponsible;
+                        Grid.Cells[22,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].CustomerGroup;
+                        Grid.Cells[23,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].AccountType;
+                        Grid.Cells[24,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].PaymentTerms.ToString();
+                        Grid.Cells[25,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Inf4;
+                        Grid.Cells[26,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].Group3.ToString();
+                        Grid.Cells[27,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].GeneralComment;
+                        Grid.Cells[28,Index]:=ReturnCustomerReport.CustomerSnapshot[Index].DailyComment;
+                    end;
+
+                    Service.Logger.Log('[GetAgingReportAsync]: Returned status code is ' + Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetAgingReportAsync]: Rows processed: '
+                        + ReturnCustomerReport.Meta.RowsAffected.ToString()
+                        + ' within '
+                        + ReturnCustomerReport.Meta.ProcessingTimeSpan
+                        + ' seconds.'
+                    );
+
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    CallResponse.IsSucceeded:=True;
+
+                finally
+                    ReturnCustomerReport.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetAgingReportAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[GetAgingReportAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetAgingReportAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except
+            on E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetAgingReportAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(Grid, CallResponse);
+            if Assigned(Grid) then Grid.Free();
+        end);
+
+    end);
+
+    NewTask.Start();
+
 end;
 
 
@@ -166,42 +331,42 @@ begin
                     Grid.Cells[26,0]:=ReturnCustSnapshots._Inf4;
                     Grid.Cells[27,0]:=ReturnCustSnapshots._Group3;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var Index:=1 to RowCount do
                     begin
-                        Grid.Cells[1, iCNT]:=ReturnCustSnapshots.CustomerName[iCNT - 1];
-                        Grid.Cells[2, iCNT]:=ReturnCustSnapshots.CustomerNumber[iCNT - 1].ToString();
-                        Grid.Cells[3, iCNT]:=ReturnCustSnapshots.FollowUp[iCNT - 1];
-                        Grid.Cells[4, iCNT]:=ReturnCustSnapshots.Overdue[iCNT - 1].ToString();
-                        Grid.Cells[5, iCNT]:=ReturnCustSnapshots.NotDue[iCNT - 1].ToString();
-                        Grid.Cells[6, iCNT]:=ReturnCustSnapshots.Range1[iCNT - 1].ToString();
-                        Grid.Cells[7, iCNT]:=ReturnCustSnapshots.Range2[iCNT - 1].ToString();
-                        Grid.Cells[8, iCNT]:=ReturnCustSnapshots.Range3[iCNT - 1].ToString();
-                        Grid.Cells[9, iCNT]:=ReturnCustSnapshots.Range4[iCNT - 1].ToString();
-                        Grid.Cells[10,iCNT]:=ReturnCustSnapshots.Range5[iCNT - 1].ToString();
-                        Grid.Cells[11,iCNT]:=ReturnCustSnapshots.Range6[iCNT - 1].ToString();
-                        Grid.Cells[12,iCNT]:=ReturnCustSnapshots.Total[iCNT - 1].ToString();
-                        Grid.Cells[13,iCNT]:=ReturnCustSnapshots.SourceDbName[iCNT - 1];
-                        Grid.Cells[14,iCNT]:=ReturnCustSnapshots.Free1[iCNT - 1];
-                        Grid.Cells[15,iCNT]:=ReturnCustSnapshots.PersonResponsible[iCNT - 1];
-                        Grid.Cells[16,iCNT]:=ReturnCustSnapshots.SalesResponsible[iCNT - 1];
-                        Grid.Cells[17,iCNT]:=ReturnCustSnapshots.PaymentTerms[iCNT - 1].ToString();
-                        Grid.Cells[18,iCNT]:=ReturnCustSnapshots.Free2[iCNT - 1];
-                        Grid.Cells[19,iCNT]:=ReturnCustSnapshots.Free3[iCNT - 1];
-                        Grid.Cells[20,iCNT]:=ReturnCustSnapshots.CreditLimit[iCNT - 1].ToString();
-                        Grid.Cells[21,iCNT]:=ReturnCustSnapshots.CreditBalance[iCNT - 1].ToString();
-                        Grid.Cells[23,iCNT]:=ReturnCustSnapshots.LedgerIso[iCNT - 1];
-                        Grid.Cells[24,iCNT]:=ReturnCustSnapshots.CustomerGroup[iCNT - 1];
-                        Grid.Cells[25,iCNT]:=ReturnCustSnapshots.AccountType[iCNT - 1];
-                        Grid.Cells[26,iCNT]:=ReturnCustSnapshots.Inf4[iCNT - 1];
-                        Grid.Cells[27,iCNT]:=ReturnCustSnapshots.Group3[iCNT - 1];
+                        Grid.Cells[1, Index]:=ReturnCustSnapshots.CustomerName[Index - 1];
+                        Grid.Cells[2, Index]:=ReturnCustSnapshots.CustomerNumber[Index - 1].ToString();
+                        Grid.Cells[3, Index]:=ReturnCustSnapshots.FollowUp[Index - 1];
+                        Grid.Cells[4, Index]:=ReturnCustSnapshots.Overdue[Index - 1].ToString();
+                        Grid.Cells[5, Index]:=ReturnCustSnapshots.NotDue[Index - 1].ToString();
+                        Grid.Cells[6, Index]:=ReturnCustSnapshots.Range1[Index - 1].ToString();
+                        Grid.Cells[7, Index]:=ReturnCustSnapshots.Range2[Index - 1].ToString();
+                        Grid.Cells[8, Index]:=ReturnCustSnapshots.Range3[Index - 1].ToString();
+                        Grid.Cells[9, Index]:=ReturnCustSnapshots.Range4[Index - 1].ToString();
+                        Grid.Cells[10,Index]:=ReturnCustSnapshots.Range5[Index - 1].ToString();
+                        Grid.Cells[11,Index]:=ReturnCustSnapshots.Range6[Index - 1].ToString();
+                        Grid.Cells[12,Index]:=ReturnCustSnapshots.Total[Index - 1].ToString();
+                        Grid.Cells[13,Index]:=ReturnCustSnapshots.SourceDbName[Index - 1];
+                        Grid.Cells[14,Index]:=ReturnCustSnapshots.Free1[Index - 1];
+                        Grid.Cells[15,Index]:=ReturnCustSnapshots.PersonResponsible[Index - 1];
+                        Grid.Cells[16,Index]:=ReturnCustSnapshots.SalesResponsible[Index - 1];
+                        Grid.Cells[17,Index]:=ReturnCustSnapshots.PaymentTerms[Index - 1].ToString();
+                        Grid.Cells[18,Index]:=ReturnCustSnapshots.Free2[Index - 1];
+                        Grid.Cells[19,Index]:=ReturnCustSnapshots.Free3[Index - 1];
+                        Grid.Cells[20,Index]:=ReturnCustSnapshots.CreditLimit[Index - 1].ToString();
+                        Grid.Cells[21,Index]:=ReturnCustSnapshots.CreditBalance[Index - 1].ToString();
+                        Grid.Cells[23,Index]:=ReturnCustSnapshots.LedgerIso[Index - 1];
+                        Grid.Cells[24,Index]:=ReturnCustSnapshots.CustomerGroup[Index - 1];
+                        Grid.Cells[25,Index]:=ReturnCustSnapshots.AccountType[Index - 1];
+                        Grid.Cells[26,Index]:=ReturnCustSnapshots.Inf4[Index - 1];
+                        Grid.Cells[27,Index]:=ReturnCustSnapshots.Group3[Index - 1];
                     end;
 
                     PayLoad.AgeDate:=ReturnCustSnapshots.AgeDate;
 
-                    FComputeAgeSummary(Grid, PayLoad);
+                    THelpers.ComputeAgeSummary(Grid, PayLoad);
                     Service.Logger.Log('[ReadAgeViewAsync]: Aging summary has been calculated.');
 
-                    FComputeRiskClass(Grid, PayLoad, RiskClassGroup);
+                    THelpers.ComputeRiskClass(Grid, PayLoad, RiskClassGroup);
                     Service.Logger.Log('[ReadAgeViewAsync]: Risk class data has been calculated.');
 
                     CallResponse.IsSucceeded:=True;
@@ -377,96 +542,6 @@ begin
     case IsPrefixRequired of
         True:  Result:=THelpers.GetSourceDBName(InputString, 'F');
         False: Result:=InputString;
-    end;
-
-end;
-
-
-procedure TDebtors.FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
-begin
-
-    for var iCNT:=1 to Grid.RowCount - 1 do //if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
-    begin
-
-        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._NotDue), iCNT], 0);
-        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range1), iCNT], 0);
-        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range2), iCNT], 0);
-        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range3), iCNT], 0);
-        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range4), iCNT], 0);
-        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range5), iCNT], 0);
-        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range6), iCNT], 0);
-
-        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Total), iCNT], 0);
-        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditLimit), iCNT], 0);
-
-        if StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditBalance), iCNT], 0) < 0 then
-        begin
-            inc(AgingPayLoad.Exceeders);
-            AgingPayLoad.TotalExceed:=AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditBalance), iCNT], 0));
-        end;
-
-        inc(AgingPayLoad.CustAll);
-
-    end;
-
-end;
-
-
-procedure TDebtors.FComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
-begin
-
-    if AgingPayLoad.Balance = 0 then Exit();
-
-    var TotalPerItem: TArray<double>;
-    var ListPosition: TArray<integer>;
-    var Count: double:=0;
-    var Rows: integer:=0;
-
-    AgingPayLoad.RCA:=AgingPayLoad.Balance * RiskClassGroup.Class_A;
-    AgingPayLoad.RCB:=AgingPayLoad.Balance * RiskClassGroup.Class_B;
-    AgingPayLoad.RCC:=AgingPayLoad.Balance * RiskClassGroup.Class_C;
-
-    // Move totals and its positions into array
-    for var iCNT:=1 to Grid.RowCount do
-    //if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
-    begin
-        SetLength(ListPosition, Rows + 1);
-        SetLength(TotalPerItem, Rows + 1);
-        ListPosition[Rows]:=iCNT;
-        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Total), iCNT]), 0);
-        inc(Rows);
-    end;
-
-    // Sort via total value
-    TSorting.QuickSort(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
-
-    // Compute and display RCA
-    for var iCNT:=Low(ListPosition) to High(ListPosition) do
-    begin
-
-        Count:=Count + TotalPerItem[iCNT];
-
-        // Risk Class 'A'
-        if Count <= AgingPayLoad.RCA then
-        begin
-            Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[iCNT]]:='A';
-            inc(AgingPayLoad.RCAcount);
-        end;
-
-        // Risk Class 'B'
-        if (Count > AgingPayLoad.RCA) and (Count <= AgingPayLoad.RCA + AgingPayLoad.RCB) then
-        begin
-            Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[iCNT]]:='B';
-            inc(AgingPayLoad.RCBcount);
-        end;
-
-        // Risk Class 'C'
-        if Count > AgingPayLoad.RCA + AgingPayLoad.RCB then
-        begin
-            Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[iCNT]]:='C';
-            inc(AgingPayLoad.RCCcount);
-        end;
-
     end;
 
 end;

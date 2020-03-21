@@ -125,7 +125,7 @@ begin
     Service.Mediator.Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), Row]:=DateToStr(SelectedDate);
-    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
+    MainForm.UpdateFollowUps(MainForm.sgAgeView);
 
 end;
 

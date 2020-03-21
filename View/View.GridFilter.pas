@@ -30,7 +30,8 @@ uses
     Unity.ListView,
     Unity.ChkListBox,
     Unity.Panel,
-    Unity.Enums;
+    Unity.Enums,
+    Unity.Records;
 
     {TODO -oTomek -cGeneral : Redesign this completly}
 
@@ -89,6 +90,7 @@ type
         var countFree3:       integer;
         // Global filter count
         var HowManyFlts:      integer;
+        procedure RecalcAgeViewSummary_Callback(PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
     public
         var FColName:    string;
         var FColNumber:  integer;
@@ -117,6 +119,7 @@ implementation
 
 uses
     View.Main,
+    Unity.Helpers,
     Unity.Constants,
     Unity.Settings,
     Unity.Service;
@@ -137,6 +140,7 @@ end;
 
 procedure TFilterForm.FilterClearAll();
 begin
+
     SetLength(FilterForm.INF7,        1, 2);
     SetLength(FilterForm.INF4,        1, 2);
     SetLength(FilterForm.Gr3,         1, 2);
@@ -151,6 +155,7 @@ begin
     SetLength(FilterForm.Free1,       1, 2);
     SetLength(FilterForm.Free2,       1, 2);
     SetLength(FilterForm.Free3,       1, 2);
+
     countINF7       :=0;
     countINF4       :=0;
     countGr3        :=0;
@@ -166,7 +171,15 @@ begin
     countFree2      :=0;
     countFree3      :=0;
     HowManyFlts     :=0;
+
     InUse:=False;
+
+    Service.Mediator.Utilities.RecalcAgeViewSummaryAsync(
+        MainForm.sgAgeView,
+        MainForm.FRiskClassGroup,
+        RecalcAgeViewSummary_Callback
+    );
+
 end;
 
 
@@ -491,6 +504,30 @@ end;
 {$ENDREGION}
 
 
+{$REGION 'CALLBACKS'}
+
+
+procedure TFilterForm.RecalcAgeViewSummary_Callback(PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[RecalcAgeViewSummary_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+    end;
+
+    MainForm.sgAgeView.Freeze(False);
+    MainForm.sgAgeView.Repaint();
+    MainForm.UpdateAgeSummary(PayLoad);
+    MainForm.UpdateFollowUps(MainForm.sgAgeView);
+    Screen.Cursor:=crDefault;
+
+end;
+
+
+{$ENDREGION}
+
+
 {$REGION 'MOUSE CLICK EVENTS'}
 
 
@@ -501,30 +538,28 @@ begin
     begin
 
         Screen.Cursor:=crHourGlass;
-        try
-            FGrid.Freeze(True);
+        FGrid.Freeze(True);
 
-            // Filter
-            if (FFilterNum = TColumns.Inf7)              then FilterNow(INF7);
-            if (FFilterNum = TColumns.Inf4)              then FilterNow(INF4);
-            if (FFilterNum = TColumns.Group3)            then FilterNow(Gr3);
-            if (FFilterNum = TColumns.SalesResponsible)  then FilterNow(SalesResp);
-            if (FFilterNum = TColumns.PersonResponsible) then FilterNow(PersonResp);
-            if (FFilterNum = TColumns.CustomerGroup)     then FilterNow(CustomerGrp);
-            if (FFilterNum = TColumns.AccountType)       then FilterNow(AccountType);
-            if (FFilterNum = TColumns.Follow)            then FilterNow(FollowUp);
-            if (FFilterNum = TColumns.CoCode)            then FilterNow(CoCode);
-            if (FFilterNum = TColumns.Agent)             then FilterNow(Agent);
-            if (FFilterNum = TColumns.Division)          then FilterNow(Division);
-            if (FFilterNum = TColumns.Free1)             then FilterNow(Free1);
-            if (FFilterNum = TColumns.Free2)             then FilterNow(Free2);
-            if (FFilterNum = TColumns.Free3)             then FilterNow(Free3);
+        if (FFilterNum = TColumns.Inf7)              then FilterNow(INF7);
+        if (FFilterNum = TColumns.Inf4)              then FilterNow(INF4);
+        if (FFilterNum = TColumns.Group3)            then FilterNow(Gr3);
+        if (FFilterNum = TColumns.SalesResponsible)  then FilterNow(SalesResp);
+        if (FFilterNum = TColumns.PersonResponsible) then FilterNow(PersonResp);
+        if (FFilterNum = TColumns.CustomerGroup)     then FilterNow(CustomerGrp);
+        if (FFilterNum = TColumns.AccountType)       then FilterNow(AccountType);
+        if (FFilterNum = TColumns.Follow)            then FilterNow(FollowUp);
+        if (FFilterNum = TColumns.CoCode)            then FilterNow(CoCode);
+        if (FFilterNum = TColumns.Agent)             then FilterNow(Agent);
+        if (FFilterNum = TColumns.Division)          then FilterNow(Division);
+        if (FFilterNum = TColumns.Free1)             then FilterNow(Free1);
+        if (FFilterNum = TColumns.Free2)             then FilterNow(Free2);
+        if (FFilterNum = TColumns.Free3)             then FilterNow(Free3);
 
-        finally
-            FGrid.Freeze(False);
-            FGrid.Repaint();
-            Screen.Cursor:=crDefault;
-        end;
+        Service.Mediator.Utilities.RecalcAgeViewSummaryAsync(
+            FGrid,
+            MainForm.FRiskClassGroup,
+            RecalcAgeViewSummary_Callback
+        );
 
         Close();
 
@@ -546,31 +581,28 @@ begin
     begin
 
         Screen.Cursor:=crHourGlass;
-        try
+        FGrid.Freeze(True);
 
-            FGrid.Freeze(True);
+        if (FFilterNum = TColumns.Inf7)              then FilterRemove(INF7);
+        if (FFilterNum = TColumns.Inf4)              then FilterRemove(INF4);
+        if (FFilterNum = TColumns.Group3)            then FilterRemove(Gr3);
+        if (FFilterNum = TColumns.SalesResponsible)  then FilterRemove(SalesResp);
+        if (FFilterNum = TColumns.PersonResponsible) then FilterRemove(PersonResp);
+        if (FFilterNum = TColumns.CustomerGroup)     then FilterRemove(CustomerGrp);
+        if (FFilterNum = TColumns.AccountType)       then FilterRemove(AccountType);
+        if (FFilterNum = TColumns.Follow)            then FilterRemove(FollowUp);
+        if (FFilterNum = TColumns.CoCode)            then FilterRemove(CoCode);
+        if (FFilterNum = TColumns.Agent)             then FilterRemove(Agent);
+        if (FFilterNum = TColumns.Division)          then FilterRemove(Division);
+        if (FFilterNum = TColumns.Free1)             then FilterRemove(Free1);
+        if (FFilterNum = TColumns.Free2)             then FilterRemove(Free2);
+        if (FFilterNum = TColumns.Free3)             then FilterRemove(Free3);
 
-            // Unfilter
-            if (FFilterNum = TColumns.Inf7)              then FilterRemove(INF7);
-            if (FFilterNum = TColumns.Inf4)              then FilterRemove(INF4);
-            if (FFilterNum = TColumns.Group3)            then FilterRemove(Gr3);
-            if (FFilterNum = TColumns.SalesResponsible)  then FilterRemove(SalesResp);
-            if (FFilterNum = TColumns.PersonResponsible) then FilterRemove(PersonResp);
-            if (FFilterNum = TColumns.CustomerGroup)     then FilterRemove(CustomerGrp);
-            if (FFilterNum = TColumns.AccountType)       then FilterRemove(AccountType);
-            if (FFilterNum = TColumns.Follow)            then FilterRemove(FollowUp);
-            if (FFilterNum = TColumns.CoCode)            then FilterRemove(CoCode);
-            if (FFilterNum = TColumns.Agent)             then FilterRemove(Agent);
-            if (FFilterNum = TColumns.Division)          then FilterRemove(Division);
-            if (FFilterNum = TColumns.Free1)             then FilterRemove(Free1);
-            if (FFilterNum = TColumns.Free2)             then FilterRemove(Free2);
-            if (FFilterNum = TColumns.Free3)             then FilterRemove(Free3);
-
-        finally
-            FGrid.Freeze(False);
-            FGrid.Repaint();
-            Screen.Cursor:=crDefault;
-        end;
+        Service.Mediator.Utilities.RecalcAgeViewSummaryAsync(
+            FGrid,
+            MainForm.FRiskClassGroup,
+            RecalcAgeViewSummary_Callback
+        );
 
         Close;
 

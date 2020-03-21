@@ -519,6 +519,25 @@ begin
 
                 end;
 
+                // ---------------------------
+                // Include only not due items.
+                // ---------------------------
+                TInvoiceFilter.SendNotDue:
+                begin
+
+                    if
+                        (
+                            StrToFloatDef(OpenItems.Cells[FOpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
+                        )
+                    and
+                        (
+                            StrToFloatDef(OpenItems.Cells[FOpenItemsRefs.PmtStatCol, iCNT], 0) >= 0
+                        )
+                    then
+                        OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
+
+                end;
+
             end;
 
         end;

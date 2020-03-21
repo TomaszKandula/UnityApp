@@ -30,7 +30,7 @@ type
     /// </summary>
     TStringGrid = class(Vcl.Grids.TStringGrid)
     strict private
-        var FToExcelResult: string;
+        var FToExcelResult:   string;
         var FCsvImportResult: string;
         var FCsvExportResult: string;
     public
@@ -140,11 +140,11 @@ type
         /// </summary>
         procedure ShowGrids();
         /// <summary>
-        ///
+        /// Enable edit option of the cells.
         /// </summary>
         procedure AllowEditing();
         /// <summary>
-        ///
+        /// Disable cells editing.
         /// </summary>
         procedure QuitEditing();
     end;

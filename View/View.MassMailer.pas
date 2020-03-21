@@ -78,6 +78,7 @@ type
         grSettings: TGroupBox;
         shapeLbuEmails: TShape;
         cbMergeList: TCheckBox;
+        cbNotDueOnly: TCheckBox;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -101,6 +102,8 @@ type
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure selCompanySelect(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure cbNotDueOnlyClick(Sender: TObject);
+        procedure cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
@@ -375,9 +378,11 @@ begin
     if THelpers.MsgCall(Question2, 'Do you want to send it now?') = IDNO then Exit();
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
+
     if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
+    if cbNotDueOnly.Checked  then InvFilter:=TInvoiceFilter.SendNotDue;
 
     // -----------------------------------
     // Get item count for sendable emails.
@@ -638,17 +643,12 @@ begin
     begin
         cbOverdueOnly.Checked:=False;
         cbNonOverdue.Checked:=False;
+        cbNotDueOnly.Checked:=False;
         ImgCover.Visible:=True;
     end;
 
-    if
-        not(cbShowAll.Checked)
-    and
-        not(cbOverdueOnly.Checked)
-    and
-        not(cbNonOverdue.Checked)
-    then
-        cbShowAll.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbShowAll.Checked:=True;
 
 end;
 
@@ -660,17 +660,12 @@ begin
     begin
         cbShowAll.Checked:=False;
         cbNonOverdue.Checked:=False;
+        cbNotDueOnly.Checked:=False;
         ImgCover.Visible:=True;
     end;
 
-    if
-        not(cbShowAll.Checked)
-    and
-        not(cbOverdueOnly.Checked)
-    and
-        not(cbNonOverdue.Checked)
-    then
-        cbOverdueOnly.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) then cbOverdueOnly.Checked:=True;
 
 end;
 
@@ -682,17 +677,29 @@ begin
     begin
         cbShowAll.Checked:=False;
         cbOverdueOnly.Checked:=False;
+        cbNotDueOnly.Checked:=False;
         ImgCover.Visible:=False;
     end;
 
-    if
-        not(cbShowAll.Checked)
-    and
-        not(cbOverdueOnly.Checked)
-    and
-        not(cbNonOverdue.Checked)
-    then
-        cbNonOverdue.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNonOverdue.Checked:=True;
+
+end;
+
+
+procedure TMassMailerForm.cbNotDueOnlyClick(Sender: TObject);
+begin
+
+    if cbNotDueOnly.Checked then
+    begin
+        cbShowAll.Checked:=False;
+        cbOverdueOnly.Checked:=False;
+        cbNonOverdue.Checked:=False;
+        ImgCover.Visible:=True;
+    end;
+
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
+        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNotDueOnly.Checked:=True;
 
 end;
 
@@ -758,6 +765,12 @@ end;
 
 
 procedure TMassMailerForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then cbNotDueOnly.SetFocus();
+end;
+
+
+procedure TMassMailerForm.cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then CustomerList.SetFocus();
 end;

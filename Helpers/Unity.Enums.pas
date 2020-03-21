@@ -42,7 +42,7 @@ type
     /// <summary>
     /// Defines what types of invoices will be shown on the statement(s).
     /// </summary>
-    TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
+    TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems, SendNotDue);
     /// <summary>
     /// Application file type for encoding/decoding.
     /// </summary>

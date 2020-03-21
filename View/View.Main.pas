@@ -65,7 +65,7 @@ uses
 type
 
 
-    TMainForm = class(TForm)
+    TMainForm = class(TForm) // Representing main user window
         Action_GoogleIt: TMenuItem;
         imgSSL: TImage;
         imgNavCover: TImage;
@@ -838,6 +838,7 @@ type
         var FFollowsToday: integer;
         var FFollowsPast: integer;
         var FFollowsNext: integer;
+        var FExcelFileName: string;
         function  CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
         procedure RedeemAccess();
@@ -853,7 +854,6 @@ type
         procedure ClearAgingSummary();
         procedure ClearOpenItemsSummary();
         procedure LoadOpenItems();
-        procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
         procedure AgeViewMapping();
         procedure SkypeCallUpdate(CallTime: cardinal);
         procedure FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
@@ -868,13 +868,15 @@ type
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
         procedure BulkFollowUpUpdate_Callback(CallResponse: TCallResponse);
+        procedure GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
         var FGridPicture: TImage;
         var FOpenItemsUpdate: string;
         var FOpenItemsStatus: string;
-        procedure UpdateFollowUps(Source: TStringGrid; Col: integer);
+        procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
+        procedure UpdateFollowUps(Source: TStringGrid);
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
         procedure InitMainWnd();
@@ -1166,56 +1168,6 @@ begin
 end;
 
 
-procedure TMainForm.UpdateAgeSummary(PayLoad: TAgingPayLoad);
-begin
-
-    valTotalCustomers.Caption:=IntToStr(PayLoad.CustAll);
-
-    amtNotDue.Caption:=FormatFloat('#,##0.00', PayLoad.ANotDue);
-    amtRange1.Caption:=FormatFloat('#,##0.00', PayLoad.ARange1);
-    amtRange2.Caption:=FormatFloat('#,##0.00', PayLoad.ARange2);
-    amtRange3.Caption:=FormatFloat('#,##0.00', PayLoad.ARange3);
-    amtRange4.Caption:=FormatFloat('#,##0.00', PayLoad.ARange4);
-    amtRange5.Caption:=FormatFloat('#,##0.00', PayLoad.ARange5);
-    amtRange6.Caption:=FormatFloat('#,##0.00', PayLoad.ARange6);
-    amtTotal.Caption :=FormatFloat('#,##0.00', PayLoad.Balance);
-
-    if not (PayLoad.Balance = 0) then
-    begin
-        procNotDue.Caption:=FormatFloat('0.00', ( (PayLoad.ANotDue / PayLoad.Balance) * 100 )) + '%';
-        procRange1.Caption:=FormatFloat('0.00', ( (PayLoad.ARange1 / PayLoad.Balance) * 100 )) + '%';
-        procRange2.Caption:=FormatFloat('0.00', ( (PayLoad.ARange2 / PayLoad.Balance) * 100 )) + '%';
-        procRange3.Caption:=FormatFloat('0.00', ( (PayLoad.ARange3 / PayLoad.Balance) * 100 )) + '%';
-        procRange4.Caption:=FormatFloat('0.00', ( (PayLoad.ARange4 / PayLoad.Balance) * 100 )) + '%';
-        procRange5.Caption:=FormatFloat('0.00', ( (PayLoad.ARange5 / PayLoad.Balance) * 100 )) + '%';
-        procRange6.Caption:=FormatFloat('0.00', ( (PayLoad.ARange6 / PayLoad.Balance) * 100 )) + '%';
-        procTotal.Caption :=FormatFloat('0.00', ( ( (PayLoad.ANotDue / PayLoad.Balance) +
-                                                           (PayLoad.ARange1 / PayLoad.Balance) +
-                                                           (PayLoad.ARange2 / PayLoad.Balance) +
-                                                           (PayLoad.ARange3 / PayLoad.Balance) +
-                                                           (PayLoad.ARange4 / PayLoad.Balance) +
-                                                           (PayLoad.ARange5 / PayLoad.Balance) +
-                                                           (PayLoad.ARange6 / PayLoad.Balance) ) * 100 ) ) + '%';
-    end;
-
-    amtRiskClassA.Caption :=FormatFloat('#,##0.00', PayLoad.RCA);
-    amtRiskClassB.Caption :=FormatFloat('#,##0.00', PayLoad.RCB);
-    amtRiskClassC.Caption :=FormatFloat('#,##0.00', PayLoad.RCC);
-
-    itemRiskClassA.Caption:=IntToStr(PayLoad.RCAcount) + ' cust.';
-    itemRiskClassB.Caption:=IntToStr(PayLoad.RCBcount) + ' cust.';
-    itemRiskClassC.Caption:=IntToStr(PayLoad.RCCcount) + ' cust.';
-
-    amtExceeders.Caption    :=IntToStr(PayLoad.Exceeders);
-    amtCreditExcess.Caption :=FormatFloat('#,##0.00', PayLoad.TotalExceed);
-    amtGrantedLimits.Caption:=FormatFloat('#,##0.00', PayLoad.Limits);
-    amtNotOverdue.Caption   :=amtNotDue.Caption;
-    amtPastDue.Caption      :=FormatFloat('#,##0.00', (PayLoad.ARange1 + PayLoad.ARange2 + PayLoad.ARange3));
-    amtDefaulted.Caption    :=FormatFloat('#,##0.00', (PayLoad.ARange4 + PayLoad.ARange5 + PayLoad.ARange6));
-
-end;
-
-
 procedure TMainForm.AgeViewMapping();
 begin
 
@@ -1467,29 +1419,81 @@ begin
 end;
 
 
-procedure TMainForm.UpdateFollowUps(Source: TStringGrid; Col: integer);
+procedure TMainForm.UpdateAgeSummary(PayLoad: TAgingPayLoad);
+begin
+
+    valTotalCustomers.Caption:=IntToStr(PayLoad.CustAll);
+
+    amtNotDue.Caption:=FormatFloat('#,##0.00', PayLoad.ANotDue);
+    amtRange1.Caption:=FormatFloat('#,##0.00', PayLoad.ARange1);
+    amtRange2.Caption:=FormatFloat('#,##0.00', PayLoad.ARange2);
+    amtRange3.Caption:=FormatFloat('#,##0.00', PayLoad.ARange3);
+    amtRange4.Caption:=FormatFloat('#,##0.00', PayLoad.ARange4);
+    amtRange5.Caption:=FormatFloat('#,##0.00', PayLoad.ARange5);
+    amtRange6.Caption:=FormatFloat('#,##0.00', PayLoad.ARange6);
+    amtTotal.Caption :=FormatFloat('#,##0.00', PayLoad.Balance);
+
+    if not (PayLoad.Balance = 0) then
+    begin
+        procNotDue.Caption:=FormatFloat('0.00', ( (PayLoad.ANotDue / PayLoad.Balance) * 100 )) + '%';
+        procRange1.Caption:=FormatFloat('0.00', ( (PayLoad.ARange1 / PayLoad.Balance) * 100 )) + '%';
+        procRange2.Caption:=FormatFloat('0.00', ( (PayLoad.ARange2 / PayLoad.Balance) * 100 )) + '%';
+        procRange3.Caption:=FormatFloat('0.00', ( (PayLoad.ARange3 / PayLoad.Balance) * 100 )) + '%';
+        procRange4.Caption:=FormatFloat('0.00', ( (PayLoad.ARange4 / PayLoad.Balance) * 100 )) + '%';
+        procRange5.Caption:=FormatFloat('0.00', ( (PayLoad.ARange5 / PayLoad.Balance) * 100 )) + '%';
+        procRange6.Caption:=FormatFloat('0.00', ( (PayLoad.ARange6 / PayLoad.Balance) * 100 )) + '%';
+        procTotal.Caption :=FormatFloat('0.00', ( ( (PayLoad.ANotDue / PayLoad.Balance) +
+                                                           (PayLoad.ARange1 / PayLoad.Balance) +
+                                                           (PayLoad.ARange2 / PayLoad.Balance) +
+                                                           (PayLoad.ARange3 / PayLoad.Balance) +
+                                                           (PayLoad.ARange4 / PayLoad.Balance) +
+                                                           (PayLoad.ARange5 / PayLoad.Balance) +
+                                                           (PayLoad.ARange6 / PayLoad.Balance) ) * 100 ) ) + '%';
+    end;
+
+    amtRiskClassA.Caption :=FormatFloat('#,##0.00', PayLoad.RCA);
+    amtRiskClassB.Caption :=FormatFloat('#,##0.00', PayLoad.RCB);
+    amtRiskClassC.Caption :=FormatFloat('#,##0.00', PayLoad.RCC);
+
+    itemRiskClassA.Caption:=IntToStr(PayLoad.RCAcount) + ' cust.';
+    itemRiskClassB.Caption:=IntToStr(PayLoad.RCBcount) + ' cust.';
+    itemRiskClassC.Caption:=IntToStr(PayLoad.RCCcount) + ' cust.';
+
+    amtExceeders.Caption    :=IntToStr(PayLoad.Exceeders);
+    amtCreditExcess.Caption :=FormatFloat('#,##0.00', PayLoad.TotalExceed);
+    amtGrantedLimits.Caption:=FormatFloat('#,##0.00', PayLoad.Limits);
+    amtNotOverdue.Caption   :=amtNotDue.Caption;
+    amtPastDue.Caption      :=FormatFloat('#,##0.00', (PayLoad.ARange1 + PayLoad.ARange2 + PayLoad.ARange3));
+    amtDefaulted.Caption    :=FormatFloat('#,##0.00', (PayLoad.ARange4 + PayLoad.ARange5 + PayLoad.ARange6));
+
+end;
+
+
+procedure TMainForm.UpdateFollowUps(Source: TStringGrid);
 begin
 
     FFollowsToday:=0;
     FFollowsNext :=0;
     FFollowsPast :=0;
 
-    for var iCNT:=0 to Source.RowCount - 1 do
+    var Col:=sgAgeView.GetCol(TReturnCustSnapshots._FollowUp);
+
+    for var Index:=0 to Source.RowCount - 1 do
     begin
 
-        if not String.IsNullOrWhitespace(Source.Cells[Col, iCNT]) then
+        if not String.IsNullOrWhitespace(Source.Cells[Col, Index]) then
         begin
 
             // Today follow-ups
-            if THelpers.CDate(Source.Cells[Col, iCNT]) = THelpers.CDate(valCurrentDate.Caption) then
+            if THelpers.CDate(Source.Cells[Col, Index]) = THelpers.CDate(valCurrentDate.Caption) then
                 Inc(FFollowsToday);
 
             // Future follow-ups
-            if THelpers.CDate(Source.Cells[Col, iCNT]) > THelpers.CDate(valCurrentDate.Caption) then
+            if THelpers.CDate(Source.Cells[Col, Index]) > THelpers.CDate(valCurrentDate.Caption) then
                 Inc(FFollowsNext);
 
             // Past follow-ups
-            if THelpers.CDate(Source.Cells[Col, iCNT]) < THelpers.CDate(valCurrentDate.Caption) then
+            if THelpers.CDate(Source.Cells[Col, Index]) < THelpers.CDate(valCurrentDate.Caption) then
                 Inc(FFollowsPast);
 
         end;
@@ -1771,8 +1775,8 @@ begin
     sgAgeView.Freeze(True);
     try
 
-        sgAgeView.RowCount  :=ReturnedData.RowCount;
-        sgAgeView.ColCount  :=ReturnedData.ColCount;
+        sgAgeView.RowCount:=ReturnedData.RowCount;
+        sgAgeView.ColCount:=ReturnedData.ColCount;
 
         for var iCNT:=0 to ReturnedData.RowCount - 1 do
             for var jCNT:=0 to ReturnedData.ColCount - 1 do
@@ -1801,7 +1805,7 @@ begin
     LoadOpenItems();
 
     Service.Mediator.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
-    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
+    UpdateFollowUps(sgAgeView);
     BusyForm.Close();
 
 end;
@@ -1811,11 +1815,11 @@ procedure TMainForm.ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; Cal
 begin
 
     sgOpenItems.Freeze(False);
+    UpdateStatusBar(TStatusBar.Ready);
 
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        MainForm.UpdateStatusBar(TStatusBar.Ready);
         Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1828,7 +1832,6 @@ begin
     amtUnallocated.Caption:=FormatFloat('#,##0.00', OpenItemsData.UnallocatedAmt);
 
     sgOpenItems.SetColWidth(10, 20, 400);
-    MainForm.UpdateStatusBar(TStatusBar.Ready);
     Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
 
 end;
@@ -1943,7 +1946,24 @@ begin
         Exit();
     end;
 
-    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
+    UpdateFollowUps(sgAgeView);
+
+end;
+
+
+procedure TMainForm.GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+begin
+
+    UpdateStatusBar(TStatusBar.Ready);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[GetAgingReport_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    // Grid to Excel & save to XLSX file...
 
 end;
 
@@ -3156,7 +3176,7 @@ end;
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-    THelpers.WndCall(FeedbackForm, TWindowState.Modal);
+    THelpers.WndCall(FeedbackForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3168,7 +3188,7 @@ end;
 
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-    THelpers.WndCall(AboutForm, TWindowState.Modal);
+    THelpers.WndCall(AboutForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3268,7 +3288,7 @@ procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
 
     if valStatus.Caption = TStatusBar.Ready then
-        THelpers.WndCall(ActionsForm, TWindowState.Modal)
+        THelpers.WndCall(ActionsForm, TWindowState.Modal, MainForm)
     else
         THelpers.MsgCall(TAppMessage.Warn, 'Wait until "Ready" status and try again.');
 
@@ -3277,7 +3297,7 @@ end;
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
-    //THelpers.WndCall(TrackerForm, TWindowState.Modal);
+    //THelpers.WndCall(TrackerForm, TWindowState.Modal, MainForm);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -3327,7 +3347,7 @@ begin
         Exit();
     end;
 
-    THelpers.WndCall(MassMailerForm, TWindowState.Modal);
+    THelpers.WndCall(MassMailerForm, TWindowState.Modal, MainForm);
 
 end;
 
@@ -3335,7 +3355,7 @@ end;
 procedure TMainForm.Action_AddFollowUpGroupClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
-    THelpers.WndCall(CalendarForm, TWindowState.Modal);
+    THelpers.WndCall(CalendarForm, TWindowState.Modal, MainForm);
     FollowUpsUpdate(sgAgeView, DateToStr(CalendarForm.FSelectedDate));
 end;
 
@@ -3353,7 +3373,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Inf4;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3364,7 +3384,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.SalesResponsible;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3375,7 +3395,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.PersonResponsible;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3386,7 +3406,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.CustomerGroup;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3397,7 +3417,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.AccountType;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3408,7 +3428,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Follow;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3419,7 +3439,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.CoCode;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3430,7 +3450,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free1;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3441,7 +3461,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free2;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3452,7 +3472,7 @@ begin
     FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free3;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3462,8 +3482,8 @@ begin
 
     sgAgeView.Freeze(True);
 
-    for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
-        sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
+    for var Index:=1 to sgAgeView.RowCount - 1 do
+        sgAgeView.RowHeights[Index]:=sgAgeView.sgRowHeight;
 
     FilterForm.FilterClearAll();
     sgAgeView.Freeze(False);
@@ -3485,21 +3505,16 @@ begin
     GridSearchForm.Grid     :=MainForm.sgAgeView;
     GridSearchForm.ColName  :=TReturnCustSnapshots._CustomerName;
     GridSearchForm.ColNumber:=TReturnCustSnapshots._CustomerNumber;
-    THelpers.WndCall(GridSearchForm, TWindowState.Modeless);
+    THelpers.WndCall(GridSearchForm, TWindowState.Modeless, MainForm);
 end;
 
 
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
-
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
-
-//    UpdateStatusBar(TStatusBar.ExportXLS);
-//    var FileName: string;
-//    if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
-//    var Utilities: IUtilities:=TUtilities.Create();
-//    Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
-
+    UpdateStatusBar(TStatusBar.ExportXLS);
+    var FileName: string;
+    if MainForm.FileXLExport.Execute then FExcelFileName:=MainForm.FileXLExport.FileName else FExcelFileName:='';
+    Service.Mediator.Debtors.GetAgingReportAsync(FLoadedCompanies, GetAgingReport_Callback);
 end;
 
 
@@ -3548,7 +3563,7 @@ end;
 
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
 begin
-    THelpers.WndCall(ColorsForm, TWindowState.Modal);
+    THelpers.WndCall(ColorsForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3791,7 +3806,7 @@ begin
     ResetTabsheetButtons;
     txtReports.Font.Style:=[fsBold];
     txtReports.Font.Color:=$006433C9;
-    THelpers.WndCall(ReportsForm, TWindowState.Modal);
+    THelpers.WndCall(ReportsForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3859,7 +3874,7 @@ begin
     ResetTabsheetButtons;
     txtRating.Font.Style:=[fsBold];
     txtRating.Font.Color:=AppButtonTxtSelected;
-    THelpers.WndCall(RateForm, TWindowState.Modal);
+    THelpers.WndCall(RateForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3869,7 +3884,7 @@ begin
     ResetTabsheetButtons;
     txtFeedback.Font.Style:=[fsBold];
     txtFeedback.Font.Color:=AppButtonTxtSelected;
-    THelpers.WndCall(FeedbackForm, TWindowState.Modal);
+    THelpers.WndCall(FeedbackForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3879,7 +3894,7 @@ begin
     ResetTabsheetButtons;
     txtInfo.Font.Style:=[fsBold];
     txtInfo.Font.Color:=AppButtonTxtSelected;
-    THelpers.WndCall(AboutForm, TWindowState.Modal);
+    THelpers.WndCall(AboutForm, TWindowState.Modal, MainForm);
 end;
 
 
@@ -3891,7 +3906,7 @@ end;
 
 procedure TMainForm.imgGetAgingReportClick(Sender: TObject);
 begin
-    THelpers.WndCall(CompanyListForm, Modal);
+    THelpers.WndCall(CompanyListForm, Modal, MainForm);
 end;
 
 
@@ -3931,7 +3946,7 @@ end;
 
 procedure TMainForm.btnSearchAbClick(Sender: TObject);
 begin
-    //THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);
+    //THelpers.WndCall(SqlSearchForm, TWindowState.Modeless, MainForm);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
@@ -4025,7 +4040,7 @@ end;
 
 procedure TMainForm.imgEventLogClick(Sender: TObject);
 begin
-    THelpers.WndCall(EventForm, TWindowState.Modeless);
+    THelpers.WndCall(EventForm, TWindowState.Modeless, MainForm);
 end;
 
 

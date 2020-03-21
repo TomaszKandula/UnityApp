@@ -26,6 +26,7 @@ uses
     Unity.Types,
     Unity.Enums,
     Unity.Grid,
+    Unity.Records,
     Unity.References,
     Api.BankDetails;
 
@@ -68,7 +69,7 @@ type
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
-        class function WndCall(WinForm: TForm; Mode: TWindowState): integer; static;
+        class function WndCall(WinForm: TForm; Mode: TWindowState; ParentForm: TForm = nil): integer; static;
         class function MsgCall(WndType: TAppMessage; WndText: string): integer; static;
         class function CDate(StrDate: string): TDate; static;
         class function Explode(Text: string; SourceDelim: char): string; static;
@@ -95,6 +96,8 @@ type
         class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
         class function StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>; static;
         class function WordCount(const InputStr: string): cardinal; static;
+        class procedure ComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad); static;
+        class procedure ComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup); static;
     end;
 
 
@@ -107,7 +110,9 @@ uses
     System.Zip,
     Vcl.Graphics,
     Unity.Constants,
-    Unity.Settings;
+    Unity.Settings,
+    Unity.Sorting,
+    Api.ReturnCustSnapshots;
 
 
 class function TArrayUtils<T>.Contains(const x: T; const anArray: array of T): boolean;
@@ -365,16 +370,16 @@ begin
 end;
 
 
-class function THelpers.WndCall(WinForm: TForm; Mode: TWindowState): integer;
+class function THelpers.WndCall(WinForm: TForm; Mode: TWindowState; ParentForm: TForm = nil): integer;
 begin
 
     Result:=0;
 
-    WinForm.PopupMode  :=pmAuto;
-    WinForm.PopupParent:=WinForm;
+    WinForm.PopupMode  :=pmExplicit;
+    WinForm.PopupParent:=ParentForm;
 
     case Mode of
-        TWindowState.Modal: Result:=WinForm.ShowModal;
+        TWindowState.Modal:    Result:=WinForm.ShowModal;
         TWindowState.Modeless: WinForm.Show;
     end;
 
@@ -948,10 +953,10 @@ begin
     var FindWord:   boolean:=False;
 
     // Count words in TMemo component while user is typing
-    for var iCNT:=1 to TextLength do
+    for var Index:=1 to TextLength do
     begin
 
-        if not (CharInSet(InputStr[iCNT], ToSkip)) then
+        if not (CharInSet(InputStr[Index], ToSkip)) then
         begin
 
             if not FindWord then
@@ -964,6 +969,98 @@ begin
         else
         begin
             FindWord:=False;
+        end;
+
+    end;
+
+end;
+
+
+class procedure THelpers.ComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
+begin
+
+    for var Index:=1 to Grid.RowCount - 1 do if Grid.RowHeights[Index] <> Grid.sgRowHidden then
+    begin
+
+        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._NotDue), Index], 0);
+        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range1), Index], 0);
+        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range2), Index], 0);
+        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range3), Index], 0);
+        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range4), Index], 0);
+        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range5), Index], 0);
+        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range6), Index], 0);
+
+        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Total), Index], 0);
+        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditLimit), Index], 0);
+
+        if StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditBalance), Index], 0) < 0 then
+        begin
+
+            Inc(AgingPayLoad.Exceeders);
+            AgingPayLoad.TotalExceed:=
+                AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditBalance), Index], 0));
+
+        end;
+
+        Inc(AgingPayLoad.CustAll);
+
+    end;
+
+end;
+
+
+class procedure THelpers.ComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
+begin
+
+    if AgingPayLoad.Balance = 0 then Exit();
+
+    var TotalPerItem: TArray<double>;
+    var ListPosition: TArray<integer>;
+    var Count: double:=0;
+    var Rows: integer:=0;
+
+    AgingPayLoad.RCA:=AgingPayLoad.Balance * RiskClassGroup.Class_A;
+    AgingPayLoad.RCB:=AgingPayLoad.Balance * RiskClassGroup.Class_B;
+    AgingPayLoad.RCC:=AgingPayLoad.Balance * RiskClassGroup.Class_C;
+
+    // Move totals and its positions into array
+    for var Index:=1 to Grid.RowCount do if Grid.RowHeights[Index] <> Grid.sgRowHidden then
+    begin
+        SetLength(ListPosition, Rows + 1);
+        SetLength(TotalPerItem, Rows + 1);
+        ListPosition[Rows]:=Index;
+        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Total), Index]), 0);
+        Inc(Rows);
+    end;
+
+    // Sort via total value
+    TSorting.QuickSort(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
+
+    // Compute and display RCA
+    for var Index:=Low(ListPosition) to High(ListPosition) do
+    begin
+
+        Count:=Count + TotalPerItem[Index];
+
+        // Risk Class 'A'
+        if Count <= AgingPayLoad.RCA then
+        begin
+            Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[Index]]:='A';
+            inc(AgingPayLoad.RCAcount);
+        end;
+
+        // Risk Class 'B'
+        if (Count > AgingPayLoad.RCA) and (Count <= AgingPayLoad.RCA + AgingPayLoad.RCB) then
+        begin
+            Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[Index]]:='B';
+            inc(AgingPayLoad.RCBcount);
+        end;
+
+        // Risk Class 'C'
+        if Count > AgingPayLoad.RCA + AgingPayLoad.RCB then
+        begin
+            Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[Index]]:='C';
+            inc(AgingPayLoad.RCCcount);
         end;
 
     end;

@@ -141,7 +141,15 @@ type
     /// <summary>
     /// Callback signature for method updating FollowUp field in General Comment table.
     /// </summary>
-    TFolloUpUpdate = procedure(CallResponse: TCallResponse) of object;
+    TFollowUpUpdate = procedure(CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for method recalculating age summary and risk class change after age view has been filtered.
+    /// </summary>
+    TRecalcAgeViewSummary = procedure(PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for method getting aging report for given companies.
+    /// </summary>
+    TGetAgingReport = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
 
 implementation

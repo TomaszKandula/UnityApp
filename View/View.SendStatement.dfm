@@ -39,7 +39,7 @@ object SendForm: TSendForm
       AlignWithMargins = True
       Left = 20
       Top = 10
-      Width = 85
+      Width = 493
       Height = 13
       Margins.Left = 20
       Margins.Top = 10
@@ -47,6 +47,7 @@ object SendForm: TSendForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom message:'
+      ExplicitWidth = 85
     end
     object PanelMessage: TPanel
       AlignWithMargins = True
@@ -420,7 +421,7 @@ object SendForm: TSendForm
       end
       object cbNonOverdue: TCheckBox
         Left = 39
-        Top = 100
+        Top = 92
         Width = 163
         Height = 17
         Cursor = crHandPoint
@@ -432,7 +433,7 @@ object SendForm: TSendForm
       end
       object cbOverdueOnly: TCheckBox
         Left = 39
-        Top = 77
+        Top = 69
         Width = 163
         Height = 17
         Cursor = crHandPoint
@@ -444,7 +445,7 @@ object SendForm: TSendForm
       end
       object cbShowAll: TCheckBox
         Left = 39
-        Top = 54
+        Top = 46
         Width = 163
         Height = 17
         Cursor = crHandPoint
@@ -455,6 +456,18 @@ object SendForm: TSendForm
         TabOrder = 2
         OnClick = cbShowAllClick
         OnKeyUp = cbShowAllKeyUp
+      end
+      object cbNotDueOnly: TCheckBox
+        Left = 39
+        Top = 115
+        Width = 163
+        Height = 17
+        Cursor = crHandPoint
+        TabStop = False
+        Caption = 'Show not due items only'
+        TabOrder = 3
+        OnClick = cbNotDueOnlyClick
+        OnKeyUp = cbNotDueOnlyKeyUp
       end
     end
   end

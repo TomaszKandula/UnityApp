@@ -38,7 +38,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFolloUpUpdate = nil);
+        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFollowUpUpdate = nil);
         /// <summary>
         /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload with comment Id
         /// parameter for update. If comment Id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
@@ -111,7 +111,7 @@ type
         constructor Create();
         destructor Destroy(); override;
         procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil); virtual;
-        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFolloUpUpdate = nil); virtual;
+        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFollowUpUpdate = nil); virtual;
         procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
         procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
         function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
@@ -255,7 +255,7 @@ begin
 end;
 
 
-procedure TComments.BulkFollowupUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFolloUpUpdate = nil);
+procedure TComments.BulkFollowupUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFollowUpUpdate = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
