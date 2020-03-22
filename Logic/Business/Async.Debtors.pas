@@ -64,7 +64,7 @@ type
     /// </remarks>
     TDebtors = class(TInterfacedObject, IDebtors)
     strict private
-        function  FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
+        function FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
     public
         constructor Create();
         destructor Destroy(); override;
@@ -426,17 +426,17 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        for var iCNT:=1 to Grid.RowCount - 1 do
+        for var GridIndex:=1 to Grid.RowCount - 1 do
         begin
 
-            for var jCNT:=1 to Source.RowCount - 1 do
+            for var SourceIndex:=1 to Source.RowCount - 1 do
             begin
 
-                var TargetName:=Grid.Cells[ColTargetName, iCNT];
-                var SourceName:=Source.Cells[ColSourceId, jCNT];
+                var TargetName:=Grid.Cells[ColTargetName, GridIndex];
+                var SourceName:=Source.Cells[ColSourceId, SourceIndex];
 
-                var TargetCoCode:=Grid.Cells[ColTargetCoCode, iCNT];
-                var SourceDbName:=Source.Cells[ColSourceDbName, jCNT];
+                var TargetCoCode:=Grid.Cells[ColTargetCoCode, GridIndex];
+                var SourceDbName:=Source.Cells[ColSourceDbName, SourceIndex];
 
                 if not SourceDbName.Contains('F') then SourceDbName:=THelpers.GetSourceDBName(SourceDbName, 'F');
 
@@ -446,7 +446,7 @@ begin
 
                     TThread.Synchronize(nil, procedure
                     begin
-                        Grid.Cells[ColTargetName, iCNT]:=Source.Cells[ColSourceDesc, jCNT];
+                        Grid.Cells[ColTargetName, GridIndex]:=Source.Cells[ColSourceDesc, SourceIndex];
                     end);
 
                 end;
@@ -487,8 +487,8 @@ begin
 
                     var CustSortingOptions: TCustSortingOptions:=TJson.JsonToObject<TCustSortingOptions>(Rest.Content);
 
-                    for var iCNT:=0 to Length(CustSortingOptions.SortingOptions) - 1 do
-                        TempList.Add(CustSortingOptions.SortingOptions[iCNT]);
+                    for var Index:=0 to Length(CustSortingOptions.SortingOptions) - 1 do
+                        TempList.Add(CustSortingOptions.SortingOptions[Index]);
 
                     CallResponse.IsSucceeded:=True;
                     CustSortingOptions.Free();

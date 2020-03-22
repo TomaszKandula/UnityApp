@@ -80,6 +80,8 @@ type
     TStatusBar = class abstract
         const Ready       = 'Ready';
         const Processing  = 'Processing...';
+        const MakeReport  = 'Generating aging report...';
+        const WritingXLS  = 'Writing to Excel...';
         const ExportXLS   = 'Exporting to Excel...';
         const ExportCSV   = 'Exporting to CSV file...';
         const ImportCSV   = 'Importing from CSV file...';

@@ -27,7 +27,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
+        procedure WriteToExcelAsync(Source: TStringGrid; FileName: string; Callback: TExcelExport);
         /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -68,7 +68,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport); virtual;
+        procedure WriteToExcelAsync(Source: TStringGrid; FileName: string; Callback: TExcelExport); virtual;
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
         function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
@@ -82,6 +82,8 @@ implementation
 uses
     System.SysUtils,
     System.Classes,
+    System.Win.ComObj,
+    System.Variants,
     REST.Types,
     REST.Json,
     Unity.Enums,
@@ -103,24 +105,32 @@ begin
 end;
 
 
-procedure TUtilities.ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
+procedure TUtilities.WriteToExcelAsync(Source: TStringGrid; FileName: string; Callback: TExcelExport);
 begin
+
+    var Grid:=TStringGrid.Create(nil);
+    Grid.RowCount:=Source.RowCount;
+    Grid.ColCount:=Source.ColCount;
+
+    for var iCNT:=0 to Source.RowCount - 1 do
+        for var jCNT:=0 to Source.ColCount - 1 do
+            Grid.Cells[jCNT, iCNT]:=Source.Cells[jCNT, iCNT];
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
         var CallResponse: TCallResponse;
         try
-
-            // New implementation here
-
+            Grid.ExportXLS(FileName, 'Aging Report');
+            Grid.Free();
+            Service.Logger.Log('[WriteToExcelAsync]: Excel has been saved to file "' + FileName + '".');
             CallResponse.IsSucceeded:=True;
-
         except
             on E: Exception do
             begin
+                if Assigned(Grid) then Grid.Free();
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[ExcelExportAsync]: Cannot execute. Error has been thrown: ' + CallResponse.LastMessage;
+                CallResponse.LastMessage:='[WriteToExcelAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 
@@ -133,7 +143,7 @@ begin
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
 
 end;
 

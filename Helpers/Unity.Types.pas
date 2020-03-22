@@ -7,13 +7,14 @@ unit Unity.Types;
 
 interface
 
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Note:
 //    Some types may have the same signature. The reason why we have individual
-//    types for the same signature rather than one common is that, this is easier
-//    to extend, just add argument to the existing signature for given method and
-//    it can be use right away by given implementation and by callback consumer.
-// ------------------------------------------------------------------------------
+//    types for the same signature rather than one common is that, it is easier
+//    to extend, it is enough to just add argument to the existing signature for
+//    given method, so it can be used right away by given implementation and
+//    by callback consumer.
+// -----------------------------------------------------------------------------
 
 uses
     Unity.Grid,

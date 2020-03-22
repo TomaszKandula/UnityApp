@@ -128,6 +128,10 @@ type
         /// </summary>
         function ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
         /// <summary>
+        /// Export to Excel file current grid content.
+        /// </summary>
+        procedure ExportXLS(AFileName: string; ASheetName: string);
+        /// <summary>
         /// Select all rows and columns (except first row which is presumbly a column title).
         /// </summary>
         procedure SelectAll();
@@ -159,6 +163,7 @@ uses
     System.Classes,
     System.Win.ComObj,
     System.Variants,
+    System.Threading,
     Winapi.Messages,
     Vcl.Clipbrd,
     Unity.Constants,
@@ -757,6 +762,66 @@ begin
             FCsvExportResult:='Data has been exported successfully!';
 
         CSVData.Free;
+
+    end;
+
+end;
+
+
+procedure TStringGrid.ExportXLS(AFileName: string; ASheetName: string);
+begin
+
+    var XLApp: OLEVariant:=CreateOleObject('Excel.Application');
+    var Sheet: OLEVariant;
+    try
+
+        try
+
+            XLApp.Visible:=False;
+            XLApp.Caption:='Unity Platform - Data Export';
+            XLApp.DisplayAlerts:=False;
+            XLApp.Workbooks.Add(xlWBatWorkSheet);
+
+            Sheet:=XLApp.Workbooks[1].WorkSheets[1];
+            Sheet.Name:=ASheetName;
+
+            // Offsets cannot be less than one
+            var RowOffset: integer:=1;
+            var ColOffset: integer:=1;
+
+            // To Excel sheet
+            for var Col:=0 to Self.ColCount - 1 do
+                for var Row:=0 to Self.RowCount - 1 do
+                    // We skip first string grid column
+                    Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
+
+            // Simple formatting
+            for var Col:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
+            for var Row:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
+
+            // Save to file
+            XLApp.Workbooks[1].SaveAs(AFileName);
+
+        finally
+
+            if not VarIsEmpty(XLApp) then
+            begin
+                XLApp.DisplayAlerts:=False;
+                XLApp.Quit;
+                XLAPP:=Unassigned;
+                Sheet:=Unassigned;
+            end;
+
+        end;
+
+    except
+        on E: Exception do
+        begin
+            if E.Message = xlWARN_MESSAGE then
+                FToExcelResult:='The data cannot be exported because Microsoft Excel cannot be found.'
+            else
+                FToExcelResult:='The data cannot be exported, error message has been thrown: ' + E.Message;
+        end;
 
     end;
 

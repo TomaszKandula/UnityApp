@@ -869,6 +869,7 @@ type
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
         procedure BulkFollowUpUpdate_Callback(CallResponse: TCallResponse);
         procedure GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        procedure WriteToExcel_Callback(CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
@@ -1963,7 +1964,25 @@ begin
         Exit();
     end;
 
-    // Grid to Excel & save to XLSX file...
+    UpdateStatusBar(TStatusBar.WritingXLS);
+    Service.Mediator.Utilities.WriteToExcelAsync(ReturnedData, FExcelFileName, WriteToExcel_Callback);
+
+end;
+
+
+procedure TMainForm.WriteToExcel_Callback(CallResponse: TCallResponse);
+begin
+
+    UpdateStatusBar(TStatusBar.Ready);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[WriteToExcel_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'Report has been exported and saved successfuly!');
 
 end;
 
@@ -3511,10 +3530,14 @@ end;
 
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
-    UpdateStatusBar(TStatusBar.ExportXLS);
-    var FileName: string;
-    if MainForm.FileXLExport.Execute then FExcelFileName:=MainForm.FileXLExport.FileName else FExcelFileName:='';
-    Service.Mediator.Debtors.GetAgingReportAsync(FLoadedCompanies, GetAgingReport_Callback);
+
+    if MainForm.FileXLExport.Execute then
+    begin
+        FExcelFileName:=MainForm.FileXLExport.FileName;
+        UpdateStatusBar(TStatusBar.MakeReport);
+        Service.Mediator.Debtors.GetAgingReportAsync(FLoadedCompanies, GetAgingReport_Callback);
+    end;
+
 end;
 
 
