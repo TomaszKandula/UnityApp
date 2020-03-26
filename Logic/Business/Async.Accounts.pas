@@ -89,6 +89,13 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
+        /// <summary>
+        /// Allows to get the user permissions. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetUserPermissionsAwaited(): TCallResponse;
     end;
 
 
@@ -109,6 +116,7 @@ type
         function LoadRatingAwaited(var Rating: TRating): TCallResponse; virtual;
         procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating); virtual;
         procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating); virtual;
+        function GetUserPermissionsAwaited(): TCallResponse; virtual;
     end;
 
 
@@ -135,7 +143,9 @@ uses
     Api.UserRatingAdded,
     Api.UserRatingUpdate,
     Api.UserRatingUpdated,
-    Api.TokenGranted;
+    Api.TokenGranted,
+    Api.UserPermissions,
+    Api.UserPermissionList;
 
 
 constructor TAccounts.Create();
@@ -719,8 +729,6 @@ end;
 procedure TAccounts.SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
 begin
 
-    var CallResponse: TCallResponse;
-
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
@@ -745,6 +753,7 @@ begin
             UserRatingAdd.Free();
         end;
 
+        var CallResponse: TCallResponse;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
@@ -888,6 +897,83 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+function TAccounts.GetUserPermissionsAwaited(): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+            + 'accounts/permissions/'
+            + Service.SessionData.UnityUserId.ToString();
+
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetUserPermissionsAwaited]: Executing GET ' + Rest.ClientBaseURL);
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var UserPermissionList:=TJson.JsonToObject<TUserPermissionList>(Rest.Content);
+                try
+
+                    Service.UpdateUserPermissions(UserPermissionList.UserPermissions);
+
+                    CallResponse.IsSucceeded :=UserPermissionList.IsSucceeded;
+                    CallResponse.ErrorCode   :=UserPermissionList.Error.ErrorCode;
+                    CallResponse.LastMessage :=UserPermissionList.Error.ErrorDesc;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+
+                    Service.Logger.Log('[GetUserPermissionsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    UserPermissionList.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetUserPermissionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
 
 end;
 

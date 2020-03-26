@@ -11,54 +11,122 @@ interface
 type
 
 
-    /// <summary>
-    /// Indicates age view sorting column.
-    /// </summary>
-    TColumns = (Inf7, Inf4, CoCode, Agent, Division, Follow, Group3, Free1, Free2, Free3, SalesResponsible, PersonResponsible, CustomerGroup, AccountType);
-    /// <summary>
-    /// Defines data type to be sorted.
-    /// </summary>
-    TDataType = (TString, TInteger, TFloat);
-    /// <summary>
-    /// Indicates document type to be sent to the customer.
-    /// </summary>
-    TDocType = (Reminder, Statement, Auto, Manual);
-    /// <summary>
-    /// Indicates whether the document uses default template or it is customized by the user.
-    /// </summary>
-    TDocMode = (Custom, Defined);
-    /// <summary>
-    /// Defines action type to be executed after user chooses the date from calendar.
-    /// </summary>
-    TCalendar = (DateToDB, GetDate, TimeOnly, DateOnly, DateTime);
-    /// <summary>
-    /// Defines action type.
-    /// </summary>
-    TActions = (OpenAll, OpenForUser, Insert, Update, Export, Import, Copy, Paste, Cut, Escape, Delete);
-    /// <summary>
-    /// Defines whether window is modal or modeless.
-    /// </summary>
-    TWindowState = (Modal, Modeless);
-    /// <summary>
-    /// Defines what types of invoices will be shown on the statement(s).
-    /// </summary>
-    TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems, SendNotDue);
-    /// <summary>
-    /// Application file type for encoding/decoding.
-    /// </summary>
-    TAppFiles = (Configuration, Licence);
-    /// <summary>
-    /// Indicates whether the application timers are enabled or disabled.
-    /// </summary>
-    TAppTimers = (TurnedOn, TurnedOff);
-    /// <summary>
-    /// States type of the icon on message box and button combinations.
-    /// </summary>
-    TAppMessage = (Info{OK}, Warn{OK}, Error{OK}, Question1{OK}, Question2{YES_NO});
-    /// <summary>
-    /// Indicates wheter the list must return first or last item.
-    /// </summary>
-    TListSelection = (First, Last);
+    TColumns = (
+        Inf7,
+        Inf4,
+        CoCode,
+        Agent,
+        Division,
+        Follow,
+        Group3,
+        Free1,
+        Free2,
+        Free3,
+        SalesResponsible,
+        PersonResponsible,
+        CustomerGroup,
+        AccountType
+    );
+
+    TDataType = (
+        TString,
+        TInteger,
+        TFloat
+    );
+
+    TDocType = (
+        Reminder,
+        Statement,
+        Auto,
+        Manual
+    );
+
+    TDocMode = (
+        Custom,
+        Defined
+    );
+
+    TCalendar = (
+        DateToDB,
+        GetDate,
+        TimeOnly,
+        DateOnly,
+        DateTime
+    );
+
+    TActions = (
+        OpenAll,
+        OpenForUser,
+        Insert,
+        Update,
+        Export,
+        Import,
+        Copy,
+        Paste,
+        Cut,
+        Escape,
+        Delete
+    );
+
+    TWindowState = (
+        Modal,
+        Modeless
+    );
+
+    TInvoiceFilter = (
+        ReminderOvd,
+        ReminderNonOvd,
+        ShowAllItems,
+        SendNotDue
+    );
+
+    TAppFiles = (
+        Configuration,
+        Licence
+    );
+
+    TAppTimers = (
+        TurnedOn,
+        TurnedOff
+    );
+
+    TAppMessage = (
+        Info{OK},
+        Warn{OK},
+        Error{OK},
+        Question1{OK},
+        Question2{YES_NO}
+    );
+
+    TListSelection = (
+        First,
+        Last
+    );
+
+    TPermissions = (
+        Undefined,
+        Read,
+        ReadWrite,
+        Deny
+    );
+
+    TModules = (
+        AddressBook    = 1001,
+        ActionWindow   = 1002,
+        InvoiceTracker = 1003,
+        Free1Field     = 1004,
+        Free2Field     = 1005,
+        Free3Field     = 1006,
+        GeneralComment = 1007,
+        DailyComment   = 1008,
+        Statements     = 1009,
+        Reminders      = 1010,
+        Calling        = 1011,
+        Reporting      = 1012,
+        OpenItems      = 1013,
+        Unidentified   = 1014,
+        Documents      = 1015
+    );
 
 
 implementation

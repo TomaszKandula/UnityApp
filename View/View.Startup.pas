@@ -277,7 +277,7 @@ begin
         // --------------------------------------
         // Load/Sync all html layouts for emails.
         // --------------------------------------
-        Sleep(250);
+        Sleep(50);
         ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
 
         if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
@@ -312,7 +312,7 @@ begin
         // -------------------------
         // General tables API calls.
         // -------------------------
-        Sleep(250);
+        Sleep(50);
         ChangeProgressBar(85, 'Calling general tables loaders...', ProgressBar);
 
         if not GetGeneralTablesAsync() then
@@ -364,7 +364,7 @@ begin
 
     if not LCallResponse.IsSucceeded then
     begin
-        Service.Logger.Log('[GetReleaseAsync]: ' + LCallResponse.LastMessage);
+        LastErrorMsg:=LCallResponse.LastMessage;
         Result:=False;
         Exit();
     end;
@@ -380,19 +380,19 @@ begin
 
     Result:=True;
 
-    var CallResponse: TCallResponse;
-    var NewAccessToken: string;
+    var LCallResponse: TCallResponse;
+    var LNewAccessToken: string;
 
-    CallResponse:=Service.Mediator.Accounts.RequestAccessTokenAwaited(NewAccessToken);
+    LCallResponse:=Service.Mediator.Accounts.RequestAccessTokenAwaited(LNewAccessToken);
 
-    if not CallResponse.IsSucceeded then
+    if not LCallResponse.IsSucceeded then
     begin
-        Service.Logger.Log('[GetAccessTokenAsync]: ' + CallResponse.LastMessage);
+        LastErrorMsg:=LCallResponse.LastMessage;
         Result:=False;
         Exit();
     end;
 
-    Service.AccessToken:=NewAccessToken;
+    Service.AccessToken:=LNewAccessToken;
 
 end;
 

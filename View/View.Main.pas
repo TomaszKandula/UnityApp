@@ -843,12 +843,13 @@ type
         procedure RequestUnityWebWithToken();
         procedure RedeemAccess();
         procedure PermitCheckInit();
-        procedure SetPanelBorders;
-        procedure SetGridColumnWidths;
-        procedure SetGridRowHeights;
-        procedure SetButtonsGlyphs;
+        procedure GetUserPermissions();
+        procedure SetPanelBorders();
+        procedure SetGridColumnWidths();
+        procedure SetGridRowHeights();
+        procedure SetButtonsGlyphs();
         procedure SetSettingsPanel(IsLocked: boolean);
-        procedure InitializeScreenSettings;
+        procedure InitializeScreenSettings();
         function  AddressBookExclusion: boolean;
         procedure ClearMainViewInfo();
         procedure ClearAgingSummary();
@@ -1552,6 +1553,27 @@ begin
         FIsAppMenuLocked:=False;
         valAadUser.Caption:=Service.SessionData.DisplayName;
         Service.Logger.Log('[RedeemAccess]: Redeem user access to account has been completed successfully.');
+        GetUserPermissions();
+    end;
+
+end;
+
+
+procedure TMainForm.GetUserPermissions();
+begin
+
+    var LCallResponse: TCallResponse;
+    LCallResponse:=Service.Mediator.Accounts.GetUserPermissionsAwaited();
+    Service.Logger.Log('[GetUserPermissions]: Getting current user permissions...');
+
+    if not LCallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, '[GetUserPermissions]: Cannot get user permissions. Please contact IT Support. Description: ' + LCallResponse.LastMessage);
+        Service.Logger.Log('[GetUserPermissions]: Cannot get user permissions. Error has been thrown: ' + LCallResponse.LastMessage);
+    end
+    else
+    begin
+        Service.Logger.Log('[GetUserPermissions]: User permissions refreshed.');
     end;
 
 end;
@@ -3306,6 +3328,12 @@ end;
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
 
+    if Service.GetUserPermission(TModules.ActionWindow) = TPermissions.Deny then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     if valStatus.Caption = TStatusBar.Ready then
         THelpers.WndCall(ActionsForm, TWindowState.Modal, MainForm)
     else
@@ -3824,12 +3852,20 @@ end;
 
 procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
+
+    if Service.GetUserPermission(TModules.Reporting) <> TPermissions.Read then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     if not CanAccessAppMenu then Exit();
     ReportsForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtReports.Font.Style:=[fsBold];
     txtReports.Font.Color:=$006433C9;
     THelpers.WndCall(ReportsForm, TWindowState.Modal, MainForm);
+
 end;
 
 
@@ -3842,23 +3878,49 @@ end;
 
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
+
     if not CanAccessAppMenu then Exit();
+
+    if Service.GetUserPermission(TModules.InvoiceTracker) = TPermissions.Deny then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     //SetActiveTabsheet(TabSheet4);
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+
 end;
 
 
 procedure TMainForm.txtAddressBookClick(Sender: TObject);
 begin
+
     if not CanAccessAppMenu then Exit();
+
+    if Service.GetUserPermission(TModules.AddressBook) = TPermissions.Deny then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     SetActiveTabsheet(TabSheet3);
+
 end;
 
 
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
+
+    if Service.GetUserPermission(TModules.OpenItems) <> TPermissions.Read then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     if not CanAccessAppMenu then Exit();
     SetActiveTabsheet(TabSheet2);
+
 end;
 
 
@@ -4939,6 +5001,14 @@ begin
         and (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free2))
             and (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free3))
                 then Exit();
+
+    if (Service.GetUserPermission(TModules.Free1Field) <> TPermissions.ReadWrite) or
+       (Service.GetUserPermission(TModules.Free2Field) <> TPermissions.ReadWrite) or
+       (Service.GetUserPermission(TModules.Free3Field) <> TPermissions.ReadWrite) then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to edit this field.');
+        Exit();
+    end;
 
     if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
     begin

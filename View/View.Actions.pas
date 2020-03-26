@@ -1232,12 +1232,26 @@ end;
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
+
+    if Service.GetUserPermission(TModules.Documents) <> TPermissions.ReadWrite then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     THelpers.WndCall(SendForm, TWindowState.Modal, ActionsForm);
+
 end;
 
 
 procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
+
+    if Service.GetUserPermission(TModules.Documents) <> TPermissions.ReadWrite then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
 
     if THelpers.MsgCall(Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
@@ -1277,7 +1291,15 @@ end;
 
 procedure TActionsForm.btnCallCustomerClick(Sender: TObject);
 begin
+
+    if Service.GetUserPermission(TModules.Calling) <> TPermissions.ReadWrite then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        Exit();
+    end;
+
     MakePhoneCall();
+
 end;
 
 
@@ -1590,6 +1612,12 @@ end;
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
+    if Service.GetUserPermission(TModules.DailyComment) <> TPermissions.ReadWrite then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to edit this field.');
+        Exit();
+    end;
+
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
         DailyCom.Lines.Add(TChars.CRLF);
@@ -1603,6 +1631,12 @@ end;
 
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+
+    if Service.GetUserPermission(TModules.GeneralComment) <> TPermissions.ReadWrite then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to edit this field.');
+        Exit();
+    end;
 
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin

@@ -11,11 +11,13 @@ interface
 uses
     System.Classes,
     System.SysUtils,
+    Unity.Enums,
     Unity.Records,
     Unity.RestWrapper,
     Unity.EventLogger,
     Unity.Settings,
-    Unity.Mediator;
+    Unity.Mediator,
+    Api.UserPermissions;
 
 
 type
@@ -23,13 +25,14 @@ type
 
     TService = class(TObject)
     strict private
-        var FSessionId:    string;
-        var FSessionLog:   string;
-        var FSessionData:  TSessionData;
-        var FAccessToken:  string;
-        var FMediator:     IMediator;
-        var FLogger:       ILogger;
-        var FSettings:     ISettings;
+        var FSessionId:       string;
+        var FSessionLog:      string;
+        var FSessionData:     TSessionData;
+        var FAccessToken:     string;
+        var FMediator:        IMediator;
+        var FLogger:          ILogger;
+        var FSettings:        ISettings;
+        var FPermissionArray: TArray<TArray<integer>>;
         procedure RegisterAccessToken(NewValue: string);
     public
         constructor Create();
@@ -44,6 +47,8 @@ type
         function InvokeRest(): IRESTFul;
         procedure InitializeSession(GenSessionId: string; SessionLog: string);
         procedure UpdateUserData(UnityUserId: integer; Department: string; AliasName: string; DisplayName: string; EmailAddress: string);
+        procedure UpdateUserPermissions(UserPermissions: TArray<TUserPermissions>);
+        function GetUserPermission(Module: TModules): TPermissions;
     end;
 
 
@@ -121,6 +126,48 @@ begin
     FSessionData.AliasName   :=AliasName;
     FSessionData.DisplayName :=DisplayName;
     FSessionData.EmailAddress:=EmailAddress;
+end;
+
+
+procedure TService.UpdateUserPermissions(UserPermissions: TArray<TUserPermissions>);
+begin
+
+    var Counts:=Length(UserPermissions);
+    SetLength(FPermissionArray, Counts, 2);
+
+    for var Index:=0 to Counts - 1 do
+    begin
+        FPermissionArray[Index, 0]:=UserPermissions[Index].ModuleId;
+        FPermissionArray[Index, 1]:=UserPermissions[Index].PermissionId;
+    end;
+
+end;
+
+
+function TService.GetUserPermission(Module: TModules): TPermissions;
+begin
+
+    Result:=TPermissions.Undefined;
+    if not Assigned(FPermissionArray) then Exit();
+
+    for var Index:=0 to Length(FPermissionArray) - 1 do
+    begin
+
+        if FPermissionArray[Index, 0] = Ord(Module) then
+        begin
+
+            case FPermissionArray[Index, 1] of
+                10: Result:=TPermissions.Read;
+                11: Result:=TPermissions.ReadWrite;
+                12: Result:=TPermissions.Deny;
+            end;
+
+            Break;
+
+        end;
+
+    end;
+
 end;
 
 
