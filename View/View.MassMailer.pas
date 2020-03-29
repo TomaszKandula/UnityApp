@@ -546,7 +546,7 @@ begin
             ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
             SetLbuCompanies(selCompany, FLbuEmails);
 
-            MainForm.TimerCustOpenItems.Enabled:=False;
+            MainForm.TimerCustSnapshots.Enabled:=False;
             Service.Logger.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
 
             Text_Subject.SetFocus();
@@ -575,7 +575,7 @@ begin
     // ------------------------------------------------
     FIsDataLoaded:=False;
     CustomerList.Clear();
-    MainForm.TimerCustOpenItems.Enabled:=True;
+    MainForm.TimerCustSnapshots.Enabled:=True;
     Service.Logger.Log('[TMassMailerForm.FormClose]: Mass mailer has been closed, open items loader is resumed.');
 end;
 

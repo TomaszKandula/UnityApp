@@ -73,8 +73,9 @@ type
         procedure SetRatingStars(RatingNumber: integer);
         procedure InsertRating();
         procedure UpdateRating();
-        procedure SubmitRatingAsync_Callback(CallResponse: TCallResponse);
-        procedure UpdateRatingAsync_Callback(CallResponse: TCallResponse);
+        procedure LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+        procedure SubmitRating_Callback(CallResponse: TCallResponse);
+        procedure UpdateRating_Callback(CallResponse: TCallResponse);
     public
         var FSetLastSelection: TTabSheet;
     end;
@@ -185,7 +186,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Service.Mediator.Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
+    Service.Mediator.Accounts.SubmitRatingAsync(UserRating, SubmitRating_Callback);
 
 end;
 
@@ -201,7 +202,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Service.Mediator.Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
+    Service.Mediator.Accounts.UpdateRatingAsync(UserRating, UpdateRating_Callback);
 
 end;
 
@@ -212,7 +213,29 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TRateForm.SubmitRatingAsync_Callback(CallResponse: TCallResponse);
+procedure TRateForm.LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+begin
+
+    FIsDataLoaded:=True;
+    Screen.Cursor:=crDefault;
+    ReportMemo.Enabled:=True;
+    btnSendRating.Enabled:=True;
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    FSelectedRating:=Rating.UserRating;
+    ReportMemo.Text:=Rating.UserComment;
+    SetRatingStars(FSelectedRating);
+    FIsAppRated:=True;
+
+end;
+
+
+procedure TRateForm.SubmitRating_Callback(CallResponse: TCallResponse);
 begin
 
     Screen.Cursor:=crDefault;
@@ -230,7 +253,7 @@ begin
 end;
 
 
-procedure TRateForm.UpdateRatingAsync_Callback(CallResponse: TCallResponse);
+procedure TRateForm.UpdateRating_Callback(CallResponse: TCallResponse);
 begin
 
     Screen.Cursor:=crDefault;
@@ -263,6 +286,8 @@ end;
 procedure TRateForm.FormShow(Sender: TObject);
 begin
     SetRatingStars(0);
+    ReportMemo.Enabled:=False;
+    btnSendRating.Enabled:=False;
 end;
 
 
@@ -271,29 +296,8 @@ begin
 
     if not FIsDataLoaded then
     begin
-
         Screen.Cursor:=crHourGlass;
-
-        THelpers.ExecWithDelay(500, procedure
-        begin
-
-            var CallResponse: TCallResponse;
-            var Rating: TRating;
-            CallResponse:=Service.Mediator.Accounts.LoadRatingAwaited(Rating);
-
-            if CallResponse.IsSucceeded then
-            begin
-                FSelectedRating:=Rating.UserRating;
-                ReportMemo.Text:=Rating.UserComment;
-                SetRatingStars(FSelectedRating);
-                FIsAppRated:=True;
-            end;
-
-            Screen.Cursor:=crDefault;
-            FIsDataLoaded:=True;
-
-        end);
-
+        Service.Mediator.Accounts.LoadRatingAsync(LoadRating_Callback);
     end;
 
 end;

@@ -28,15 +28,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
-        /// <summary>
-        /// Allow to async. check SSIS master table to check if open items have been updated.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
+        function GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse;
         /// <summary>
         /// Allow to async. load current open items from SQL database.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -59,8 +51,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        function GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse; virtual;
-        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems); virtual;
+        function GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse; virtual;
         procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems); virtual;
     end;
 
@@ -92,7 +83,7 @@ begin
 end;
 
 
-function TOpenItems.GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
+function TOpenItems.GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -106,7 +97,7 @@ begin
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'openitems/customers/ssis/';
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'automation/customers/openitems/ssis/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetSSISDataAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
@@ -166,50 +157,6 @@ begin
     Result  :=CallResponse;
     DateTime:=GotDateTime;
     Status  :=GotStatus;
-
-end;
-
-
-procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var ReadStatus: string;
-        var ReadDateTime: string;
-        var CallResponse: TCallResponse;
-        var CanGetAging: boolean:=False;
-
-        try
-
-            var OpenItemsResponse: TCallResponse;
-            OpenItemsResponse:=GetSSISDataAwaited(TCalendar.DateTime, ReadDateTime, ReadStatus);
-            ReadDateTime:=THelpers.FormatDateTime(ReadDateTime, TCalendar.DateTime);
-
-            if ( StrToDateTime(OpenItemsUpdate) < StrToDateTime(ReadDateTime) )
-                and ( ReadStatus = 'Completed' ) then CanGetAging:=True;
-
-            CallResponse.IsSucceeded:=True;
-
-        except
-            on E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[ScanOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(CanGetAging, ReadDateTime, CallResponse);
-        end);
-
-    end);
-
-    NewTask.Start;
 
 end;
 

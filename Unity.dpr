@@ -141,6 +141,7 @@ uses
 	Api.FollowUpsUpdated in 'Model\Responses\Api.FollowUpsUpdated.pas',
     Api.ReturnCustomerReport in 'Model\Responses\Api.ReturnCustomerReport.pas',
 	Api.UserPermissionList in 'Model\Responses\Api.UserPermissionList.pas',
+	Api.LatestAzureJobStatus in 'Model\Responses\Api.LatestAzureJobStatus.pas',
     Sync.Mailer in 'Logic\Business\Sync.Mailer.pas',
     Sync.Document in 'Logic\Business\Sync.Document.pas',
     Async.Accounts in 'Logic\Business\Async.Accounts.pas',

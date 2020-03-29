@@ -17168,10 +17168,10 @@ object MainForm: TMainForm
     Left = 1104
     Top = 448
   end
-  object TimerCustOpenItems: TTimer
+  object TimerCustSnapshots: TTimer
     Enabled = False
     Interval = 10000
-    OnTimer = TimerCustOpenItemsTimer
+    OnTimer = TimerCustSnapshotsTimer
     Left = 1000
     Top = 584
   end

@@ -265,7 +265,7 @@ type
         SettingsInnerPanel: TPanel;
         amtUnallocated: TLabel;
         txtUnallocated: TLabel;
-        TimerCustOpenItems: TTimer;
+        TimerCustSnapshots: TTimer;
         txtOverdue: TLabel;
         amtOverdue: TLabel;
         txtCutOffDate: TLabel;
@@ -610,7 +610,7 @@ type
         procedure sgPaidInfoMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPaidInfoMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure TimerCustOpenItemsTimer(Sender: TObject);
+        procedure TimerCustSnapshotsTimer(Sender: TObject);
         procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
         procedure sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgAgeViewMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -839,6 +839,7 @@ type
         var FFollowsPast: integer;
         var FFollowsNext: integer;
         var FExcelFileName: string;
+        procedure UserRatingCheck();
         function  CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
         procedure RedeemAccess();
@@ -863,7 +864,7 @@ type
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
         procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
-        procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
+        procedure ScanSnapshots_Callback(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure FreeFieldsUpdate_Callback(CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
@@ -871,12 +872,13 @@ type
         procedure BulkFollowUpUpdate_Callback(CallResponse: TCallResponse);
         procedure GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure WriteToExcel_Callback(CallResponse: TCallResponse);
+        procedure LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
         var FGridPicture: TImage;
-        var FOpenItemsUpdate: string;
-        var FOpenItemsStatus: string;
+        var FDataUpdate: string;
+        var FDataStatus: string;
         procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
         procedure UpdateFollowUps(Source: TStringGrid);
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
@@ -1037,13 +1039,13 @@ begin
         TurnedOn:
         begin
             TimerFollowUp.Enabled:=True;
-            TimerCustOpenItems.Enabled:=True;
+            TimerCustSnapshots.Enabled:=True;
         end;
 
         TurnedOff:
         begin
             TimerFollowUp.Enabled:=False;
-            TimerCustOpenItems.Enabled:=False;
+            TimerCustSnapshots.Enabled:=False;
         end;
 
     end;
@@ -1509,6 +1511,18 @@ begin
 end;
 
 
+procedure TMainForm.UserRatingCheck();
+begin
+
+    // Executes after 5 minutes
+    THelpers.ExecWithDelay(300000, procedure
+    begin
+        Service.Mediator.Accounts.LoadRatingAsync(LoadRating_Callback);
+    end);
+
+end;
+
+
 function TMainForm.CanAccessAppMenu(): boolean;
 begin
 
@@ -1554,6 +1568,7 @@ begin
         valAadUser.Caption:=Service.SessionData.DisplayName;
         Service.Logger.Log('[RedeemAccess]: Redeem user access to account has been completed successfully.');
         GetUserPermissions();
+        UserRatingCheck();
     end;
 
 end;
@@ -1872,20 +1887,27 @@ begin
 end;
 
 
-procedure TMainForm.ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
+procedure TMainForm.ScanSnapshots_Callback(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse);
 begin
 
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        Service.Logger.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[ScanSnapshots_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    //FOpenItemsUpdate:=ReadDateTime;
-    //FOpenItemsStatus:='';
-    //...load latest aging report with open items
+    if CanGetAge then
+    begin
+        FDataUpdate:=ReceivedTime;
+        valUpdateStamp.Caption:=ReceivedTime;
+        if FLoadedCompanies.Count > 0 then LoadAgeReport();
+    end
+    else
+    begin
+        Service.Logger.Log('[ScanSnapshots_Callback]: Nothing to update.');
+    end;
 
 end;
 
@@ -2005,6 +2027,24 @@ begin
     end;
 
     THelpers.MsgCall(TAppMessage.Info, 'Report has been exported and saved successfuly!');
+
+end;
+
+
+procedure TMainForm.LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[LoadRating_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    if Rating.UserRating = 0 then
+    begin
+        THelpers.WndCall(RateForm, TWindowState.Modeless, MainForm);
+    end;
 
 end;
 
@@ -2194,8 +2234,8 @@ begin
 
                 var OpenItemsResponse: TCallResponse;
 
-                OpenItemsResponse:=Service.Mediator.OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
-                FOpenItemsUpdate:=THelpers.FormatDateTime(FOpenItemsUpdate, TCalendar.DateTime);
+                OpenItemsResponse:=Service.Mediator.OpenItems.GetSSISDataAwaited(FDataUpdate, FDataStatus);
+                FDataUpdate:=THelpers.FormatDateTime(FDataUpdate, TCalendar.DateTime);
 
                 if not OpenItemsResponse.IsSucceeded then
                 begin
@@ -2204,11 +2244,11 @@ begin
                 end;
 
                 Service.Logger.Log(
-                    '[StartMainWnd]: Open items information loaded (FOpenItemsUpdate = ' +
-                    FOpenItemsUpdate + '; FOpenItemsStatus = ' + FOpenItemsStatus + ').'
+                    '[StartMainWnd]: Open items information loaded (FDataUpdate = ' +
+                    FDataUpdate + '; FDataStatus = ' + FDataStatus + ').'
                 );
 
-                valUpdateStamp.Caption:=FOpenItemsUpdate.Substring(0, Length(FOpenItemsUpdate) - 3);
+                valUpdateStamp.Caption:=FDataUpdate.Substring(0, Length(FDataUpdate) - 3);
                 valCutOffDate.Caption:='n/a';
 
                 selAgeSorting.Clear();
@@ -2784,7 +2824,7 @@ begin
         var CurrentDate :=THelpers.CDate(valCurrentDate.Caption);
         var AssignedUser:=sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible), iCNT].ToLower();
 
-        if (FollowUpDate = CurrentDate) and (ActiveUser = AssignedUser) then Inc(Sum);
+        if (FollowUpDate = CurrentDate) {and (ActiveUser = AssignedUser)} then Inc(Sum);
 
     end;
 
@@ -2818,10 +2858,9 @@ begin
 end;
 
 
-procedure TMainForm.TimerCustOpenItemsTimer(Sender: TObject);
+procedure TMainForm.TimerCustSnapshotsTimer(Sender: TObject);
 begin
-    Service.Logger.Log('[TimerCustOpenItemsTimer]: Calling open items scanner...');
-    Service.Mediator.OpenItems.ScanOpenItemsAsync(FOpenItemsUpdate, ScanOpenItems_Callback);
+    Service.Mediator.Debtors.ScanSnapshotsAsync(FDataUpdate, ScanSnapshots_Callback);
 end;
 
 
@@ -3173,7 +3212,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3241,7 +3280,7 @@ end;
 
 procedure TMainForm.Action_AccountDetailsClick(Sender: TObject);
 begin
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3345,7 +3384,7 @@ end;
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
     //THelpers.WndCall(TrackerForm, TWindowState.Modal, MainForm);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3888,7 +3927,7 @@ begin
     end;
 
     //SetActiveTabsheet(TabSheet4);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 
 end;
 
@@ -3912,7 +3951,7 @@ end;
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
 
-    if Service.GetUserPermission(TModules.OpenItems) <> TPermissions.Read then
+    if Service.GetUserPermission(TModules.OpenItems) = TPermissions.Deny then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
@@ -3928,7 +3967,7 @@ procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
     //SetActiveTabsheet(TabSheet6);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3936,7 +3975,7 @@ procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
     //SetActiveTabsheet(TabSheet5);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -4032,7 +4071,7 @@ end;
 procedure TMainForm.btnSearchAbClick(Sender: TObject);
 begin
     //THelpers.WndCall(SqlSearchForm, TWindowState.Modeless, MainForm);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 

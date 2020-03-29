@@ -91,11 +91,11 @@ type
     );
 
     TAppMessage = (
-        Info{OK},
-        Warn{OK},
-        Error{OK},
-        Question1{OK},
-        Question2{YES_NO}
+        Info,      // OK button only
+        Warn,      // OK button only
+        Error,     // OK button only
+        Question1, // OK button only
+        Question2  // Yes and No buttons
     );
 
     TListSelection = (

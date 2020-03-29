@@ -96,11 +96,11 @@ object RateForm: TRateForm
     object txtCaption: TLabel
       AlignWithMargins = True
       Left = 10
-      Top = 15
+      Top = 25
       Width = 559
       Height = 37
       Margins.Left = 10
-      Margins.Top = 15
+      Margins.Top = 25
       Margins.Right = 10
       Margins.Bottom = 10
       Align = alTop
@@ -114,6 +114,7 @@ object RateForm: TRateForm
       Font.Style = []
       ParentColor = False
       ParentFont = False
+      ExplicitTop = 15
       ExplicitWidth = 279
     end
     object txtComment: TLabel
@@ -215,9 +216,9 @@ object RateForm: TRateForm
     object PanelStars: TPanel
       AlignWithMargins = True
       Left = 10
-      Top = 62
+      Top = 72
       Width = 559
-      Height = 86
+      Height = 76
       Margins.Left = 10
       Margins.Top = 0
       Margins.Right = 10
@@ -225,6 +226,8 @@ object RateForm: TRateForm
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 2
+      ExplicitTop = 62
+      ExplicitHeight = 86
       object Image1: TImage
         AlignWithMargins = True
         Left = 145

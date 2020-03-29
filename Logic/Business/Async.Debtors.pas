@@ -23,6 +23,21 @@ type
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
         /// <summary>
+        /// Allow to check async. for latest generated snapshots. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse;
+        /// <summary>
+        /// Allow to read async. current age report from SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots);
+        /// <summary>
         /// Allow to read async. current age report from SQL database.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
@@ -60,7 +75,7 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or extend them.
     /// </remarks>
     TDebtors = class(TInterfacedObject, IDebtors)
     strict private
@@ -68,7 +83,9 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure GetAgingReportAsync(SelectedCompanies: TList<string>; Callback: TGetAgingReport);
+        function CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse; virtual;
+        procedure ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots); virtual;
+        procedure GetAgingReportAsync(SelectedCompanies: TList<string>; Callback: TGetAgingReport); virtual;
         procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView); virtual;
         procedure MapTableAsync(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetName: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
@@ -93,7 +110,8 @@ uses
     Api.UserCustSnapshotList,
     Api.ReturnCustSnapshots,
     Api.CustomerSnapshot,
-    Api.ReturnCustomerReport;
+    Api.ReturnCustomerReport,
+    Api.LatestAzureJobStatus;
 
 
 constructor TDebtors.Create();
@@ -104,6 +122,133 @@ end;
 destructor TDebtors.Destroy();
 begin
     inherited;
+end;
+
+
+function TDebtors.CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var GetDateTime:  string;
+    var GetStatus:    string;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'automation/azurejobs/' + CheckDate + '/';
+        Rest.AddParameter('type','snapshots');
+        Rest.AddParameter('mode','generation');
+
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[CheckSnapshotsAwaited]: Executing GET ' + Rest.ClientBaseURL);
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var LatestAzureJobStatus:=TJson.JsonToObject<TLatestAzureJobStatus>(Rest.Content);
+                try
+
+                    GetDateTime:=LatestAzureJobStatus.JobDateTime;
+                    GetStatus:=LatestAzureJobStatus.StatusCode;
+                    CallResponse.LastMessage:=LatestAzureJobStatus.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=LatestAzureJobStatus.Error.ErrorCode;
+
+                    CallResponse.IsSucceeded:=True;
+                    Service.Logger.Log('[CheckSnapshotsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    LatestAzureJobStatus.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckSnapshotsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[CheckSnapshotsAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[CheckSnapshotsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckSnapshotsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    Result:=CallResponse;
+    ReceivedTime  :=GetDateTime;
+    ReceivedStatus:=GetStatus;
+
+end;
+
+
+procedure TDebtors.ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var ReceivedStatus:   string;
+        var ReceivedDateTime: string;
+        var ReadDateTime:     string;
+        var CallResponse:     TCallResponse;
+        var CanGetAging:=False;
+        try
+
+            var SnapshotsResponse: TCallResponse;
+            var CurrentDate:=DateToStr(Now);
+
+            SnapshotsResponse:=CheckSnapshotsAwaited(CurrentDate, ReceivedDateTime, ReceivedStatus);
+            ReadDateTime:=THelpers.FormatDateTime(ReceivedDateTime, TCalendar.DateTime);
+
+            if ( StrToDateTime(SnapshotsUpdate) < StrToDateTime(ReadDateTime) )
+                and ( ReceivedStatus = 'Completed' ) then CanGetAging:=True;
+
+            CallResponse.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[ScanSnapshotsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CanGetAging, ReadDateTime, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start;
+
 end;
 
 

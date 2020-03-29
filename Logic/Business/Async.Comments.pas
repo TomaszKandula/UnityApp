@@ -734,9 +734,7 @@ begin
             + SourceDBName
             + '/'
             + CustNumber.ToString()
-            + '/comment/'
-            + UserAlias
-            + '/';
+            + '/comment/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetGeneralCommentAsync]: Executing GET ' + Rest.ClientBaseURL);
 
@@ -901,9 +899,7 @@ begin
             + SourceDBName
             + '/'
             + CustNumber.ToString()
-            + '/comments/'
-            + UserAlias
-            + '/';
+            + '/comments/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetDailyCommentsAsync]: Executing GET ' + Rest.ClientBaseURL);
 

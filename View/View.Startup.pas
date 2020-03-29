@@ -422,7 +422,7 @@ begin
         // Setup timers, some of them may be removed after introducing REST API.
         // ---------------------------------------------------------------------
         MainAppForm.TimerFollowUp.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000); // 30 minutes
-        MainAppForm.TimerCustOpenItems.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000); // 5 minutes
+        MainAppForm.TimerCustSnapshots.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000); // 5 minutes
 
         // ---------------------------------------------
         // Setup risk classes with proper number format.

@@ -114,7 +114,7 @@ type
     /// <summary>
     /// Callback signature for scanning SSIS master table to check if open items have been updated.
     /// </summary>
-    TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
+    TScanOpenItems = procedure(CanGetAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
     /// <summary>
     /// Callback signature for reading open items. Payload returned contains summary data from loaded invoices.
     /// </summary>
@@ -151,6 +151,14 @@ type
     /// Callback signature for method getting aging report for given companies.
     /// </summary>
     TGetAgingReport = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for method getting user rating of Unity Platform.
+    /// </summary>
+    TLoadRating = procedure(UserRating: TRating; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature for scanning Azure Jobs table to check if snapshots have been updated.
+    /// </summary>
+    TScanSnapshots = procedure(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse) of object;
 
 
 implementation

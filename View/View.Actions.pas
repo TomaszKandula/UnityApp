@@ -336,7 +336,7 @@ end;
 
 procedure TActionsForm.UpdateOpenItems();
 begin
-    txtTimeDate.Caption:=MainForm.FOpenItemsUpdate;
+    txtTimeDate.Caption:=MainForm.FDataUpdate;
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber.ToString();
     GetOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
@@ -1078,7 +1078,7 @@ begin
         OpenItemsGrid.Freeze(True);
         DailyComGrid.Freeze(True);
 
-        MainForm.TimerCustOpenItems.Enabled:=False;
+        MainForm.TimerCustSnapshots.Enabled:=False;
         Service.Logger.Log('[TActionsForm.FormActivate]: Action view has been opened, open items loader is on hold.');
 
         THelpers.ExecWithDelay(500, procedure
@@ -1126,7 +1126,7 @@ end;
 procedure TActionsForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FIsDataLoaded:=False;
-    MainForm.TimerCustOpenItems.Enabled:=True;
+    MainForm.TimerCustSnapshots.Enabled:=True;
     Service.Logger.Log('[TActionsForm.FormActivate]: Action view has been closed, open items loader is resumed.');
 end;
 

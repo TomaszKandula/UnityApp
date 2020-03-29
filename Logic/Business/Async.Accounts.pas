@@ -72,7 +72,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function LoadRatingAwaited(var Rating: TRating): TCallResponse;
+        procedure LoadRatingAsync(Callback: TLoadRating);
         /// <summary>
         /// Allow to write async. user rating with optional comment.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -113,7 +113,7 @@ type
         function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse; virtual;
         function SaveUserLogsAwaited(): TCallResponse; virtual;
         function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse; virtual;
-        function LoadRatingAwaited(var Rating: TRating): TCallResponse; virtual;
+        procedure LoadRatingAsync(Callback: TLoadRating); virtual;
         procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating); virtual;
         procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating); virtual;
         function GetUserPermissionsAwaited(): TCallResponse; virtual;
@@ -645,11 +645,8 @@ begin
 end;
 
 
-function TAccounts.LoadRatingAwaited(var Rating: TRating): TCallResponse;
+procedure TAccounts.LoadRatingAsync(Callback: TLoadRating);
 begin
-
-    var CallResponse: TCallResponse;
-    var TempRating: TRating;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -666,6 +663,8 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
+        var TempRating: TRating;
+        var CallResponse: TCallResponse;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
@@ -674,7 +673,7 @@ begin
                 var UserRating:=TJson.JsonToObject<TUserRating>(Rest.Content);
                 try
 
-                    TempRating.UserRating:=UserRating.Rating;
+                    TempRating.UserRating :=UserRating.Rating;
                     TempRating.UserComment:=UserRating.Comment;
 
                     CallResponse.IsSucceeded :=UserRating.IsSucceeded;
@@ -716,12 +715,14 @@ begin
 
         end;
 
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(TempRating, CallResponse);
+        end);
+
     end);
 
     NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Rating:=TempRating;
-    Result:=CallResponse;
 
 end;
 
@@ -747,8 +748,8 @@ begin
         var UserRatingAdd:=TUserRatingAdd.Create();
         try
             UserRatingAdd.UserRating:=Rating.UserRating;
-            UserRatingAdd.Comment   :=Rating.UserComment;
-            Rest.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
+            UserRatingAdd.Comment:=Rating.UserComment;
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserRatingAdd);
         finally
             UserRatingAdd.Free();
         end;
