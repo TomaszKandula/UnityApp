@@ -155,6 +155,7 @@ begin
 
     if FGrid.RowHeights[FFoundRow] = -1 then
     THelpers.MsgCall(
+        GridSearchForm.Handle,
         Info,
         'The item has been found (' + FGrid.Cells[FSearchColumn, FFoundRow] + ') for search pattern "' +
         FSearchString + '". ' + TChars.CRLF +
@@ -174,8 +175,15 @@ begin
 
     if (FSearchString = '') or (FSearchString = TChars.SPACE) then
     begin
-        THelpers.MsgCall(Warn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
+
+        THelpers.MsgCall(
+            GridSearchForm.Handle,
+            Warn,
+            'Cannot search empty string. Please provide with customer name or customer number and try again.'
+        );
+
         Exit();
+
     end;
 
     FIsNumber:=TryToInt(FSearchString);
@@ -276,7 +284,7 @@ begin
             FGrid.Col:=FGrid.GetCol(FColName);
         end
         else
-        THelpers.MsgCall(Info, 'Cannot find specified customer.');
+        THelpers.MsgCall(GridSearchForm.Handle, TAppMessage.Info, 'Cannot find specified customer.');
 
     end
     else
@@ -297,7 +305,7 @@ begin
         end
         else
         begin
-            THelpers.MsgCall(Info, 'Cannot find specified customer.');
+            THelpers.MsgCall(GridSearchForm.Handle, TAppMessage.Info, 'Cannot find specified customer.');
             btnUnhide.Enabled:=False;
         end;
 

@@ -371,11 +371,18 @@ begin
     if (String.IsNullOrEmpty(Text_Subject.Text)) or (String.IsNullOrEmpty(Text_Message.Text))
     then
     begin
-        THelpers.MsgCall(Warn, 'Cannot send incomplete form. Please re-check it and try again.');
+
+        THelpers.MsgCall(
+            MassMailerForm.Handle,
+            TAppMessage.Warn,
+            'Cannot send incomplete form. Please re-check it and try again.'
+        );
+
         Exit();
+
     end;
 
-    if THelpers.MsgCall(Question2, 'Do you want to send it now?') = IDNO then Exit();
+    if THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Question2, 'Do you want to send it now?') = IDNO then Exit();
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
 
@@ -445,7 +452,7 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         ActivityProgressOff();
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -462,7 +469,7 @@ begin
     else if CallResponse.LastMessage = 'Processed.' then
     begin
         ActivityProgressOff();
-        THelpers.MsgCall(TAppMessage.Info, 'All listed items have been processed.');
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed.');
     end;
 
 end;
@@ -603,7 +610,7 @@ begin
 
     if lstLbuEmails.ItemIndex < 0 then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please select e-mail address you want to apply.');
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Warn, 'Please select e-mail address you want to apply.');
         Exit();
     end;
 

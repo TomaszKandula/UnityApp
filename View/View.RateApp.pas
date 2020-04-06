@@ -223,7 +223,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(RateForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -244,11 +244,11 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(RateForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Your rating has been submitted. Thank you!');
+    THelpers.MsgCall(RateForm.Handle,TAppMessage.Info, 'Your rating has been submitted. Thank you!');
 
 end;
 
@@ -262,11 +262,11 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(RateForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Your rating has been updated.');
+    THelpers.MsgCall(RateForm.Handle, TAppMessage.Info, 'Your rating has been updated.');
 
 end;
 
@@ -332,7 +332,7 @@ begin
 
     if FSelectedRating = 0 then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please rate the application.');
+        THelpers.MsgCall(RateForm.Handle, TAppMessage.Warn, 'Please rate the application.');
         Exit();
     end;
 

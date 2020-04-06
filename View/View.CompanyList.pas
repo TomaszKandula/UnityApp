@@ -122,7 +122,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(CompanyListForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 

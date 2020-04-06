@@ -4,7 +4,7 @@
         <MainSource>Unity.dpr</MainSource>
         <ProjectVersion>18.7</ProjectVersion>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <FrameworkType>VCL</FrameworkType>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
         <AppType>Application</AppType>
@@ -117,10 +117,10 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2020;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2021;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Build>2020</VerInfo_Build>
+        <VerInfo_Build>2021</VerInfo_Build>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_PreRelease>false</VerInfo_PreRelease>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
@@ -148,9 +148,9 @@
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>2020</VerInfo_Build>
+        <VerInfo_Build>2021</VerInfo_Build>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2020;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2021;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
         <VerInfo_PreRelease>false</VerInfo_PreRelease>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
@@ -349,7 +349,7 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Release" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -368,7 +368,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Release" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

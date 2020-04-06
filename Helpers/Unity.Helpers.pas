@@ -70,7 +70,7 @@ type
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
         class function WndCall(WinForm: TForm; Mode: TWindowState; ParentForm: TForm = nil): integer; static;
-        class function MsgCall(WndType: TAppMessage; WndText: string): integer; static;
+        class function MsgCall(Handler: Hwnd; WndType: TAppMessage; WndText: string): integer; static;
         class function CDate(StrDate: string): TDate; static;
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
@@ -386,18 +386,54 @@ begin
 end;
 
 
-class function THelpers.MsgCall(WndType: TAppMessage; WndText: string): integer;
+class function THelpers.MsgCall(Handler: Hwnd; WndType: TAppMessage; WndText: string): integer;
 begin
 
     Result:=0;
     if WndText = '' then Exit();
 
     case WndType of
-        TAppMessage.Info:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONINFORMATION);
-        TAppMessage.Warn:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONWARNING);
-        TAppMessage.Error:     Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONERROR);
-        TAppMessage.Question1: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
-        TAppMessage.Question2: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
+
+        TAppMessage.Info: Result:=
+            Winapi.Windows.MessageBox(
+                Handler,
+                PChar(WndText),
+                PChar(TCommon.APPCAPTION),
+                MB_OK + MB_ICONINFORMATION
+            );
+
+        TAppMessage.Warn: Result:=
+            Winapi.Windows.MessageBox(
+                Handler,
+                PChar(WndText),
+                PChar(TCommon.APPCAPTION),
+                MB_OK + MB_ICONWARNING
+            );
+
+        TAppMessage.Error: Result:=
+            Winapi.Windows.MessageBox(
+                Handler,
+                PChar(WndText),
+                PChar(TCommon.APPCAPTION),
+                MB_OK + MB_ICONERROR
+            );
+
+        TAppMessage.Question1: Result:=
+            Winapi.Windows.MessageBox(
+                Handler,
+                PChar(WndText),
+                PChar(TCommon.APPCAPTION),
+                MB_OKCANCEL + MB_ICONQUESTION
+            );
+
+        TAppMessage.Question2: Result:=
+            Winapi.Windows.MessageBox(
+                Handler,
+                PChar(WndText),
+                PChar(TCommon.APPCAPTION),
+                MB_YESNO + MB_ICONQUESTION
+            );
+
     end;
 
 end;

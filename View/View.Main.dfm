@@ -17489,8 +17489,8 @@ object MainForm: TMainForm
   end
   object TrayIcon: TTrayIcon
     Animate = True
-    Hint = 'Unity for Debt Management'
-    BalloonTitle = 'Unity'
+    Hint = 'Unity Platform'
+    BalloonTitle = 'Unity Platform'
     BalloonFlags = bfInfo
     Icon.Data = {
       0000010009001010000001002000680400009600000018180000010020008809

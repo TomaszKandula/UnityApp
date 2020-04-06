@@ -141,7 +141,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(CalendarForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;

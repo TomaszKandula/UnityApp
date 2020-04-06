@@ -391,9 +391,14 @@ begin
 
         if FSrcColumns[iCNT] = -100 then
         begin
-            THelpers.MsgCall(Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
+
+            THelpers.MsgCall(
+                ActionsForm.Handle,
+                TAppMessage.Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.'
+            );
             Close;
             Exit();
+
         end;
 
         OpenItemsDest.Cells[iCNT + 1, 0]:=OpenItemsSrc.Cells[FSrcColumns[iCNT], 0];
@@ -555,7 +560,7 @@ begin
 
     if String.IsNullOrEmpty(ActionsForm.Cust_Phone.Text) or String.IsNullOrWhiteSpace(ActionsForm.Cust_Phone.Text) then
     begin
-        THelpers.MsgCall(Warn, 'No phone number has been found. Please provide valid phone number and try again.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'No phone number has been found. Please provide valid phone number and try again.');
         Exit();
     end;
 
@@ -563,13 +568,13 @@ begin
 
     if not FileExists(Settings.DirApplication + 'LyncCall.exe') then
     begin
-        THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit();
     end;
 
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
-        THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
         Exit();
     end;
 
@@ -646,7 +651,7 @@ end;
 procedure TActionsForm.ClearFollowUp();
 begin
 
-    if THelpers.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
+    if THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
 
         var LGeneralCommentFields: TGeneralCommentFields;
@@ -777,11 +782,11 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, CallResponse.LastMessage);
     UpdateDaily();
 
 end;
@@ -792,7 +797,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, CallResponse.LastMessage);
         Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -822,7 +827,7 @@ begin
 
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated.');
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'Address Book has been updated.');
     Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Address Book has been updated.');
 
 end;
@@ -833,7 +838,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, CallResponse.LastMessage);
         Service.Logger.Log('[InsertAddressBook_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -858,7 +863,7 @@ begin
     MainForm.sgAddressBook.Cells[Col7, RowCount - 1]:=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
     FCustDetailsId:=ReturnedId;
-    THelpers.MsgCall(TAppMessage.Info, 'New customer has been added successfully.');
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'New customer has been added successfully.');
     Service.Logger.Log('[InsertAddressBook_Callback]: Address Book has been updated.');
 
 end;
@@ -869,7 +874,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -882,7 +887,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -897,7 +902,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[GetDailyCommentsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -943,7 +948,7 @@ begin
 
     if (not CallResponse.IsSucceeded) and (CallResponse.ErrorCode <> 'no_comment_found') then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[GetGeneralCommentAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -958,7 +963,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -990,7 +995,7 @@ begin
 
         if not CallResponse.IsSucceeded then
         begin
-            THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+            THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
             CompanyDetails.Dispose();
             LbuEmails.Free();
             Exit();
@@ -1218,7 +1223,7 @@ procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=True;
     //THelpers.WndCall(QmsForm, Modal, ActionsForm);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -1226,7 +1231,7 @@ procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=False;
     //THelpers.WndCall(QmsForm, Modal, ActionsForm);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -1235,7 +1240,7 @@ begin
 
     if Service.GetUserPermission(TModules.Documents) <> TPermissions.ReadWrite then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
@@ -1249,11 +1254,11 @@ begin
 
     if Service.GetUserPermission(TModules.Documents) <> TPermissions.ReadWrite then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
-    if THelpers.MsgCall(Question2, 'Do you want to send it, right now?') = IDNO then Exit();
+    if THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
     OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
     CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
@@ -1294,7 +1299,7 @@ begin
 
     if Service.GetUserPermission(TModules.Calling) <> TPermissions.ReadWrite then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
@@ -1614,7 +1619,7 @@ begin
 
     if Service.GetUserPermission(TModules.DailyComment) <> TPermissions.ReadWrite then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to edit this field.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You do not have permission to edit this field.');
         Exit();
     end;
 
@@ -1634,7 +1639,7 @@ begin
 
     if Service.GetUserPermission(TModules.GeneralComment) <> TPermissions.ReadWrite then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to edit this field.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You do not have permission to edit this field.');
         Exit();
     end;
 

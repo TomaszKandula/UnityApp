@@ -90,11 +90,11 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(FeedbackForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Your feedback has been sent successfully!');
+    THelpers.MsgCall(FeedbackForm.Handle, TAppMessage.Info, 'Your feedback has been sent successfully!');
 
 end;
 
@@ -134,8 +134,15 @@ begin
 
     if ReportMemo.Text = '' then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
+
+        THelpers.MsgCall(
+            FeedbackForm.Handle,
+            TAppMessage.Warn,
+            'Cannot send empty report. Please write what feels right and then send.'
+        );
+
         Exit();
+
     end;
 
     PanelClient.Enabled:=False;

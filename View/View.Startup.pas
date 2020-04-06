@@ -205,6 +205,7 @@ begin
         begin
             Service.Logger.Log('Critical error has occured [GetAccessTokenSync]: ' + LastErrorMsg);
             THelpers.MsgCall(
+                StartupForm.Handle,
                 TAppMessage.Error,
                 'An error has occured [GetAccessTokenSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
             );
@@ -224,9 +225,15 @@ begin
 
         if not GetScreenDataSync() then
         begin
+
             Service.Logger.Log('Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            THelpers.MsgCall(
+                StartupForm.Handle,
+                TAppMessage.Error,
+                'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
+            );
             ExitAppSync();
+
         end
         else
         begin
@@ -251,6 +258,7 @@ begin
         begin
             Service.Logger.Log('Critical error has occured [GetReleaseAsync]: ' + LastErrorMsg);
             THelpers.MsgCall(
+                StartupForm.Handle,
                 TAppMessage.Error,
                 'An error has occured [GetReleaseAsync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
             );
@@ -263,6 +271,7 @@ begin
             begin
                 Service.Logger.Log('[GetReleaseAsync]: There is newer version available.');
                 THelpers.MsgCall(
+                    StartupForm.Handle,
                     TAppMessage.Warn,
                     'There is newer version available, please update it from Software Centre. Application will be closed.'
                 );
@@ -284,6 +293,7 @@ begin
         begin
             Service.Logger.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
             THelpers.MsgCall(
+                StartupForm.Handle,
                 TAppMessage.Error,
                 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.'
             );
@@ -301,6 +311,7 @@ begin
             begin
                 Service.Logger.Log('[UnzippLayouts]: Cannot unzipp resource file.');
                 THelpers.MsgCall(
+                    StartupForm.Handle,
                     TAppMessage.Error,
                     'An error occured [UnzippLayouts]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.'
                 );
@@ -319,6 +330,7 @@ begin
         begin
             Service.Logger.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
             THelpers.MsgCall(
+                StartupForm.Handle,
                 TAppMessage.Error,
                 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
             );

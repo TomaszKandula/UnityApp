@@ -1087,7 +1087,7 @@ begin
 
     if LoadedCompanies.Count = 0 then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
         Service.Logger.Log('[LoadOpenItems]: No aging report loded while open items requested.');
         Exit();
     end;
@@ -1530,7 +1530,7 @@ begin
 
     if FIsAppMenuLocked then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have access to this feature. Active Directory validation is not completed.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have access to this feature. Active Directory validation is not completed.');
         Result:=False;
     end;
 
@@ -1583,7 +1583,7 @@ begin
 
     if not LCallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, '[GetUserPermissions]: Cannot get user permissions. Please contact IT Support. Description: ' + LCallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, '[GetUserPermissions]: Cannot get user permissions. Please contact IT Support. Description: ' + LCallResponse.LastMessage);
         Service.Logger.Log('[GetUserPermissions]: Cannot get user permissions. Error has been thrown: ' + LCallResponse.LastMessage);
     end
     else
@@ -1738,7 +1738,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
         Service.Logger.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
@@ -1772,12 +1772,12 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, CallResponse.LastMessage);
         Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Address Book has been updated successfully.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'Address Book has been updated successfully.');
     Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
 
 end;
@@ -1788,12 +1788,12 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'New data has been added to Address Book successfully.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'New data has been added to Address Book successfully.');
     Service.Logger.Log('[AddToAddressBookAsync_Callback]: New data has been inserted to Adddress Book successfully.');
 
 end;
@@ -1804,7 +1804,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         UpdateStatusBar(TStatusBar.Ready);
         Service.Logger.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
@@ -1857,7 +1857,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1880,7 +1880,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[FreeFieldsUpdate_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
     end;
 
@@ -1892,7 +1892,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
         Service.Logger.Log('[ScanSnapshots_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
@@ -1917,7 +1917,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[CheckGivenPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1962,12 +1962,12 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[SetNewPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'New password has been saved.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'New password has been saved.');
 
     btnPassUpdate.Enabled:=False;
     EditCurrentPassword.Enabled:=False;
@@ -1986,7 +1986,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[BulkFollowUpUpdate_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -2003,7 +2003,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[GetAgingReport_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -2021,12 +2021,12 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[WriteToExcel_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Report has been exported and saved successfuly!');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'Report has been exported and saved successfuly!');
 
 end;
 
@@ -2036,7 +2036,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[LoadRating_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -2239,7 +2239,7 @@ begin
 
                 if not OpenItemsResponse.IsSucceeded then
                 begin
-                    THelpers.MsgCall(TAppMessage.Error, OpenItemsResponse.LastMessage);
+                    THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, OpenItemsResponse.LastMessage);
                     Exit();
                 end;
 
@@ -2261,7 +2261,7 @@ begin
 
                     if not DebtorsResponse.IsSucceeded then
                     begin
-                        THelpers.MsgCall(TAppMessage.Error, DebtorsResponse.LastMessage);
+                        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, DebtorsResponse.LastMessage);
                         Exit();
                     end;
 
@@ -2274,7 +2274,7 @@ begin
                     end
                     else
                     begin
-                        THelpers.MsgCall(TAppMessage.Error, 'No sorting options have been found. Please contact IT Support.');
+                        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, 'No sorting options have been found. Please contact IT Support.');
                         Service.Logger.Log('[StartMainWnd]: No sorting options have been found.');
                     end;
 
@@ -2407,7 +2407,7 @@ begin
             CallResponse:=Service.Mediator.Accounts.SaveUserLogsAwaited();
 
             if not CallResponse.IsSucceeded then
-                THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+                THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
 
             var Settings: ISettings:=TSettings.Create;
             Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
@@ -2850,7 +2850,11 @@ begin
     if FPermitCheckTimer = (FPermitCheckTimeout / TimerPermitCheck.Interval) then
     begin
         TimerPermitCheck.Enabled:=False;
-        THelpers.MsgCall(TAppMessage.Error, 'Active Directory user validation check is timed out. Access cannot be granted. Please contact IT Support.');
+        THelpers.MsgCall(
+            MainForm.Handle,
+            TAppMessage.Error,
+            'Active Directory user validation check is timed out. Access cannot be granted. Please contact IT Support.'
+        );
     end;
 
     RedeemAccess();
@@ -3190,7 +3194,7 @@ procedure TMainForm.Action_DelRowClick(Sender: TObject);
 begin
 
     var Msg:='Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.';
-    if THelpers.MsgCall(TAppMessage.Question2, Msg) = IDNO then Exit();
+    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, Msg) = IDNO then Exit();
 
     var CallResponse: TCallResponse;
     CallResponse:=Service.Mediator.AddressBook.DelFromAddressBookAwaited(
@@ -3200,7 +3204,7 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
         Service.Logger.Log('[Action_DelRowClick]: Cannot delete selected row.');
         Exit();
     end;
@@ -3212,7 +3216,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3280,7 +3284,7 @@ end;
 
 procedure TMainForm.Action_AccountDetailsClick(Sender: TObject);
 begin
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3292,7 +3296,7 @@ end;
 
 procedure TMainForm.Action_ClearCoockiesClick(Sender: TObject);
 begin
-    if THelpers.MsgCall(TAppMessage.Question2, 'Do you want to clear stored coockies?') = ID_YES then
+    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, 'Do you want to clear stored coockies?') = ID_YES then
         Chromium.DeleteCookies();
 end;
 
@@ -3302,7 +3306,7 @@ begin
     var Settings: ISettings:=TSettings.Create();
     Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
     Settings.Encode(TAppFiles.Configuration);
-    THelpers.MsgCall(TAppMessage.Info, 'The cache will be cleared next time you start the application.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'The cache will be cleared next time you start the application.');
 end;
 
 
@@ -3369,14 +3373,14 @@ begin
 
     if Service.GetUserPermission(TModules.ActionWindow) = TPermissions.Deny then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
     if valStatus.Caption = TStatusBar.Ready then
         THelpers.WndCall(ActionsForm, TWindowState.Modal, MainForm)
     else
-        THelpers.MsgCall(TAppMessage.Warn, 'Wait until "Ready" status and try again.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Wait until "Ready" status and try again.');
 
 end;
 
@@ -3384,7 +3388,7 @@ end;
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
     //THelpers.WndCall(TrackerForm, TWindowState.Modal, MainForm);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3399,7 +3403,7 @@ begin
 
     if sgAgeView.Selection.Bottom - sgAgeView.Selection.Top > 1 then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Bulk insertion is not supported in this version.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Bulk insertion is not supported in this version.');
         Exit();
     end;
 
@@ -3423,13 +3427,13 @@ begin
 
     if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please select more than one customer.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please select more than one customer.');
         Exit();
     end;
 
     if not FIsAddressBookOpened then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please make sure Address Book is currently opened.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please make sure Address Book is currently opened.');
         Exit();
     end;
 
@@ -3598,7 +3602,7 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
 
-    if MainForm.FileXLExport.Execute then
+    if MainForm.FileXLExport.Execute(MainForm.Handle) then
     begin
         FExcelFileName:=MainForm.FileXLExport.FileName;
         UpdateStatusBar(TStatusBar.MakeReport);
@@ -3838,7 +3842,7 @@ begin
 
     if Url.Contains(' ') then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'The URL address cannot contain whitespaces. Please corrected and try again.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'The URL address cannot contain whitespaces. Please corrected and try again.');
         Exit();
     end;
 
@@ -3894,7 +3898,7 @@ begin
 
     if Service.GetUserPermission(TModules.Reporting) <> TPermissions.Read then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
@@ -3922,12 +3926,12 @@ begin
 
     if Service.GetUserPermission(TModules.InvoiceTracker) = TPermissions.Deny then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
     //SetActiveTabsheet(TabSheet4);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 
 end;
 
@@ -3939,7 +3943,7 @@ begin
 
     if Service.GetUserPermission(TModules.AddressBook) = TPermissions.Deny then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
@@ -3953,7 +3957,7 @@ begin
 
     if Service.GetUserPermission(TModules.OpenItems) = TPermissions.Deny then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to access this feature.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have permission to access this feature.');
         Exit();
     end;
 
@@ -3967,7 +3971,7 @@ procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
     //SetActiveTabsheet(TabSheet6);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -3975,7 +3979,7 @@ procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
     //SetActiveTabsheet(TabSheet5);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -4039,7 +4043,7 @@ begin
 
     if FLoadedCompanies.Count = 0 then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'No aging report has been uploaded.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'No aging report has been uploaded.');
         Exit();
     end;
 
@@ -4059,7 +4063,7 @@ end;
 procedure TMainForm.btnCloseAbClick(Sender: TObject);
 begin
 
-    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
+    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
     begin
         sgAddressBook.ClearAll(2, 1, 1, True);
         FIsAddressBookOpened:=False;
@@ -4071,7 +4075,7 @@ end;
 procedure TMainForm.btnSearchAbClick(Sender: TObject);
 begin
     //THelpers.WndCall(SqlSearchForm, TWindowState.Modeless, MainForm);
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in this version.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -4080,7 +4084,7 @@ begin
 
     if not(sgAddressBook.Visible) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please open Address Book first.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please open Address Book first.');
         Exit();
     end;
 
@@ -4123,7 +4127,7 @@ end;
 procedure TMainForm.imgSectionRemoveClick(Sender: TObject);
 begin
 
-    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then Exit();
+    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then Exit();
     if sgListSection.RowCount = 1 then Exit();
 
     // Remove given section
@@ -4188,7 +4192,7 @@ end;
 procedure TMainForm.imgKeyRemoveClick(Sender: TObject);
 begin
 
-    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit();
+    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit();
 
     // Check for last row
     if sgListValue.RowCount = 1 then Exit();
@@ -4211,14 +4215,14 @@ end;
 procedure TMainForm.imgUpdateValuesClick(Sender: TObject);
 begin
 
-    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
+    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
 
     // Check if there is no empty keys
     for var iCNT: integer:= 1 to (sgListValue.RowCount - 1) do
     begin
         if string.IsNullOrEmpty(sgListValue.Cells[1, iCNT]) then
         begin
-            THelpers.MsgCall(TAppMessage.Warn, 'Cannot save. At least one key has no label.');
+            THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Cannot save. At least one key has no label.');
             Exit();
         end;
     end;
@@ -4231,7 +4235,7 @@ begin
 
     Settings.Encode(TAppFiles.Configuration);
 
-    THelpers.MsgCall(TAppMessage.Info, 'All Keys and its values has been saved successfully.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'All Keys and its values has been saved successfully.');
 
 end;
 
@@ -4246,7 +4250,7 @@ begin
 
         if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
         begin
-            THelpers.MsgCall(TAppMessage.Warn, 'New password and its confirmation does not match, please re-type it and try again.');
+            THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'New password and its confirmation does not match, please re-type it and try again.');
             Exit();
         end;
 
@@ -4255,7 +4259,7 @@ begin
     end
     else
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with current password, new password and its confirmation.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please provide with current password, new password and its confirmation.');
     end;
 
 end;
@@ -4272,7 +4276,7 @@ begin
 
     if String.IsNullOrEmpty(EditPassword.Text) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with password.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please provide with password.');
         Exit();
     end
     else
@@ -4755,7 +4759,7 @@ end;
 
 procedure TMainForm.imgLockClick(Sender: TObject);
 begin
-    THelpers.MsgCall(TAppMessage.Warn, 'This feature is locked by the administrator.');
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is locked by the administrator.');
 end;
 
 
@@ -4945,7 +4949,7 @@ begin
     if (Key=89) and (Shift=[ssALT]) then
     begin
 
-        if THelpers.MsgCall(TAppMessage.Question1, 'Are you sure you want to exit the Unity?') = IDOK then
+        if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question1, 'Are you sure you want to exit the Unity?') = IDOK then
         begin
             FAllowClose:=True;
             MainForm.Close();
@@ -5045,7 +5049,7 @@ begin
        (Service.GetUserPermission(TModules.Free2Field) <> TPermissions.ReadWrite) or
        (Service.GetUserPermission(TModules.Free3Field) <> TPermissions.ReadWrite) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You do not have permission to edit this field.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'You do not have permission to edit this field.');
         Exit();
     end;
 
@@ -5126,7 +5130,7 @@ begin
     begin
         sgAgeView.SelectAll();
         sgAgeView.CopyCutPaste(TActions.Copy);
-        THelpers.MsgCall(TAppMessage.Info, 'The selected spreadsheet has been copied to clipboard.');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'The selected spreadsheet has been copied to clipboard.');
     end;
 
 end;

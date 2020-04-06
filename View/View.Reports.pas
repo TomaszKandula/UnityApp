@@ -141,7 +141,7 @@ begin
 
     if not(Return > 32) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        THelpers.MsgCall(ReportsForm.Handle, TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
         Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
@@ -155,7 +155,7 @@ begin
 
     if not(Return > 32) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        THelpers.MsgCall(ReportsForm.Handle,TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
         Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
@@ -169,7 +169,7 @@ begin
 
     if not(Return > 32) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        THelpers.MsgCall(ReportsForm.Handle,TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
         Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
@@ -183,7 +183,7 @@ begin
 
     if not(Return > 32) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        THelpers.MsgCall(ReportsForm.Handle,TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
         Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 

@@ -125,11 +125,11 @@ begin
 
     if String.IsNullOrEmpty(Text_Message.Text) then
     begin
-        THelpers.MsgCall(Warn, 'Please provide custom message and salutation.');
+        THelpers.MsgCall(SendForm.Handle, TAppMessage.Warn, 'Please provide custom message and salutation.');
         Exit();
     end;
 
-    if THelpers.MsgCall(Question2, 'Do you want to send it, right now?') = IDNO then Exit();
+    if THelpers.MsgCall(SendForm.Handle, TAppMessage.Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
 
@@ -189,11 +189,11 @@ begin
 
     if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(SendForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
+    THelpers.MsgCall(SendForm.Handle, TAppMessage.Info, CallResponse.LastMessage);
 
 end;
 

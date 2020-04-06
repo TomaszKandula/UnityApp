@@ -131,8 +131,15 @@ begin
 
     if not(CheckPhoneList(PhoneList)) then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
+
+        THelpers.MsgCall(
+            PhoneListForm.Handle,
+            TAppMessage.Warn,
+            'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.'
+        );
+
         Exit();
+
     end;
 
     ActionsForm.Cust_Phone.Items.Clear();
