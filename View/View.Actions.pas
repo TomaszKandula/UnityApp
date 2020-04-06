@@ -1311,13 +1311,12 @@ end;
 procedure TActionsForm.btnGoogleItClick(Sender: TObject);
 begin
 
-    var Settings: ISettings:=TSettings.Create();
     var AppParam:='https://google.com/search?q=' + TNetEncoding.URL.Encode(Cust_Name.Caption);
 
     ShellExecute(
         ActionsForm.Handle,
         'open',
-        PChar(Settings.DirApplication + TCommon.UnityReader),
+        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
         PChar(AppParam),
         nil,
         SW_SHOWNORMAL

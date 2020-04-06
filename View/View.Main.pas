@@ -530,6 +530,8 @@ type
         txtInfoLine1: TLabel;
         txtInfoLine2: TLabel;
         txtInfoLine3: TLabel;
+        Action_InGoogle: TMenuItem;
+        Action_CopySelection: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -799,6 +801,8 @@ type
         procedure Action_ClearCacheClick(Sender: TObject);
         procedure PopupTrackerPopup(Sender: TObject);
         procedure PopupLoginPopup(Sender: TObject);
+        procedure Action_InGoogleClick(Sender: TObject);
+        procedure Action_CopySelectionClick(Sender: TObject);
         procedure Page1Show(Sender: TObject);
         procedure Page2Show(Sender: TObject);
         procedure Page3Show(Sender: TObject);
@@ -1540,8 +1544,7 @@ end;
 procedure TMainForm.RequestUnityWebWithToken();
 begin
 
-    var Settings: ISettings:=TSettings.Create();
-    var BaseUrl:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', '');
+    var BaseUrl:=Service.Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', '');
     var Url:=WideString(BaseUrl) + '/?sessiontoken=' + Service.SessionId;
 
     try
@@ -1696,11 +1699,10 @@ begin
     if Screen.MonitorCount > 1 then
     begin
 
-        var Settings:  ISettings:=TSettings.Create;
-        var LastTopPos :=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP', 24);
-        var LastLeftPos:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', 24);
-        var LastWidth  :=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', 1024);
-        var LastHeight :=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', 1024);
+        var LastTopPos :=Service.Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP', 24);
+        var LastLeftPos:=Service.Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', 24);
+        var LastWidth  :=Service.Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', 1024);
+        var LastHeight :=Service.Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', 1024);
 
         MainForm.DefaultMonitor:=dmDesktop;
         MainForm.Top   :=LastTopPos;
@@ -1925,11 +1927,9 @@ begin
     SetSettingsPanel(False);
 
     var List: TStringList:=TStringList.Create();
-    var Settings: ISettings:=TSettings.Create();
-
     try
 
-        Settings.GetSections(List);
+        Service.Settings.GetSections(List);
         sgListSection.RowCount:=List.Count;
         var jCNT: integer:=1;
 
@@ -2370,10 +2370,8 @@ begin
         var StrUrl: string:=url;
         EditUrlSection.Text:=StrUrl;
 
-        var Settings: ISettings:=TSettings.Create();
-
-        if StrUrl.Contains('http://') then  imgSSL.Picture.LoadFromFile(Settings.DirAssets + 'Insecure.bmp');
-        if StrUrl.Contains('https://') then imgSSL.Picture.LoadFromFile(Settings.DirAssets + 'Secure.bmp');
+        if StrUrl.Contains('http://') then  imgSSL.Picture.LoadFromFile(Service.Settings.DirAssets + 'Insecure.bmp');
+        if StrUrl.Contains('https://') then imgSSL.Picture.LoadFromFile(Service.Settings.DirAssets + 'Secure.bmp');
 
     end;
 
@@ -2409,19 +2407,18 @@ begin
             if not CallResponse.IsSucceeded then
                 THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
 
-            var Settings: ISettings:=TSettings.Create;
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
+            Service.Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+            Service.Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+            Service.Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
+            Service.Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
 
             case MainForm.WindowState of
-                wsNormal:    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
-                wsMaximized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
-                wsMinimized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
+                wsNormal:    Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
+                wsMaximized: Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
+                wsMinimized: Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
             end;
 
-            Settings.Encode(TAppFiles.Configuration);
+            Service.Settings.Encode(TAppFiles.Configuration);
 
             if Assigned(FLoadedCompanies) then
                 FLoadedCompanies.Free();
@@ -2457,11 +2454,10 @@ begin
     var Keys:   TStringList:=TStringList.Create();
     var Values: TStringList:=TStringList.Create();
 
-    var Settings: ISettings:=TSettings.Create;
     try
 
-        Settings.GetSection(sgListSection.Cells[ACol, ARow], Keys);
-        Settings.GetSectionValues(sgListSection.Cells[ACol, ARow], Values);
+        Service.Settings.GetSection(sgListSection.Cells[ACol, ARow], Keys);
+        Service.Settings.GetSectionValues(sgListSection.Cells[ACol, ARow], Values);
         sgListValue.RowCount:=Keys.Count + 1;
 
         if Keys.Count = 0 then
@@ -2626,13 +2622,11 @@ begin
         if not (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
         begin
 
-            var Settings: ISettings:=TSettings.Create();
-
             // Future days
             if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) > THelpers.CDate(valCurrentDate.Caption)) then
             begin
-                sgAgeView.Canvas.Brush.Color:=Settings.FutureBColor;
-                sgAgeView.Canvas.Font.Color :=Settings.FutureFColor;
+                sgAgeView.Canvas.Brush.Color:=Service.Settings.FutureBColor;
+                sgAgeView.Canvas.Font.Color :=Service.Settings.FutureFColor;
                 sgAgeView.Canvas.FillRect(Rect);
                 sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
             end;
@@ -2640,8 +2634,8 @@ begin
             // Today
             if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) = THelpers.CDate(valCurrentDate.Caption)) then
             begin
-                sgAgeView.Canvas.Brush.Color:=Settings.TodayBColor;
-                sgAgeView.Canvas.Font.Color :=Settings.TodayFColor;
+                sgAgeView.Canvas.Brush.Color:=Service.Settings.TodayBColor;
+                sgAgeView.Canvas.Font.Color :=Service.Settings.TodayFColor;
                 sgAgeView.Canvas.FillRect(Rect);
                 sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
             end;
@@ -2649,8 +2643,8 @@ begin
             // Past days
             if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) < THelpers.CDate(valCurrentDate.Caption)) then
             begin
-                sgAgeView.Canvas.Brush.Color:=Settings.PastBColor;
-                sgAgeView.Canvas.Font.Color :=Settings.PastFColor;
+                sgAgeView.Canvas.Brush.Color:=Service.Settings.PastBColor;
+                sgAgeView.Canvas.Font.Color :=Service.Settings.PastFColor;
                 sgAgeView.Canvas.FillRect(Rect);
                 sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
             end;
@@ -2982,6 +2976,7 @@ begin
     if valTotalCustomers.Caption = '0' then
     begin
         Action_LyncCall.Enabled      :=False;
+        Action_InGoogle.Enabled      :=False;
         Action_Tracker.Enabled       :=False;
         Action_AddToBook.Enabled     :=False;
         Action_MassMailer.Enabled    :=False;
@@ -3001,6 +2996,7 @@ begin
         if sgAgeView.Selection.Bottom - sgAgeView.Selection.Top > 0 then
         begin
             Action_LyncCall.Enabled      :=False;
+            Action_InGoogle.Enabled      :=False;
             Action_Tracker.Enabled       :=True;
             Action_AddToBook.Enabled     :=True;
             Action_MassMailer.Enabled    :=True;
@@ -3018,6 +3014,7 @@ begin
         begin
 
             Action_LyncCall.Enabled      :=True;
+            Action_InGoogle.Enabled      :=True;
             Action_Tracker.Enabled       :=True;
             Action_AddToBook.Enabled     :=True;
             Action_MassMailer.Enabled    :=True;
@@ -3169,13 +3166,12 @@ procedure TMainForm.Action_GoogleItClick(Sender: TObject);
 begin
 
     var CustomerName:=sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._CustomerName), sgAddressBook.Row];
-    var Settings: ISettings:=TSettings.Create();
     var AppParam:='https://google.com/search?q=' + TNetEncoding.URL.Encode(CustomerName);
 
     ShellExecute(
         MainForm.Handle,
         'open',
-        PChar(Settings.DirApplication + TCommon.UnityReader),
+        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
         PChar(AppParam),
         nil,
         SW_SHOWNORMAL
@@ -3303,9 +3299,8 @@ end;
 
 procedure TMainForm.Action_ClearCacheClick(Sender: TObject);
 begin
-    var Settings: ISettings:=TSettings.Create();
-    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
-    Settings.Encode(TAppFiles.Configuration);
+    Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
+    Service.Settings.Encode(TAppFiles.Configuration);
     THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'The cache will be cleared next time you start the application.');
 end;
 
@@ -3382,6 +3377,33 @@ begin
     else
         THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Wait until "Ready" status and try again.');
 
+end;
+
+
+procedure TMainForm.Action_InGoogleClick(Sender: TObject);
+begin
+
+    var AppParam:=
+        'https://google.com/search?q=' +
+        TNetEncoding.URL.Encode(
+            sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), sgAgeView.Row]
+        );
+
+    ShellExecute(
+        ActionsForm.Handle,
+        'open',
+        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
+        PChar(AppParam),
+        nil,
+        SW_SHOWNORMAL
+    );
+
+end;
+
+
+procedure TMainForm.Action_CopySelectionClick(Sender: TObject);
+begin
+    sgAgeView.CopyCutPaste(TActions.Copy);
 end;
 
 
@@ -4131,9 +4153,8 @@ begin
     if sgListSection.RowCount = 1 then Exit();
 
     // Remove given section
-    var Settings: ISettings:=TSettings.Create;
-    Settings.DeleteSection(sgListSection.Cells[1, sgListSection.Row]);
-    Settings.Encode(TAppFiles.Configuration);
+    Service.Settings.DeleteSection(sgListSection.Cells[1, sgListSection.Row]);
+    Service.Settings.Encode(TAppFiles.Configuration);
 
     // Remove from string grid
     sgListSection.DeleteRowFrom(1, 1);
@@ -4198,9 +4219,8 @@ begin
     if sgListValue.RowCount = 1 then Exit();
 
     // Remove key
-    var Settings: ISettings:=TSettings.Create;
-    Settings.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
-    Settings.Encode(TAppFiles.Configuration);
+    Service.Settings.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
+    Service.Settings.Encode(TAppFiles.Configuration);
 
     // Remove from string grid list
     sgListValue.DeleteRowFrom(1, 1);
@@ -4227,13 +4247,11 @@ begin
         end;
     end;
 
-    var Settings: ISettings:=TSettings.Create;
-
     // Save to settings file all the keys and values
     for var iCNT: integer:= 1 to (sgListValue.RowCount - 1) do
-        Settings.SetStringValue(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, iCNT], sgListValue.Cells[2, iCNT]);
+        Service.Settings.SetStringValue(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, iCNT], sgListValue.Cells[2, iCNT]);
 
-    Settings.Encode(TAppFiles.Configuration);
+    Service.Settings.Encode(TAppFiles.Configuration);
 
     THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'All Keys and its values has been saved successfully.');
 
@@ -4463,73 +4481,73 @@ end;
 
 procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
 begin
-    if (sgAgeView.Enabled) and (sgAgeView.Visible) then sgAgeView.SetFocus();
+    //if (sgAgeView.Enabled) and (sgAgeView.Visible) then sgAgeView.SetFocus();
 end;
 
 
 procedure TMainForm.sgOpenItemsMouseEnter(Sender: TObject);
 begin
-    if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then sgOpenItems.SetFocus();
+    //if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then sgOpenItems.SetFocus();
 end;
 
 
 procedure TMainForm.sgAddressBookMouseEnter(Sender: TObject);
 begin
-    if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then sgAddressBook.SetFocus();
+    //if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then sgAddressBook.SetFocus();
 end;
 
 
 procedure TMainForm.sgInvoiceTrackerMouseEnter(Sender: TObject);
 begin
-    if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then sgInvoiceTracker.SetFocus();
+    //if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then sgInvoiceTracker.SetFocus();
 end;
 
 
 procedure TMainForm.sgCoCodesMouseEnter(Sender: TObject);
 begin
-    if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then sgCoCodes.SetFocus();
+    //if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then sgCoCodes.SetFocus();
 end;
 
 
 procedure TMainForm.sgPaidInfoMouseEnter(Sender: TObject);
 begin
-    if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then sgPaidInfo.SetFocus();
+    //if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then sgPaidInfo.SetFocus();
 end;
 
 
 procedure TMainForm.sgPmtTermsMouseEnter(Sender: TObject);
 begin
-    if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then sgPmtTerms.SetFocus();
+    //if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then sgPmtTerms.SetFocus();
 end;
 
 
 procedure TMainForm.sgControlStatusMouseEnter(Sender: TObject);
 begin
-    if (sgControlStatus.Enabled) and (sgControlStatus.Visible) then sgControlStatus.SetFocus();
+    //if (sgControlStatus.Enabled) and (sgControlStatus.Visible) then sgControlStatus.SetFocus();
 end;
 
 
 procedure TMainForm.sgPersonRespMouseEnter(Sender: TObject);
 begin
-    if (sgPersonResp.Enabled) and (sgPersonResp.Visible) then sgPersonResp.SetFocus();
+    //if (sgPersonResp.Enabled) and (sgPersonResp.Visible) then sgPersonResp.SetFocus();
 end;
 
 
 procedure TMainForm.sgSalesRespMouseEnter(Sender: TObject);
 begin
-    if (sgSalesResp.Enabled) and (sgSalesResp.Visible) then sgSalesResp.SetFocus();
+    //if (sgSalesResp.Enabled) and (sgSalesResp.Visible) then sgSalesResp.SetFocus();
 end;
 
 
 procedure TMainForm.sgAccountTypeMouseEnter(Sender: TObject);
 begin
-    if (sgAccountType.Enabled) and (sgAccountType.Visible) then sgAccountType.SetFocus();
+    //if (sgAccountType.Enabled) and (sgAccountType.Visible) then sgAccountType.SetFocus();
 end;
 
 
 procedure TMainForm.sgCustomerGrMouseEnter(Sender: TObject);
 begin
-    if (sgCustomerGr.Enabled) and (sgCustomerGr.Visible) then sgCustomerGr.SetFocus();
+    //if (sgCustomerGr.Enabled) and (sgCustomerGr.Visible) then sgCustomerGr.SetFocus();
 end;
 
 
@@ -4550,7 +4568,7 @@ end;
 
 
 // OPEN ITEMS | WHEEL DOWN
-procedure TMainForm.sgOpenItemsMouseWheelDown(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.sgOpenItemsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     sgOpenItems.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
@@ -4558,7 +4576,7 @@ end;
 
 
 // OPEN ITEMS | WHEEL UP
-procedure TMainForm.sgOpenItemsMouseWheelUp(Sender: TObject; Shift:     TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.sgOpenItemsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     sgOpenItems.Perform(WM_VSCROLL, SB_LINEUP, 0);
@@ -4574,7 +4592,7 @@ end;
 
 
 // ADDRESS BOOK | WHEEL UP
-procedure TMainForm.sgAddressBookMouseWheelUp(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.sgAddressBookMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     sgAddressBook.Perform(WM_VSCROLL, SB_LINEUP, 0);
@@ -4606,7 +4624,7 @@ end;
 
 
 // SECTION LIST | WHEEL UP
-procedure TMainForm.sgListSectionMouseWheelUp(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.sgListSectionMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     sgListSection.Perform(WM_VSCROLL, SB_LINEUP, 0);
@@ -4614,7 +4632,7 @@ end;
 
 
 // VALUE LIST | WHEEL DOWN
-procedure TMainForm.sgListValueMouseWheelDown(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.sgListValueMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     sgListValue.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
@@ -4622,7 +4640,7 @@ end;
 
 
 // VALUE LIST  | WHEEL UP
-procedure TMainForm.sgListValueMouseWheelUp(Sender: TObject; Shift:     TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.sgListValueMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     sgListValue.Perform(WM_VSCROLL, SB_LINEUP, 0);
@@ -5039,6 +5057,13 @@ end;
 
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+
+    // <CTRL> + <ALT> + <W>
+    if (Key = 87) and (Shift = [ssAlt]) and (Shift = [ssCtrl]) then
+    begin
+        MainForm.sgAgeView.SetColWidth(10, 20, 400);
+        Exit();
+    end;
 
     // <CTRL> + <C>
     if (Key = 67) and (Shift = [ssCtrl]) then
