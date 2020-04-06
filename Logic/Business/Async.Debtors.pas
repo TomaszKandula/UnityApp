@@ -574,16 +574,14 @@ begin
         for var GridIndex:=1 to Grid.RowCount - 1 do
         begin
 
+            var TargetName:=Grid.Cells[ColTargetName, GridIndex];
+            var TargetCoCode:=Grid.Cells[ColTargetCoCode, GridIndex];
+
             for var SourceIndex:=1 to Source.RowCount - 1 do
             begin
 
-                var TargetName:=Grid.Cells[ColTargetName, GridIndex];
                 var SourceName:=Source.Cells[ColSourceId, SourceIndex];
-
-                var TargetCoCode:=Grid.Cells[ColTargetCoCode, GridIndex];
                 var SourceDbName:=Source.Cells[ColSourceDbName, SourceIndex];
-
-                if not SourceDbName.Contains('F') then SourceDbName:=THelpers.GetSourceDBName(SourceDbName, 'F');
 
                 if (TargetName = SourceName) and (FComparableDbName(TargetCoCode, IsPrefixRequired) = SourceDbName)
                 then
@@ -593,6 +591,8 @@ begin
                     begin
                         Grid.Cells[ColTargetName, GridIndex]:=Source.Cells[ColSourceDesc, SourceIndex];
                     end);
+
+                    Break;
 
                 end;
 

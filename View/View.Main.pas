@@ -1837,15 +1837,15 @@ begin
     UpdateAgeSummary(PayLoad);
     Service.Logger.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
-    AgeViewMapping();
-    SwitchTimers(TurnedOn);
-
     ClearOpenItemsSummary();
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
 
     Service.Mediator.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
     UpdateFollowUps(sgAgeView);
+    AgeViewMapping();
+
+    SwitchTimers(TurnedOn);
     BusyForm.Close();
 
 end;
