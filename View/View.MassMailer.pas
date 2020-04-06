@@ -184,7 +184,7 @@ begin
 
         if (SourceDbName = srcSourceDbName) and (CustNumber = srcCustomerNumber) then
         begin
-            Result:=Source.Cells[Source.GetCol('RegularEmails'), iCNT];
+            Result:=Source.Cells[Source.GetCol('StatementEmails'), iCNT];
             Exit();
         end;
 

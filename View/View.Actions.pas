@@ -1398,49 +1398,49 @@ end;
 
 procedure TActionsForm.Cust_PhoneMouseEnter(Sender: TObject);
 begin
-    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus();
+    //if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus();
 end;
 
 
 procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
 begin
-    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus();
+    //if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus();
 end;
 
 
 procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
 begin
-    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus();
+    //if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus();
 end;
 
 
 procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
 begin
-    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus();
+    //if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus();
 end;
 
 
 procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
 begin
-    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus();
+    //if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus();
 end;
 
 
 procedure TActionsForm.DailyComGridMouseEnter(Sender: TObject);
 begin
-    if (DailyComGrid.Enabled) and (DailyComGrid.Visible) then DailyComGrid.SetFocus();
+    //if (DailyComGrid.Enabled) and (DailyComGrid.Visible) then DailyComGrid.SetFocus();
 end;
 
 
 procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
 begin
-    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus();
+    //if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus();
 end;
 
 
 procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
 begin
-    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus();
+    //if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus();
 end;
 
 

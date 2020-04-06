@@ -5040,6 +5040,22 @@ end;
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
+    // <CTRL> + <C>
+    if (Key = 67) and (Shift = [ssCtrl]) then
+    begin
+        sgAgeView.CopyCutPaste(TActions.Copy);
+        Exit();
+    end;
+
+    // <CTRL> + <A>
+    if (Key = 65) and (Shift = [ssCtrl]) then
+    begin
+        sgAgeView.SelectAll();
+        sgAgeView.CopyCutPaste(TActions.Copy);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'The selected spreadsheet has been copied to clipboard.');
+        Exit();
+    end;
+
     if (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free1))
         and (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free2))
             and (sgAgeView.Col <> sgAgeView.GetCol(TReturnCustSnapshots._Free3))
@@ -5067,6 +5083,7 @@ begin
         Exit();
     end;
 
+    // <CTRL> + <V>
     if (Key = 86) and (Shift = [ssCtrl]) then
     begin
         sgAgeView.CopyCutPaste(TActions.Paste, True);
@@ -5120,19 +5137,7 @@ end;
 
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
-    // <CTRL> + <C>
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAgeView.CopyCutPaste(TActions.Copy);
-
-    // <CTRL> + <A>
-    if (Key = 65) and (Shift = [ssCtrl]) then
-    begin
-        sgAgeView.SelectAll();
-        sgAgeView.CopyCutPaste(TActions.Copy);
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'The selected spreadsheet has been copied to clipboard.');
-    end;
-
+    // Empty
 end;
 
 
