@@ -75,6 +75,7 @@ type
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
         class function ListToString(Input: TList<string>; TargetDelim: string): string; static;
+        class function StringToArray(DelimitedText: string; Delim: char): TArray<string>; static;
         class function ArrayStrToString(Input: TArray<string>; TargetDelim: string): string; static;
         class function ArrayIntToString(Input: TArray<integer>; TargetDelim: string): string; static;
         class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
@@ -481,6 +482,23 @@ begin
         else
             Result:=Result + Input.Items[iCNT];
 
+    end;
+
+end;
+
+
+class function THelpers.StringToArray(DelimitedText: string; Delim: char): TArray<string>;
+begin
+
+    Result:=TArray<string>.Create(DelimitedText);
+
+    var StringList:=TStringList.Create();
+    try
+        StringList.Delimiter:=Delim;
+        StringList.DelimitedText:=DelimitedText;
+        Result:=StringList.ToStringArray;
+    finally
+        StringList.Free();
     end;
 
 end;

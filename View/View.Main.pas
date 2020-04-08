@@ -824,7 +824,7 @@ type
             targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
-        const FPermitCheckTimeout = 120000;
+        const FPermitCheckTimeout = 900000; // 15 min.
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
@@ -2846,8 +2846,8 @@ begin
         TimerPermitCheck.Enabled:=False;
         THelpers.MsgCall(
             MainForm.Handle,
-            TAppMessage.Error,
-            'Active Directory user validation check is timed out. Access cannot be granted. Please contact IT Support.'
+            TAppMessage.Warn,
+            'Azure Active Directory user validation check has timed out. Please try to redeem your access. If you will still encounter issues, please contact IT support.'
         );
     end;
 

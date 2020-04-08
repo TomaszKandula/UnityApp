@@ -148,7 +148,8 @@ uses
     Unity.Constants,
     Unity.Service,
     Api.ReturnOpenItems,
-    Api.ReturnCustSnapshots;
+    Api.ReturnCustSnapshots,
+    Api.AddressBookList;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -176,16 +177,21 @@ end;
 function TMassMailerForm.GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
 begin
 
-    for var iCNT:=0 to Source.RowCount - 1 do
+    Result:='';
+
+    var Col1:=Source.GetCol(TAddressBookList._SourceDbName);
+    var Col2:=Source.GetCol(TAddressBookList._CustomerNumber);
+
+    for var iCNT:=1 to Source.RowCount - 1 do
     begin
 
-        var srcSourceDbName  :=Source.Cells[Source.GetCol('SourceDbName'),   iCNT];
-        var srcCustomerNumber:=Source.Cells[Source.GetCol('CustomerNumber'), iCNT];
+        var srcSourceDbName  :=Source.Cells[Col1, iCNT];
+        var srcCustomerNumber:=Source.Cells[Col2, iCNT];
 
         if (SourceDbName = srcSourceDbName) and (CustNumber = srcCustomerNumber) then
         begin
-            Result:=Source.Cells[Source.GetCol('StatementEmails'), iCNT];
-            Exit();
+            Result:=Source.Cells[Source.GetCol(TAddressBookList._StatementEmails), iCNT];
+            Break;
         end;
 
     end;
@@ -245,10 +251,10 @@ begin
         for var jCNT:=0 to Length(SourceArray) - 1 do
         begin
 
-            var listSourceDbName:=SourceArray[jCNT, 0];
-            var compSourceDbName:=TargetList.Items[iCNT].SubItems[5];
+            var ListSourceDbName:=SourceArray[jCNT, 0];
+            var CompSourceDbName:=TargetList.Items[iCNT].SubItems[5];
 
-            if listSourceDbName = compSourceDbName then
+            if ListSourceDbName = CompSourceDbName then
             begin
                 TargetList.Items[iCNT].SubItems[7]{LbuName}    :=SourceArray[jCNT, 1{LbuName}];
                 TargetList.Items[iCNT].SubItems[8]{LbuAddress} :=SourceArray[jCNT, 2{LbuAddress}];
@@ -267,20 +273,19 @@ end;
 procedure TMassMailerForm.SetEmailAddresses(List: TListView);
 begin
 
-    var EmailAddress: string;
-
     if List.Items.Count > 0 then
     begin
 
-        for var iCNT: integer:=0 to List.Items.Count - 1 do
+        for var iCNT:=0 to List.Items.Count - 1 do
         begin
 
             var lstSourceDbName  :=List.Items[iCNT].SubItems[5]{SourceDbName};
             var lstCustomerNumber:=List.Items[iCNT].SubItems[0]{CustomerNumber};
 
-            EmailAddress:=GetEmailAddress(lstSourceDbName, lstCustomerNumber, MainForm.sgAddressBook);
+            var EmailAddress:=GetEmailAddress(lstSourceDbName, lstCustomerNumber, MainForm.sgAddressBook);
 
-            if not(string.IsNullOrEmpty(EmailAddress)) then List.Items[iCNT].SubItems[4]{RegularEmails}:=EmailAddress
+            if not(string.IsNullOrEmpty(EmailAddress)) then List.Items[iCNT].SubItems[4]{StatementEmails}:=EmailAddress
+                else EmailAddress:='Not found!';
 
         end;
 

@@ -139,6 +139,7 @@ begin
     if cbNotDueOnly.Checked  then InvFilter:=TInvoiceFilter.SendNotDue;
 
     var TempStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
+    var ListEmailsTo:=THelpers.StringToArray(ActionsForm.Cust_Mail.Text, ';');
 
     OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
     CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
@@ -150,7 +151,7 @@ begin
     FPayLoad.BeginDate     :=ValBeginDate.Caption;
     FPayLoad.EndDate       :=ValEndDate.Caption;
     FPayLoad.SendFrom      :=ActionsForm.LbuSendFrom;
-    FPayLoad.MailTo        :=TArray<string>.Create(ActionsForm.Cust_Mail.Text);
+    FPayLoad.MailTo        :=ListEmailsTo;
     FPayLoad.SourceDBName  :=ActionsForm.SourceDBName;
     FPayLoad.CustName      :=ActionsForm.CustName;
     FPayLoad.CustNumber    :=ActionsForm.CustNumber;

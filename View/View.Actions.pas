@@ -1263,6 +1263,8 @@ begin
     OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
     CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
 
+    var ListEmailsTo:=THelpers.StringToArray(Cust_Mail.Text, ';');
+
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :='Account Statement';
     FPayLoad.Message       :='';
@@ -1270,7 +1272,7 @@ begin
     FPayLoad.BeginDate     :='';
     FPayLoad.EndDate       :='';
     FPayLoad.SendFrom      :=LbuSendFrom;
-    FPayLoad.MailTo        :=TArray<string>.Create(Cust_Mail.Text);
+    FPayLoad.MailTo        :=ListEmailsTo;
     FPayLoad.SourceDBName  :=SourceDBName;
     FPayLoad.CustNumber    :=CustNumber;
     FPayLoad.CustName      :=CustName;

@@ -232,10 +232,13 @@ begin
                 if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
                 begin
 
+                    var EmailsTo:=PayLoad.MailerList.Items[iCNT].SubItems[4];
+                    var ListEmailsTo:=THelpers.StringToArray(EmailsTo, ';');
+
                     PayLoad.CustNumber  :=(PayLoad.MailerList.Items[iCNT].SubItems[0]).ToInteger();
                     PayLoad.CustName    :=PayLoad.MailerList.Items[iCNT].SubItems[1];
                     PayLoad.SendFrom    :=PayLoad.MailerList.Items[iCNT].SubItems[3];
-                    PayLoad.MailTo      :=TArray<string>.Create(PayLoad.MailerList.Items[iCNT].SubItems[4]);
+                    PayLoad.MailTo      :=ListEmailsTo;
                     PayLoad.SourceDBName:=PayLoad.MailerList.Items[iCNT].SubItems[5];
                     PayLoad.BankDetails :=PayLoad.MailerList.Items[iCNT].SubItems[6];
                     PayLoad.LBUName     :=PayLoad.MailerList.Items[iCNT].SubItems[7];
