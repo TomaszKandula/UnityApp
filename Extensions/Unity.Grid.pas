@@ -792,8 +792,15 @@ begin
             // To Excel sheet
             for var Col:=0 to Self.ColCount - 1 do
                 for var Row:=0 to Self.RowCount - 1 do
-                    // We skip first string grid column
-                    Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
+                    begin
+                        // We skip first string grid column
+                        // and add ['] character to avoid Excel
+                        // autoformating of first row (header)
+                        if Row = 0 then
+                            Sheet.Cells[Row + RowOffset, Col + ColOffset]:='''' + Self.Cells[Col + 1, Row]
+                        else
+                            Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
+                    end;
 
             // Simple formatting
             for var Col:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;

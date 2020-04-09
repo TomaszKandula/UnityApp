@@ -23,20 +23,21 @@ type
     ICompanies = interface(IInterface)
     ['{E7616759-7564-44A4-BEEF-BDD220040E1E}']
         /// <summary>
-        /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
-        /// <summary>
-        /// Allow to load async. some company data like name, address, phone etc.
+        /// Allow to load async. company data as name, address, phone etc.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails);
+        procedure GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics);
+        /// <summary>
+        /// Allow to load async. lists of company data as name, address, phone etc.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCompanyListingsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyListings);
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
         /// </summary>
@@ -58,8 +59,8 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse; virtual;
-        procedure GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails); virtual;
+        procedure GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics); virtual;
+        procedure GetCompanyListingsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyListings); virtual;
         function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse; virtual;
     end;
 
@@ -76,7 +77,10 @@ uses
     Unity.Service,
     Api.CompanyData,
     Api.CompanyCodesList,
-    Api.CompanyEmailsList;
+    Api.CompanyEmailsList,
+    Api.ReturnCompanyDetails,
+    Api.CompanyDetails,
+    Api.UserCompanySelection;
 
 
 constructor TCompanies.Create();
@@ -90,86 +94,8 @@ begin
 end;
 
 
-// remove it after mass mailer refactored!
-// use only async version!
-function TCompanies.GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+procedure TCompanies.GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics);
 begin
-
-    var CallResponse: TCallResponse;
-    var CompanyData: TCompanyData;
-    try
-
-        var NewTask: ITask:=TTask.Create(procedure
-        begin
-
-            var Rest:=Service.InvokeRest();
-			Rest.AccessToken:=Service.AccessToken;
-            Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-            Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
-            Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-            Service.Logger.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Rest.ClientBaseURL);
-
-            try
-
-                if (Rest.Execute) and (Rest.StatusCode = 200) then
-                begin
-                    CompanyData:=TJson.JsonToObject<TCompanyData>(Rest.Content);
-                    CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-                end
-                else
-                begin
-
-                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                    else
-                        if String.IsNullOrEmpty(Rest.Content) then
-                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    Service.Logger.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    Service.Logger.Log(CallResponse.LastMessage);
-                end;
-
-            end;
-
-        end);
-
-        NewTask.Start();
-        TTask.WaitForAll(NewTask);
-
-        CompanyDetails.LbuName   :=CompanyData.CompanyName;
-        CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
-        CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
-        CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
-        CompanyDetails.Exclusions:=CompanyData.Exclusions;
-        FSetCompanyDetails(CompanyData.CompanyBanks, CompanyDetails.LbuBanks);
-
-    finally
-        CompanyData.Free();
-        Result:=CallResponse;
-    end;
-
-end;
-
-
-procedure TCompanies.GetCompanyDetailsAsync(SourceDBName: string; Callback: TGetCompanyDetails);
-begin
-
-    var CallResponse: TCallResponse;
-    var CompanyDetails: TCompanyDetails;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -182,6 +108,8 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
+        var CallResponse: TCallResponse;
+        var CompanySpecifics: TCompanySpecifics;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
@@ -189,12 +117,12 @@ begin
 
                 var CompanyData:=TJson.JsonToObject<TCompanyData>(Rest.Content);
                 try
-                    CompanyDetails.LbuName   :=CompanyData.CompanyName;
-                    CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
-                    CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
-                    CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
-                    CompanyDetails.Exclusions:=CompanyData.Exclusions;
-                    FSetCompanyDetails(CompanyData.CompanyBanks, CompanyDetails.LbuBanks);
+                    CompanySpecifics.LbuName   :=CompanyData.CompanyName;
+                    CompanySpecifics.LbuAddress:=CompanyData.CompanyAddress;
+                    CompanySpecifics.LbuPhones :=CompanyData.CompanyPhones;
+                    CompanySpecifics.LbuEmails :=CompanyData.CompanyEmails;
+                    CompanySpecifics.Exclusions:=CompanyData.Exclusions;
+                    FSetCompanyDetails(CompanyData.CompanyBanks, CompanySpecifics.LbuBanks);
                 finally
                     CompanyData.Free();
                 end;
@@ -232,7 +160,92 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CompanyDetails, CallResponse);
+            if Assigned(Callback) then Callback(CompanySpecifics, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+procedure TCompanies.GetCompanyListingsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyListings);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/details/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[GetCompanyListingsAsync]: Executing POST ' + Rest.ClientBaseURL);
+
+        var UserCompanySelection:=TUserCompanySelection.Create();
+        try
+            UserCompanySelection.SelectedCoCodes:=SelectedCompanies.ToArray();
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+        finally
+            UserCompanySelection.Free();
+        end;
+
+        var CallResponse: TCallResponse;
+        var CompanyListings: TCompanyListings;
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var ReturnCompanyDetails:=TJson.JsonToObject<TReturnCompanyDetails>(Rest.Content);
+                try
+
+                    CompanyListings:=ReturnCompanyDetails.CompanyDetails;
+
+                    CallResponse.LastMessage:=ReturnCompanyDetails.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=ReturnCompanyDetails.Error.ErrorCode;
+                    CallResponse.IsSucceeded:=True;
+
+                    Service.Logger.Log('[GetCompanyListingsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    ReturnCompanyDetails.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCompanyListingsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[GetCompanyListingsAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetCompanyListingsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetCompanyListingsAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CompanyListings, CallResponse);
+            CompanyListings.Dispose();
         end);
 
     end);

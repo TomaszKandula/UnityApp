@@ -210,7 +210,7 @@ object MassMailerForm: TMassMailerForm
       AlignWithMargins = True
       Left = 20
       Top = 68
-      Width = 85
+      Width = 497
       Height = 13
       Margins.Left = 20
       Margins.Top = 0
@@ -218,12 +218,13 @@ object MassMailerForm: TMassMailerForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom message:'
+      ExplicitWidth = 85
     end
     object TextSubject: TLabel
       AlignWithMargins = True
       Left = 20
       Top = 10
-      Width = 78
+      Width = 497
       Height = 13
       Margins.Left = 20
       Margins.Top = 10
@@ -231,6 +232,7 @@ object MassMailerForm: TMassMailerForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom subject:'
+      ExplicitWidth = 78
     end
     object PanelMessage: TPanel
       AlignWithMargins = True

@@ -72,9 +72,13 @@ type
     /// </summary>
     TGetGeneralComments = procedure(Comments: TGeneralCommentFields; CallResponse: TCallResponse) of object;
     /// <summary>
+    /// Callback signature for getting list of details for given companies.
+    /// </summary>
+    TGetCompanyListings = procedure(CompanyListings: TCompanyListings; CallResponse: TCallResponse) of object;
+    /// <summary>
     /// Callback signature for getting results for company details.
     /// </summary>
-    TGetCompanyDetails = procedure(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse) of object;
+    TGetCompanySpecifics = procedure(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse) of object;
     /// <summary>
     /// Callback signature for reading current age report from SQL database.
     /// </summary>

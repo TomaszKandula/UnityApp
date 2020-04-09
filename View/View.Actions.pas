@@ -240,7 +240,7 @@ type
         procedure GetDailyCommentsAsync_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
         procedure GetGeneralCommentAsync_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
         procedure GetCustomerDetailsAsync_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
-        procedure GetCompanyDetailsAsync_Callback(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse);
+        procedure GetCompanySpecificsAsync_Callback(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse);
     public
         property SourceDBName: string read FSourceDBName;
         property CustName: string read FCustName;
@@ -454,7 +454,7 @@ end;
 
 procedure TActionsForm.UpdateCompanyDetails();
 begin
-    Service.Mediator.Companies.GetCompanyDetailsAsync(SourceDBName, GetCompanyDetailsAsync_Callback);
+    Service.Mediator.Companies.GetCompanySpecificsAsync(SourceDBName, GetCompanySpecificsAsync_Callback);
 end;
 
 
@@ -987,7 +987,7 @@ begin
 end;
 
 
-procedure TActionsForm.GetCompanyDetailsAsync_Callback(CompanyDetails: TCompanyDetails; CallResponse: TCallResponse);
+procedure TActionsForm.GetCompanySpecificsAsync_Callback(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse);
 begin
 
     var LbuEmails:=TStringList.Create();
@@ -996,20 +996,20 @@ begin
         if not CallResponse.IsSucceeded then
         begin
             THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-            CompanyDetails.Dispose();
+            CompanySpecifics.Dispose();
             LbuEmails.Free();
             Exit();
         end;
 
-        FLbuName   :=CompanyDetails.LbuName;
-        FLbuAddress:=CompanyDetails.LbuAddress;
-        FExclusions:=CompanyDetails.Exclusions;
+        FLbuName   :=CompanySpecifics.LbuName;
+        FLbuAddress:=CompanySpecifics.LbuAddress;
+        FExclusions:=CompanySpecifics.Exclusions;
 
-        FLbuPhones   :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
-        FLbuBanksHtml:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+        FLbuPhones   :=THelpers.ArrayStrToString(CompanySpecifics.LbuPhones, ';');
+        FLbuBanksHtml:=THelpers.BankListToHtml(CompanySpecifics.LbuBanks);
 
         selSendFrom.Clear();
-        THelpers.StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
+        THelpers.StrArrayToStrings(CompanySpecifics.LbuEmails, LbuEmails);
         selSendFrom.Items.AddStrings(LbuEmails);
         if selSendFrom.Items.Count > 0 then
         begin
@@ -1019,7 +1019,7 @@ begin
 
     finally
         LbuEmails.Free();
-        CompanyDetails.Dispose();
+        CompanySpecifics.Dispose();
     end;
 
 end;

@@ -125,6 +125,7 @@ type
         procedure ExecuteMailer();
     public
         property ItemCount: integer read FItemCount write FItemCount;
+        procedure GetCompanyDetails_Callback(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse);
         procedure SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
@@ -202,42 +203,50 @@ end;
 procedure TMassMailerForm.GetCompanyDetails(LoadedCompanies: TList<string>);
 begin
 
-    var CompanyDetails: TCompanyDetails;
-    var CallResponse: TCallResponse;
+//    var CompanyDetails: TCompanyDetails;
+//    var CallResponse: TCallResponse;
+//
+//    SetLength(FCompanyDetails, LoadedCompanies.Count, 6);
+//    for var iCNT:=0 to LoadedCompanies.Count - 1 do
+//    begin
+//
+//        CallResponse:=Service.Mediator.Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
+//
+//        if CallResponse.IsSucceeded then
+//        begin
+//
+//            var LbuPhones :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
+//            var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.Exclusions, ';');
+//            var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+//
+//            FCompanyDetails[iCNT, 0]:=LoadedCompanies[iCNT];
+//            FCompanyDetails[iCNT, 1]:=CompanyDetails.LbuName;
+//            FCompanyDetails[iCNT, 2]:=CompanyDetails.LbuAddress;
+//            FCompanyDetails[iCNT, 3]:=LbuPhones;
+//            FCompanyDetails[iCNT, 4]:=LbuBanks;
+//            FCompanyDetails[iCNT, 5]:=Exclusions;
+//
+//            var PreservedLen:=Length(FLbuEmails);
+//            SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
+//            for var jCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
+//            begin
+//                FLbuEmails[jCNT + PreservedLen, 0]:=LoadedCompanies[iCNT];
+//                FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.LbuEmails[jCNT];
+//            end;
+//
+//        end;
+//
+//        CompanyDetails.Dispose();
+//
+//    end;
 
-    SetLength(FCompanyDetails, LoadedCompanies.Count, 6);
-    for var iCNT:=0 to LoadedCompanies.Count - 1 do
-    begin
+end;
 
-        CallResponse:=Service.Mediator.Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
 
-        if CallResponse.IsSucceeded then
-        begin
+procedure TMassMailerForm.GetCompanyDetails_Callback(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse);
+begin
 
-            var LbuPhones :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
-            var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.Exclusions, ';');
-            var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
 
-            FCompanyDetails[iCNT, 0]:=LoadedCompanies[iCNT];
-            FCompanyDetails[iCNT, 1]:=CompanyDetails.LbuName;
-            FCompanyDetails[iCNT, 2]:=CompanyDetails.LbuAddress;
-            FCompanyDetails[iCNT, 3]:=LbuPhones;
-            FCompanyDetails[iCNT, 4]:=LbuBanks;
-            FCompanyDetails[iCNT, 5]:=Exclusions;
-
-            var PreservedLen:=Length(FLbuEmails);
-            SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
-            for var jCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
-            begin
-                FLbuEmails[jCNT + PreservedLen, 0]:=LoadedCompanies[iCNT];
-                FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.LbuEmails[jCNT];
-            end;
-
-        end;
-
-        CompanyDetails.Dispose();
-
-    end;
 
 end;
 

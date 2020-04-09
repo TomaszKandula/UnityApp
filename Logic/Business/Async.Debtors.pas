@@ -623,16 +623,5 @@ begin
 end;
 
 
-//function TDebtors.FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
-//begin
-//
-//    case IsPrefixRequired of
-//        True:  Result:=THelpers.GetSourceDBName(InputString, 'F');
-//        False: Result:=InputString;
-//    end;
-//
-//end;
-
-
 end.
 

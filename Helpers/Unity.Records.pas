@@ -17,7 +17,8 @@ uses
     Unity.Grid,
     Unity.References,
     Unity.ListView,
-    Api.BankDetails;
+    Api.BankDetails,
+    Api.CompanyDetails;
 
 
 // -----------------------------------
@@ -68,9 +69,17 @@ type
     end;
 
     /// <summary>
+    /// Carries a group of variables to be received back when queried by async. task.
+    /// </summary>
+    TCompanyListings = record
+        Details: TArray<TCompanyDetails>;
+        procedure Dispose();
+    end;
+
+    /// <summary>
     /// Carries a group of variables to be received back when queried by awaited async. task.
     /// </summary>
-    TCompanyDetails = record
+    TCompanySpecifics = record
         LbuName:    string;
         LbuAddress: string;
         LbuPhones:  TArray<string>;
@@ -252,10 +261,10 @@ type
     /// Carries a group of variables for open items summary with ledger currency and other currency.
     /// </summary>
     TOpenItemsTotal = record
-        OpenAm:     double;
-        Am:         double;
-        OpenCurAm:  double;
-        CurAm:      double;
+        OpenAm:    double;
+        Am:        double;
+        OpenCurAm: double;
+        CurAm:     double;
     end;
 
 
@@ -280,10 +289,17 @@ begin
 end;
 
 
-procedure TCompanyDetails.Dispose();
+procedure TCompanySpecifics.Dispose();
 begin
     for var BankDetails: TBankDetails in LbuBanks do BankDetails.Free();
-    Self:=Default(TCompanyDetails);
+    Self:=Default(TCompanySpecifics);
+end;
+
+
+procedure TCompanyListings.Dispose();
+begin
+    for var CompanyDetails: TCompanyDetails in Details do CompanyDetails.Free();
+    Self:=Default(TCompanyListings);
 end;
 
 
