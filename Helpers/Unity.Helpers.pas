@@ -113,7 +113,7 @@ uses
     Unity.Constants,
     Unity.Settings,
     Unity.Sorting,
-    Api.ReturnCustSnapshots;
+    Api.CustomerSnapshotEx;
 
 
 class function TArrayUtils<T>.Contains(const x: T; const anArray: array of T): boolean;
@@ -1036,23 +1036,23 @@ begin
     for var Index:=1 to Grid.RowCount - 1 do if Grid.RowHeights[Index] <> Grid.sgRowHidden then
     begin
 
-        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._NotDue), Index], 0);
-        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range1), Index], 0);
-        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range2), Index], 0);
-        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range3), Index], 0);
-        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range4), Index], 0);
-        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range5), Index], 0);
-        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Range6), Index], 0);
+        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._NotDue), Index], 0);
+        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range1), Index], 0);
+        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range2), Index], 0);
+        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range3), Index], 0);
+        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range4), Index], 0);
+        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range5), Index], 0);
+        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range6), Index], 0);
 
-        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Total), Index], 0);
-        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditLimit), Index], 0);
+        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Total), Index], 0);
+        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._CreditLimit), Index], 0);
 
-        if StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditBalance), Index], 0) < 0 then
+        if StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._CreditBalance), Index], 0) < 0 then
         begin
 
             Inc(AgingPayLoad.Exceeders);
             AgingPayLoad.TotalExceed:=
-                AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.GetCol(TReturnCustSnapshots._CreditBalance), Index], 0));
+                AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._CreditBalance), Index], 0));
 
         end;
 
@@ -1083,7 +1083,7 @@ begin
         SetLength(ListPosition, Rows + 1);
         SetLength(TotalPerItem, Rows + 1);
         ListPosition[Rows]:=Index;
-        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.GetCol(TReturnCustSnapshots._Total), Index]), 0);
+        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Total), Index]), 0);
         Inc(Rows);
     end;
 

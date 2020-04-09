@@ -14,7 +14,7 @@ interface
 uses
     Api.ErrorHandler,
     Api.MetaData,
-    Api.CustomerSnapshot;
+    Api.CustomerSnapshotEx;
 
 
 type
@@ -22,12 +22,12 @@ type
 
     TReturnCustomerReport = class
     strict private
-        var FAgeDate:           string;
-        var FSnapshotDt:        string;
-        var FCustomerSnapshot:  TArray<TCustomerSnapshot>;
-        var FIsSucceeded:       boolean;
-        var FError:             TErrorHandler;
-        var FMeta:              TMetaData;
+        var FCustomerSnapshotEx: TArray<TCustomerSnapshotEx>;
+        var FAgeDate:            string;
+        var FSnapshotDt:         string;
+        var FIsSucceeded:        boolean;
+        var FError:              TErrorHandler;
+        var FMeta:               TMetaData;
     public
         destructor Destroy(); override;
         const _AgeDate          = 'Age Date';
@@ -35,12 +35,12 @@ type
         const _IsSucceeded      = 'IsSucceeded';
         const _Error            = 'Error';
         const _Meta             = 'Meta';
-        property AgeDate:          string                    read FAgeDate          write FAgeDate;
-        property SnapshotDt:       string                    read FSnapshotDt       write FSnapshotDt;
-        property CustomerSnapshot: TArray<TCustomerSnapshot> read FCustomerSnapshot write FCustomerSnapshot;
-        property IsSucceeded:      boolean                   read FIsSucceeded      write FIsSucceeded;
-        property Error:            TErrorHandler             read FError            write FError;
-        property Meta:             TMetaData                 read FMeta             write FMeta;
+        property CustomerSnapshotEx: TArray<TCustomerSnapshotEx> read FCustomerSnapshotEx write FCustomerSnapshotEx;
+        property AgeDate:            string                      read FAgeDate            write FAgeDate;
+        property SnapshotDt:         string                      read FSnapshotDt         write FSnapshotDt;
+        property IsSucceeded:        boolean                     read FIsSucceeded        write FIsSucceeded;
+        property Error:              TErrorHandler               read FError              write FError;
+        property Meta:               TMetaData                   read FMeta               write FMeta;
     end;
 
 
@@ -49,11 +49,15 @@ implementation
 
 destructor TReturnCustomerReport.Destroy();
 begin
-    for var CustomerSnapshot: TCustomerSnapshot in FCustomerSnapshot do
-        if Assigned(CustomerSnapshot) then CustomerSnapshot.Free();
+
+    for var CustomerSnapshotEx: TCustomerSnapshotEx in FCustomerSnapshotEx do
+        if Assigned(CustomerSnapshotEx) then CustomerSnapshotEx.Free();
+
     if Assigned(FError) then FError.Free();
     if Assigned(FMeta) then FMeta.Free();
+
     inherited;
+
 end;
 
 

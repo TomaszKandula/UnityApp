@@ -1,4 +1,4 @@
-unit Api.CustomerSnapshot;
+unit Api.CustomerSnapshotEx;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -14,7 +14,7 @@ interface
 type
 
 
-    TCustomerSnapshot = class
+    TCustomerSnapshotEx = class
     strict private
         var FCustomerName:      string;
         var FCustomerNumber:    Int64;
@@ -43,6 +43,8 @@ type
         var FFree1:             string;
         var FFree2:             string;
         var FFree3:             string;
+        var FGeneralComment:    string;
+        var FDailyComment:      string;
     public
         const _CustomerName      = 'Customer Name';
         const _CustomerNumber    = 'Customer Number';
@@ -71,6 +73,8 @@ type
         const _Free1             = 'Free 1';
         const _Free2             = 'Free 2';
         const _Free3             = 'Free 3';
+        const _GeneralComment    = 'GeneralComment';
+        const _DailyComment      = 'DailyComment';
         property CustomerName:      string   read FCustomerName      write FCustomerName;
         property CustomerNumber:    Int64    read FCustomerNumber    write FCustomerNumber;
         property CountryCode:       integer  read FCountryCode       write FCountryCode;
@@ -98,6 +102,8 @@ type
         property Free1:             string   read FFree1             write FFree1;
         property Free2:             string   read FFree2             write FFree2;
         property Free3:             string   read FFree3             write FFree3;
+        property GeneralComment:    string   read FGeneralComment    write FGeneralComment;
+        property DailyComment:      string   read FDailyComment      write FDailyComment;
     end;
 
 

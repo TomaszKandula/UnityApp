@@ -117,10 +117,10 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2023;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2036;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Build>2023</VerInfo_Build>
+        <VerInfo_Build>2036</VerInfo_Build>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_PreRelease>false</VerInfo_PreRelease>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
@@ -192,6 +192,7 @@
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
         <DCCReference Include="Model\Api.UserPermissions.pas"/>
         <DCCReference Include="Model\Api.CustomerSnapshot.pas"/>
+        <DCCReference Include="Model\Api.CustomerSnapshotEx.pas"/>
         <DCCReference Include="Model\Api.FollowUpData.pas"/>
         <DCCReference Include="Model\Api.FreeFields.pas"/>
         <DCCReference Include="Model\Api.MetaData.pas"/>
@@ -250,7 +251,7 @@
         <DCCReference Include="Model\Responses\Api.ReturnCustomerGroup.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnSsisData.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnOpenItems.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCustSnapshots.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCustomerSnapshots.pas"/>
         <DCCReference Include="Model\Responses\Api.TokenGranted.pas"/>
         <DCCReference Include="Model\Responses\Api.AddressBookUpdated.pas"/>
         <DCCReference Include="Model\Responses\Api.UserGeneralCommentCheck.pas"/>

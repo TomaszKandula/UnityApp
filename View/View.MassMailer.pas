@@ -148,7 +148,7 @@ uses
     Unity.Constants,
     Unity.Service,
     Api.ReturnOpenItems,
-    Api.ReturnCustSnapshots,
+    Api.CustomerSnapshotEx,
     Api.AddressBookList;
 
 
@@ -342,9 +342,9 @@ begin
         if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
         begin
 
-            var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT];
-            var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), iCNT];
-            var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT];
+            var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerNumber), iCNT];
+            var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerName), iCNT];
+            var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName), iCNT];
 
             // Visible fields
             Item:=MassMailerForm.CustomerList.Items.Add();

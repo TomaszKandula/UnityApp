@@ -278,7 +278,7 @@ uses
     Unity.Sorting,
     Api.ReturnOpenItems,
     Api.UserDailyCommentsList,
-    Api.ReturnCustSnapshots,
+    Api.CustomerSnapshotEx,
     Api.AddressBookList;
 
 
@@ -526,9 +526,9 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), MainForm.sgAgeView.Row];
-    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
-    FSourceDBName:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), MainForm.sgAgeView.Row]);
+    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerName), MainForm.sgAgeView.Row];
+    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
+    FSourceDBName:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName), MainForm.sgAgeView.Row]);
 end;
 
 
@@ -603,7 +603,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
         if
             (MainForm.sgAgeView.RowHeights[Iterator] <> -1)
         and
-            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._Overdue), Iterator] <> '0')
+            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._Overdue), Iterator] <> '0')
         then
         begin
             MainForm.sgAgeView.Row:=Iterator;
@@ -666,7 +666,7 @@ begin
 
         Service.Mediator.Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), MainForm.sgAgeView.Row]:='';
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._FollowUp), MainForm.sgAgeView.Row]:='';
         MainForm.UpdateFollowUps(MainForm.sgAgeView);
 
     end;

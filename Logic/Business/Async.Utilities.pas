@@ -360,15 +360,25 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var CallResponse: TCallResponse;
+        var LCallResponse: TCallResponse;
         var PayLoad: TAgingPayLoad;
+        try
+            THelpers.ComputeAgeSummary(Source, PayLoad);
+            THelpers.ComputeRiskClass(Source, PayLoad, RiskClassGroup);
+            LCallResponse.IsSucceeded:=True;
+        except
+            on E: Exception do
+            begin
+                LCallResponse.IsSucceeded:=False;
+                LCallResponse.LastMessage:='[RecalcAgeViewSummaryAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(LCallResponse.LastMessage);
+            end;
 
-        THelpers.ComputeAgeSummary(Source, PayLoad);
-        THelpers.ComputeRiskClass(Source, PayLoad, RiskClassGroup);
+        end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(PayLoad, CallResponse);
+            if Assigned(Callback) then Callback(PayLoad, LCallResponse);
         end);
 
     end);
