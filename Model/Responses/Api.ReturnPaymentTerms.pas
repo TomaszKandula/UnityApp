@@ -13,7 +13,8 @@ interface
 
 uses
     Api.ErrorHandler,
-    Api.MetaData;
+    Api.MetaData,
+    Api.PaymentTermsFields;
 
 
 type
@@ -21,44 +22,16 @@ type
 
     TReturnPaymentTerms = class
     strict private
-        var FId:               TArray<integer>;
-        var FErpCode:          TArray<integer>;
-        var FDescription:      TArray<string>;
-        var FMonth:            TArray<integer>;
-        var FDays:             TArray<integer>;
-        var FDaysNet:          TArray<integer>;
-        var FUsing:            TArray<integer>;
-        var FExtractDateStamp: TArray<TDateTime>;
-        var FProcessBatchKey:  TArray<integer>;
-        var FEntity:           TArray<integer>;
-        var FIsSucceeded:      boolean;
-        var FError:            TErrorHandler;
-        var FMeta:             TMetaData;
+        var FPaymentTerms: TArray<TPaymentTermsFields>;
+        var FIsSucceeded:  boolean;
+        var FError:        TErrorHandler;
+        var FMeta:         TMetaData;
     public
         destructor Destroy(); override;
-        const _Id               = 'Id';
-        const _ErpCode          = 'ErpCode';
-        const _Description      = 'Description';
-        const _Month            = 'Month';
-        const _Days             = 'Days';
-        const _DaysNet          = 'DaysNet';
-        const _Using            = 'Using';
         const _IsSucceeded      = 'IsSucceeded';
-        const _ExtractDateStamp = 'ExtractDateStamp';
-        const _ProcessBatchKey  = 'ProcessBatchKey';
-        const _Entity           = 'Entity';
         const _Error            = 'Error';
         const _Meta             = 'Meta';
-        property Id:               TArray<integer>   read FId               write FId;
-        property ErpCode:          TArray<integer>   read FErpCode          write FErpCode;
-        property Description:      TArray<string>    read FDescription      write FDescription;
-        property Month:            TArray<integer>   read FMonth            write FMonth;
-        property Days:             TArray<integer>   read FDays             write FDays;
-        property DaysNet:          TArray<integer>   read FDaysNet          write FDaysNet;
-        property Using:            TArray<integer>   read FUsing            write FUsing;
-        property ExtractDateStamp: TArray<TDateTime> read FExtractDateStamp write FExtractDateStamp;
-        property ProcessBatchKey:  TArray<integer>   read FProcessBatchKey  write FProcessBatchKey;
-        property Entity:           TArray<integer>   read FEntity           write FEntity;
+        property PaymentTerms: TArray<TPaymentTermsFields> read FPaymentTerms write FPaymentTerms;
         property IsSucceeded:      boolean           read FIsSucceeded      write FIsSucceeded;
         property Error:            TErrorHandler     read FError            write FError;
         property Meta:             TMetaData         read FMeta             write FMeta;
@@ -70,9 +43,15 @@ implementation
 
 destructor TReturnPaymentTerms.Destroy();
 begin
+
+    for var PaymentTerms: TPaymentTermsFields in FPaymentTerms do
+        if Assigned(PaymentTerms) then PaymentTerms.Free();
+
     if Assigned(FError) then FError.Free();
     if Assigned(FMeta) then FMeta.Free();
+
     inherited;
+
 end;
 
 

@@ -37,7 +37,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure GetCompanyListingsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyListings);
+        procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails);
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
         /// </summary>
@@ -60,7 +60,7 @@ type
         constructor Create();
         destructor Destroy(); override;
         procedure GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics); virtual;
-        procedure GetCompanyListingsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyListings); virtual;
+        procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails); virtual;
         function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse; virtual;
     end;
 
@@ -170,7 +170,7 @@ begin
 end;
 
 
-procedure TCompanies.GetCompanyListingsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyListings);
+procedure TCompanies.GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -193,27 +193,16 @@ begin
         end;
 
         var CallResponse: TCallResponse;
-        var CompanyListings: TCompanyListings;
+        var ReturnCompanyDetails: TReturnCompanyDetails;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var ReturnCompanyDetails:=TJson.JsonToObject<TReturnCompanyDetails>(Rest.Content);
-                try
-
-                    CompanyListings:=ReturnCompanyDetails.CompanyDetails;
-
-                    CallResponse.LastMessage:=ReturnCompanyDetails.Error.ErrorDesc;
-                    CallResponse.ErrorCode  :=ReturnCompanyDetails.Error.ErrorCode;
-                    CallResponse.IsSucceeded:=True;
-
-                    Service.Logger.Log('[GetCompanyListingsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    ReturnCompanyDetails.Free();
-                end;
-
+                ReturnCompanyDetails:=TJson.JsonToObject<TReturnCompanyDetails>(Rest.Content);
+                CallResponse.LastMessage:=ReturnCompanyDetails.Error.ErrorDesc;
+                CallResponse.ErrorCode  :=ReturnCompanyDetails.Error.ErrorCode;
+                CallResponse.IsSucceeded:=True;
+                Service.Logger.Log('[GetCompanyListingsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
@@ -244,8 +233,8 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CompanyListings, CallResponse);
-            CompanyListings.Dispose();
+            if Assigned(Callback) then Callback(ReturnCompanyDetails, CallResponse);
+            if Assigned(ReturnCompanyDetails) then ReturnCompanyDetails.Free();
         end);
 
     end);

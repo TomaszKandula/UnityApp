@@ -142,12 +142,17 @@ uses
     Unity.Helpers,
     Unity.Service,
     Api.ReturnCompanies,
-    Api.ReturnAccountType,
-    Api.ReturnPaidInfo,
+    Api.CompaniesFields,
     Api.ReturnControlStatus,
+    Api.ControlStatusFields,
+    Api.ReturnPaidInfo,
+    Api.PaidInfoFields,
+    Api.ReturnPaymentTerms,
+    Api.PaymentTermsFields,
+
+    Api.ReturnAccountType,
     Api.ReturnPersonResponsible,
     Api.ReturnSalesResponsible,
-    Api.ReturnPaymentTerms,
     Api.ReturnCustomerGroup;
 
 
@@ -187,42 +192,42 @@ begin
                 var ReturnCompanies:=TJson.JsonToObject<TReturnCompanies>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnCompanies.SourceDbName);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnCompanies.Companies);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=15;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnCompanies._SourceDbName;
-                    TargetGrid.Cells[2, 0]:=ReturnCompanies._CompanyCode;
-                    TargetGrid.Cells[3, 0]:=ReturnCompanies._CompanyName;
-                    TargetGrid.Cells[4, 0]:=ReturnCompanies._CompanyAddress;
-                    TargetGrid.Cells[5, 0]:=ReturnCompanies._CompanyVat;
-                    TargetGrid.Cells[6, 0]:=ReturnCompanies._CompanyDuns;
-                    TargetGrid.Cells[7, 0]:=ReturnCompanies._CompanyRate;
-                    TargetGrid.Cells[8, 0]:=ReturnCompanies._KpiOvdTarget;
-                    TargetGrid.Cells[9, 0]:=ReturnCompanies._KpiUnallTarget;
-                    TargetGrid.Cells[10,0]:=ReturnCompanies._StatBeforeRem;
-                    TargetGrid.Cells[11,0]:=ReturnCompanies._LbuType;
-                    TargetGrid.Cells[12,0]:=ReturnCompanies._Currency;
-                    TargetGrid.Cells[13,0]:=ReturnCompanies._City;
-                    TargetGrid.Cells[14,0]:=ReturnCompanies._Country;
+                    TargetGrid.Cells[1, 0]:=TCompaniesFields._SourceDbName;
+                    TargetGrid.Cells[2, 0]:=TCompaniesFields._CompanyCode;
+                    TargetGrid.Cells[3, 0]:=TCompaniesFields._CompanyName;
+                    TargetGrid.Cells[4, 0]:=TCompaniesFields._CompanyAddress;
+                    TargetGrid.Cells[5, 0]:=TCompaniesFields._CompanyVat;
+                    TargetGrid.Cells[6, 0]:=TCompaniesFields._CompanyDuns;
+                    TargetGrid.Cells[7, 0]:=TCompaniesFields._CompanyRate;
+                    TargetGrid.Cells[8, 0]:=TCompaniesFields._KpiOvdTarget;
+                    TargetGrid.Cells[9, 0]:=TCompaniesFields._KpiUnallTarget;
+                    TargetGrid.Cells[10,0]:=TCompaniesFields._StatBeforeRem;
+                    TargetGrid.Cells[11,0]:=TCompaniesFields._LbuType;
+                    TargetGrid.Cells[12,0]:=TCompaniesFields._Currency;
+                    TargetGrid.Cells[13,0]:=TCompaniesFields._City;
+                    TargetGrid.Cells[14,0]:=TCompaniesFields._Country;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var Index:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnCompanies.SourceDbName[iCNT - 1];
-                        TargetGrid.Cells[2, iCNT]:=ReturnCompanies.CompanyCode[iCNT - 1].ToString();
-                        TargetGrid.Cells[3, iCNT]:=ReturnCompanies.CompanyName[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnCompanies.CompanyAddress[iCNT - 1];
-                        TargetGrid.Cells[5, iCNT]:=ReturnCompanies.CompanyVat[iCNT - 1];
-                        TargetGrid.Cells[6, iCNT]:=ReturnCompanies.CompanyDuns[iCNT - 1].ToString();
-                        TargetGrid.Cells[7, iCNT]:=ReturnCompanies.CompanyRate[iCNT - 1].ToString();
-                        TargetGrid.Cells[8, iCNT]:=ReturnCompanies.KpiOvdTarget[iCNT - 1].ToString();
-                        TargetGrid.Cells[9, iCNT]:=ReturnCompanies.KpiUnallTarget[iCNT - 1].ToString();
-                        TargetGrid.Cells[10,iCNT]:=ReturnCompanies.StatBeforeRem[iCNT - 1].ToString();
-                        TargetGrid.Cells[11,iCNT]:=ReturnCompanies.LbuType[iCNT - 1];
-                        TargetGrid.Cells[12,iCNT]:=ReturnCompanies.Currency[iCNT - 1];
-                        TargetGrid.Cells[13,iCNT]:=ReturnCompanies.City[iCNT - 1];
-                        TargetGrid.Cells[14,iCNT]:=ReturnCompanies.Country[iCNT - 1];
+                        TargetGrid.Cells[1, Index]:=ReturnCompanies.Companies[Index - 1].SourceDbName;
+                        TargetGrid.Cells[2, Index]:=ReturnCompanies.Companies[Index - 1].CompanyCode.ToString();
+                        TargetGrid.Cells[3, Index]:=ReturnCompanies.Companies[Index - 1].CompanyName;
+                        TargetGrid.Cells[4, Index]:=ReturnCompanies.Companies[Index - 1].CompanyAddress;
+                        TargetGrid.Cells[5, Index]:=ReturnCompanies.Companies[Index - 1].CompanyVat;
+                        TargetGrid.Cells[6, Index]:=ReturnCompanies.Companies[Index - 1].CompanyDuns.ToString();
+                        TargetGrid.Cells[7, Index]:=ReturnCompanies.Companies[Index - 1].CompanyRate.ToString();
+                        TargetGrid.Cells[8, Index]:=ReturnCompanies.Companies[Index - 1].KpiOvdTarget.ToString();
+                        TargetGrid.Cells[9, Index]:=ReturnCompanies.Companies[Index - 1].KpiUnallTarget.ToString();
+                        TargetGrid.Cells[10,Index]:=ReturnCompanies.Companies[Index - 1].StatBeforeRem.ToString();
+                        TargetGrid.Cells[11,Index]:=ReturnCompanies.Companies[Index - 1].LbuType;
+                        TargetGrid.Cells[12,Index]:=ReturnCompanies.Companies[Index - 1].Currency;
+                        TargetGrid.Cells[13,Index]:=ReturnCompanies.Companies[Index - 1].City;
+                        TargetGrid.Cells[14,Index]:=ReturnCompanies.Companies[Index - 1].Country;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -299,22 +304,22 @@ begin
                 var ReturnControlStatus:=TJson.JsonToObject<TReturnControlStatus>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnControlStatus.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnControlStatus.ControlStatus);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=5;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnControlStatus._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnControlStatus._Code;
-                    TargetGrid.Cells[3, 0]:=ReturnControlStatus._Text;
-                    TargetGrid.Cells[4, 0]:=ReturnControlStatus._Description;
+                    TargetGrid.Cells[1, 0]:=TControlStatusFields._Id;
+                    TargetGrid.Cells[2, 0]:=TControlStatusFields._Code;
+                    TargetGrid.Cells[3, 0]:=TControlStatusFields._Text;
+                    TargetGrid.Cells[4, 0]:=TControlStatusFields._Description;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var iCNT:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnControlStatus.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnControlStatus.Code[iCNT - 1].ToString();
-                        TargetGrid.Cells[3, iCNT]:=ReturnControlStatus.Text[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnControlStatus.Description[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnControlStatus.ControlStatus[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnControlStatus.ControlStatus[iCNT - 1].Code.ToString();
+                        TargetGrid.Cells[3, iCNT]:=ReturnControlStatus.ControlStatus[iCNT - 1].Text;
+                        TargetGrid.Cells[4, iCNT]:=ReturnControlStatus.ControlStatus[iCNT - 1].Description;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -391,20 +396,20 @@ begin
                 var ReturnPaidInfo:=TJson.JsonToObject<TReturnPaidInfo>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnPaidInfo.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnPaidInfo.PaidInfo);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=4;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnPaidInfo._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnPaidInfo._ErpCode;
-                    TargetGrid.Cells[3, 0]:=ReturnPaidInfo._Description;
+                    TargetGrid.Cells[1, 0]:=TPaidInfoFields._Id;
+                    TargetGrid.Cells[2, 0]:=TPaidInfoFields._ErpCode;
+                    TargetGrid.Cells[3, 0]:=TPaidInfoFields._Description;
 
                     for var iCNT:=1{Skip header} to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnPaidInfo.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnPaidInfo.ErpCode[iCNT - 1];
-                        TargetGrid.Cells[3, iCNT]:=ReturnPaidInfo.Description[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnPaidInfo.PaidInfo[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnPaidInfo.PaidInfo[iCNT - 1].ErpCode;
+                        TargetGrid.Cells[3, iCNT]:=ReturnPaidInfo.PaidInfo[iCNT - 1].Description;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -481,30 +486,30 @@ begin
                 var ReturnPaymentTerms:=TJson.JsonToObject<TReturnPaymentTerms>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnPaymentTerms.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnPaymentTerms.PaymentTerms);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=9;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnPaymentTerms._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnPaymentTerms._ErpCode;
-                    TargetGrid.Cells[3, 0]:=ReturnPaymentTerms._Description;
-                    TargetGrid.Cells[4, 0]:=ReturnPaymentTerms._Month;
-                    TargetGrid.Cells[5, 0]:=ReturnPaymentTerms._Days;
-                    TargetGrid.Cells[6, 0]:=ReturnPaymentTerms._DaysNet;
-                    TargetGrid.Cells[7, 0]:=ReturnPaymentTerms._Using;
-                    TargetGrid.Cells[8, 0]:=ReturnPaymentTerms._Entity;
+                    TargetGrid.Cells[1, 0]:=TPaymentTermsFields._Id;
+                    TargetGrid.Cells[2, 0]:=TPaymentTermsFields._ErpCode;
+                    TargetGrid.Cells[3, 0]:=TPaymentTermsFields._Description;
+                    TargetGrid.Cells[4, 0]:=TPaymentTermsFields._Month;
+                    TargetGrid.Cells[5, 0]:=TPaymentTermsFields._Days;
+                    TargetGrid.Cells[6, 0]:=TPaymentTermsFields._DaysNet;
+                    TargetGrid.Cells[7, 0]:=TPaymentTermsFields._Using;
+                    TargetGrid.Cells[8, 0]:=TPaymentTermsFields._Entity;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var iCNT:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnPaymentTerms.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnPaymentTerms.ErpCode[iCNT - 1].ToString();
-                        TargetGrid.Cells[3, iCNT]:=ReturnPaymentTerms.Description[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnPaymentTerms.Month[iCNT - 1].ToString();
-                        TargetGrid.Cells[5, iCNT]:=ReturnPaymentTerms.Days[iCNT - 1].ToString();
-                        TargetGrid.Cells[6, iCNT]:=ReturnPaymentTerms.DaysNet[iCNT - 1].ToString();
-                        TargetGrid.Cells[7, iCNT]:=ReturnPaymentTerms.Using[iCNT - 1].ToString();
-                        TargetGrid.Cells[8, iCNT]:=ReturnPaymentTerms.Entity[iCNT - 1].ToString();
+                        TargetGrid.Cells[1, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].ErpCode.ToString();
+                        TargetGrid.Cells[3, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].Description;
+                        TargetGrid.Cells[4, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].Month.ToString();
+                        TargetGrid.Cells[5, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].Days.ToString();
+                        TargetGrid.Cells[6, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].DaysNet.ToString();
+                        TargetGrid.Cells[7, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].Using.ToString();
+                        TargetGrid.Cells[8, iCNT]:=ReturnPaymentTerms.PaymentTerms[iCNT - 1].Entity.ToString();
                     end;
 
                     CallResponse.IsSucceeded:=True;

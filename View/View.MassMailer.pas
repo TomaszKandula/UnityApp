@@ -30,7 +30,8 @@ uses
     Unity.ListView,
     Unity.Records,
     Unity.References,
-    Unity.Enums;
+    Unity.Enums,
+    Api.ReturnCompanyDetails;
 
 
 type
@@ -116,16 +117,16 @@ type
         const FSizeOfTxtInHeader = -2;
         procedure ListViewAutoFit(List: TListView; const AutoFit: integer);
         function GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
-        procedure GetCompanyDetails(LoadedCompanies: TList<string>);
         procedure SetCompanyDetails(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
         procedure SetEmailAddresses(List: TListView);
         procedure SetLbuEmails(var LbuEmailsList: TListBox; SelectedCompany: string; Source: TArray<TArray<string>>);
         procedure SetLbuCompanies(var LbuCompanyList: TComboBox; Source: TArray<TArray<string>>);
+        procedure FinishStartUp();
         procedure LoadFromGrid();
         procedure ExecuteMailer();
     public
         property ItemCount: integer read FItemCount write FItemCount;
-        procedure GetCompanyDetails_Callback(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse);
+        procedure GetCompanyDetails_Callback(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse);
         procedure SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
@@ -200,53 +201,46 @@ begin
 end;
 
 
-procedure TMassMailerForm.GetCompanyDetails(LoadedCompanies: TList<string>);
+procedure TMassMailerForm.GetCompanyDetails_Callback(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse);
 begin
 
-//    var CompanyDetails: TCompanyDetails;
-//    var CallResponse: TCallResponse;
-//
-//    SetLength(FCompanyDetails, LoadedCompanies.Count, 6);
-//    for var iCNT:=0 to LoadedCompanies.Count - 1 do
-//    begin
-//
-//        CallResponse:=Service.Mediator.Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
-//
-//        if CallResponse.IsSucceeded then
-//        begin
-//
-//            var LbuPhones :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
-//            var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.Exclusions, ';');
-//            var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
-//
-//            FCompanyDetails[iCNT, 0]:=LoadedCompanies[iCNT];
-//            FCompanyDetails[iCNT, 1]:=CompanyDetails.LbuName;
-//            FCompanyDetails[iCNT, 2]:=CompanyDetails.LbuAddress;
-//            FCompanyDetails[iCNT, 3]:=LbuPhones;
-//            FCompanyDetails[iCNT, 4]:=LbuBanks;
-//            FCompanyDetails[iCNT, 5]:=Exclusions;
-//
-//            var PreservedLen:=Length(FLbuEmails);
-//            SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
-//            for var jCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
-//            begin
-//                FLbuEmails[jCNT + PreservedLen, 0]:=LoadedCompanies[iCNT];
-//                FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.LbuEmails[jCNT];
-//            end;
-//
-//        end;
-//
-//        CompanyDetails.Dispose();
-//
-//    end;
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[GetCompanyDetails_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
 
-end;
+    var Items:=Length(CompanyDetails.CompanyDetails);
+    if not Items > 0 then Exit();
 
+    SetLength(FCompanyDetails, Items, 6);
+    for var Index:=0 to Items - 1 do
+    begin
 
-procedure TMassMailerForm.GetCompanyDetails_Callback(CompanySpecifics: TCompanySpecifics; CallResponse: TCallResponse);
-begin
+        var LbuPhones :=THelpers.ArrayStrToString(CompanyDetails.CompanyDetails[Index].CompanyPhones, ';');
+        var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.CompanyDetails[Index].Exclusions, ';');
+        var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.CompanyDetails[Index].CompanyBanks);
 
+        FCompanyDetails[Index, 0]:=CompanyDetails.CompanyDetails[Index].SourceDbName;
+        FCompanyDetails[Index, 1]:=CompanyDetails.CompanyDetails[Index].CompanyName;
+        FCompanyDetails[Index, 2]:=CompanyDetails.CompanyDetails[Index].CompanyAddress;
+        FCompanyDetails[Index, 3]:=LbuPhones;
+        FCompanyDetails[Index, 4]:=LbuBanks;
+        FCompanyDetails[Index, 5]:=Exclusions;
 
+        var PreservedLen:=Length(FLbuEmails);
+        SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.CompanyDetails[Index].CompanyPhones), 2);
+
+        for var jCNT:=0 to Length(CompanyDetails.CompanyDetails[Index].CompanyEmails) - 1 do
+        begin
+            FLbuEmails[jCNT + PreservedLen, 0]:=CompanyDetails.CompanyDetails[Index].SourceDbName;
+            FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.CompanyDetails[Index].CompanyEmails[jCNT];
+        end;
+
+    end;
+
+    FinishStartUp();
 
 end;
 
@@ -335,6 +329,24 @@ begin
     finally
         NoDuplicates.Free();
     end;
+
+end;
+
+
+procedure TMassMailerForm.FinishStartUp();
+begin
+
+    SetCompanyDetails(CustomerList, FCompanyDetails);
+    ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
+    SetLbuCompanies(selCompany, FLbuEmails);
+
+    MainForm.TimerCustSnapshots.Enabled:=False;
+    Service.Logger.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
+
+    Text_Subject.SetFocus();
+    FIsDataLoaded:=True;
+    Screen.Cursor:=crDefault;
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
 
 end;
 
@@ -559,22 +571,9 @@ begin
 
         THelpers.ExecWithDelay(500, procedure
         begin
-
             LoadFromGrid();
             SetEmailAddresses(CustomerList);
-            GetCompanyDetails(MainForm.LoadedCompanies);
-            SetCompanyDetails(CustomerList, FCompanyDetails);
-            ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
-            SetLbuCompanies(selCompany, FLbuEmails);
-
-            MainForm.TimerCustSnapshots.Enabled:=False;
-            Service.Logger.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
-
-            Text_Subject.SetFocus();
-            FIsDataLoaded:=True;
-            Screen.Cursor:=crDefault;
-            MainForm.UpdateStatusBar(TStatusBar.Ready);
-
+            Service.Mediator.Companies.GetCompanyDetailsAsync(MainForm.LoadedCompanies, GetCompanyDetails_Callback);
         end);
 
     end;

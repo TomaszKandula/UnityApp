@@ -2003,7 +2003,6 @@ begin
 
     if Rating.UserRating = 0 then
     begin
-        //THelpers.WndCall(RateForm, TWindowState.Modeless, MainForm);
         btnRatingClick(Self);
     end;
 

@@ -18,7 +18,8 @@ interface
 
 uses
     Unity.Grid,
-    Unity.Records;
+    Unity.Records,
+    Api.ReturnCompanyDetails;
 
 
 type
@@ -74,7 +75,7 @@ type
     /// <summary>
     /// Callback signature for getting list of details for given companies.
     /// </summary>
-    TGetCompanyListings = procedure(CompanyListings: TCompanyListings; CallResponse: TCallResponse) of object;
+    TGetCompanyDetails = procedure(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse) of object;
     /// <summary>
     /// Callback signature for getting results for company details.
     /// </summary>

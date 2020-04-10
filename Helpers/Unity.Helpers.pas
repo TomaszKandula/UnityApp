@@ -37,9 +37,9 @@ type
     TArrayUtils<T> = class abstract
     public
         class function Contains(const x: T; const anArray: array of T): boolean; static;
-        class procedure Copy(const FromArray: TArray<T>; var ToArray: TArray<T>); static;
+        class procedure Copy(FromArray: TArray<T>; var ToArray: TArray<T>); static;
+        class procedure CopyToList(FromArray: TArray<T>; var TargetList: TList<T>); static;
         class procedure Move(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
-        class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
 
 
@@ -132,10 +132,17 @@ begin
 end;
 
 
-class procedure TArrayUtils<T>.Copy(const FromArray: TArray<T>; var ToArray: TArray<T>);
+class procedure TArrayUtils<T>.Copy(FromArray: TArray<T>; var ToArray: TArray<T>);
 begin
     ToArray:=FromArray;
     SetLength(ToArray, Length(FromArray));
+end;
+
+
+class procedure TArrayUtils<T>.CopyToList(FromArray: TArray<T>; var TargetList: TList<T>);
+begin
+    for var iCNT:=0 to Length(FromArray) - 1 do
+        TargetList.Add(FromArray[iCNT]);
 end;
 
 
@@ -144,13 +151,6 @@ begin
     ToArray:=FromArray;
     SetLength(ToArray, Length(FromArray));
     FromArray:=nil;
-end;
-
-
-class procedure TArrayUtils<T>.MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>);
-begin
-    for var iCNT:=0 to Length(FromArray) - 1 do
-        TargetList.Add(FromArray[iCNT]);
 end;
 
 

@@ -74,7 +74,8 @@ implementation
 
 uses
     Api.ReturnControlStatus,
-    Api.ReturnOpenItems;
+    Api.ReturnOpenItems,
+    Api.ControlStatusFields;
 
 
 procedure TFOpenItemsRefs.InitWith(SourceGrid: TStringGrid);
@@ -119,10 +120,10 @@ begin
     // Similarly to the "UpdateFOpenItemsRefs" method,
     // we use it to decrease level of usage of ReturnColumn method.
     // -----------------------------------------------------------------------
-    Id         :=SourceGrid.GetCol(TReturnControlStatus._Id);
-    Code       :=SourceGrid.GetCol(TReturnControlStatus._Code);
-    Text       :=SourceGrid.GetCol(TReturnControlStatus._Text);
-    Description:=SourceGrid.GetCol(TReturnControlStatus._Description);
+    Id         :=SourceGrid.GetCol(TControlStatusFields._Id);
+    Code       :=SourceGrid.GetCol(TControlStatusFields._Code);
+    Text       :=SourceGrid.GetCol(TControlStatusFields._Text);
+    Description:=SourceGrid.GetCol(TControlStatusFields._Description);
 end;
 
 

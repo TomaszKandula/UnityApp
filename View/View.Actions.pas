@@ -809,7 +809,7 @@ begin
     var Col5:=MainForm.sgAddressBook.GetCol(TAddressBookList._StatementEmails);
     var Col6:=MainForm.sgAddressBook.GetCol(TAddressBookList._PhoneNumbers);
 
-    // Start with 1 to sip the header
+    // Start with 1 to skip the header
     for var Index:=1 to MainForm.sgAddressBook.RowCount - 1 do
     begin
 

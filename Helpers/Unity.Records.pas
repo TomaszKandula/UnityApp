@@ -17,8 +17,7 @@ uses
     Unity.Grid,
     Unity.References,
     Unity.ListView,
-    Api.BankDetails,
-    Api.CompanyDetails;
+    Api.BankDetails;
 
 
 // -----------------------------------
@@ -68,13 +67,6 @@ type
         EmailAddress: string;
     end;
 
-    /// <summary>
-    /// Carries a group of variables to be received back when queried by async. task.
-    /// </summary>
-    TCompanyListings = record
-        Details: TArray<TCompanyDetails>;
-        procedure Dispose();
-    end;
 
     /// <summary>
     /// Carries a group of variables to be received back when queried by awaited async. task.
@@ -293,13 +285,6 @@ procedure TCompanySpecifics.Dispose();
 begin
     for var BankDetails: TBankDetails in LbuBanks do BankDetails.Free();
     Self:=Default(TCompanySpecifics);
-end;
-
-
-procedure TCompanyListings.Dispose();
-begin
-    for var CompanyDetails: TCompanyDetails in Details do CompanyDetails.Free();
-    Self:=Default(TCompanyListings);
 end;
 
 
