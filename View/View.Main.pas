@@ -940,6 +940,7 @@ uses
     Api.ReturnPaymentTerms,
     Api.ReturnCustomerGroup,
     Api.ReturnOpenItems,
+    Api.OpenItemsFields,
     Api.AddressBookList,
     Api.CustomerSnapshotEx,
     Api.UserGeneralCommentUpdate;
@@ -2656,11 +2657,11 @@ begin
 
     if ARow = 0 then Exit();
 
-    var Col1: integer:=sgOpenItems.GetCol(TReturnOpenItems._OpenCurAmount);
-    var Col2: integer:=sgOpenItems.GetCol(TReturnOpenItems._OpenAmount);
-    var Col3: integer:=sgOpenItems.GetCol(TReturnOpenItems._CurAmount);
-    var Col4: integer:=sgOpenItems.GetCol(TReturnOpenItems._Amount);
-    var Col5: integer:=sgOpenItems.GetCol(TReturnOpenItems._PmtStatus);
+    var Col1: integer:=sgOpenItems.GetCol(TOpenItemsFields._OpenCurAmount);
+    var Col2: integer:=sgOpenItems.GetCol(TOpenItemsFields._OpenAmount);
+    var Col3: integer:=sgOpenItems.GetCol(TOpenItemsFields._CurAmount);
+    var Col4: integer:=sgOpenItems.GetCol(TOpenItemsFields._Amount);
+    var Col5: integer:=sgOpenItems.GetCol(TOpenItemsFields._PmtStatus);
 
     MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 

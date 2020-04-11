@@ -13,7 +13,8 @@ interface
 
 
 uses
-    Unity.Grid;
+    Unity.Grid,
+    Api.OpenItemsFields;
 
 
 // -----------------------------------
@@ -93,23 +94,23 @@ begin
     // database workload during the day we have decided to update the data in
     // Open Items table few times a day (on regular basis).
     // ---------------------------------------------------------------------------
-    CoCodeCol   :=SourceGrid.GetCol(TReturnOpenItems._SourceDbName);
-    CustNumCol  :=SourceGrid.GetCol(TReturnOpenItems._CustNumber);
-    OpenAmCol   :=SourceGrid.GetCol(TReturnOpenItems._OpenAmount);
-    PmtStatCol  :=SourceGrid.GetCol(TReturnOpenItems._PmtStatus);
-    CtrlCol     :=SourceGrid.GetCol(TReturnOpenItems._ControlStatus);
-    InvoNoCol   :=SourceGrid.GetCol(TReturnOpenItems._InvoiceNumber);
-    ValDtCol    :=SourceGrid.GetCol(TReturnOpenItems._ValueDate);
-    DueDtCol    :=SourceGrid.GetCol(TReturnOpenItems._DueDate);
-    ISOCol      :=SourceGrid.GetCol(TReturnOpenItems._Iso);
-    CurAmCol    :=SourceGrid.GetCol(TReturnOpenItems._CurAmount);
-    OpenCurAmCol:=SourceGrid.GetCol(TReturnOpenItems._OpenCurAmount);
-    Ad1Col      :=SourceGrid.GetCol(TReturnOpenItems._Address1);
-    Ad2Col      :=SourceGrid.GetCol(TReturnOpenItems._Address2);
-    Ad3Col      :=SourceGrid.GetCol(TReturnOpenItems._Address3);
-    PnoCol      :=SourceGrid.GetCol(TReturnOpenItems._PostalNumber);
-    PAreaCol    :=SourceGrid.GetCol(TReturnOpenItems._PostalArea);
-    Text        :=SourceGrid.GetCol(TReturnOpenItems._Text);
+    CoCodeCol   :=SourceGrid.GetCol(TOpenItemsFields._SourceDbName);
+    CustNumCol  :=SourceGrid.GetCol(TOpenItemsFields._CustNumber);
+    OpenAmCol   :=SourceGrid.GetCol(TOpenItemsFields._OpenAmount);
+    PmtStatCol  :=SourceGrid.GetCol(TOpenItemsFields._PmtStatus);
+    CtrlCol     :=SourceGrid.GetCol(TOpenItemsFields._ControlStatus);
+    InvoNoCol   :=SourceGrid.GetCol(TOpenItemsFields._InvoiceNumber);
+    ValDtCol    :=SourceGrid.GetCol(TOpenItemsFields._ValueDate);
+    DueDtCol    :=SourceGrid.GetCol(TOpenItemsFields._DueDate);
+    ISOCol      :=SourceGrid.GetCol(TOpenItemsFields._Iso);
+    CurAmCol    :=SourceGrid.GetCol(TOpenItemsFields._CurAmount);
+    OpenCurAmCol:=SourceGrid.GetCol(TOpenItemsFields._OpenCurAmount);
+    Ad1Col      :=SourceGrid.GetCol(TOpenItemsFields._Address1);
+    Ad2Col      :=SourceGrid.GetCol(TOpenItemsFields._Address2);
+    Ad3Col      :=SourceGrid.GetCol(TOpenItemsFields._Address3);
+    PnoCol      :=SourceGrid.GetCol(TOpenItemsFields._PostalNumber);
+    PAreaCol    :=SourceGrid.GetCol(TOpenItemsFields._PostalArea);
+    Text        :=SourceGrid.GetCol(TOpenItemsFields._Text);
 end;
 
 

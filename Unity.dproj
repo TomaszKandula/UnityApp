@@ -117,10 +117,10 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2078;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2084;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Build>2078</VerInfo_Build>
+        <VerInfo_Build>2084</VerInfo_Build>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_PreRelease>false</VerInfo_PreRelease>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
@@ -190,6 +190,15 @@
         <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
         <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
+        <DCCReference Include="Model\Api.CompaniesFields.pas"/>
+        <DCCReference Include="Model\Api.ControlStatusFields.pas"/>
+        <DCCReference Include="Model\Api.PaidInfoFields.pas"/>
+        <DCCReference Include="Model\Api.PaymentTermsFields.pas"/>
+        <DCCReference Include="Model\Api.SalesResponsibleFields.pas"/>
+        <DCCReference Include="Model\Api.PersonResponsibleFields.pas"/>
+        <DCCReference Include="Model\Api.AccountTypeFields.pas"/>
+        <DCCReference Include="Model\Api.CustomerGroupFields.pas"/>
+        <DCCReference Include="Model\Api.OpenItemsFields.pas"/>
         <DCCReference Include="Model\Api.CompanyDetails.pas"/>
         <DCCReference Include="Model\Api.UserPermissions.pas"/>
         <DCCReference Include="Model\Api.CustomerSnapshot.pas"/>
@@ -224,7 +233,6 @@
         <DCCReference Include="Model\Responses\Api.UserCompaniesUpdated.pas"/>
         <DCCReference Include="Model\Responses\Api.CustSortingOptions.pas"/>
         <DCCReference Include="Model\Responses\Api.UserSessionLogsSaved.pas"/>
-        <DCCReference Include="Model\Responses\Api.CompanyData.pas"/>
         <DCCReference Include="Model\Responses\Api.CompanyEmailsList.pas"/>
         <DCCReference Include="Model\Responses\Api.SentEmail.pas"/>
         <DCCReference Include="Model\Responses\Api.UserGeneralCommentAdded.pas"/>
@@ -242,6 +250,7 @@
         <DCCReference Include="Model\Responses\Api.UserRating.pas"/>
         <DCCReference Include="Model\Responses\Api.UserRatingAdded.pas"/>
         <DCCReference Include="Model\Responses\Api.UserRatingUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCompanyData.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnCompanies.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnAccountType.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnPaidInfo.pas"/>
@@ -292,14 +301,6 @@
         <DCCReference Include="View\View.Startup.pas"/>
         <DCCReference Include="View\View.CompanyList.pas"/>
         <DCCReference Include="View\View.RateApp.pas"/>
-        <DCCReference Include="Model\Api.CompaniesFields.pas"/>
-        <DCCReference Include="Model\Api.ControlStatusFields.pas"/>
-        <DCCReference Include="Model\Api.PaidInfoFields.pas"/>
-        <DCCReference Include="Model\Api.PaymentTermsFields.pas"/>
-        <DCCReference Include="Model\Api.SalesResponsibleFields.pas"/>
-        <DCCReference Include="Model\Api.PersonResponsibleFields.pas"/>
-        <DCCReference Include="Model\Api.AccountTypeFields.pas"/>
-        <DCCReference Include="Model\Api.CustomerGroupFields.pas"/>
         <None Include="Include\Cef.inc"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>

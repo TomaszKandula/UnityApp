@@ -75,7 +75,7 @@ uses
     REST.Json,
     Unity.Helpers,
     Unity.Service,
-    Api.CompanyData,
+    Api.ReturnCompanyData,
     Api.CompanyCodesList,
     Api.CompanyEmailsList,
     Api.ReturnCompanyDetails,
@@ -109,27 +109,14 @@ begin
         Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var CallResponse: TCallResponse;
-        var CompanySpecifics: TCompanySpecifics;
+        var ReturnCompanyData: TReturnCompanyData;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var CompanyData:=TJson.JsonToObject<TCompanyData>(Rest.Content);
-                try
-                    CompanySpecifics.LbuName   :=CompanyData.CompanyName;
-                    CompanySpecifics.LbuAddress:=CompanyData.CompanyAddress;
-                    CompanySpecifics.LbuPhones :=CompanyData.CompanyPhones;
-                    CompanySpecifics.LbuEmails :=CompanyData.CompanyEmails;
-                    CompanySpecifics.Exclusions:=CompanyData.Exclusions;
-                    FSetCompanyDetails(CompanyData.CompanyBanks, CompanySpecifics.LbuBanks);
-                finally
-                    CompanyData.Free();
-                end;
-
+                ReturnCompanyData:=TJson.JsonToObject<TReturnCompanyData>(Rest.Content);
                 CallResponse.IsSucceeded:=True;
                 Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
             end
             else
             begin
@@ -160,7 +147,8 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CompanySpecifics, CallResponse);
+            if Assigned(Callback) then Callback(ReturnCompanyData, CallResponse);
+            if Assigned(ReturnCompanyData) then ReturnCompanyData.Free();
         end);
 
     end);

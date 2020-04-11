@@ -67,20 +67,6 @@ type
         EmailAddress: string;
     end;
 
-
-    /// <summary>
-    /// Carries a group of variables to be received back when queried by awaited async. task.
-    /// </summary>
-    TCompanySpecifics = record
-        LbuName:    string;
-        LbuAddress: string;
-        LbuPhones:  TArray<string>;
-        LbuEmails:  TArray<string>;
-        Exclusions: TArray<integer>;
-        LbuBanks:   TArray<TBankDetails>;
-        procedure Dispose();
-    end;
-
     /// <summary>
     /// Carries a group of variables to be received back when awaited async. task is done.
     /// </summary>
@@ -278,13 +264,6 @@ begin
     SetLength(Free1, Count);
     SetLength(Free2, Count);
     SetLength(Free3, Count);
-end;
-
-
-procedure TCompanySpecifics.Dispose();
-begin
-    for var BankDetails: TBankDetails in LbuBanks do BankDetails.Free();
-    Self:=Default(TCompanySpecifics);
 end;
 
 

@@ -150,6 +150,7 @@ uses
     Unity.Constants,
     Unity.Service,
     Api.ReturnOpenItems,
+    Api.OpenItemsFields,
     Api.CustomerSnapshotEx,
     Api.AddressBookList;
 
@@ -430,7 +431,7 @@ begin
     // We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
     // This is necessary to ensure that the HTML generator will generate list for the customer.
     // -----------------------------------------------------------------------------------------------------
-    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TReturnOpenItems._PmtStatus), TDataType.TFloat, True);
+    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TOpenItemsFields._PmtStatus), TDataType.TFloat, True);
 
     OpenItemsRefs.InitWith(MainForm.sgOpenItems);
     CtrlStatusRefs.InitWith(MainForm.sgControlStatus);

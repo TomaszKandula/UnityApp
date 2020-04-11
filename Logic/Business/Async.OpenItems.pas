@@ -69,7 +69,8 @@ uses
     Unity.Service,
     Api.UserCompanySelection,
     Api.ReturnSsisData,
-    Api.ReturnOpenItems;
+    Api.ReturnOpenItems,
+    Api.OpenItemsFields;
 
 
 constructor TOpenItems.Create();
@@ -225,86 +226,86 @@ begin
             var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Rest.Content);
             try
 
-                var RowCount:=Length(ReturnOpenItems.SourceDbName);
-                OpenItemsGrid.RowCount:=RowCount;
+                var RowCount:=Length(ReturnOpenItems.OpenItems);
+                OpenItemsGrid.RowCount:=RowCount + 1; // Add header
                 OpenItemsGrid.ColCount:=37;
 
                 OpenItemsGrid.Cells[0, 0]:='';
-                OpenItemsGrid.Cells[1, 0]:=ReturnOpenItems._SourceDbName;
-                OpenItemsGrid.Cells[2, 0]:=ReturnOpenItems._CustNumber;
-                OpenItemsGrid.Cells[3, 0]:=ReturnOpenItems._VoucherType;
-                OpenItemsGrid.Cells[4, 0]:=ReturnOpenItems._OpenCurAmount;
-                OpenItemsGrid.Cells[5, 0]:=ReturnOpenItems._OpenAmount;
-                OpenItemsGrid.Cells[6, 0]:=ReturnOpenItems._CustName;
-                OpenItemsGrid.Cells[7, 0]:=ReturnOpenItems._Iso;
-                OpenItemsGrid.Cells[8, 0]:=ReturnOpenItems._CurAmount;
-                OpenItemsGrid.Cells[9, 0]:=ReturnOpenItems._Amount;
-                OpenItemsGrid.Cells[10,0]:=ReturnOpenItems._InvoiceNumber;
-                OpenItemsGrid.Cells[11,0]:=ReturnOpenItems._DueDate;
-                OpenItemsGrid.Cells[12,0]:=ReturnOpenItems._Inf4;
-                OpenItemsGrid.Cells[13,0]:=ReturnOpenItems._Inf7;
-                OpenItemsGrid.Cells[14,0]:=ReturnOpenItems._CreditLimit;
-                OpenItemsGrid.Cells[15,0]:=ReturnOpenItems._Country;
-                OpenItemsGrid.Cells[16,0]:=ReturnOpenItems._PmtTerms;
-                OpenItemsGrid.Cells[17,0]:=ReturnOpenItems._PmtStatus;
-                OpenItemsGrid.Cells[18,0]:=ReturnOpenItems._Agent;
-                OpenItemsGrid.Cells[19,0]:=ReturnOpenItems._ControlStatus;
-                OpenItemsGrid.Cells[20,0]:=ReturnOpenItems._Address1;
-                OpenItemsGrid.Cells[21,0]:=ReturnOpenItems._Address2;
-                OpenItemsGrid.Cells[22,0]:=ReturnOpenItems._Address3;
-                OpenItemsGrid.Cells[23,0]:=ReturnOpenItems._PostalNumber;
-                OpenItemsGrid.Cells[24,0]:=ReturnOpenItems._PostalArea;
-                OpenItemsGrid.Cells[25,0]:=ReturnOpenItems._GenAccNumber;
-                OpenItemsGrid.Cells[26,0]:=ReturnOpenItems._ValueDate;
-                OpenItemsGrid.Cells[27,0]:=ReturnOpenItems._Division;
-                OpenItemsGrid.Cells[28,0]:=ReturnOpenItems._Text;
-                OpenItemsGrid.Cells[29,0]:=ReturnOpenItems._DirectDebit;
-                OpenItemsGrid.Cells[30,0]:=ReturnOpenItems._AdditionalText;
-                OpenItemsGrid.Cells[31,0]:=ReturnOpenItems._SalesResponsible;
-                OpenItemsGrid.Cells[32,0]:=ReturnOpenItems._CustomerGroup;
-                OpenItemsGrid.Cells[33,0]:=ReturnOpenItems._PersonResponsible;
-                OpenItemsGrid.Cells[34,0]:=ReturnOpenItems._AccountType;
-                OpenItemsGrid.Cells[35,0]:=ReturnOpenItems._VoucherNumber;
-                OpenItemsGrid.Cells[36,0]:=ReturnOpenItems._VoucherDate;
+                OpenItemsGrid.Cells[1, 0]:=TOpenItemsFields._SourceDbName;
+                OpenItemsGrid.Cells[2, 0]:=TOpenItemsFields._CustNumber;
+                OpenItemsGrid.Cells[3, 0]:=TOpenItemsFields._VoucherType;
+                OpenItemsGrid.Cells[4, 0]:=TOpenItemsFields._OpenCurAmount;
+                OpenItemsGrid.Cells[5, 0]:=TOpenItemsFields._OpenAmount;
+                OpenItemsGrid.Cells[6, 0]:=TOpenItemsFields._CustName;
+                OpenItemsGrid.Cells[7, 0]:=TOpenItemsFields._Iso;
+                OpenItemsGrid.Cells[8, 0]:=TOpenItemsFields._CurAmount;
+                OpenItemsGrid.Cells[9, 0]:=TOpenItemsFields._Amount;
+                OpenItemsGrid.Cells[10,0]:=TOpenItemsFields._InvoiceNumber;
+                OpenItemsGrid.Cells[11,0]:=TOpenItemsFields._DueDate;
+                OpenItemsGrid.Cells[12,0]:=TOpenItemsFields._Inf4;
+                OpenItemsGrid.Cells[13,0]:=TOpenItemsFields._Inf7;
+                OpenItemsGrid.Cells[14,0]:=TOpenItemsFields._CreditLimit;
+                OpenItemsGrid.Cells[15,0]:=TOpenItemsFields._Country;
+                OpenItemsGrid.Cells[16,0]:=TOpenItemsFields._PmtTerms;
+                OpenItemsGrid.Cells[17,0]:=TOpenItemsFields._PmtStatus;
+                OpenItemsGrid.Cells[18,0]:=TOpenItemsFields._Agent;
+                OpenItemsGrid.Cells[19,0]:=TOpenItemsFields._ControlStatus;
+                OpenItemsGrid.Cells[20,0]:=TOpenItemsFields._Address1;
+                OpenItemsGrid.Cells[21,0]:=TOpenItemsFields._Address2;
+                OpenItemsGrid.Cells[22,0]:=TOpenItemsFields._Address3;
+                OpenItemsGrid.Cells[23,0]:=TOpenItemsFields._PostalNumber;
+                OpenItemsGrid.Cells[24,0]:=TOpenItemsFields._PostalArea;
+                OpenItemsGrid.Cells[25,0]:=TOpenItemsFields._GenAccNumber;
+                OpenItemsGrid.Cells[26,0]:=TOpenItemsFields._ValueDate;
+                OpenItemsGrid.Cells[27,0]:=TOpenItemsFields._Division;
+                OpenItemsGrid.Cells[28,0]:=TOpenItemsFields._Text;
+                OpenItemsGrid.Cells[29,0]:=TOpenItemsFields._DirectDebit;
+                OpenItemsGrid.Cells[30,0]:=TOpenItemsFields._AdditionalText;
+                OpenItemsGrid.Cells[31,0]:=TOpenItemsFields._SalesResponsible;
+                OpenItemsGrid.Cells[32,0]:=TOpenItemsFields._CustomerGroup;
+                OpenItemsGrid.Cells[33,0]:=TOpenItemsFields._PersonResponsible;
+                OpenItemsGrid.Cells[34,0]:=TOpenItemsFields._AccountType;
+                OpenItemsGrid.Cells[35,0]:=TOpenItemsFields._VoucherNumber;
+                OpenItemsGrid.Cells[36,0]:=TOpenItemsFields._VoucherDate;
 
-                for var iCNT:=1{Skip header} to RowCount do
+                for var iCNT:=1 to RowCount do
                 begin
-                    OpenItemsGrid.Cells[1, iCNT]:=ReturnOpenItems.SourceDbName[iCNT - 1];
-                    OpenItemsGrid.Cells[2, iCNT]:=ReturnOpenItems.CustNumber[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[3, iCNT]:=ReturnOpenItems.VoucherType[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[4, iCNT]:=ReturnOpenItems.OpenCurAmount[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[5, iCNT]:=ReturnOpenItems.OpenAmount[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[6, iCNT]:=ReturnOpenItems.CustName[iCNT - 1];
-                    OpenItemsGrid.Cells[7, iCNT]:=ReturnOpenItems.Iso[iCNT - 1];
-                    OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.CurAmount[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.Amount[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[10,iCNT]:=ReturnOpenItems.InvoiceNumber[iCNT - 1];
-                    OpenItemsGrid.Cells[11,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.DueDate[iCNT - 1], TCalendar.DateOnly);
-                    OpenItemsGrid.Cells[12,iCNT]:=ReturnOpenItems.Inf4[iCNT - 1];
-                    OpenItemsGrid.Cells[13,iCNT]:=ReturnOpenItems.Inf7[iCNT - 1];
-                    OpenItemsGrid.Cells[14,iCNT]:=ReturnOpenItems.CreditLimit[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[15,iCNT]:=ReturnOpenItems.Country[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[16,iCNT]:=ReturnOpenItems.PmtTerms[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[17,iCNT]:=ReturnOpenItems.PmtStatus[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[18,iCNT]:=ReturnOpenItems.Agent[iCNT - 1];
-                    OpenItemsGrid.Cells[19,iCNT]:=ReturnOpenItems.ControlStatus[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[20,iCNT]:=ReturnOpenItems.Address1[iCNT - 1];
-                    OpenItemsGrid.Cells[21,iCNT]:=ReturnOpenItems.Address2[iCNT - 1];
-                    OpenItemsGrid.Cells[22,iCNT]:=ReturnOpenItems.Address3[iCNT - 1];
-                    OpenItemsGrid.Cells[23,iCNT]:=ReturnOpenItems.PostalNumber[iCNT - 1];
-                    OpenItemsGrid.Cells[24,iCNT]:=ReturnOpenItems.PostalArea[iCNT - 1];
-                    OpenItemsGrid.Cells[25,iCNT]:=ReturnOpenItems.GenAccNumber[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[26,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.ValueDate[iCNT - 1], TCalendar.DateOnly);
-                    OpenItemsGrid.Cells[27,iCNT]:=ReturnOpenItems.Division[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[28,iCNT]:=ReturnOpenItems.Text[iCNT - 1];
-                    OpenItemsGrid.Cells[29,iCNT]:=ReturnOpenItems.DirectDebit[iCNT - 1];
-                    OpenItemsGrid.Cells[30,iCNT]:=ReturnOpenItems.AdditionalText[iCNT - 1];
-                    OpenItemsGrid.Cells[31,iCNT]:=ReturnOpenItems.SalesResponsible[iCNT - 1];
-                    OpenItemsGrid.Cells[32,iCNT]:=ReturnOpenItems.CustomerGroup[iCNT - 1];
-                    OpenItemsGrid.Cells[33,iCNT]:=ReturnOpenItems.PersonResponsible[iCNT - 1];
-                    OpenItemsGrid.Cells[34,iCNT]:=ReturnOpenItems.AccountType[iCNT - 1];
-                    OpenItemsGrid.Cells[35,iCNT]:=ReturnOpenItems.VoucherNumber[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[36,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.VoucherDate[iCNT - 1], TCalendar.DateOnly);
+                    OpenItemsGrid.Cells[1, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].SourceDbName;
+                    OpenItemsGrid.Cells[2, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CustNumber.ToString();
+                    OpenItemsGrid.Cells[3, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].VoucherType.ToString();
+                    OpenItemsGrid.Cells[4, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].OpenCurAmount.ToString();
+                    OpenItemsGrid.Cells[5, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].OpenAmount.ToString();
+                    OpenItemsGrid.Cells[6, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CustName;
+                    OpenItemsGrid.Cells[7, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Iso;
+                    OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CurAmount.ToString();
+                    OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Amount.ToString();
+                    OpenItemsGrid.Cells[10,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].InvoiceNumber;
+                    OpenItemsGrid.Cells[11,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[iCNT - 1].DueDate, TCalendar.DateOnly);
+                    OpenItemsGrid.Cells[12,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Inf4;
+                    OpenItemsGrid.Cells[13,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Inf7;
+                    OpenItemsGrid.Cells[14,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CreditLimit.ToString();
+                    OpenItemsGrid.Cells[15,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Country.ToString();
+                    OpenItemsGrid.Cells[16,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PmtTerms.ToString();
+                    OpenItemsGrid.Cells[17,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PmtStatus.ToString();
+                    OpenItemsGrid.Cells[18,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Agent;
+                    OpenItemsGrid.Cells[19,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].ControlStatus.ToString();
+                    OpenItemsGrid.Cells[20,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Address1;
+                    OpenItemsGrid.Cells[21,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Address2;
+                    OpenItemsGrid.Cells[22,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Address3;
+                    OpenItemsGrid.Cells[23,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PostalNumber;
+                    OpenItemsGrid.Cells[24,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PostalArea;
+                    OpenItemsGrid.Cells[25,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].GenAccNumber.ToString();
+                    OpenItemsGrid.Cells[26,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[iCNT - 1].ValueDate, TCalendar.DateOnly);
+                    OpenItemsGrid.Cells[27,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Division.ToString();
+                    OpenItemsGrid.Cells[28,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Text;
+                    OpenItemsGrid.Cells[29,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].DirectDebit;
+                    OpenItemsGrid.Cells[30,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].AdditionalText;
+                    OpenItemsGrid.Cells[31,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].SalesResponsible;
+                    OpenItemsGrid.Cells[32,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CustomerGroup;
+                    OpenItemsGrid.Cells[33,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PersonResponsible;
+                    OpenItemsGrid.Cells[34,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].AccountType;
+                    OpenItemsGrid.Cells[35,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].VoucherNumber.ToString();
+                    OpenItemsGrid.Cells[36,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[iCNT - 1].VoucherDate, TCalendar.DateOnly);
                 end;
 
                 CallResponse.IsSucceeded:=True;
@@ -353,9 +354,9 @@ begin
 
     var VoucherNumber:=Service.Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
-    var VoTpCol   :=InputGrid.GetCol(TReturnOpenItems._VoucherType);
-    var OpenAmCol :=InputGrid.GetCol(TReturnOpenItems._OpenAmount);
-    var PmtStatCol:=InputGrid.GetCol(TReturnOpenItems._PmtStatus);
+    var VoTpCol   :=InputGrid.GetCol(TOpenItemsFields._VoucherType);
+    var OpenAmCol :=InputGrid.GetCol(TOpenItemsFields._OpenAmount);
+    var PmtStatCol:=InputGrid.GetCol(TOpenItemsFields._PmtStatus);
 
     for var iCNT:=1 to InputGrid.RowCount - 1 do
     begin

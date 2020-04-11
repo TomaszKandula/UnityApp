@@ -1,4 +1,4 @@
-unit Api.CompanyData;
+unit Api.ReturnCompanyData;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -20,7 +20,7 @@ uses
 type
 
 
-    TCompanyData = class
+    TReturnCompanyData = class
     strict private
         var FCompanyName:    string;
         var FCompanyAddress: string;
@@ -57,12 +57,17 @@ type
 implementation
 
 
-destructor TCompanyData.Destroy();
+destructor TReturnCompanyData.Destroy();
 begin
+
+    for var BankDetails: TBankDetails in FCompanyBanks do
+        if Assigned(BankDetails) then BankDetails.Free();
+
     if Assigned(FError) then FError.Free();
     if Assigned(FMeta) then FMeta.Free();
-    for var BankDetails: TBankDetails in FCompanyBanks do BankDetails.Free();
+
     inherited;
+
 end;
 
 
