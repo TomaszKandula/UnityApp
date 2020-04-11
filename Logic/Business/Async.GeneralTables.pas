@@ -149,11 +149,14 @@ uses
     Api.PaidInfoFields,
     Api.ReturnPaymentTerms,
     Api.PaymentTermsFields,
-
-    Api.ReturnAccountType,
-    Api.ReturnPersonResponsible,
     Api.ReturnSalesResponsible,
-    Api.ReturnCustomerGroup;
+    Api.SalesResponsibleFields,
+    Api.ReturnPersonResponsible,
+    Api.PersonResponsibleFields,
+    Api.ReturnAccountType,
+    Api.AccountTypeFields,
+    Api.ReturnCustomerGroup,
+    Api.CustomerGroupFields;
 
 
 constructor TGeneralTables.Create();
@@ -586,22 +589,22 @@ begin
                 var ReturnSalesResponsible:=TJson.JsonToObject<TReturnSalesResponsible>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnSalesResponsible.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnSalesResponsible.SalesResponsible);
+                    TargetGrid.RowCount:=RowCount + 1; // Add headers
                     TargetGrid.ColCount:=5;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnSalesResponsible._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnSalesResponsible._SourceDbName;
-                    TargetGrid.Cells[3, 0]:=ReturnSalesResponsible._ErpCode;
-                    TargetGrid.Cells[4, 0]:=ReturnSalesResponsible._Description;
+                    TargetGrid.Cells[1, 0]:=TSalesResponsibleFields._Id;
+                    TargetGrid.Cells[2, 0]:=TSalesResponsibleFields._SourceDbName;
+                    TargetGrid.Cells[3, 0]:=TSalesResponsibleFields._ErpCode;
+                    TargetGrid.Cells[4, 0]:=TSalesResponsibleFields._Description;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var iCNT:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnSalesResponsible.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnSalesResponsible.SourceDbName[iCNT - 1];
-                        TargetGrid.Cells[3, iCNT]:=ReturnSalesResponsible.ErpCode[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnSalesResponsible.Description[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnSalesResponsible.SalesResponsible[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnSalesResponsible.SalesResponsible[iCNT - 1].SourceDbName;
+                        TargetGrid.Cells[3, iCNT]:=ReturnSalesResponsible.SalesResponsible[iCNT - 1].ErpCode;
+                        TargetGrid.Cells[4, iCNT]:=ReturnSalesResponsible.SalesResponsible[iCNT - 1].Description;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -678,22 +681,22 @@ begin
                 var ReturnPersonResponsible:=TJson.JsonToObject<TReturnPersonResponsible>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnPersonResponsible.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnPersonResponsible.PersonResponsible);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=5;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnPersonResponsible._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnPersonResponsible._SourceDbName;
-                    TargetGrid.Cells[3, 0]:=ReturnPersonResponsible._ErpCode;
-                    TargetGrid.Cells[4, 0]:=ReturnPersonResponsible._Description;
+                    TargetGrid.Cells[1, 0]:=TPersonResponsibleFields._Id;
+                    TargetGrid.Cells[2, 0]:=TPersonResponsibleFields._SourceDbName;
+                    TargetGrid.Cells[3, 0]:=TPersonResponsibleFields._ErpCode;
+                    TargetGrid.Cells[4, 0]:=TPersonResponsibleFields._Description;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var iCNT:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnPersonResponsible.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnPersonResponsible.SourceDbName[iCNT - 1];
-                        TargetGrid.Cells[3, iCNT]:=ReturnPersonResponsible.ErpCode[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnPersonResponsible.Description[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnPersonResponsible.PersonResponsible[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnPersonResponsible.PersonResponsible[iCNT - 1].SourceDbName;
+                        TargetGrid.Cells[3, iCNT]:=ReturnPersonResponsible.PersonResponsible[iCNT - 1].ErpCode;
+                        TargetGrid.Cells[4, iCNT]:=ReturnPersonResponsible.PersonResponsible[iCNT - 1].Description;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -770,22 +773,22 @@ begin
                 var ReturnAccountType:=TJson.JsonToObject<TReturnAccountType>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnAccountType.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnAccountType.AccountType);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=5;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnAccountType._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnAccountType._SourceDbName;
-                    TargetGrid.Cells[3, 0]:=ReturnAccountType._ErpCode;
-                    TargetGrid.Cells[4, 0]:=ReturnAccountType._Description;
+                    TargetGrid.Cells[1, 0]:=TAccountTypeFields._Id;
+                    TargetGrid.Cells[2, 0]:=TAccountTypeFields._SourceDbName;
+                    TargetGrid.Cells[3, 0]:=TAccountTypeFields._ErpCode;
+                    TargetGrid.Cells[4, 0]:=TAccountTypeFields._Description;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var iCNT:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnAccountType.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnAccountType.SourceDbName[iCNT - 1];
-                        TargetGrid.Cells[3, iCNT]:=ReturnAccountType.ErpCode[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnAccountType.Description[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnAccountType.AccountType[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnAccountType.AccountType[iCNT - 1].SourceDbName;
+                        TargetGrid.Cells[3, iCNT]:=ReturnAccountType.AccountType[iCNT - 1].ErpCode;
+                        TargetGrid.Cells[4, iCNT]:=ReturnAccountType.AccountType[iCNT - 1].Description;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -862,22 +865,22 @@ begin
                 var ReturnCustomerGroup:=TJson.JsonToObject<TReturnCustomerGroup>(Rest.Content);
                 try
 
-                    var RowCount:=Length(ReturnCustomerGroup.Id);
-                    TargetGrid.RowCount:=RowCount;
+                    var RowCount:=Length(ReturnCustomerGroup.CustomerGroup);
+                    TargetGrid.RowCount:=RowCount + 1; // Add header
                     TargetGrid.ColCount:=5;
 
                     TargetGrid.Cells[0, 0]:='';
-                    TargetGrid.Cells[1, 0]:=ReturnCustomerGroup._Id;
-                    TargetGrid.Cells[2, 0]:=ReturnCustomerGroup._SourceDbName;
-                    TargetGrid.Cells[3, 0]:=ReturnCustomerGroup._ErpCode;
-                    TargetGrid.Cells[4, 0]:=ReturnCustomerGroup._Description;
+                    TargetGrid.Cells[1, 0]:=TCustomerGroupFields._Id;
+                    TargetGrid.Cells[2, 0]:=TCustomerGroupFields._SourceDbName;
+                    TargetGrid.Cells[3, 0]:=TCustomerGroupFields._ErpCode;
+                    TargetGrid.Cells[4, 0]:=TCustomerGroupFields._Description;
 
-                    for var iCNT:=1{Skip header} to RowCount do
+                    for var iCNT:=1 to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT]:=ReturnCustomerGroup.Id[iCNT - 1].ToString();
-                        TargetGrid.Cells[2, iCNT]:=ReturnCustomerGroup.SourceDbName[iCNT - 1];
-                        TargetGrid.Cells[3, iCNT]:=ReturnCustomerGroup.ErpCode[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT]:=ReturnCustomerGroup.Description[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnCustomerGroup.CustomerGroup[iCNT - 1].Id.ToString();
+                        TargetGrid.Cells[2, iCNT]:=ReturnCustomerGroup.CustomerGroup[iCNT - 1].SourceDbName;
+                        TargetGrid.Cells[3, iCNT]:=ReturnCustomerGroup.CustomerGroup[iCNT - 1].ErpCode;
+                        TargetGrid.Cells[4, iCNT]:=ReturnCustomerGroup.CustomerGroup[iCNT - 1].Description;
                     end;
 
                     CallResponse.IsSucceeded:=True;

@@ -177,7 +177,11 @@ uses
   Api.CompaniesFields in 'Model\Api.CompaniesFields.pas',
   Api.ControlStatusFields in 'Model\Api.ControlStatusFields.pas',
   Api.PaidInfoFields in 'Model\Api.PaidInfoFields.pas',
-  Api.PaymentTermsFields in 'Model\Api.PaymentTermsFields.pas';
+  Api.PaymentTermsFields in 'Model\Api.PaymentTermsFields.pas',
+  Api.SalesResponsibleFields in 'Model\Api.SalesResponsibleFields.pas',
+  Api.PersonResponsibleFields in 'Model\Api.PersonResponsibleFields.pas',
+  Api.AccountTypeFields in 'Model\Api.AccountTypeFields.pas',
+  Api.CustomerGroupFields in 'Model\Api.CustomerGroupFields.pas';
 
 {$R *.res}
 
