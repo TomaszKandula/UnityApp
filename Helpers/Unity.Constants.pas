@@ -44,7 +44,7 @@ type
         const FontColor:      integer   = $006433C9; // RGB: C93364 BGR: 6433C9
         const AltColor:       integer   = $00FFDBB7; // RGB: B7DBFF BGR: FFDBB7
         const DecryptKey:     integer   = 429496;
-        const AppCaption:     string    = 'Unity';
+        const AppCaption:     string    = 'Unity Platform';
         const UnityReader:    string    = 'UnityReader.exe';
         const LicenceFile:    string    = 'Unity.lic';
         const ReleaseFile:    string    = 'Release.zip';

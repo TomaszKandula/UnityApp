@@ -91,6 +91,7 @@ uses
     Unity.Service,
     Api.UserCompanySelection,
     Api.AddressBookList,
+    Api.AddressBookFields,
     Api.AddressBookItem,
     Api.AddressBookUpdate,
     Api.AddressBookUpdated,
@@ -145,7 +146,7 @@ begin
         end;
 
         var CallResponse: TCallResponse;
-        var ReturnedData:=TStringGrid.Create(nil);
+        var Grid:=TStringGrid.Create(nil);
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
@@ -154,30 +155,29 @@ begin
                 var AddressBookList:=TJson.JsonToObject<TAddressBookList>(Rest.Content);
                 try
 
-                    ReturnedData.RowCount:=Length(AddressBookList.Id) + 1{Header};
-                    ReturnedData.ColCount:=9;
+                    Grid.RowCount:=Length(AddressBookList.AddressBook) + 1; // Add header
+                    Grid.ColCount:=9;
 
-                    // Setup headers
-                    ReturnedData.Cells[0, 0]:='';//empty lp column
-                    ReturnedData.Cells[1, 0]:=AddressBookList._Id;//hidden column
-                    ReturnedData.Cells[2, 0]:=AddressBookList._SourceDbName;
-                    ReturnedData.Cells[3, 0]:=AddressBookList._CustomerNumber;
-                    ReturnedData.Cells[4, 0]:=AddressBookList._CustomerName;
-                    ReturnedData.Cells[5, 0]:=AddressBookList._ContactPerson;
-                    ReturnedData.Cells[6, 0]:=AddressBookList._RegularEmails;
-                    ReturnedData.Cells[7, 0]:=AddressBookList._StatementEmails;
-                    ReturnedData.Cells[8, 0]:=AddressBookList._PhoneNumbers;
+                    Grid.Cells[0, 0]:='';//empty lp column
+                    Grid.Cells[1, 0]:=TAddressBookFields._Id;//hidden column
+                    Grid.Cells[2, 0]:=TAddressBookFields._SourceDbName;
+                    Grid.Cells[3, 0]:=TAddressBookFields._CustomerNumber;
+                    Grid.Cells[4, 0]:=TAddressBookFields._CustomerName;
+                    Grid.Cells[5, 0]:=TAddressBookFields._ContactPerson;
+                    Grid.Cells[6, 0]:=TAddressBookFields._RegularEmails;
+                    Grid.Cells[7, 0]:=TAddressBookFields._StatementEmails;
+                    Grid.Cells[8, 0]:=TAddressBookFields._PhoneNumbers;
 
-                    for var iCNT:=1 to ReturnedData.RowCount - 1 do
+                    for var Index:=1 to Grid.RowCount - 1 do
                     begin
-                        ReturnedData.Cells[1, iCNT]:=AddressBookList.Id[iCNT - 1].ToString();
-                        ReturnedData.Cells[2, iCNT]:=AddressBookList.SourceDbName[iCNT - 1];
-                        ReturnedData.Cells[3, iCNT]:=AddressBookList.CustomerNumber[iCNT - 1].ToString();
-                        ReturnedData.Cells[4, iCNT]:=AddressBookList.CustomerName[iCNT - 1];
-                        ReturnedData.Cells[5, iCNT]:=AddressBookList.ContactPerson[iCNT - 1];
-                        ReturnedData.Cells[6, iCNT]:=AddressBookList.RegularEmails[iCNT - 1];
-                        ReturnedData.Cells[7, iCNT]:=AddressBookList.StatementEmails[iCNT - 1];
-                        ReturnedData.Cells[8, iCNT]:=AddressBookList.PhoneNumbers[iCNT - 1];
+                        Grid.Cells[1, Index]:=AddressBookList.AddressBook[Index - 1].Id.ToString();
+                        Grid.Cells[2, Index]:=AddressBookList.AddressBook[Index - 1].SourceDbName;
+                        Grid.Cells[3, Index]:=AddressBookList.AddressBook[Index - 1].CustomerNumber.ToString();
+                        Grid.Cells[4, Index]:=AddressBookList.AddressBook[Index - 1].CustomerName;
+                        Grid.Cells[5, Index]:=AddressBookList.AddressBook[Index - 1].ContactPerson;
+                        Grid.Cells[6, Index]:=AddressBookList.AddressBook[Index - 1].RegularEmails;
+                        Grid.Cells[7, Index]:=AddressBookList.AddressBook[Index - 1].StatementEmails;
+                        Grid.Cells[8, Index]:=AddressBookList.AddressBook[Index - 1].PhoneNumbers;
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -218,8 +218,8 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(ReturnedData, CallResponse);
-            if Assigned(ReturnedData) then ReturnedData.Free();
+            if Assigned(Callback) then Callback(Grid, CallResponse);
+            if Assigned(Grid) then Grid.Free();
         end);
 
     end);

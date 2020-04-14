@@ -152,7 +152,7 @@ uses
     Api.ReturnOpenItems,
     Api.OpenItemsFields,
     Api.CustomerSnapshotEx,
-    Api.AddressBookList;
+    Api.AddressBookFields;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -182,8 +182,8 @@ begin
 
     Result:='';
 
-    var Col1:=Source.GetCol(TAddressBookList._SourceDbName);
-    var Col2:=Source.GetCol(TAddressBookList._CustomerNumber);
+    var Col1:=Source.GetCol(TAddressBookFields._SourceDbName);
+    var Col2:=Source.GetCol(TAddressBookFields._CustomerNumber);
 
     for var iCNT:=1 to Source.RowCount - 1 do
     begin
@@ -193,7 +193,7 @@ begin
 
         if (SourceDbName = srcSourceDbName) and (CustNumber = srcCustomerNumber) then
         begin
-            Result:=Source.Cells[Source.GetCol(TAddressBookList._StatementEmails), iCNT];
+            Result:=Source.Cells[Source.GetCol(TAddressBookFields._StatementEmails), iCNT];
             Break;
         end;
 

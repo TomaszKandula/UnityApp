@@ -941,7 +941,7 @@ uses
     Api.ReturnCustomerGroup,
     Api.ReturnOpenItems,
     Api.OpenItemsFields,
-    Api.AddressBookList,
+    Api.AddressBookFields,
     Api.CustomerSnapshotEx,
     Api.UserGeneralCommentUpdate;
 
@@ -1231,7 +1231,7 @@ begin
     for var SelIndex:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
     begin
 
-        if sgAgeView.RowHeights[Index] <> sgAgeView.sgRowHidden then
+        if sgAgeView.RowHeights[SelIndex] <> sgAgeView.sgRowHidden then
         begin
 
             sgAgeView.Cells[Col3, SelIndex]:=CommonDate;
@@ -1627,10 +1627,10 @@ begin
     // Indicates editable columns. Use it to examin if user should be able to
     // edit selected cell in TStrigGrid component.
     // ----------------------------------------------------------------------
-    if (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._StatementEmails))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._PhoneNumbers))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._ContactPerson))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._RegularEmails))
+    if (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._StatementEmails))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._PhoneNumbers))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._ContactPerson))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._RegularEmails))
     then
         // Do not exclude above columns from editing
         Result:=False
@@ -3126,7 +3126,7 @@ end;
 procedure TMainForm.Action_GoogleItClick(Sender: TObject);
 begin
 
-    var CustomerName:=sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._CustomerName), sgAddressBook.Row];
+    var CustomerName:=sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookFields._CustomerName), sgAddressBook.Row];
     var AppParam:='https://google.com/search?q=' + TNetEncoding.URL.Encode(CustomerName);
 
     ShellExecute(
@@ -3155,7 +3155,7 @@ begin
 
     var CallResponse: TCallResponse;
     CallResponse:=Service.Mediator.AddressBook.DelFromAddressBookAwaited(
-        sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookList._Id),
+        sgAddressBook.Cells[sgAddressBook.GetCol(TAddressBookFields._Id),
         sgAddressBook.Row].ToInteger()
     );
 
@@ -3333,10 +3333,7 @@ begin
         Exit();
     end;
 
-    if valStatus.Caption = TStatusBar.Ready then
-        THelpers.WndCall(ActionsForm, TWindowState.Modal, MainForm)
-    else
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Wait until "Ready" status and try again.');
+    THelpers.WndCall(ActionsForm, TWindowState.Modal, MainForm)
 
 end;
 

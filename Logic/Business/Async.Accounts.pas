@@ -54,19 +54,20 @@ type
         /// </remarks>
         procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList);
         /// <summary>
+        /// Allow to write async. user choice of comapny codes to load.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+        /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserLogsAwaited(): TCallResponse;
-        /// <summary>
-        /// Allow to write async. user choice of comapny codes to load. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
         /// <summary>
         /// Allow to load async. user rating with optional comment. There is no separate notification.
         /// </summary>
@@ -112,7 +113,7 @@ type
         function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse; virtual;
         function CheckSessionAwaited(SessionId: string): TCallResponse; virtual;
         procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList); virtual;
-        function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse; virtual;
+        procedure SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList); virtual;
         function SaveUserLogsAwaited(): TCallResponse; virtual;
         procedure LoadRatingAsync(Callback: TLoadRating); virtual;
         procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating); virtual;
@@ -464,10 +465,8 @@ begin
 end;
 
 
-function TAccounts.SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
+procedure TAccounts.SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
 begin
-
-    var CallResponse: TCallResponse;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -486,59 +485,62 @@ begin
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
-
             UserCompanySelection.SelectedCoCodes:=UserSelection.ToArray();
             Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
-            try
-
-                if (Rest.Execute) and (Rest.StatusCode = 200) then
-                begin
-
-                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
-                    try
-                        CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-                    finally
-                        UserCompaniesUpdated.Free();
-                    end;
-
-                end
-                else
-                begin
-
-                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                    else
-                        if String.IsNullOrEmpty(Rest.Content) then
-                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    Service.Logger.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    Service.Logger.Log(CallResponse.LastMessage);
-                end;
-
-            end;
-
         finally
             UserCompanySelection.Free();
         end;
 
+        var CallResponse: TCallResponse;
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
+                try
+                    CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
+                    Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+                finally
+                    UserCompaniesUpdated.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
     end);
 
     NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=CallResponse;
 
 end;
 

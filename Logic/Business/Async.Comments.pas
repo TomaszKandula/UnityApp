@@ -139,6 +139,7 @@ uses
     Api.UserGeneralCommentCheck,
     Api.UserGeneralCommentUpdated,
     Api.UserDailyCommentsList,
+    Api.UserDailyCommentsFields,
     Api.UserDailyCommentAdd,
     Api.UserDailyCommentAdded,
     Api.UserDailyCommentUpdate,
@@ -911,23 +912,23 @@ begin
                 var UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Rest.Content);
                 try
 
-                    SetLength(TempComments, Length(UserDailyCommentsList.CommentId));
+                    SetLength(TempComments, Length(UserDailyCommentsList.UserDailyComments));
 
-                    for var iCNT:=0 to Length(UserDailyCommentsList.CommentId) - 1 do
+                    for var Index:=0 to Length(UserDailyCommentsList.UserDailyComments) - 1 do
                     begin
-                        TempComments[iCNT].CommentId           :=UserDailyCommentsList.CommentId[iCNT];
-                        TempComments[iCNT].SourceDBName        :=UserDailyCommentsList.SourceDBName[iCNT];
-                        TempComments[iCNT].CustomerNumber      :=UserDailyCommentsList.CustomerNumber[iCNT];
-                        TempComments[iCNT].AgeDate             :=UserDailyCommentsList.AgeDate[iCNT];
-                        TempComments[iCNT].CallEvent           :=UserDailyCommentsList.CallEvent[iCNT];
-                        TempComments[iCNT].CallDuration        :=UserDailyCommentsList.CallDuration[iCNT];
-                        TempComments[iCNT].FixedStatementsSent :=UserDailyCommentsList.FixedStatementsSent[iCNT];
-                        TempComments[iCNT].CustomStatementsSent:=UserDailyCommentsList.CustomStatementsSent[iCNT];
-                        TempComments[iCNT].FixedRemindersSent  :=UserDailyCommentsList.FixedRemindersSent[iCNT];
-                        TempComments[iCNT].CustomRemindersSent :=UserDailyCommentsList.CustomRemindersSent[iCNT];
-                        TempComments[iCNT].UserComment         :=UserDailyCommentsList.UserComment[iCNT];
-                        TempComments[iCNT].UserAlias           :=UserDailyCommentsList.UserAlias[iCNT];
-                        TempComments[iCNT].EntryDateTime       :=UserDailyCommentsList.EntryDateTime[iCNT];
+                        TempComments[Index].CommentId           :=UserDailyCommentsList.UserDailyComments[Index].CommentId;
+                        TempComments[Index].SourceDBName        :=UserDailyCommentsList.UserDailyComments[Index].SourceDBName;
+                        TempComments[Index].CustomerNumber      :=UserDailyCommentsList.UserDailyComments[Index].CustomerNumber;
+                        TempComments[Index].AgeDate             :=UserDailyCommentsList.UserDailyComments[Index].AgeDate;
+                        TempComments[Index].CallEvent           :=UserDailyCommentsList.UserDailyComments[Index].CallEvent;
+                        TempComments[Index].CallDuration        :=UserDailyCommentsList.UserDailyComments[Index].CallDuration;
+                        TempComments[Index].FixedStatementsSent :=UserDailyCommentsList.UserDailyComments[Index].FixedStatementsSent;
+                        TempComments[Index].CustomStatementsSent:=UserDailyCommentsList.UserDailyComments[Index].CustomStatementsSent;
+                        TempComments[Index].FixedRemindersSent  :=UserDailyCommentsList.UserDailyComments[Index].FixedRemindersSent;
+                        TempComments[Index].CustomRemindersSent :=UserDailyCommentsList.UserDailyComments[Index].CustomRemindersSent;
+                        TempComments[Index].UserComment         :=UserDailyCommentsList.UserDailyComments[Index].UserComment;
+                        TempComments[Index].UserAlias           :=UserDailyCommentsList.UserDailyComments[Index].UserAlias;
+                        TempComments[Index].EntryDateTime       :=UserDailyCommentsList.UserDailyComments[Index].EntryDateTime;
                     end;
 
                     CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;

@@ -72,6 +72,8 @@ uses
     Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
     Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
     Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
+	Api.UserDailyCommentsFields in 'Model\Api.UserDailyCommentsFields.pas',
+	Api.AddressBookFields in 'Model\Api.AddressBookFields.pas',
 	Api.UserCompanyFields in 'Model\Api.UserCompanyFields.pas',
 	Api.CompaniesFields in 'Model\Api.CompaniesFields.pas',
 	Api.ControlStatusFields in 'Model\Api.ControlStatusFields.pas',
@@ -211,17 +213,43 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
+    var PathAppDir :=Service.Settings.DirApplication;
+    var PathHomeDir:=Service.Settings.DirRoaming;
+
+    // --------------------------------
+    // Check Config.cfg and Config.bin.
+    // --------------------------------
+    if not FileExists(PathHomeDir + 'Config.cfg') then
+    begin
+
+        if FileExists(PathHomeDir + 'Config.bin') then
+        begin
+            // Recover and re-open
+            TFile.Copy(PathHomeDir + 'Config.bin', PathHomeDir + 'Config.cfg');
+            Sleep(2500);
+            ShellExecute(MainForm.Handle, 'open', PChar(PathAppDir + 'Unity.exe'), nil, nil, SW_SHOWNORMAL);
+            ExitProcess(0);
+        end
+        else
+        begin
+            Application.MessageBox(
+                PCHar('Cannot find Config.bin. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
+                PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
+            );
+            ExitProcess(0);
+        end;
+
+    end;
+
     // ------------------------------------------------------
     // Open settings file, decode its content and Initialize
     // new session service that holds session data throughout
     // the application lifetime.
     // ------------------------------------------------------
-    var PathAppDir :=Service.Settings.DirApplication;
-    var PathHomeDir:=Service.Settings.DirRoaming;
     if not Service.Settings.CheckConfigFile then
     begin
         Application.MessageBox(
-            PCHar('Cannot find config.cfg. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
+            PCHar('Cannot find Config.cfg. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
             PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
         );
         ExitProcess(0);
@@ -238,7 +266,7 @@ begin
     // ----------------------------------------------------------------
     if Service.Settings.GetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', '') = 'yes' then
     begin
-        THelpers.RemoveAllInFolder(PathAppDir + 'cache', '*.*');
+        THelpers.RemoveAllInFolder(PathHomeDir + 'cache', '*.*');
         Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'no');
         Service.Settings.Encode(TAppFiles.Configuration);
     end;

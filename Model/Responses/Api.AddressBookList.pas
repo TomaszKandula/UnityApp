@@ -13,7 +13,8 @@ interface
 
 uses
     Api.ErrorHandler,
-    Api.MetaData;
+    Api.MetaData,
+    Api.AddressBookFields;
 
 
 type
@@ -21,41 +22,19 @@ type
 
     TAddressBookList = class
     strict private
-        var FId:              TArray<integer>;
-        var FSourceDbName:    TArray<string>;
-        var FCustomerNumber:  TArray<Int64>;
-        var FCustomerName:    TArray<string>;
-        var FContactPerson:   TArray<string>;
-        var FRegularEmails:   TArray<string>;
-        var FStatementEmails: TArray<string>;
-        var FPhoneNumbers:    TArray<string>;
-        var FIsSucceeded:     boolean;
-        var FError:           TErrorHandler;
-        var FMeta:            TMetaData;
+        var FAddressBook: TArray<TAddressBookFields>;
+        var FIsSucceeded: boolean;
+        var FError:       TErrorHandler;
+        var FMeta:        TMetaData;
     public
         destructor Destroy(); override;
-        const _Id              = 'Id';
-        const _SourceDbName    = 'SourceDbName';
-        const _CustomerNumber  = 'CustomerNumber';
-        const _CustomerName    = 'CustomerName';
-        const _ContactPerson   = 'ContactPerson';
-        const _RegularEmails   = 'RegularEmails';
-        const _StatementEmails = 'StatementEmails';
-        const _PhoneNumbers    = 'PhoneNumbers';
-        const _IsSucceeded     = 'IsSucceeded';
-        const _Error           = 'Error';
-        const _Meta            = 'Meta';
-        property Id:              TArray<integer> read FId              write FId;
-        property SourceDbName:    TArray<string>  read FSourceDbName    write FSourceDbName;
-        property CustomerNumber:  TArray<Int64>   read FCustomerNumber  write FCustomerNumber;
-        property CustomerName:    TArray<string>  read FCustomerName    write FCustomerName;
-        property ContactPerson:   TArray<string>  read FContactPerson   write FContactPerson;
-        property RegularEmails:   TArray<string>  read FRegularEmails   write FRegularEmails;
-        property StatementEmails: TArray<string>  read FStatementEmails write FStatementEmails;
-        property PhoneNumbers:    TArray<string>  read FPhoneNumbers    write FPhoneNumbers;
-        property IsSucceeded:     boolean         read FIsSucceeded     write FIsSucceeded;
-        property Error:           TErrorHandler   read FError           write FError;
-        property Meta:            TMetaData       read FMeta            write FMeta;
+        const _IsSucceeded = 'IsSucceeded';
+        const _Error       = 'Error';
+        const _Meta        = 'Meta';
+        property AddressBook: TArray<TAddressBookFields> read FAddressBook write FAddressBook;
+        property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
+        property Error:       TErrorHandler read FError       write FError;
+        property Meta:        TMetaData     read FMeta        write FMeta;
     end;
 
 
@@ -64,9 +43,15 @@ implementation
 
 destructor TAddressBookList.Destroy();
 begin
+
+    for var AddressBook: TAddressBookFields in FAddressBook do
+        if Assigned(AddressBook) then AddressBook.Free();
+
     if Assigned(FError) then FError.Free();
     if Assigned(FMeta) then FMeta.Free();
+
     inherited;
+
 end;
 
 

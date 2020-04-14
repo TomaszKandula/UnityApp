@@ -30,7 +30,15 @@ type
         /// </remarks>
         function GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse;
         /// <summary>
-        /// Allow to async. load current open items from SQL database.
+        /// Allow to async. load open items from database for given company and customer number.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetOpenItemsAsync(SourceDbName: string; CustomerNumber: Int64; Callback: TGetOpenItems);
+        /// <summary>
+        /// Allow to async. load all open items from database.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
@@ -52,6 +60,7 @@ type
         constructor Create();
         destructor Destroy(); override;
         function GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse; virtual;
+        procedure GetOpenItemsAsync(SourceDbName: string; CustomerNumber: Int64; Callback: TGetOpenItems); virtual;
         procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems); virtual;
     end;
 
@@ -162,6 +171,132 @@ begin
 end;
 
 
+procedure TOpenItems.GetOpenItemsAsync(SourceDbName: string; CustomerNumber: Int64; Callback: TGetOpenItems);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+        + 'openitems/customers/'
+        + SourceDbName
+        + '/'
+        + CustomerNumber.ToString()
+        + '/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetOpenItemsAsync]: Executing GET ' + Rest.ClientBaseURL);
+
+        var CallResponse: TCallResponse;
+        var Grid:=TStringGrid.Create(nil);
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Rest.Content);
+                try
+
+                    var RowCount:=Length(ReturnOpenItems.OpenItems);
+                    Grid.RowCount:=RowCount + 1; // Add header
+                    Grid.ColCount:=20;
+
+                    Grid.Cells[0, 0]:='';
+                    Grid.Cells[1 ,0]:=TOpenItemsFields._InvoiceNumber;
+                    Grid.Cells[2 ,0]:=TOpenItemsFields._Text;
+                    Grid.Cells[3 ,0]:=TOpenItemsFields._AdditionalText;
+                    Grid.Cells[4, 0]:=TOpenItemsFields._OpenAmount;
+                    Grid.Cells[5, 0]:=TOpenItemsFields._Amount;
+                    Grid.Cells[6, 0]:=TOpenItemsFields._OpenCurAmount;
+                    Grid.Cells[7, 0]:=TOpenItemsFields._CurAmount;
+                    Grid.Cells[8, 0]:=TOpenItemsFields._Iso;
+                    Grid.Cells[9 ,0]:=TOpenItemsFields._DueDate;
+                    Grid.Cells[10,0]:=TOpenItemsFields._ValueDate;
+                    Grid.Cells[11,0]:=TOpenItemsFields._ControlStatus;
+                    Grid.Cells[12,0]:=TOpenItemsFields._PmtStatus;
+                    Grid.Cells[13,0]:=TOpenItemsFields._Address1;
+                    Grid.Cells[14,0]:=TOpenItemsFields._Address2;
+                    Grid.Cells[15,0]:=TOpenItemsFields._Address3;
+                    Grid.Cells[16,0]:=TOpenItemsFields._PostalNumber;
+                    Grid.Cells[17,0]:=TOpenItemsFields._PostalArea;
+                    Grid.Cells[18,0]:=TOpenItemsFields._SourceDbName;
+                    Grid.Cells[19,0]:=TOpenItemsFields._CustNumber;
+
+                    for var Index:=1 to RowCount do
+                    begin
+                        Grid.Cells[1, Index]:=ReturnOpenItems.OpenItems[Index - 1].InvoiceNumber;
+                        Grid.Cells[2, Index]:=ReturnOpenItems.OpenItems[Index - 1].Text;
+                        Grid.Cells[3, Index]:=ReturnOpenItems.OpenItems[Index - 1].AdditionalText;
+                        Grid.Cells[4, Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenAmount.ToString();
+                        Grid.Cells[5, Index]:=ReturnOpenItems.OpenItems[Index - 1].Amount.ToString();
+                        Grid.Cells[6, Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenCurAmount.ToString();
+                        Grid.Cells[7, Index]:=ReturnOpenItems.OpenItems[Index - 1].CurAmount.ToString();
+                        Grid.Cells[8, Index]:=ReturnOpenItems.OpenItems[Index - 1].Iso;
+                        Grid.Cells[9, Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].DueDate, TCalendar.DateOnly);
+                        Grid.Cells[10,Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].ValueDate, TCalendar.DateOnly);
+                        Grid.Cells[11,Index]:=ReturnOpenItems.OpenItems[Index - 1].ControlStatus.ToString();
+                        Grid.Cells[12,Index]:=ReturnOpenItems.OpenItems[Index - 1].PmtStatus.ToString();
+                        Grid.Cells[13,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address1;
+                        Grid.Cells[14,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address2;
+                        Grid.Cells[15,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address3;
+                        Grid.Cells[16,Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalNumber;
+                        Grid.Cells[17,Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalArea;
+                        Grid.Cells[18,Index]:=ReturnOpenItems.OpenItems[Index - 1].SourceDbName;
+                        Grid.Cells[19,Index]:=ReturnOpenItems.OpenItems[Index - 1].CustNumber.ToString();
+                    end;
+
+                    CallResponse.IsSucceeded:=True;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    ReturnOpenItems.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetOpenItemsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[GetOpenItemsAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetOpenItemsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except
+            on E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(Grid, CallResponse);
+            if Assigned(Grid) then Grid.Free();
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
 procedure TOpenItems.ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems);
 begin
 
@@ -192,7 +327,7 @@ begin
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
 
 end;
 
@@ -268,44 +403,44 @@ begin
                 OpenItemsGrid.Cells[35,0]:=TOpenItemsFields._VoucherNumber;
                 OpenItemsGrid.Cells[36,0]:=TOpenItemsFields._VoucherDate;
 
-                for var iCNT:=1 to RowCount do
+                for var Index:=1 to RowCount do
                 begin
-                    OpenItemsGrid.Cells[1, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].SourceDbName;
-                    OpenItemsGrid.Cells[2, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CustNumber.ToString();
-                    OpenItemsGrid.Cells[3, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].VoucherType.ToString();
-                    OpenItemsGrid.Cells[4, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].OpenCurAmount.ToString();
-                    OpenItemsGrid.Cells[5, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].OpenAmount.ToString();
-                    OpenItemsGrid.Cells[6, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CustName;
-                    OpenItemsGrid.Cells[7, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Iso;
-                    OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CurAmount.ToString();
-                    OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Amount.ToString();
-                    OpenItemsGrid.Cells[10,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].InvoiceNumber;
-                    OpenItemsGrid.Cells[11,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[iCNT - 1].DueDate, TCalendar.DateOnly);
-                    OpenItemsGrid.Cells[12,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Inf4;
-                    OpenItemsGrid.Cells[13,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Inf7;
-                    OpenItemsGrid.Cells[14,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CreditLimit.ToString();
-                    OpenItemsGrid.Cells[15,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Country.ToString();
-                    OpenItemsGrid.Cells[16,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PmtTerms.ToString();
-                    OpenItemsGrid.Cells[17,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PmtStatus.ToString();
-                    OpenItemsGrid.Cells[18,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Agent;
-                    OpenItemsGrid.Cells[19,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].ControlStatus.ToString();
-                    OpenItemsGrid.Cells[20,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Address1;
-                    OpenItemsGrid.Cells[21,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Address2;
-                    OpenItemsGrid.Cells[22,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Address3;
-                    OpenItemsGrid.Cells[23,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PostalNumber;
-                    OpenItemsGrid.Cells[24,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PostalArea;
-                    OpenItemsGrid.Cells[25,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].GenAccNumber.ToString();
-                    OpenItemsGrid.Cells[26,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[iCNT - 1].ValueDate, TCalendar.DateOnly);
-                    OpenItemsGrid.Cells[27,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Division.ToString();
-                    OpenItemsGrid.Cells[28,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].Text;
-                    OpenItemsGrid.Cells[29,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].DirectDebit;
-                    OpenItemsGrid.Cells[30,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].AdditionalText;
-                    OpenItemsGrid.Cells[31,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].SalesResponsible;
-                    OpenItemsGrid.Cells[32,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].CustomerGroup;
-                    OpenItemsGrid.Cells[33,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].PersonResponsible;
-                    OpenItemsGrid.Cells[34,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].AccountType;
-                    OpenItemsGrid.Cells[35,iCNT]:=ReturnOpenItems.OpenItems[iCNT - 1].VoucherNumber.ToString();
-                    OpenItemsGrid.Cells[36,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[iCNT - 1].VoucherDate, TCalendar.DateOnly);
+                    OpenItemsGrid.Cells[1, Index]:=ReturnOpenItems.OpenItems[Index - 1].SourceDbName;
+                    OpenItemsGrid.Cells[2, Index]:=ReturnOpenItems.OpenItems[Index - 1].CustNumber.ToString();
+                    OpenItemsGrid.Cells[3, Index]:=ReturnOpenItems.OpenItems[Index - 1].VoucherType.ToString();
+                    OpenItemsGrid.Cells[4, Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenCurAmount.ToString();
+                    OpenItemsGrid.Cells[5, Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenAmount.ToString();
+                    OpenItemsGrid.Cells[6, Index]:=ReturnOpenItems.OpenItems[Index - 1].CustName;
+                    OpenItemsGrid.Cells[7, Index]:=ReturnOpenItems.OpenItems[Index - 1].Iso;
+                    OpenItemsGrid.Cells[8, Index]:=ReturnOpenItems.OpenItems[Index - 1].CurAmount.ToString();
+                    OpenItemsGrid.Cells[9, Index]:=ReturnOpenItems.OpenItems[Index - 1].Amount.ToString();
+                    OpenItemsGrid.Cells[10,Index]:=ReturnOpenItems.OpenItems[Index - 1].InvoiceNumber;
+                    OpenItemsGrid.Cells[11,Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].DueDate, TCalendar.DateOnly);
+                    OpenItemsGrid.Cells[12,Index]:=ReturnOpenItems.OpenItems[Index - 1].Inf4;
+                    OpenItemsGrid.Cells[13,Index]:=ReturnOpenItems.OpenItems[Index - 1].Inf7;
+                    OpenItemsGrid.Cells[14,Index]:=ReturnOpenItems.OpenItems[Index - 1].CreditLimit.ToString();
+                    OpenItemsGrid.Cells[15,Index]:=ReturnOpenItems.OpenItems[Index - 1].Country.ToString();
+                    OpenItemsGrid.Cells[16,Index]:=ReturnOpenItems.OpenItems[Index - 1].PmtTerms.ToString();
+                    OpenItemsGrid.Cells[17,Index]:=ReturnOpenItems.OpenItems[Index - 1].PmtStatus.ToString();
+                    OpenItemsGrid.Cells[18,Index]:=ReturnOpenItems.OpenItems[Index - 1].Agent;
+                    OpenItemsGrid.Cells[19,Index]:=ReturnOpenItems.OpenItems[Index - 1].ControlStatus.ToString();
+                    OpenItemsGrid.Cells[20,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address1;
+                    OpenItemsGrid.Cells[21,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address2;
+                    OpenItemsGrid.Cells[22,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address3;
+                    OpenItemsGrid.Cells[23,Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalNumber;
+                    OpenItemsGrid.Cells[24,Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalArea;
+                    OpenItemsGrid.Cells[25,Index]:=ReturnOpenItems.OpenItems[Index - 1].GenAccNumber.ToString();
+                    OpenItemsGrid.Cells[26,Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].ValueDate, TCalendar.DateOnly);
+                    OpenItemsGrid.Cells[27,Index]:=ReturnOpenItems.OpenItems[Index - 1].Division.ToString();
+                    OpenItemsGrid.Cells[28,Index]:=ReturnOpenItems.OpenItems[Index - 1].Text;
+                    OpenItemsGrid.Cells[29,Index]:=ReturnOpenItems.OpenItems[Index - 1].DirectDebit;
+                    OpenItemsGrid.Cells[30,Index]:=ReturnOpenItems.OpenItems[Index - 1].AdditionalText;
+                    OpenItemsGrid.Cells[31,Index]:=ReturnOpenItems.OpenItems[Index - 1].SalesResponsible;
+                    OpenItemsGrid.Cells[32,Index]:=ReturnOpenItems.OpenItems[Index - 1].CustomerGroup;
+                    OpenItemsGrid.Cells[33,Index]:=ReturnOpenItems.OpenItems[Index - 1].PersonResponsible;
+                    OpenItemsGrid.Cells[34,Index]:=ReturnOpenItems.OpenItems[Index - 1].AccountType;
+                    OpenItemsGrid.Cells[35,Index]:=ReturnOpenItems.OpenItems[Index - 1].VoucherNumber.ToString();
+                    OpenItemsGrid.Cells[36,Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].VoucherDate, TCalendar.DateOnly);
                 end;
 
                 CallResponse.IsSucceeded:=True;

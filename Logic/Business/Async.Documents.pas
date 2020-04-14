@@ -187,7 +187,7 @@ begin
             else if not(PayLoad.Series) then
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SendAccountStatement]: Account Statement cannot be sent. Please contact IT support.';
+                CallResponse.LastMessage:='[SendAccDocumentAsync]: Account Statement cannot be sent. Please contact IT support.';
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 
@@ -195,7 +195,7 @@ begin
             on E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SendAccountStatement]: Cannot execute. Error has been thrown: ' + E.Message;
+                CallResponse.LastMessage:='[SendAccDocumentAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 
@@ -255,13 +255,13 @@ begin
 
             CallResponse.IsSucceeded:=True;
             CallResponse.LastMessage:='Processed.';
-            Service.Logger.Log('[SendAccountStatements]: Listed items have been processed successfully!');
+            Service.Logger.Log('[SendAccDocumentsAsync]: Listed items have been processed successfully!');
 
         except
             on E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SendAccountStatements]: Cannot execute. Error has been thrown: ' + E.Message;
+                CallResponse.LastMessage:='[SendAccDocumentsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 

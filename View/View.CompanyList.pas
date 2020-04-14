@@ -60,6 +60,7 @@ type
         procedure ClearCompanyList();
         procedure CheckItem(var CheckEvent: boolean);
         procedure GetUserCompanyList_Callback(PayLoad: TUserCompanyList; CallResponse: TCallResponse);
+        procedure SaveUserCompanyList_Callback(CallResponse: TCallResponse);
     end;
 
 
@@ -119,17 +120,7 @@ begin
 
     end;
 
-    var CallResponse: TCallResponse;
-    CallResponse:=Service.Mediator.Accounts.SaveUserCompanyListAwaited(MainForm.LoadedCompanies);
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(CompanyListForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    MainForm.LoadAgeReport();
-    Close();
+    Service.Mediator.Accounts.SetUserCompanyListAsync(MainForm.LoadedCompanies, SaveUserCompanyList_Callback);
 
  end;
 
@@ -169,6 +160,9 @@ end;
 {$ENDREGION}
 
 
+{$REGION 'CALLBACKS'}
+
+
 procedure TCompanyListForm.GetUserCompanyList_Callback(PayLoad: TUserCompanyList; CallResponse: TCallResponse);
 begin
 
@@ -194,6 +188,25 @@ begin
     FIsDataLoaded:=True;
 
 end;
+
+
+procedure TCompanyListForm.SaveUserCompanyList_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(CompanyListForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[SaveUserCompanyList_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    MainForm.LoadAgeReport();
+    Close();
+
+end;
+
+
+{$ENDREGION}
 
 
 {$REGION 'STARTUP'}

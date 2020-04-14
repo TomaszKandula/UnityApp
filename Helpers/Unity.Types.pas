@@ -64,6 +64,8 @@ type
     TLoadRating            = procedure(UserRating: TRating; CallResponse: TCallResponse) of object;
     TScanSnapshots         = procedure(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse) of object;
     TGetUserCompanyList    = procedure(PayLoad: TUserCompanyList; CallResponse: TCallResponse) of object;
+    TSetUserCompanyList    = procedure(CallResponse: TCallResponse) of object;
+    TGetOpenItems          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
 
 
 implementation

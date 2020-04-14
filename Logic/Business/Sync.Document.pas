@@ -408,21 +408,7 @@ end;
 function TDocument.BuildHTML(): integer;
 begin
 
-    // ------------------------------------------------------------------------------------------
-    // We have two different date time format. First used by application that is always the same:
-    //     Time: hh:mm:ss
-    //     Date: yyyy-mm-dd
-    // Second is local user format settings in Windows system that may vary. Data that comes from
-    // SQL database will be displayed accordingly to local user settings, so any conversion from
-    // string must use local settings and use application settings if further calculation is
-    // done on the data.
-    // ------------------------------------------------------------------------------------------
-    var LocalFrmt: TFormatSettings;
     var UnityFrmt: TFormatSettings;
-
-    {$WARN SYMBOL_PLATFORM OFF} { Windows only }
-    LocalFrmt:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
-    {$WARN SYMBOL_PLATFORM ON}
     UnityFrmt:=FormatSettings;
 
     FPos:=0;
@@ -460,11 +446,11 @@ begin
 
                             if
                                 (
-                                    StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
+                                    StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], UnityFrmt) >= StrToDate(BeginWith, UnityFrmt)
                                 )
                             and
                                 (
-                                    StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) <= StrToDate(EndWith, UnityFrmt)
+                                    StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], UnityFrmt) <= StrToDate(EndWith, UnityFrmt)
                                 )
                             then
                                 OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
@@ -508,11 +494,11 @@ begin
                         )
                     and
                         (
-                            StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
+                            StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], UnityFrmt) >= StrToDate(BeginWith, UnityFrmt)
                         )
                     and
                         (
-                            StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) <= StrToDate(EndWith, UnityFrmt)
+                            StrToDate(OpenItems.Cells[FOpenItemsRefs.DueDtCol, iCNT], UnityFrmt) <= StrToDate(EndWith, UnityFrmt)
                         )
                     then
                         OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
