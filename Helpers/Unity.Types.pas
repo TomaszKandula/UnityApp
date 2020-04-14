@@ -20,7 +20,8 @@ uses
     Unity.Grid,
     Unity.Records,
     Api.ReturnCompanyDetails,
-    Api.ReturnCompanyData;
+    Api.ReturnCompanyData,
+    Api.UserCompanyList;
 
 
 type
@@ -62,9 +63,11 @@ type
     TGetAgingReport        = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
     TLoadRating            = procedure(UserRating: TRating; CallResponse: TCallResponse) of object;
     TScanSnapshots         = procedure(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse) of object;
+    TGetUserCompanyList    = procedure(PayLoad: TUserCompanyList; CallResponse: TCallResponse) of object;
 
 
 implementation
 
 
 end.
+

@@ -46,12 +46,13 @@ type
         /// </remarks>
         function CheckSessionAwaited(SessionId: string): TCallResponse;
         /// <summary>
-        /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
+        /// Allow to load async. list of company codes assigned to the current user.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse;
+        procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList);
         /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
         /// </summary>
@@ -110,9 +111,9 @@ type
         function RequestAccessTokenAwaited(var AccessToken: string): TCallResponse; virtual;
         function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse; virtual;
         function CheckSessionAwaited(SessionId: string): TCallResponse; virtual;
-        function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse; virtual;
-        function SaveUserLogsAwaited(): TCallResponse; virtual;
+        procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList); virtual;
         function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse; virtual;
+        function SaveUserLogsAwaited(): TCallResponse; virtual;
         procedure LoadRatingAsync(Callback: TLoadRating); virtual;
         procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating); virtual;
         procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating); virtual;
@@ -395,11 +396,8 @@ begin
 end;
 
 
-function TAccounts.GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse;
+procedure TAccounts.GetUserCompanyListAsync(Callback: TGetUserCompanyList);
 begin
-
-    var CallResponse: TCallResponse;
-    var TempUserCompanyList: TArray<TArray<string>>;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -414,44 +412,28 @@ begin
             + '/companies/';
 
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetUserCompanyListAwaited]: Executing GET ' + Rest.ClientBaseURL);
+        Service.Logger.Log('[GetUserCompanyListAsync]: Executing GET ' + Rest.ClientBaseURL);
 
+        var CallResponse: TCallResponse;
+        var UserCompanyList: TUserCompanyList;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-
-                var UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Rest.Content);
-                try
-
-                    var ItemCount:=Length(UserCompanyList.Companies);
-                    SetLength(TempUserCompanyList, ItemCount, 2);
-
-                    for var iCNT:=0 to ItemCount - 1 do
-                    begin
-                        TempUserCompanyList[iCNT, 0]:=UserCompanyList.Companies[iCNT];
-                        TempUserCompanyList[iCNT, 1]:=UserCompanyList.IsSelected[iCNT].ToString();
-                    end;
-
-                    CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    UserCompanyList.Free();
-                end;
-
+                UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Rest.Content);
+                CallResponse.IsSucceeded:=True;
+                Service.Logger.Log('[GetUserCompanyListAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    CallResponse.LastMessage:='[GetUserCompanyListAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[GetUserCompanyListAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        CallResponse.LastMessage:='[GetUserCompanyListAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
                 CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -463,17 +445,99 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[GetUserCompanyListAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(UserCompanyList, CallResponse);
+            if Assigned(UserCompanyList) then UserCompanyList.Free();
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+function TAccounts.SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+            + 'accounts/'
+            + Service.SessionData.UnityUserId.ToString()
+            + '/companies/';
+
+        Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Rest.ClientBaseURL);
+
+        var UserCompanySelection:=TUserCompanySelection.Create();
+        try
+
+            UserCompanySelection.SelectedCoCodes:=UserSelection.ToArray();
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            try
+
+                if (Rest.Execute) and (Rest.StatusCode = 200) then
+                begin
+
+                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
+                    try
+                        CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
+                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+                    finally
+                        UserCompaniesUpdated.Free();
+                    end;
+
+                end
+                else
+                begin
+
+                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    else
+                        if String.IsNullOrEmpty(Rest.Content) then
+                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    Service.Logger.Log(CallResponse.LastMessage);
+
+                end;
+
+            except on
+                E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    Service.Logger.Log(CallResponse.LastMessage);
+                end;
+
+            end;
+
+        finally
+            UserCompanySelection.Free();
         end;
 
     end);
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-    TArrayUtils<TArray<string>>.Move(TempUserCompanyList, CompanyList);
     Result:=CallResponse;
 
 end;
@@ -555,85 +619,6 @@ begin
 
         finally
             UserSessionLogs.Free();
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=CallResponse;
-
-end;
-
-
-function TAccounts.SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
-begin
-
-    var CallResponse: TCallResponse;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-		Rest.AccessToken:=Service.AccessToken;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
-            + Service.SessionData.UnityUserId.ToString()
-            + '/companies/';
-
-        Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Rest.ClientBaseURL);
-
-        var UserCompanySelection:=TUserCompanySelection.Create();
-        try
-
-            UserCompanySelection.SelectedCoCodes:=UserSelection.ToArray();
-            Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
-            try
-
-                if (Rest.Execute) and (Rest.StatusCode = 200) then
-                begin
-
-                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
-                    try
-                        CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                        Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-                    finally
-                        UserCompaniesUpdated.Free();
-                    end;
-
-                end
-                else
-                begin
-
-                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                    else
-                        if String.IsNullOrEmpty(Rest.Content) then
-                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    Service.Logger.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    Service.Logger.Log(CallResponse.LastMessage);
-                end;
-
-            end;
-
-        finally
-            UserCompanySelection.Free();
         end;
 
     end);

@@ -38,13 +38,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails);
-        /// <summary>
-        /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
     end;
 
 
@@ -53,15 +46,11 @@ type
     /// and override the methods or and extend them.
     /// </remarks>
     TCompanies = class(TInterfacedObject, ICompanies)
-    strict private
-        procedure FSetCompanyDetails(Source: TArray<TBankDetails>; var Target: TArray<TBankDetails>);
-        procedure FSetCompanyEmails(Source: TArray<TRegisteredEmails>; var Target: TArray<TRegisteredEmails>);
     public
         constructor Create();
         destructor Destroy(); override;
         procedure GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics); virtual;
         procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails); virtual;
-        function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse; virtual;
     end;
 
 
@@ -76,8 +65,6 @@ uses
     Unity.Helpers,
     Unity.Service,
     Api.ReturnCompanyData,
-    Api.CompanyCodesList,
-    Api.CompanyEmailsList,
     Api.ReturnCompanyDetails,
     Api.CompanyDetails,
     Api.UserCompanySelection;
@@ -228,115 +215,6 @@ begin
     end);
 
     NewTask.Start();
-
-end;
-
-
-function TCompanies.GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
-begin
-
-    var CallResponse: TCallResponse;
-    var CompanyEmailsList: TCompanyEmailsList;
-    try
-
-        var NewTask: ITask:=TTask.Create(procedure
-        begin
-
-            var Rest:=Service.InvokeRest();
-			Rest.AccessToken:=Service.AccessToken;
-            Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-            Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/emails/';
-            Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-            Service.Logger.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Rest.ClientBaseURL);
-
-            try
-
-                var CompanyCodesList:=TCompanyCodesList.Create();
-                CompanyCodesList.SourceDBName:=SourceList;
-                Rest.CustomBody:=TJson.ObjectToJsonString(CompanyCodesList);
-
-                if (Rest.Execute) and (Rest.StatusCode = 200) then
-                begin
-                    CompanyEmailsList:=TJson.JsonToObject<TCompanyEmailsList>(Rest.Content);
-                    CallResponse.IsSucceeded:=True;
-                    Service.Logger.Log('[GetCompanyEmailsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-                end
-                else
-                begin
-
-                    if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                        CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                    else
-                        if String.IsNullOrEmpty(Rest.Content) then
-                            CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    Service.Logger.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[GetCompanyEmailsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    Service.Logger.Log(CallResponse.LastMessage);
-                end;
-
-            end;
-
-        end);
-
-        NewTask.Start();
-        TTask.WaitForAll(NewTask);
-        FSetCompanyEmails(CompanyEmailsList.EmailList, TargetList);
-
-    finally
-        Result:=CallResponse;
-        CompanyEmailsList.Free();
-    end;
-
-end;
-
-
-procedure TCompanies.FSetCompanyDetails(Source: TArray<TBankDetails>; var Target: TArray<TBankDetails>);
-begin
-
-    SetLength(Target, Length(Source));
-    for var iCNT:=0 to Length(Source) - 1 do
-    begin
-
-        if not Assigned(Target[iCNT]) then
-            Target[iCNT]:=TBankDetails.Create();
-
-        Target[iCNT].BankName:=Source[iCNT].BankName;
-        Target[iCNT].BankAcc :=Source[iCNT].BankAcc;
-        Target[iCNT].BankCode:=Source[iCNT].BankCode;
-        Target[iCNT].BankIso :=Source[iCNT].BankIso;
-
-    end;
-
-end;
-
-
-procedure TCompanies.FSetCompanyEmails(Source: TArray<TRegisteredEmails>; var Target: TArray<TRegisteredEmails>);
-begin
-
-    SetLength(Target, Length(Source));
-    for var iCNT:=0 to Length(Source) - 1 do
-    begin
-
-        if not Assigned(Target[iCNT]) then
-            Target[iCNT]:=TRegisteredEmails.Create();
-
-        Target[iCNT].CompanyCode :=Source[iCNT].CompanyCode;
-        Target[iCNT].CompanyEmail:=Source[iCNT].CompanyEmail;
-
-    end;
 
 end;
 

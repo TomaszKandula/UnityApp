@@ -91,16 +91,16 @@ type
         // Use this method to ensure all interfaces are created regardless,
         // if mock interfaces are used via consturctor or not
         procedure ForceInitialize(); virtual;
-        property Accounts:       IAccounts       read GetAccounts;
-        property AddressBook:    IAddressBook    read GetAddressBook;
-        property Comments:       IComments       read GetComments;
-        property Companies:      ICompanies      read GetCompanies;
-        property Debtors:        IDebtors        read GetDebtors;
-        property Documents:      IDocuments      read GetDocuments;
-        property GeneralTables:  IGeneralTables  read GetGeneralTables;
-        property Mailer:         IMailer         read GetMailer;
-        property OpenItems:      IOpenItems      read GetOpenItems;
-        property Utilities:      IUtilities      read GetUtilities;
+        property Accounts:       IAccounts      read GetAccounts;
+        property AddressBook:    IAddressBook   read GetAddressBook;
+        property Comments:       IComments      read GetComments;
+        property Companies:      ICompanies     read GetCompanies;
+        property Debtors:        IDebtors       read GetDebtors;
+        property Documents:      IDocuments     read GetDocuments;
+        property GeneralTables:  IGeneralTables read GetGeneralTables;
+        property Mailer:         IMailer        read GetMailer;
+        property OpenItems:      IOpenItems     read GetOpenItems;
+        property Utilities:      IUtilities     read GetUtilities;
     end;
 
 

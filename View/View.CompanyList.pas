@@ -24,7 +24,9 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
-    Unity.Panel;
+    Unity.Panel,
+    Unity.Records,
+    Api.UserCompanyList;
 
 
 type
@@ -57,6 +59,7 @@ type
         procedure RequestAgeReport();
         procedure ClearCompanyList();
         procedure CheckItem(var CheckEvent: boolean);
+        procedure GetUserCompanyList_Callback(PayLoad: TUserCompanyList; CallResponse: TCallResponse);
     end;
 
 
@@ -76,7 +79,6 @@ uses
     Unity.Grid,
     Unity.Constants,
     Unity.Enums,
-    Unity.Records,
     Unity.Service;
 
 
@@ -167,6 +169,33 @@ end;
 {$ENDREGION}
 
 
+procedure TCompanyListForm.GetUserCompanyList_Callback(PayLoad: TUserCompanyList; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(CompanyListForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[GetUserCompanyList_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    var Count:=Length(PayLoad.UserCompanies);
+    SetLength(FCompaniesHolder, Count, 2);
+
+    for var Index:=0 to Count - 1 do
+    begin
+        FilterList.Items.Add(PayLoad.UserCompanies[Index].Companies);
+        if PayLoad.UserCompanies[Index].IsSelected then FilterList.Checked[Index]:=True;
+        FCompaniesHolder[Index, 0]:=PayLoad.UserCompanies[Index].Companies;
+        FCompaniesHolder[Index, 1]:=PayLoad.UserCompanies[Index].IsSelected.ToString();
+    end;
+
+    Screen.Cursor:=crDefault;
+    FIsDataLoaded:=True;
+
+end;
+
+
 {$REGION 'STARTUP'}
 
 
@@ -191,24 +220,11 @@ begin
     begin
 
         Screen.Cursor:=crHourGlass;
+        FilterList.Clear();
 
         THelpers.ExecWithDelay(500, procedure
         begin
-
-            FilterList.Clear();
-            var CallResponse: TCallResponse;
-
-            CallResponse:=Service.Mediator.Accounts.GetUserCompanyListAwaited(FCompaniesHolder);
-
-            if CallResponse.IsSucceeded then for var iCNT:=0 to Length(FCompaniesHolder) - 1 do
-            begin
-                FilterList.Items.Add(FCompaniesHolder[iCNT, 0]);
-                if FCompaniesHolder[iCNT, 1] = '-1' then FilterList.Checked[iCNT]:=True;
-            end;
-
-            Screen.Cursor:=crDefault;
-            FIsDataLoaded:=True;
-
+            Service.Mediator.Accounts.GetUserCompanyListAsync(GetUserCompanyList_Callback);
         end);
 
     end;

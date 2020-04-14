@@ -1,4 +1,4 @@
-unit Api.CompanyCodesList;
+unit Api.UserCompanyFields;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -14,17 +14,19 @@ interface
 type
 
 
-    TCompanyCodesList = class
-    strict private
-        var FSourceDBName: TArray<string>;
-    public
-        const _SourceDBName = 'SourceDBName';
-        property SourceDBName: TArray<string> read FSourceDBName write FSourceDBName;
-    end;
+	TUserCompanyFields = class
+	strict private
+        var FCompany:     string;
+        var FIsSelected:  boolean;
+	public
+        const _Company    = 'Company';
+        const _IsSelected = 'IsSelected';
+        property Companies:   string  read FCompany    write FCompany;
+        property IsSelected:  boolean read FIsSelected write FIsSelected;
+	end;
 
 
 implementation
 
 
 end.
-

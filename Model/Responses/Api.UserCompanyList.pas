@@ -13,30 +13,28 @@ interface
 
 uses
     Api.ErrorHandler,
-    Api.MetaData;
+    Api.MetaData,
+    Api.UserCompanyFields;
+
 
 type
 
 
 	TUserCompanyList = class
 	strict private
-        var FCompanies:   TArray<string>;
-        var FIsSelected:  TArray<boolean>;
-        var FIsSucceeded: boolean;
-        var FError:       TErrorHandler;
-        var FMeta:        TMetaData;
+        var FUserCompanies: TArray<TUserCompanyFields>;
+        var FIsSucceeded:   boolean;
+        var FError:         TErrorHandler;
+        var FMeta:          TMetaData;
 	public
         destructor Destroy(); override;
-        const _Companies   = 'Companies';
-        const _IsSelected  = 'IsSelected';
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        property Companies:   TArray<string>  read FCompanies   write FCompanies;
-        property IsSelected:  TArray<boolean> read FIsSelected  write FIsSelected;
-        property IsSucceeded: boolean         read FIsSucceeded write FIsSucceeded;
-        property Error:       TErrorHandler   read FError       write FError;
-        property Meta:        TMetaData       read FMeta        write FMeta;
+        property UserCompanies: TArray<TUserCompanyFields> read FUserCompanies write FUserCompanies;
+        property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
+        property Error:       TErrorHandler read FError       write FError;
+        property Meta:        TMetaData     read FMeta        write FMeta;
 	end;
 
 
@@ -45,9 +43,15 @@ implementation
 
 destructor TUserCompanyList.Destroy();
 begin
+
+    for var UserCompanies: TUserCompanyFields in FUserCompanies do
+        if Assigned(UserCompanies) then UserCompanies.Free();
+
     if Assigned(FError) then FError.Free();
     if Assigned(FMeta) then FMeta.Free();
+
     inherited;
+
 end;
 
 

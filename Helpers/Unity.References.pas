@@ -86,7 +86,7 @@ begin
     // despite we do not change columns order at run time programatically, it
     // may be changed on server-side and that will be immediatelly reflected in
     // Open Items string grid that serves the user and the application as the
-    // source of data. Additional purpose of the code is - to get the columns
+    // cached source data. Additional purpose of the code is - to get the columns
     // at once instead using ReturnColumn multiple times in given method,
     // this increase the overall performance of the code and decreases complexity.
     // ---------------------------------------------------------------------------
