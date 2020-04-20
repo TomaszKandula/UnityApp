@@ -7,7 +7,7 @@ program Unity;
 // ---------------------------------------------------------------------- //
 // Introduced:             Mid 2016 (concept).                            //
 // First test release:     2017-07-10.                                    //
-// Last stable release:    2019-08-01 (production).                       //
+// Last stable release:    2020-04-14 (production).                       //
 // ---------------------------------------------------------------------- //
 // IDE:                    RAD Studio (2019).                             //
 // Language:               Delphi* 10.3.2.                                //

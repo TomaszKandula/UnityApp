@@ -1491,8 +1491,8 @@ end;
 procedure TMainForm.RequestUnityWebWithToken();
 begin
 
-    var BaseUrl:=Service.Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', '');
-    var Url:=WideString(BaseUrl) + '/?sessiontoken=' + Service.SessionId;
+    var BaseUrl:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_WEB_URI', '');
+    var Url:=WideString(BaseUrl) + '?sessiontoken=' + Service.SessionId;
 
     try
         Chromium.LoadURL(Url);

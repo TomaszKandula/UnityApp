@@ -250,7 +250,7 @@ begin
 
                     CallResponse.IsSucceeded:=True;
                     CallResponse.ReturnedCode:=Rest.StatusCode;
-                    Service.Logger.Log('[FLoadToGrid]: Returned status code is ' + Rest.StatusCode.ToString());
+                    Service.Logger.Log('[GetOpenItemsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnOpenItems.Free();

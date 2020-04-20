@@ -426,7 +426,7 @@ object SendForm: TSendForm
         Height = 17
         Cursor = crHandPoint
         TabStop = False
-        Caption = 'Show all items (reminder)'
+        Caption = 'Reminder with cut-off date'
         TabOrder = 0
         OnClick = cbNonOverdueClick
         OnKeyUp = cbNonOverdueKeyUp

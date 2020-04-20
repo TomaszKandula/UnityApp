@@ -33,6 +33,18 @@ type
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
     /// </remarks>
     TFOpenItemsRefs = record
+        InvoNoCol:    integer;
+        Text:         integer;
+        AddText:      integer;
+        OpenAmCol:    integer;
+        Amount:       integer;
+        OpenCurAmCol: integer;
+        CurAmCol:     integer;
+        ISOCol:       integer;
+        DueDtCol:     integer;
+        ValDtCol:     integer;
+        CtrlCol:      integer;
+        PmtStatCol:   integer;
         Ad1Col:       integer;
         Ad2Col:       integer;
         Ad3Col:       integer;
@@ -40,16 +52,6 @@ type
         PAreaCol:     integer;
         CoCodeCol:    integer;
         CustNumCol:   integer;
-        OpenAmCol:    integer;
-        PmtStatCol:   integer;
-        CtrlCol:      integer;
-        InvoNoCol:    integer;
-        ValDtCol:     integer;
-        DueDtCol:     integer;
-        ISOCol:       integer;
-        CurAmCol:     integer;
-        OpenCurAmCol: integer;
-        Text:         integer;
         procedure InitWith(SourceGrid: TStringGrid);
     end;
 
@@ -94,23 +96,25 @@ begin
     // database workload during the day we have decided to update the data in
     // Open Items table few times a day (on regular basis).
     // ---------------------------------------------------------------------------
-    CoCodeCol   :=SourceGrid.GetCol(TOpenItemsFields._SourceDbName);
-    CustNumCol  :=SourceGrid.GetCol(TOpenItemsFields._CustNumber);
-    OpenAmCol   :=SourceGrid.GetCol(TOpenItemsFields._OpenAmount);
-    PmtStatCol  :=SourceGrid.GetCol(TOpenItemsFields._PmtStatus);
-    CtrlCol     :=SourceGrid.GetCol(TOpenItemsFields._ControlStatus);
     InvoNoCol   :=SourceGrid.GetCol(TOpenItemsFields._InvoiceNumber);
-    ValDtCol    :=SourceGrid.GetCol(TOpenItemsFields._ValueDate);
-    DueDtCol    :=SourceGrid.GetCol(TOpenItemsFields._DueDate);
-    ISOCol      :=SourceGrid.GetCol(TOpenItemsFields._Iso);
-    CurAmCol    :=SourceGrid.GetCol(TOpenItemsFields._CurAmount);
+    Text        :=SourceGrid.GetCol(TOpenItemsFields._Text);
+    AddText     :=SourceGrid.GetCol(TOpenItemsFields._AdditionalText);
+    OpenAmCol   :=SourceGrid.GetCol(TOpenItemsFields._OpenAmount);
+    Amount      :=SourceGrid.GetCol(TOpenItemsFields._Amount);
     OpenCurAmCol:=SourceGrid.GetCol(TOpenItemsFields._OpenCurAmount);
+    CurAmCol    :=SourceGrid.GetCol(TOpenItemsFields._CurAmount);
+    ISOCol      :=SourceGrid.GetCol(TOpenItemsFields._Iso);
+    DueDtCol    :=SourceGrid.GetCol(TOpenItemsFields._DueDate);
+    ValDtCol    :=SourceGrid.GetCol(TOpenItemsFields._ValueDate);
+    CtrlCol     :=SourceGrid.GetCol(TOpenItemsFields._ControlStatus);
+    PmtStatCol  :=SourceGrid.GetCol(TOpenItemsFields._PmtStatus);
     Ad1Col      :=SourceGrid.GetCol(TOpenItemsFields._Address1);
     Ad2Col      :=SourceGrid.GetCol(TOpenItemsFields._Address2);
     Ad3Col      :=SourceGrid.GetCol(TOpenItemsFields._Address3);
     PnoCol      :=SourceGrid.GetCol(TOpenItemsFields._PostalNumber);
     PAreaCol    :=SourceGrid.GetCol(TOpenItemsFields._PostalArea);
-    Text        :=SourceGrid.GetCol(TOpenItemsFields._Text);
+    CoCodeCol   :=SourceGrid.GetCol(TOpenItemsFields._SourceDbName);
+    CustNumCol  :=SourceGrid.GetCol(TOpenItemsFields._CustNumber);
 end;
 
 

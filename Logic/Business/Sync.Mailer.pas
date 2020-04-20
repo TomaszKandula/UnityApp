@@ -121,7 +121,7 @@ begin
 
         var SendEmail:=TSendEmail.Create();
         try
-            SendEmail.UserId   :=Service.SessionData.UnityUserId.ToString();
+            SendEmail.UserId   :=Service.SessionData.UnityUserId;
             SendEmail.SessionId:=Service.SessionId;
             SendEmail.AliasName:=Service.SessionData.AliasName;
             SendEmail.From     :=FMailFrom;

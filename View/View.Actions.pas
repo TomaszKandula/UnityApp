@@ -341,8 +341,6 @@ begin
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber.ToString();
     Service.Mediator.OpenItems.GetOpenItemsAsync(SourceDBName, CustNumber, GetOpenItems_Callback);
-    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm);
-    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am);
 end;
 
 
@@ -456,6 +454,9 @@ begin
     Cust_Phone.ItemIndex:=0;
     selSendFrom.Clear();
 
+    ValueOpenAm.Caption:='0';
+    ValueAmount.Caption:='0';
+
     DailyCom.Text  :='';
     GeneralCom.Text:='';
 
@@ -525,9 +526,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
 begin
 
     Screen.Cursor:=crHourGlass;
-
-    DailyCom.Text  :='';
-    GeneralCom.Text:='';
+    ClearAll();
 
     // -------------------------------------------------
     // Move grid cursor to next item (skip hidden rows).
@@ -977,6 +976,9 @@ begin
         OpenItemsGrid.SetColWidth(10, 20, 400);
     end;
 
+    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm);
+    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am);
+
     // Hide helpers columns from string grid
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Address1)]    :=OpenItemsGrid.sgRowHidden;
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Address2)]    :=OpenItemsGrid.sgRowHidden;
@@ -1020,8 +1022,8 @@ begin
     Cust_Phone.Items.Add('Not found!');
     Cust_Phone.ItemIndex:=0;
 
-    ValueOpenAm.Caption:='';
-    ValueAmount.Caption:='';
+    ValueOpenAm.Caption:='0';
+    ValueAmount.Caption:='0';
     txtDesc.Caption    :='';
     DailyCom.Text      :='';
     GeneralCom.Text    :='';

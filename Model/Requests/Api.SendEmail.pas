@@ -16,7 +16,7 @@ type
 
 	TSendEmail = class
 	strict private
-        var FUserId:    string;
+        var FUserId:    integer;
         var FSessionId: string;
         var FAliasName: string;
         var FFrom:      string;
@@ -35,7 +35,7 @@ type
         const _Bcc       = 'Bcc';
         const _Subject   = 'Subject';
         const _HtmlBody  = 'HtmlBody';
-        property UserId:    string         read FUserId    write FUserId;
+        property UserId:    integer        read FUserId    write FUserId;
         property SessionId: string         read FSessionId write FSessionId;
         property AliasName: string         read FAliasName write FAliasName;
         property From:      string         read FFrom      write FFrom;

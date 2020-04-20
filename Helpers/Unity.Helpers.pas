@@ -52,7 +52,7 @@ type
     THelpers = class abstract
     strict private
         const HtmlBanks = '<p class="p">{ROWS}</p>';
-        const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';
+        const HtmlRow   = '<b>Bank Details</b>: <br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br><br>';
         const HtmlBic   = '(BIC: {BIC_NUMBER})';
         const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const HEAP_ZERO_MEMORY = $00000008;
