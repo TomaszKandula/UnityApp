@@ -273,7 +273,7 @@ begin
                 try
 
                     var RowCount:=Length(ReturnCustomerReport.CustomerSnapshotEx);
-                    Grid.RowCount:=RowCount;
+                    Grid.RowCount:=RowCount + 1; // Add header
                     Grid.ColCount:=29;
 
                     Grid.Cells[0, 0]:='';
@@ -306,36 +306,36 @@ begin
                     Grid.Cells[27,0]:=TCustomerSnapshotEx._GeneralComment;
                     Grid.Cells[28,0]:=TCustomerSnapshotEx._DailyComment;
 
-                    for var Index:=1 to RowCount - 1 do
+                    for var Index:=1 to RowCount do
                     begin
-                        Grid.Cells[1, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].CustomerName;
-                        Grid.Cells[2, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].CustomerNumber.ToString();
-                        Grid.Cells[3, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].SourceDbName;
-                        Grid.Cells[4, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Overdue.ToString();
-                        Grid.Cells[5, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].NotDue.ToString();
-                        Grid.Cells[6, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Range1.ToString();
-                        Grid.Cells[7, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Range2.ToString();
-                        Grid.Cells[8, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Range3.ToString();
-                        Grid.Cells[9, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Range4.ToString();
-                        Grid.Cells[10,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Range5.ToString();
-                        Grid.Cells[11,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Range6.ToString();
-                        Grid.Cells[12,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Total.ToString();
-                        Grid.Cells[13,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].CreditLimit.ToString();
-                        Grid.Cells[14,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].CreditBalance.ToString();
-                        Grid.Cells[15,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].LedgerIso;
-                        Grid.Cells[16,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].FollowUp;
-                        Grid.Cells[17,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Free1;
-                        Grid.Cells[18,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Free2;
-                        Grid.Cells[19,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Free3;
-                        Grid.Cells[20,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].PersonResponsible;
-                        Grid.Cells[21,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].SalesResponsible;
-                        Grid.Cells[22,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].CustomerGroup;
-                        Grid.Cells[23,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].AccountType;
-                        Grid.Cells[24,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].PaymentTerms;
-                        Grid.Cells[25,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Inf4;
-                        Grid.Cells[26,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].Group3.ToString();
-                        Grid.Cells[27,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].GeneralComment;
-                        Grid.Cells[28,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index].DailyComment;
+                        Grid.Cells[1, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].CustomerName;
+                        Grid.Cells[2, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].CustomerNumber.ToString();
+                        Grid.Cells[3, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].SourceDbName;
+                        Grid.Cells[4, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Overdue.ToString();
+                        Grid.Cells[5, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].NotDue.ToString();
+                        Grid.Cells[6, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Range1.ToString();
+                        Grid.Cells[7, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Range2.ToString();
+                        Grid.Cells[8, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Range3.ToString();
+                        Grid.Cells[9, Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Range4.ToString();
+                        Grid.Cells[10,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Range5.ToString();
+                        Grid.Cells[11,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Range6.ToString();
+                        Grid.Cells[12,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Total.ToString();
+                        Grid.Cells[13,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].CreditLimit.ToString();
+                        Grid.Cells[14,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].CreditBalance.ToString();
+                        Grid.Cells[15,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].LedgerIso;
+                        Grid.Cells[16,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].FollowUp;
+                        Grid.Cells[17,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Free1;
+                        Grid.Cells[18,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Free2;
+                        Grid.Cells[19,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Free3;
+                        Grid.Cells[20,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].PersonResponsible;
+                        Grid.Cells[21,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].SalesResponsible;
+                        Grid.Cells[22,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].CustomerGroup;
+                        Grid.Cells[23,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].AccountType;
+                        Grid.Cells[24,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].PaymentTerms;
+                        Grid.Cells[25,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Inf4;
+                        Grid.Cells[26,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].Group3.ToString();
+                        Grid.Cells[27,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].GeneralComment;
+                        Grid.Cells[28,Index]:=ReturnCustomerReport.CustomerSnapshotEx[Index - 1].DailyComment;
                     end;
 
                     Service.Logger.Log('[GetAgingReportAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -430,7 +430,7 @@ begin
                 try
 
                     var RowCount:=Length(ReturnCustomerSnapshots.CustomerSnapshot);
-                    Grid.RowCount:=RowCount;
+                    Grid.RowCount:=RowCount + 1; // Add header
                     Grid.ColCount:=28;
 
                     Grid.Cells[0, 0]:='';

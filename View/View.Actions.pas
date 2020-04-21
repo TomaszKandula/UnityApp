@@ -213,6 +213,7 @@ type
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
         function  GetRunningApps(SearchName: string): boolean;
+        procedure ApplyFixedGridWidth(Grid: TStringGrid; ColWidth: integer);
         procedure GetFirstComment(var Text: TMemo);
         procedure UpdateOpenItems();
         procedure UpdateDaily();
@@ -330,6 +331,18 @@ begin
         end;
 
         CloseHandle(Snap);
+    end;
+
+end;
+
+
+procedure TActionsForm.ApplyFixedGridWidth(Grid: TStringGrid; ColWidth: integer);
+begin
+
+    for var Index:=0 to Grid.ColCount - 1 do
+    begin
+        if (Grid.ColWidths[Index] <> -1) or (Index <> 0) then Grid.ColWidths[Index]:=ColWidth;
+        if Index = 0 then Grid.ColWidths[Index]:=10;
     end;
 
 end;
@@ -973,7 +986,8 @@ begin
 
     finally
         OpenItemsGrid.Freeze(False);
-        OpenItemsGrid.SetColWidth(10, 20, 400);
+        //OpenItemsGrid.SetColWidth(10, 20, 400);
+        ApplyFixedGridWidth(OpenItemsGrid, 80);
     end;
 
     ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm);
@@ -987,6 +1001,11 @@ begin
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._PostalArea)]  :=OpenItemsGrid.sgRowHidden;
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._CustNumber)]  :=OpenItemsGrid.sgRowHidden;
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._SourceDbName)]:=OpenItemsGrid.sgRowHidden;
+
+    // Make few columns thinner
+    OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Text)]:=40;
+    OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Iso)]:=40;
+    OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._ControlStatus)]:=40;
 
     // Sort via payment status
     OpenItemsGrid.MSort(OpenItemsGrid.GetCol(TOpenItemsFields._PmtStatus), TDataType.TInteger, True);
@@ -1074,7 +1093,8 @@ begin
 
             OpenItemsGrid.Freeze(False);
             OpenItemsGrid.AutoThumbSize;
-            OpenItemsGrid.SetColWidth(10, 20, 400);
+            //OpenItemsGrid.SetColWidth(10, 20, 400);
+            ApplyFixedGridWidth(OpenItemsGrid, 80);
 
             GetFirstComment(DailyCom);
             Screen.Cursor:=crDefault;
