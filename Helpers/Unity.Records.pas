@@ -187,6 +187,7 @@ type
         CtrlStatusRefs: TFCtrlStatusRefs;
         IsCtrlStatus:   boolean;
         IsUserInCopy:   boolean;
+        IsSourceInCopy: boolean;
     end;
 
     /// <summary>

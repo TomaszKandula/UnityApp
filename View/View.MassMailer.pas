@@ -80,6 +80,7 @@ type
         shapeLbuEmails: TShape;
         cbMergeList: TCheckBox;
         cbNotDueOnly: TCheckBox;
+        cbIncludeSource: TCheckBox;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -444,6 +445,7 @@ begin
     FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
     FPayLoad.IsCtrlStatus  :=cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=cbUserInCopy.Checked;
+    FPayLoad.IsSourceInCopy:=cbIncludeSource.Checked;
 
     Screen.Cursor:=crHourGlass;
     MainForm.UpdateStatusBar(TStatusBar.Processing);

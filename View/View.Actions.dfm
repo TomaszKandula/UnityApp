@@ -1089,6 +1089,7 @@ object ActionsForm: TActionsForm
           Top = 111
           Width = 279
           Height = 21
+          Brush.Color = clCream
           Pen.Color = 15527148
         end
         object Cust_PersonBack: TShape
@@ -1096,6 +1097,7 @@ object ActionsForm: TActionsForm
           Top = 140
           Width = 279
           Height = 21
+          Brush.Color = clCream
           Pen.Color = 15527148
         end
         object Cust_NumberBack: TShape
@@ -1155,10 +1157,10 @@ object ActionsForm: TActionsForm
         end
         object btnEdit: TSpeedButton
           AlignWithMargins = True
-          Left = 326
-          Top = 168
-          Width = 30
-          Height = 27
+          Left = 136
+          Top = 166
+          Width = 25
+          Height = 25
           Cursor = crHandPoint
           Margins.Left = 0
           Margins.Top = 0
@@ -1369,6 +1371,7 @@ object ActionsForm: TActionsForm
           Top = 82
           Width = 279
           Height = 21
+          Brush.Color = clCream
           Pen.Color = 15527148
         end
         object btnCopyGeneralMail: TSpeedButton
@@ -1411,8 +1414,8 @@ object ActionsForm: TActionsForm
           OnClick = btnCopyGeneralMailClick
         end
         object btnSaveCustDetails: TSpeedButton
-          Left = 373
-          Top = 168
+          Left = 452
+          Top = 166
           Width = 30
           Height = 27
           Cursor = crHandPoint
@@ -1453,8 +1456,8 @@ object ActionsForm: TActionsForm
           OnClick = btnSaveCustDetailsClick
         end
         object imgCoverSaveBtn: TImage
-          Left = 373
-          Top = 168
+          Left = 452
+          Top = 166
           Width = 30
           Height = 27
           Picture.Data = {
@@ -1513,10 +1516,10 @@ object ActionsForm: TActionsForm
             04C418B60000000049454E44AE426082}
         end
         object btnGoogleIt: TSpeedButton
-          Left = 140
-          Top = 24
-          Width = 21
-          Height = 21
+          Left = 136
+          Top = 20
+          Width = 25
+          Height = 25
           Cursor = crHandPoint
           Hint = 'Google this customer'
           Flat = True
@@ -1551,6 +1554,19 @@ object ActionsForm: TActionsForm
           ShowHint = True
           OnClick = btnGoogleItClick
         end
+        object zText10: TLabel
+          Left = 372
+          Top = 173
+          Width = 71
+          Height = 13
+          Caption = 'Save changes:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = 5592405
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentFont = False
+        end
         object Cust_Mail: TEdit
           Left = 172
           Top = 115
@@ -1558,7 +1574,7 @@ object ActionsForm: TActionsForm
           Height = 13
           TabStop = False
           BorderStyle = bsNone
-          Color = clWhite
+          Color = clCream
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -1578,7 +1594,7 @@ object ActionsForm: TActionsForm
           Height = 13
           TabStop = False
           BorderStyle = bsNone
-          Color = clWhite
+          Color = clCream
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -1594,14 +1610,14 @@ object ActionsForm: TActionsForm
         object Cust_Phone: TComboBox
           Left = 167
           Top = 169
-          Width = 146
+          Width = 170
           Height = 22
           Cursor = crHandPoint
           BevelInner = bvLowered
           BevelKind = bkFlat
           BevelOuter = bvNone
           Style = csOwnerDrawFixed
-          Color = clWhite
+          Color = clCream
           ItemIndex = 0
           TabOrder = 0
           TabStop = False
@@ -1611,13 +1627,13 @@ object ActionsForm: TActionsForm
             '{data}')
         end
         object Cust_MailGeneral: TEdit
-          Left = 172
+          Left = 174
           Top = 86
           Width = 261
           Height = 13
           TabStop = False
           BorderStyle = bsNone
-          Color = clWhite
+          Color = clCream
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -1630,83 +1646,23 @@ object ActionsForm: TActionsForm
           Text = '{data}'
           OnMouseEnter = Cust_MailGeneralMouseEnter
         end
-        object GroupOpenItems: TGroupBox
-          Left = 517
-          Top = 18
-          Width = 348
-          Height = 81
-          Caption = 'Total Open Items'
-          TabOrder = 4
-          object LabelOpenAm: TLabel
-            Left = 24
-            Top = 30
-            Width = 69
-            Height = 13
-            Caption = 'Open amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelAmount: TLabel
-            Left = 24
-            Top = 49
-            Width = 37
-            Height = 13
-            Caption = 'Amount'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object ValueOpenAm: TLabel
-            Left = 120
-            Top = 30
-            Width = 62
-            Height = 13
-            Caption = '{OpenAm}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object ValueAmount: TLabel
-            Left = 120
-            Top = 49
-            Width = 59
-            Height = 13
-            Caption = '{Amount}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-        end
         object GroupEmails: TGroupBox
           Left = 517
-          Top = 105
+          Top = 20
           Width = 348
-          Height = 88
+          Height = 101
           Caption = 'E-mails'
-          TabOrder = 5
+          TabOrder = 4
           object txtSendFrom: TLabel
             Left = 200
-            Top = 29
+            Top = 25
             Width = 53
             Height = 13
             Caption = 'Send from:'
           end
           object cbUserInCopy: TCheckBox
             Left = 24
-            Top = 29
+            Top = 24
             Width = 145
             Height = 17
             Cursor = crHandPoint
@@ -1723,7 +1679,7 @@ object ActionsForm: TActionsForm
           end
           object cbCtrlStatusOff: TCheckBox
             Left = 24
-            Top = 52
+            Top = 71
             Width = 145
             Height = 17
             Cursor = crHandPoint
@@ -1740,13 +1696,91 @@ object ActionsForm: TActionsForm
           end
           object selSendFrom: TComboBox
             Left = 199
-            Top = 48
+            Top = 44
             Width = 130
-            Height = 21
+            Height = 22
             Cursor = crHandPoint
-            Style = csDropDownList
+            Style = csOwnerDrawFixed
             TabOrder = 2
             OnSelect = selSendFromSelect
+          end
+          object cbIncludeSource: TCheckBox
+            Left = 24
+            Top = 47
+            Width = 145
+            Height = 17
+            Cursor = crHandPoint
+            Caption = 'Include source address'
+            Checked = True
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentColor = False
+            ParentFont = False
+            State = cbChecked
+            TabOrder = 3
+          end
+        end
+        object GroupTotals: TGroupBox
+          Left = 517
+          Top = 127
+          Width = 348
+          Height = 66
+          TabOrder = 5
+          object LabelAmount: TLabel
+            Left = 24
+            Top = 17
+            Width = 37
+            Height = 13
+            Caption = 'Amount'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 5592405
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object ValueAmount: TLabel
+            Left = 110
+            Top = 17
+            Width = 59
+            Height = 13
+            Caption = '{Amount}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object LabelOpenAm: TLabel
+            Left = 23
+            Top = 36
+            Width = 69
+            Height = 13
+            Caption = 'Open amount:'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 5592405
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object ValueOpenAm: TLabel
+            Left = 110
+            Top = 36
+            Width = 62
+            Height = 13
+            Caption = '{OpenAm}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
           end
         end
       end
@@ -1818,75 +1852,6 @@ object ActionsForm: TActionsForm
           ExplicitTop = 56
           ExplicitWidth = 65
           ExplicitHeight = 65
-        end
-        object btnAddComment: TSpeedButton
-          Left = 293
-          Top = 5
-          Width = 25
-          Height = 25
-          Cursor = crHandPoint
-          Hint = 'Add new comment'
-          Flat = True
-          Glyph.Data = {
-            F6060000424DF606000000000000360000002800000018000000180000000100
-            180000000000C006000000000000000000000000000000000000FFFFFFFFFFFF
-            FFFFFF8080808080808080808080808080808080808080808080808080808080
-            80808080808080808080808080808080808080808080FFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF80808080808080
-            8080808080808080808080808080808080808080808080808080808080808080
-            808080808080808080808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFF
-            FF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFF808080FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FFFFFFB3
-            B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3
-            B3B3B3B3B3B3FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFF
-            FF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFF808080FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FFFFFFB3B3B3B3B3B3B3B3B3
-            B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3FFFF
-            FF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFF
-            FF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFF808080FFFFFF808080FFFFFFB3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3
-            B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3FFFFFF808080FFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF97A77697A77697A776FF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF97A7
-            7697A77697A776FFFFFFB3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3B3
-            B3B3B3B3B3B3B3B3B3B3B3B3B3B3FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFF97A77697A77697A776FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFF
-            FFFFFFFFFF97A77697A77697A77697A77697A77697A77697A77697A77697A776
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FF808080FFFFFFFFFFFFFFFFFF97A77697A77697A77697A77697A77697A77697
-            A77697A77697A776FFFFFFB8824DB8824DB8824DB8824DB8824DB8824DB8824D
-            B8824DB8824DB8824DB8824DFFFFFFFFFFFFFFFFFF97A77697A77697A77697A7
-            7697A77697A77697A77697A77697A776FFFFFFB8824DB8824DB8824DB8824DB8
-            824DB8824DB8824DB8824DB8824DB8824DB8824DFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFF97A77697A77697A776FFFFFFFFFFFFFFFFFFFFFFFFB8824DB882
-            4DB8824DB8824DB8824DB8824DB8824DB8824DB8824DB8824DB8824DFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFF97A77697A77697A776FFFFFFB8824DB8824D
-            B8824DB8824DB8824DB8824DB8824DB8824DB8824DB8824DB8824DB8824DB882
-            4DB8824DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF97A77697A77697A776FF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnAddCommentClick
         end
         object DailyCom: TMemo
           AlignWithMargins = True

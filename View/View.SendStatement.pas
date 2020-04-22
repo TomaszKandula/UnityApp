@@ -168,6 +168,7 @@ begin
     FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
+    FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
 
     Screen.Cursor:=crHourGlass;
     Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);

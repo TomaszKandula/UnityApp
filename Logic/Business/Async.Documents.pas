@@ -146,7 +146,7 @@ begin
                     PayLoad.IsCtrlStatus
                 );
 
-            if Statement.SendDocument(PayLoad.IsUserInCopy) then
+            if Statement.SendDocument(PayLoad.IsUserInCopy, PayLoad.IsSourceInCopy) then
             begin
 
                 var DocumentData: TSentDocument;

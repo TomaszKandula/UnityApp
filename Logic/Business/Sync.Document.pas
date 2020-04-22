@@ -99,7 +99,7 @@ type
         property CustNumber: integer read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
         function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
-        function SendDocument(IsUserInCopy: boolean): boolean;
+        function SendDocument(IsUserInCopy: boolean; IsSourceInCopy: boolean): boolean;
     end;
 
 
@@ -216,7 +216,7 @@ type
         property CustNumber: integer read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
         function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
-        function SendDocument(IsUserInCopy: boolean): boolean;
+        function SendDocument(IsUserInCopy: boolean; IsSourceInCopy: boolean): boolean;
     end;
 
 
@@ -289,7 +289,7 @@ begin
 end;
 
 
-function TDocument.SendDocument(IsUserInCopy: boolean): boolean;
+function TDocument.SendDocument(IsUserInCopy: boolean; IsSourceInCopy: boolean): boolean;
 begin
 
     Result:=False;
@@ -331,6 +331,11 @@ begin
     case IsUserInCopy of
         True:  MailBcc:=TArray<string>.Create(Service.SessionData.EmailAddress);
         False: MailBcc:=TArray<string>.Create();
+    end;
+
+    case IsSourceInCopy of
+        True:  MailCc:=TArray<string>.Create(MailFrom);
+        False: MailCc:=TArray<string>.Create();
     end;
 
     var CallResponse: TCallResponse;

@@ -96,7 +96,6 @@ type
         txtDesc: TLabel;
         imgInfo: TImage;
         imgCoverSaveBtn: TImage;
-        GroupOpenItems: TGroupBox;
         LabelOpenAm: TLabel;
         LabelAmount: TLabel;
         ValueOpenAm: TLabel;
@@ -126,8 +125,10 @@ type
         txtCallCustomer: TLabel;
         selSendFrom: TComboBox;
         txtSendFrom: TLabel;
-        btnAddComment: TSpeedButton;
         btnGoogleIt: TSpeedButton;
+        cbIncludeSource: TCheckBox;
+        GroupTotals: TGroupBox;
+        zText10: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -191,7 +192,6 @@ type
         procedure btnAutoStatementMouseLeave(Sender: TObject);
         procedure btnCallCustomerMouseEnter(Sender: TObject);
         procedure btnCallCustomerMouseLeave(Sender: TObject);
-        procedure btnAddCommentClick(Sender: TObject);
         procedure selSendFromSelect(Sender: TObject);
         procedure btnGoogleItClick(Sender: TObject);
     strict private
@@ -654,8 +654,23 @@ end;
 procedure TActionsForm.SaveDailyComment();
 begin
 
-    var GetId:=DailyComGrid.Cells[1, DailyComGrid.Row];
-    if GetId = '' then Exit();
+    var GetId:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsFields._CommentId), DailyComGrid.Row];
+    if GetId = '' then GetId:='0' else
+    begin
+
+        var StrAgeDate:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsFields._EntryDateTime), DailyComGrid.Row];
+        StrAgeDate:=StrAgeDate.SubString(0, 10);
+        var StrToday:=DateToStr(Now());
+
+        var Today:=StrToDate(StrToday);
+        var AgeDate:=StrToDate(StrAgeDate);
+
+        if Today <> AgeDate then
+            GetId:='0'
+        else
+            GetId:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsFields._CommentId), DailyComGrid.Row];
+
+    end;
 
     var LDailyCommentFields: TDailyCommentFields;
     LDailyCommentFields.CommentId           :=GetId.ToInteger();
@@ -1274,6 +1289,7 @@ begin
     FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
+    FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
 
     Screen.Cursor:=crHourGlass;
     Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
@@ -1351,28 +1367,6 @@ end;
 procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
     SaveCustomerDetails();
-end;
-
-
-procedure TActionsForm.btnAddCommentClick(Sender: TObject);
-begin
-
-    var LDailyCommentFields: TDailyCommentFields;
-    LDailyCommentFields.CommentId           :=0;
-    LDailyCommentFields.SourceDBName        :=SourceDBName;
-    LDailyCommentFields.CustomerNumber      :=CustNumber;
-    LDailyCommentFields.AgeDate             :=MainForm.LoadedAgeDate;
-    LDailyCommentFields.CallEvent           :=0;
-    LDailyCommentFields.CallDuration        :=0;
-    LDailyCommentFields.FixedStatementsSent :=0;
-    LDailyCommentFields.CustomStatementsSent:=0;
-    LDailyCommentFields.FixedRemindersSent  :=0;
-    LDailyCommentFields.CustomRemindersSent :=0;
-    LDailyCommentFields.UserComment         :='New action...';
-    LDailyCommentFields.UserAlias           :=Service.SessionData.AliasName;
-
-    Service.Mediator.Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
-
 end;
 
 

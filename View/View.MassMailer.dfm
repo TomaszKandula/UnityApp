@@ -774,9 +774,9 @@ object MassMailerForm: TMassMailerForm
       object Text_Warn: TLabel
         Left = 24
         Top = 151
-        Width = 258
+        Width = 211
         Height = 13
-        Caption = '* E-mail template is available in English language only.'
+        Caption = '* E-mail template is available only in English.'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGray
         Font.Height = -11
@@ -788,9 +788,9 @@ object MassMailerForm: TMassMailerForm
         Left = 128
         Top = 37
         Width = 116
-        Height = 21
+        Height = 22
         Cursor = crHandPoint
-        Style = csDropDownList
+        Style = csOwnerDrawFixed
         TabOrder = 0
         OnSelect = selCompanySelect
       end
@@ -812,15 +812,15 @@ object MassMailerForm: TMassMailerForm
         TabOrder = 1
       end
       object grSettings: TGroupBox
-        Left = 288
-        Top = 34
-        Width = 241
-        Height = 111
+        Left = 272
+        Top = 24
+        Width = 281
+        Height = 137
         Caption = 'Global settings'
         TabOrder = 2
         object cbCtrlStatusOff: TCheckBox
           Left = 24
-          Top = 54
+          Top = 77
           Width = 145
           Height = 17
           Cursor = crHandPoint
@@ -854,7 +854,7 @@ object MassMailerForm: TMassMailerForm
         end
         object cbMergeList: TCheckBox
           Left = 24
-          Top = 77
+          Top = 100
           Width = 145
           Height = 17
           Cursor = crHandPoint
@@ -869,6 +869,25 @@ object MassMailerForm: TMassMailerForm
           ParentColor = False
           ParentFont = False
           TabOrder = 2
+        end
+        object cbIncludeSource: TCheckBox
+          Left = 24
+          Top = 54
+          Width = 145
+          Height = 17
+          Cursor = crHandPoint
+          Caption = 'Include source address'
+          Checked = True
+          Color = clWhite
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentColor = False
+          ParentFont = False
+          State = cbChecked
+          TabOrder = 3
         end
       end
     end
