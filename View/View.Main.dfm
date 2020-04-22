@@ -10971,10 +10971,10 @@ object MainForm: TMainForm
             Left = 206
             Top = 52
             Width = 145
-            Height = 21
+            Height = 22
             Cursor = crHandPoint
             BevelInner = bvNone
-            Style = csDropDownList
+            Style = csOwnerDrawFixed
             DropDownCount = 10
             TabOrder = 0
           end

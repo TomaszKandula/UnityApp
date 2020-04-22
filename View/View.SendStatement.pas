@@ -38,27 +38,25 @@ type
         Text_Custom_Message: TLabel;
         Text_Message: TMemo;
         Text_Warn: TLabel;
-        cbShowAll: TCheckBox;
         PanelMessage: TPanel;
         PanelClient: TPanel;
         PanelBottom: TPanel;
-        Shape_Options: TShape;
-        Text_Options: TLabel;
-        cbOverdueOnly: TCheckBox;
-        cbNonOverdue: TCheckBox;
         PanelOption: TPanel;
         btnBeginDate: TSpeedButton;
         btnDelBegin: TSpeedButton;
         btnDelEnd: TSpeedButton;
         btnEndDate: TSpeedButton;
-        DueDateLabel: TLabel;
         ImgCover: TImage;
-        Shape_Dates: TShape;
         Text_Begin: TLabel;
         Text_End: TLabel;
         ValBeginDate: TLabel;
         ValEndDate: TLabel;
-        cbNotDueOnly: TCheckBox;
+        GroupFiltering: TGroupBox;
+        cbShowAll: TRadioButton;
+        cbOverdueOnly: TRadioButton;
+        GroupOptions: TGroupBox;
+        cbNonOverdue: TRadioButton;
+        cbNotDueOnly: TRadioButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -170,10 +168,9 @@ begin
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
     FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
 
-    Screen.Cursor:=crHourGlass;
     Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
-
-    Close();
+    SendForm.Enabled:=False;
+    Screen.Cursor:=crHourGlass;
 
 end;
 
@@ -195,7 +192,9 @@ begin
         Exit();
     end;
 
+    SendForm.Enabled:=True;
     THelpers.MsgCall(SendForm.Handle, TAppMessage.Info, CallResponse.LastMessage);
+    Close();
 
 end;
 
@@ -219,6 +218,7 @@ end;
 
 procedure TSendForm.FormShow(Sender: TObject);
 begin
+    if not SendForm.Enabled then SendForm.Enabled:=True;
     Text_Message.SetFocus();
 end;
 
@@ -231,69 +231,25 @@ end;
 
 procedure TSendForm.cbShowAllClick(Sender: TObject);
 begin
-
-    if cbShowAll.Checked then
-    begin
-        cbOverdueOnly.Checked:=False;
-        cbNonOverdue.Checked:=False;
-        cbNotDueOnly.Checked:=False;
-        ImgCover.Visible:=True;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbShowAll.Checked:=True;
-
+    if cbShowAll.Checked then ImgCover.Visible:=True;
 end;
 
 
 procedure TSendForm.cbOverdueOnlyClick(Sender: TObject);
 begin
-
-    if cbOverdueOnly.Checked then
-    begin
-        cbShowAll.Checked:=False;
-        cbNonOverdue.Checked:=False;
-        cbNotDueOnly.Checked:=False;
-        ImgCover.Visible:=True;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked)
-        and not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbOverdueOnly.Checked:=True;
-
+    if cbOverdueOnly.Checked then ImgCover.Visible:=True;
 end;
 
 
 procedure TSendForm.cbNonOverdueClick(Sender: TObject);
 begin
-
-    if cbNonOverdue.Checked then
-    begin
-        cbShowAll.Checked:=False;
-        cbOverdueOnly.Checked:=False;
-        cbNotDueOnly.Checked:=False;
-        ImgCover.Visible:=False;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNonOverdue.Checked:=True;
-
+    if cbNonOverdue.Checked then ImgCover.Visible:=False;
 end;
 
 
 procedure TSendForm.cbNotDueOnlyClick(Sender: TObject);
 begin
-
-    if cbNotDueOnly.Checked then
-    begin
-        cbShowAll.Checked:=False;
-        cbOverdueOnly.Checked:=False;
-        cbNonOverdue.Checked:=False;
-        ImgCover.Visible:=True;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNotDueOnly.Checked:=True;
-
+    if cbNotDueOnly.Checked then ImgCover.Visible:=True;
 end;
 
 

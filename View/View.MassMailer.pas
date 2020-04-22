@@ -53,19 +53,12 @@ type
         PanelEmailContainer: TPanel;
         Text_Subject: TEdit;
         PanelOption: TPanel;
-        Shape_Dates: TShape;
-        Shape_Options: TShape;
         Text_Begin: TLabel;
         Text_End: TLabel;
-        Text_Options: TLabel;
         ValBeginDate: TLabel;
         ValEndDate: TLabel;
         btnBeginDate: TSpeedButton;
         btnEndDate: TSpeedButton;
-        cbNonOverdue: TCheckBox;
-        cbOverdueOnly: TCheckBox;
-        cbShowAll: TCheckBox;
-        DueDateLabel: TLabel;
         ImgCover: TImage;
         btnDelBegin: TSpeedButton;
         btnDelEnd: TSpeedButton;
@@ -79,8 +72,13 @@ type
         grSettings: TGroupBox;
         shapeLbuEmails: TShape;
         cbMergeList: TCheckBox;
-        cbNotDueOnly: TCheckBox;
         cbIncludeSource: TCheckBox;
+        GroupFiltering: TGroupBox;
+        GroupOptions: TGroupBox;
+        cbShowAll: TRadioButton;
+        cbOverdueOnly: TRadioButton;
+        cbNonOverdue: TRadioButton;
+        cbNotDueOnly: TRadioButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -171,10 +169,8 @@ end;
 
 procedure TMassMailerForm.ListViewAutoFit(List: TListView; const AutoFit: integer);
 begin
-
     for var iCNT:=0 to List.Columns.Count - 1 do if iCNT < 7 then
         List.Column[iCNT].Width:=AutoFit else List.Column[iCNT].Width:=0;
-
 end;
 
 
@@ -656,69 +652,25 @@ end;
 
 procedure TMassMailerForm.cbShowAllClick(Sender: TObject);
 begin
-
-    if cbShowAll.Checked then
-    begin
-        cbOverdueOnly.Checked:=False;
-        cbNonOverdue.Checked:=False;
-        cbNotDueOnly.Checked:=False;
-        ImgCover.Visible:=True;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbShowAll.Checked:=True;
-
+    if cbShowAll.Checked then ImgCover.Visible:=True;
 end;
 
 
 procedure TMassMailerForm.cbOverdueOnlyClick(Sender: TObject);
 begin
-
-    if cbOverdueOnly.Checked then
-    begin
-        cbShowAll.Checked:=False;
-        cbNonOverdue.Checked:=False;
-        cbNotDueOnly.Checked:=False;
-        ImgCover.Visible:=True;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) then cbOverdueOnly.Checked:=True;
-
+    if cbOverdueOnly.Checked then ImgCover.Visible:=True;
 end;
 
 
 procedure TMassMailerForm.cbNonOverdueClick(Sender: TObject);
 begin
-
-    if cbNonOverdue.Checked then
-    begin
-        cbShowAll.Checked:=False;
-        cbOverdueOnly.Checked:=False;
-        cbNotDueOnly.Checked:=False;
-        ImgCover.Visible:=False;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNonOverdue.Checked:=True;
-
+    if cbNonOverdue.Checked then ImgCover.Visible:=False;
 end;
 
 
 procedure TMassMailerForm.cbNotDueOnlyClick(Sender: TObject);
 begin
-
-    if cbNotDueOnly.Checked then
-    begin
-        cbShowAll.Checked:=False;
-        cbOverdueOnly.Checked:=False;
-        cbNonOverdue.Checked:=False;
-        ImgCover.Visible:=True;
-    end;
-
-    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and
-        not(cbNonOverdue.Checked) and not(cbNotDueOnly.Checked) then cbNotDueOnly.Checked:=True;
-
+    if cbNotDueOnly.Checked then ImgCover.Visible:=True;
 end;
 
 
