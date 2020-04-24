@@ -65,6 +65,12 @@ object PhoneListForm: TPhoneListForm
         Align = alClient
         BorderStyle = bsNone
         Color = clCream
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
       end

@@ -129,6 +129,8 @@ type
         cbIncludeSource: TCheckBox;
         GroupTotals: TGroupBox;
         zText10: TLabel;
+        txtItemCount: TLabel;
+        valItemCount: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -197,6 +199,7 @@ type
     strict private
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
+        var FLedgerIso: string;
         var FCustDetailsId: integer;
         var FSourceDBName: string;
         var FCustName: string;
@@ -450,6 +453,7 @@ begin
     FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerName), MainForm.sgAgeView.Row];
     FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
     FSourceDBName:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName), MainForm.sgAgeView.Row]);
+    FLedgerIso   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._LedgerIso), MainForm.sgAgeView.Row]);
 end;
 
 
@@ -467,8 +471,9 @@ begin
     Cust_Phone.ItemIndex:=0;
     selSendFrom.Clear();
 
-    ValueOpenAm.Caption:='0';
-    ValueAmount.Caption:='0';
+    ValueOpenAm.Caption :='0';
+    ValueAmount.Caption :='0';
+    valItemCount.Caption:='0';
 
     DailyCom.Text  :='';
     GeneralCom.Text:='';
@@ -484,25 +489,51 @@ begin
 
     if String.IsNullOrEmpty(ActionsForm.Cust_Phone.Text) or String.IsNullOrWhiteSpace(ActionsForm.Cust_Phone.Text) then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'No phone number has been found. Please provide valid phone number and try again.');
+
+        THelpers.MsgCall(
+            ActionsForm.Handle,
+            TAppMessage.Warn,
+            'No phone number has been found. Please provide valid phone number and try again.'
+        );
+
         Exit();
+
     end;
 
-    var Settings: ISettings:=TSettings.Create;
-
-    if not FileExists(Settings.DirApplication + 'LyncCall.exe') then
+    if not FileExists(Service.Settings.DirApplication + 'LyncCall.exe') then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
+
+        THelpers.MsgCall(
+            ActionsForm.Handle,
+            TAppMessage.Error,
+            TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.'
+        );
+
         Exit();
+
     end;
 
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+
+        THelpers.MsgCall(
+            ActionsForm.Handle,
+            TAppMessage.Error,
+            TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.'
+        );
+
         Exit();
+
     end;
 
-    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.DirApplication + 'LyncCall.exe'), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    ShellExecute(
+        ActionsForm.Handle,
+        'open',
+        PChar(Service.Settings.DirApplication + 'LyncCall.exe'),
+        PChar(ActionsForm.Cust_Phone.Text),
+        nil,
+        SW_SHOWNORMAL
+    );
 
     if ActionsForm.DailyCom.Text = '' then
     begin
@@ -1005,8 +1036,9 @@ begin
         ApplyFixedGridWidth(OpenItemsGrid, 80);
     end;
 
-    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm);
-    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am);
+    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) + ' ' + FLedgerIso;
+    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) + ' ' + FLedgerIso;
+    valItemCount.Caption:=(OpenItemsGrid.RowCount - 1).ToString();
 
     // Hide helpers columns from string grid
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Address1)]    :=OpenItemsGrid.sgRowHidden;
@@ -1056,8 +1088,10 @@ begin
     Cust_Phone.Items.Add('Not found!');
     Cust_Phone.ItemIndex:=0;
 
-    ValueOpenAm.Caption:='0';
-    ValueAmount.Caption:='0';
+    ValueOpenAm.Caption :='0';
+    ValueAmount.Caption :='0';
+    valItemCount.Caption:='0';
+
     txtDesc.Caption    :='';
     DailyCom.Text      :='';
     GeneralCom.Text    :='';

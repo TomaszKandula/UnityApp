@@ -18,7 +18,7 @@ uses
     System.IOUtils,
     Winapi.Messages,
     Winapi.Windows,
-    Winapi.ShellAPI,
+    //Winapi.ShellAPI,
     Vcl.ExtCtrls,
     Vcl.Forms,
     Vcl.Menus,
@@ -80,7 +80,6 @@ type
         class function ArrayIntToString(Input: TArray<integer>; TargetDelim: string): string; static;
         class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
-        class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
         class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
         class function DbNameToCoCode(SourceDBName: string): string; static;
         class function CoConvert(CoNumber: string): string; static;
@@ -588,24 +587,6 @@ begin
     finally
         tsVAL.Free();
     end;
-
-end;
-
-
-class function THelpers.ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal;
-begin
-
-    var Settings: ISettings:=TSettings.Create;
-    var AppParam: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
-
-    Result:=ShellExecute(
-        CurrentForm.Handle,
-        'open',
-        PChar(Settings.DirApplication + TCommon.UnityReader),
-        PChar(AppParam),
-        nil,
-        SW_SHOWNORMAL
-    );
 
 end;
 

@@ -66,6 +66,7 @@ type
     TGetUserCompanyList    = procedure(PayLoad: TUserCompanyList; CallResponse: TCallResponse) of object;
     TSetUserCompanyList    = procedure(CallResponse: TCallResponse) of object;
     TGetOpenItems          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
+    TGetBiReports          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
 
 
 implementation

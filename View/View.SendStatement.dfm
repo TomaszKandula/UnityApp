@@ -35,8 +35,6 @@ object SendForm: TSendForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 533
-    ExplicitHeight = 453
     object Text_Custom_Message: TLabel
       AlignWithMargins = True
       Left = 20
@@ -66,8 +64,6 @@ object SendForm: TSendForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 503
-      ExplicitHeight = 248
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
@@ -92,8 +88,6 @@ object SendForm: TSendForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-        ExplicitWidth = 499
-        ExplicitHeight = 244
       end
     end
     object PanelOption: TPanel
@@ -109,9 +103,6 @@ object SendForm: TSendForm
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitLeft = 6
-      ExplicitTop = 563
-      ExplicitWidth = 825
       object GroupOptions: TGroupBox
         AlignWithMargins = True
         Left = 10
@@ -125,13 +116,12 @@ object SendForm: TSendForm
         Align = alClient
         Caption = 'Invoice options'
         TabOrder = 0
-        ExplicitWidth = 480
-        ExplicitHeight = 145
         object cbShowAll: TRadioButton
           Left = 24
           Top = 38
           Width = 153
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Show all items (statement)'
           TabOrder = 0
           OnClick = cbShowAllClick
@@ -142,6 +132,7 @@ object SendForm: TSendForm
           Top = 63
           Width = 153
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Overdue only (reminder)'
           TabOrder = 1
           OnClick = cbOverdueOnlyClick
@@ -152,6 +143,7 @@ object SendForm: TSendForm
           Top = 86
           Width = 153
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Reminder with cut-off date'
           TabOrder = 2
           OnClick = cbNonOverdueClick
@@ -162,6 +154,7 @@ object SendForm: TSendForm
           Top = 109
           Width = 153
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Show not due items only'
           TabOrder = 3
           OnClick = cbNotDueOnlyClick
@@ -463,14 +456,12 @@ object SendForm: TSendForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
-    ExplicitTop = 473
-    ExplicitWidth = 553
     object Text_Warn: TLabel
       Left = 16
       Top = 18
-      Width = 277
+      Width = 211
       Height = 13
-      Caption = '* Account Statement is available in English language only.'
+      Caption = '* E-mail template is available only in English.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGray
       Font.Height = -11

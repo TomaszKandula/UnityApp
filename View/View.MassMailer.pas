@@ -541,6 +541,8 @@ begin
     PanelMessage.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 
     lstLbuEmails.Clear();
+
+    cbShowAll.Checked:=True;
     ValBeginDate.Caption:='2010-01-01';
     ValEndDate.Caption:='';
 
@@ -549,6 +551,7 @@ end;
 
 procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
+    lstLbuEmails.Clear();
     SetLength(FLbuEmails, 0, 2);
     SetLength(FCompanyDetails, 0, 6);
 end;

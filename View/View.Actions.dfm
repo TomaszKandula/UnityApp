@@ -1576,7 +1576,7 @@ object ActionsForm: TActionsForm
           BorderStyle = bsNone
           Color = clCream
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
+          Font.Color = clNavy
           Font.Height = -11
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
@@ -1596,7 +1596,7 @@ object ActionsForm: TActionsForm
           BorderStyle = bsNone
           Color = clCream
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
+          Font.Color = clNavy
           Font.Height = -11
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
@@ -1618,7 +1618,13 @@ object ActionsForm: TActionsForm
           BevelOuter = bvNone
           Style = csOwnerDrawFixed
           Color = clCream
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clNavy
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
           ItemIndex = 0
+          ParentFont = False
           TabOrder = 0
           TabStop = False
           Text = '{data}'
@@ -1627,7 +1633,7 @@ object ActionsForm: TActionsForm
             '{data}')
         end
         object Cust_MailGeneral: TEdit
-          Left = 174
+          Left = 173
           Top = 86
           Width = 261
           Height = 13
@@ -1635,7 +1641,7 @@ object ActionsForm: TActionsForm
           BorderStyle = bsNone
           Color = clCream
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
+          Font.Color = clNavy
           Font.Height = -11
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
@@ -1782,6 +1788,32 @@ object ActionsForm: TActionsForm
             Font.Style = [fsBold]
             ParentFont = False
           end
+          object txtItemCount: TLabel
+            Left = 255
+            Top = 17
+            Width = 56
+            Height = 13
+            Caption = 'Item count:'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 5592405
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object valItemCount: TLabel
+            Left = 255
+            Top = 36
+            Width = 39
+            Height = 13
+            Caption = '{NUM}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
         end
       end
     end
@@ -1825,16 +1857,16 @@ object ActionsForm: TActionsForm
           Margins.Right = 5
           Margins.Bottom = 5
           Align = alTop
-          Caption = 'Daily Comment:'
+          Caption = 'Post new daily comment:'
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clBlack
           Font.Height = -13
           Font.Name = 'Tahoma'
-          Font.Style = [fsUnderline]
+          Font.Style = []
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 91
+          ExplicitWidth = 144
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -1911,16 +1943,16 @@ object ActionsForm: TActionsForm
           Margins.Right = 5
           Margins.Bottom = 5
           Align = alTop
-          Caption = 'General Comment:'
+          Caption = 'Edit general comment:'
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clBlack
           Font.Height = -13
           Font.Name = 'Tahoma'
-          Font.Style = [fsUnderline]
+          Font.Style = []
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 108
+          ExplicitWidth = 130
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -1996,16 +2028,16 @@ object ActionsForm: TActionsForm
           Margins.Right = 5
           Margins.Bottom = 5
           Align = alTop
-          Caption = 'Daily Comment History:'
+          Caption = 'History of daily comment:'
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clBlack
           Font.Height = -13
           Font.Name = 'Tahoma'
-          Font.Style = [fsUnderline]
+          Font.Style = []
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 134
+          ExplicitWidth = 146
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True

@@ -57,6 +57,14 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary);
+        /// <summary>
+        /// Allows to load async. all the BI reports details, so the user can select and open desired report in a separate view.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetBiReportsAsync(Callback: TGetBiReports);
     end;
 
 
@@ -73,6 +81,7 @@ type
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
         function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
         procedure RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary); virtual;
+        procedure GetBiReportsAsync(Callback: TGetBiReports); virtual;
     end;
 
 
@@ -91,6 +100,8 @@ uses
     Unity.Helpers,
     Unity.Service,
     Api.ReturnClientInfo,
+    Api.ReturnReportList,
+    Api.ReportListFields,
     Bcrypt;
 
 
@@ -291,7 +302,7 @@ begin
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'application/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckRelease]: Executing GET ' + Rest.ClientBaseURL);
+        Service.Logger.Log('[CheckReleaseAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
         try
 
@@ -309,7 +320,7 @@ begin
                     LCallResponse.ErrorCode  :=ReturnClientInfo.Error.ErrorCode;
                     LCallResponse.LastMessage:=ReturnClientInfo.Error.ErrorDesc;
 
-                    Service.Logger.Log('[CheckRelease]: Returned status code is ' + Rest.StatusCode.ToString());
+                    Service.Logger.Log('[CheckReleaseAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
 
                 finally
                     ReturnClientInfo.Free();
@@ -320,12 +331,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    LCallResponse.LastMessage:='[CheckRelease]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    LCallResponse.LastMessage:='[CheckReleaseAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        LCallResponse.LastMessage:='[CheckRelease]: Invalid server response. Please contact IT Support.'
+                        LCallResponse.LastMessage:='[CheckReleaseAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        LCallResponse.LastMessage:='[LogSentDocumenCheckReleasetAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        LCallResponse.LastMessage:='[CheckReleaseAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
                 LCallResponse.ReturnedCode:=Rest.StatusCode;
                 LCallResponse.IsSucceeded:=False;
@@ -337,7 +348,7 @@ begin
             on E: Exception do
             begin
                 LCallResponse.IsSucceeded:=False;
-                LCallResponse.LastMessage:='[CheckRelease]: Cannot execute. Error has been thrown: ' + E.Message;
+                LCallResponse.LastMessage:='[CheckReleaseAwaited]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(LCallResponse.LastMessage);
             end;
 
@@ -379,6 +390,97 @@ begin
         TThread.Synchronize(nil, procedure
         begin
             if Assigned(Callback) then Callback(PayLoad, LCallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+procedure TUtilities.GetBiReportsAsync(Callback: TGetBiReports);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'reports/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetBiReportsAsync]: Executing GET ' + Rest.ClientBaseURL);
+
+        var LCallResponse: TCallResponse;
+        var LGrid:=TStringGrid.Create(nil);
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var ReturnReportList:=TJson.JsonToObject<TReturnReportList>(Rest.Content);
+                try
+
+                    var RowCount:=Length(ReturnReportList.ReportList);
+                    LGrid.RowCount:=RowCount + 1; // Add header
+                    LGrid.ColCount:=4;
+
+                    LGrid.Cells[0, 0]:='';
+                    LGrid.Cells[1, 0]:=TReportListFields._ReportName;
+                    LGrid.Cells[2, 0]:=TReportListFields._ReportDesc;
+                    LGrid.Cells[3, 0]:=TReportListFields._ReportLink;
+
+                    for var Index:=1 to RowCount do
+                    begin
+                        LGrid.Cells[1, Index]:=ReturnReportList.ReportList[Index - 1].ReportName;
+                        LGrid.Cells[2, Index]:=ReturnReportList.ReportList[Index - 1].ReportDesc;
+                        LGrid.Cells[3, Index]:=ReturnReportList.ReportList[Index - 1].ReportLink;
+                    end;
+
+                    LCallResponse.IsSucceeded:=ReturnReportList.IsSucceeded;
+                    LCallResponse.ErrorCode  :=ReturnReportList.Error.ErrorCode;
+                    LCallResponse.LastMessage:=ReturnReportList.Error.ErrorDesc;
+
+                    Service.Logger.Log('[GetBiReportsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    ReturnReportList.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    LCallResponse.LastMessage:='[GetBiReportsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        LCallResponse.LastMessage:='[GetBiReportsAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        LCallResponse.LastMessage:='[GetBiReportsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                LCallResponse.ReturnedCode:=Rest.StatusCode;
+                LCallResponse.IsSucceeded:=False;
+                Service.Logger.Log(LCallResponse.LastMessage);
+
+            end;
+
+        except
+            on E: Exception do
+            begin
+                LCallResponse.IsSucceeded:=False;
+                LCallResponse.LastMessage:='[GetBiReportsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(LCallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(LGrid, LCallResponse);
+            if Assigned(LGrid) then LGrid.Free();
         end);
 
     end);

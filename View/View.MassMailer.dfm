@@ -339,9 +339,6 @@ object MassMailerForm: TMassMailerForm
         Align = alClient
         Caption = 'Invoice options'
         TabOrder = 0
-        ExplicitLeft = 16
-        ExplicitWidth = 449
-        ExplicitHeight = 135
         object GroupFiltering: TGroupBox
           Left = 232
           Top = 31
@@ -619,6 +616,7 @@ object MassMailerForm: TMassMailerForm
           Top = 38
           Width = 154
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Show all items (statement)'
           TabOrder = 1
           OnClick = cbShowAllClick
@@ -629,6 +627,7 @@ object MassMailerForm: TMassMailerForm
           Top = 61
           Width = 154
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Overdue only (reminder)'
           TabOrder = 2
           OnClick = cbOverdueOnlyClick
@@ -639,6 +638,7 @@ object MassMailerForm: TMassMailerForm
           Top = 84
           Width = 154
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Reminder with cut-off date'
           TabOrder = 3
           OnClick = cbNonOverdueClick
@@ -649,6 +649,7 @@ object MassMailerForm: TMassMailerForm
           Top = 107
           Width = 154
           Height = 17
+          Cursor = crHandPoint
           Caption = 'Show not due items only'
           TabOrder = 4
           OnClick = cbNotDueOnlyClick

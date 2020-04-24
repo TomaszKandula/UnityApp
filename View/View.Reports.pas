@@ -12,6 +12,7 @@ interface
 uses
     Winapi.Windows,
     Winapi.Messages,
+    Winapi.ShellAPI,
     System.SysUtils,
     System.Variants,
     System.Classes,
@@ -22,51 +23,35 @@ uses
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
     Vcl.ComCtrls,
-    Unity.Panel;
+    Vcl.Buttons,
+    Vcl.Grids,
+    Unity.Panel,
+    Unity.Records,
+    Unity.Grid;
 
 
 type
 
 
     TReportsForm = class(TForm)
-        PanelClient: TPanel;
-        ScrollBox: TScrollBox;
-        PanelContent: TPanel;
-        Report1Overdue: TPanel;
-        Report1Icon: TImage;
-        Report1Title: TLabel;
-        Report1Text: TLabel;
-        Report2Exceeders: TPanel;
-        Report2Icon: TImage;
-        Report2Title: TLabel;
-        Report2Text: TLabel;
-        Report3Debtors: TPanel;
-        Report3Icon: TImage;
-        Report3Title: TLabel;
-        Report3Text: TLabel;
-        Report4Status: TPanel;
-        Report4Icon: TImage;
-        Report4Title: TLabel;
-        Report4Text: TLabel;
+        sgReportList: TStringGrid;
+        ReportDesc: TMemo;
+        btnOpenReport: TSpeedButton;
+        PanelReportList: TPanel;
+        PanelDesc: TPanel;
+        PanelMenu: TPanel;
+        ShapeDesc: TShape;
+        ShapeReportList: TShape;
         procedure FormCreate(Sender: TObject);
+        procedure FormActivate(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
-        procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-        procedure Report1OverdueMouseEnter(Sender: TObject);
-        procedure Report1OverdueMouseLeave(Sender: TObject);
-        procedure Report2ExceedersMouseEnter(Sender: TObject);
-        procedure Report2ExceedersMouseLeave(Sender: TObject);
-        procedure Report3DebtorsMouseEnter(Sender: TObject);
-        procedure Report3DebtorsMouseLeave(Sender: TObject);
-        procedure Report4StatusMouseEnter(Sender: TObject);
-        procedure Report4StatusMouseLeave(Sender: TObject);
-        procedure Report1OverdueClick(Sender: TObject);
-        procedure Report2ExceedersClick(Sender: TObject);
-        procedure Report3DebtorsClick(Sender: TObject);
-        procedure Report4StatusClick(Sender: TObject);
-        procedure ScrollBoxMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+        procedure sgReportListClick(Sender: TObject);
+        procedure btnOpenReportClick(Sender: TObject);
     public
         var FSetLastSelection: TTabSheet;
+    strict private
+        procedure GetBiReports_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
     end;
 
 
@@ -84,7 +69,9 @@ uses
     View.Main,
     Unity.Enums,
     Unity.Service,
-    Unity.Helpers;
+    Unity.Helpers,
+    Unity.Constants,
+    Api.ReportListFields;
 
 
 var
@@ -98,15 +85,74 @@ begin
 end;
 
 
+{$REGION 'CALLBACKS'}
+
+procedure TReportsForm.GetBiReports_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
+begin
+
+    PanelReportList.Enabled:=True;
+    PanelDesc.Enabled:=True;
+    PanelMenu.Enabled:=True;
+
+    Screen.Cursor:=crDefault;
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(ReportsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[GetBiReports_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    sgReportList.Freeze(True);
+    try
+
+        sgReportList.RowCount:=PayLoad.RowCount;
+        sgReportList.ColCount:=PayLoad.ColCount;
+
+        for var RowIndex:=0 to sgReportList.RowCount - 1 do
+            for var ColIndex:=0 to PayLoad.ColCount - 1 do
+                sgReportList.Cells[ColIndex, RowIndex]:=PayLoad.Cells[ColIndex, RowIndex];
+
+        // Hide helper columns
+        sgReportList.ColWidths[sgReportList.GetCol(TReportListFields._ReportDesc)]:=sgReportList.sgRowHidden;
+        sgReportList.ColWidths[sgReportList.GetCol(TReportListFields._ReportLink)]:=sgReportList.sgRowHidden;
+
+    finally
+        sgReportList.Freeze(False);
+        sgReportList.SetColWidth(10, 30, 400);
+    end;
+
+end;
+
+
+{$ENDREGION}
+
+
 {$REGION 'STARTUP'}
 
 
 procedure TReportsForm.FormCreate(Sender: TObject);
 begin
-    Report1Overdue.Cursor  :=crHandPoint;
-    Report2Exceeders.Cursor:=crHandPoint;
-    Report3Debtors.Cursor  :=crHandPoint;
-    Report4Status.Cursor   :=crHandPoint;
+    ReportDesc.Clear();
+end;
+
+
+procedure TReportsForm.FormActivate(Sender: TObject);
+begin
+
+    PanelReportList.Enabled:=False;
+    PanelDesc.Enabled:=False;
+    PanelMenu.Enabled:=False;
+
+    Screen.Cursor:=crHourGlass;
+
+    THelpers.ExecWithDelay(500, procedure
+    begin
+        ReportDesc.Clear();
+        sgReportList.ClearAll(2, 1, 1, True);
+        Service.Mediator.Utilities.GetBiReportsAsync(GetBiReports_Callback);
+    end);
+
 end;
 
 
@@ -122,149 +168,31 @@ begin
 end;
 
 
-procedure TReportsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-    // Do nothing
-end;
-
-
 {$ENDREGION}
 
 
-{$REGION 'MOUSE CLICK EVENTS'}
+{$REGION 'MOUSE AND BUTTON CLICK EVENTS'}
 
 
-procedure TReportsForm.Report1OverdueClick(Sender: TObject);
+procedure TReportsForm.sgReportListClick(Sender: TObject);
 begin
-
-    var Return:=THelpers.ShowReport(1, ReportsForm);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(ReportsForm.Handle, TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
+    ReportDesc.Text:=sgReportList.Cells[sgReportList.GetCOl(TReportListFields._ReportDesc), sgReportList.Row];
 end;
 
 
-procedure TReportsForm.Report2ExceedersClick(Sender: TObject);
+procedure TReportsForm.btnOpenReportClick(Sender: TObject);
 begin
 
-    var Return:=THelpers.ShowReport(2, ReportsForm);
+    var ReportUrl:=sgReportList.Cells[sgReportList.GetCOl(TReportListFields._ReportLink), sgReportList.Row];
 
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(ReportsForm.Handle,TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-end;
-
-
-procedure TReportsForm.Report3DebtorsClick(Sender: TObject);
-begin
-
-    var Return:=THelpers.ShowReport(3, ReportsForm);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(ReportsForm.Handle,TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-end;
-
-
-procedure TReportsForm.Report4StatusClick(Sender: TObject);
-begin
-
-    var Return:=THelpers.ShowReport(4, ReportsForm);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(ReportsForm.Handle,TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        Service.Logger.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-end;
-
-
-{$ENDREGION}
-
-
-{$REGION 'MOUSE MOVE EVENTS'}
-
-
-procedure TReportsForm.Report1OverdueMouseEnter(Sender: TObject);
-begin
-    Report1Title.Font.Color:=$006433C9;
-    Report1Text.Font.Color:=$006433C9;
-end;
-
-
-procedure TReportsForm.Report1OverdueMouseLeave(Sender: TObject);
-begin
-    Report1Title.Font.Color:=0;
-    Report1Text.Font.Color:=0;
-end;
-
-
-procedure TReportsForm.Report2ExceedersMouseEnter(Sender: TObject);
-begin
-    Report2Title.Font.Color:=$006433C9;
-    Report2Text.Font.Color:=$006433C9;
-end;
-
-
-procedure TReportsForm.Report2ExceedersMouseLeave(Sender: TObject);
-begin
-    Report2Title.Font.Color:=0;
-    Report2Text.Font.Color:=0;
-end;
-
-
-procedure TReportsForm.Report3DebtorsMouseEnter(Sender: TObject);
-begin
-    Report3Title.Font.Color:=$006433C9;
-    Report3Text.Font.Color:=$006433C9;
-end;
-
-
-procedure TReportsForm.Report3DebtorsMouseLeave(Sender: TObject);
-begin
-    Report3Title.Font.Color:=0;
-    Report3Text.Font.Color:=0;
-end;
-
-
-procedure TReportsForm.Report4StatusMouseEnter(Sender: TObject);
-begin
-    Report4Title.Font.Color:=$006433C9;
-    Report4Text.Font.Color:=$006433C9;
-end;
-
-
-procedure TReportsForm.Report4StatusMouseLeave(Sender: TObject);
-begin
-    Report4Title.Font.Color:=0;
-    Report4Text.Font.Color:=0;
-end;
-
-
-procedure TReportsForm.ScrollBoxMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
-begin
-
-    const Level = 2;
-    var ScrollBox: TScrollBox:=TScrollBox(Sender);
-    var Sensitivity:=WheelDelta div Level;
-
-    var NewPos:=ScrollBox.VertScrollBar.Position - Sensitivity;
-    NewPos:=Max(NewPos, 0);
-    NewPos:=Min(NewPos, ScrollBox.VertScrollBar.Range);
-
-    ScrollBox.VertScrollBar.Position:=NewPos;
-    Handled:=True;
+    ShellExecute(
+        ReportsForm.Handle,
+        'open',
+        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
+        PChar(ReportUrl),
+        nil,
+        SW_SHOWNORMAL
+    );
 
 end;
 
