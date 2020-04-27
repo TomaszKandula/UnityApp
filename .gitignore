@@ -22,5 +22,11 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-[Bb]uild/[Ww]in32/
-[Bb]uild/[Ww]in64/
+[Bb]uild/[Ww]in32/*.*
+[Bb]uild/[Ww]in64/*.*
+[Bb]uild/[Ww]in32/[Bb]in/
+[Bb]uild/[Ww]in32/[Dd]cu/
+[Bb]uild/[Ww]in32/[Ll]ayouts/
+[Bb]uild/[Ww]in64/[Bb]in/
+[Bb]uild/[Ww]in64/[Dd]cu/
+[Bb]uild/[Ww]in64/[Ll]ayouts/
