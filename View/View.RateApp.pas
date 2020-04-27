@@ -93,7 +93,6 @@ implementation
 uses
     View.Main,
     Unity.Service,
-    Unity.Settings,
     Unity.Helpers;
 
 
@@ -113,61 +112,60 @@ end;
 procedure TRateForm.SetRatingStars(RatingNumber: integer);
 begin
 
-    var Settings: ISettings:=TSettings.Create();
     case RatingNumber of
 
         0:
         begin
-            Image1.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image2.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image3.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image4.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image5.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
+            Image1.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image2.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image3.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image4.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image5.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
         end;
 
         1:
         begin
-            Image1.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image2.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image3.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image4.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image5.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
+            Image1.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image2.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image3.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image4.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image5.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
         end;
 
         2:
         begin
-            Image1.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image2.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image3.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image4.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image5.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
+            Image1.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image2.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image3.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image4.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image5.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
         end;
 
         3:
         begin
-            Image1.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image2.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image3.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image4.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
-            Image5.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
+            Image1.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image2.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image3.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image4.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
+            Image5.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
         end;
 
         4:
         begin
-            Image1.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image2.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image3.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image4.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image5.Picture.LoadFromFile(Settings.DirAssets + 'Rating0.png');
+            Image1.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image2.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image3.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image4.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image5.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating0.png');
         end;
 
         5:
         begin
-            Image1.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image2.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image3.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image4.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
-            Image5.Picture.LoadFromFile(Settings.DirAssets + 'Rating1.png');
+            Image1.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image2.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image3.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image4.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
+            Image5.Picture.LoadFromFile(Service.Settings.DirAssets + 'Rating1.png');
         end;
 
     end;

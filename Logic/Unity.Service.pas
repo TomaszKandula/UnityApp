@@ -37,7 +37,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        property AccessToken:  string       read FAccessToken write RegisterAccessToken;
+        property AccessToken:  string       read FAccessToken    write RegisterAccessToken;
         property SessionId:    string       read FSessionId;
         property SessionLog:   string       read FSessionLog;
         property SessionData:  TSessionData read FSessionData;

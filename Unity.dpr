@@ -215,6 +215,11 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
+    // ----------------------------------------------------
+    // Allow to use different config file than default one.
+    // ----------------------------------------------------
+    if not(ParamCount = 0) then Service.Settings.Initialize(ParamStr(1)) else Service.Settings.Initialize(String.Empty);
+
     var PathAppDir :=Service.Settings.DirApplication;
     var PathHomeDir:=Service.Settings.DirRoaming;
 

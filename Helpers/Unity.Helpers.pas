@@ -18,7 +18,6 @@ uses
     System.IOUtils,
     Winapi.Messages,
     Winapi.Windows,
-    //Winapi.ShellAPI,
     Vcl.ExtCtrls,
     Vcl.Forms,
     Vcl.Menus,
@@ -112,6 +111,7 @@ uses
     Unity.Constants,
     Unity.Settings,
     Unity.Sorting,
+    Unity.Service,
     Api.CustomerSnapshotEx;
 
 
@@ -571,11 +571,10 @@ begin
 
     Result:=False;
 
-    var Settings: ISettings:=TSettings.Create();
     var tsVAL:=TStringList.Create();
     try
 
-        Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
+        Service.Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
 
         for var iCNT: integer:=0 to tsVAL.Count - 1 do
         if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then

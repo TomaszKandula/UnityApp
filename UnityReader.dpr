@@ -15,7 +15,7 @@ uses
     Winapi.Windows,
     Vcl.Forms,
     uCEFApplication,
-    View.Reader in 'View\View.Reader.pas' {FormReader};
+    View.Reader in 'View\View.Reader.pas';
 
 
 {$R *.res}

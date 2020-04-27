@@ -93,7 +93,6 @@ uses
     Unity.RestWrapper,
     Unity.Enums,
     Unity.Constants,
-    Unity.Settings,
     Unity.Helpers,
     Unity.Service,
     View.Main;
@@ -193,8 +192,6 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Settings: ISettings:=TSettings.Create();
-
         // ---------------------------
         // Application initialization.
         // ---------------------------
@@ -241,7 +238,7 @@ begin
             // --------------------------------
             // API call to register session ID.
             // --------------------------------
-            Service.Mediator.Accounts.InitiateSessionAwaited(Service.SessionId, Settings.WinUserName);
+            Service.Mediator.Accounts.InitiateSessionAwaited(Service.SessionId, Service.Settings.WinUserName);
 
             Service.Logger.Log('Unity has been boot up.');
             ChangeProgressBar(50, 'Initializing... done.', ProgressBar);
@@ -289,7 +286,7 @@ begin
         Sleep(50);
         ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
 
-        if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+        if not GetHtmlLayoutsSync(Service.Settings.UrlLayoutsLst + TCommon.LayoutPak, Service.Settings.DirLayouts + TCommon.LayoutPak, Service.Settings.DirLayouts) then
         begin
             Service.Logger.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
             THelpers.MsgCall(
@@ -302,7 +299,7 @@ begin
         else
         begin
 
-            if THelpers.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+            if THelpers.UnzippLayouts(Service.Settings.DirLayouts + TCommon.LayoutPak, Service.Settings.DirLayouts) then
             begin
                 Service.Logger.Log('Html layouts has been synchronized.');
                 ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
@@ -414,13 +411,12 @@ begin
 
     Result:=True;
 
-    var Settings: ISettings:=TSettings.Create();
     try
 
         // ---------------------
         // Application captions.
         // ---------------------
-        MainAppForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
+        MainAppForm.Caption:=Service.Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
         MainAppForm.valUpdateStamp.Caption:='';
 
         // ----------------------------------
@@ -428,13 +424,13 @@ begin
         // ----------------------------------
         MainAppForm.FGridPicture:=TImage.Create(MainForm);
         MainAppForm.FGridPicture.SetBounds(0, 0, 16, 16);
-        THelpers.LoadImageFromStream(View.Main.MainForm.FGridPicture, Settings.DirAssets + 'Star.bmp');
+        THelpers.LoadImageFromStream(View.Main.MainForm.FGridPicture, Service.Settings.DirAssets + 'Star.bmp');
 
         // ---------------------------------------------------------------------
         // Setup timers, some of them may be removed after introducing REST API.
         // ---------------------------------------------------------------------
-        MainAppForm.TimerFollowUp.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000); // 30 minutes
-        MainAppForm.TimerCustSnapshots.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000); // 5 minutes
+        MainAppForm.TimerFollowUp.Interval:=Service.Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000); // 30 minutes
+        MainAppForm.TimerCustSnapshots.Interval:=Service.Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000); // 5 minutes
 
         // ---------------------------------------------
         // Setup risk classes with proper number format.
@@ -442,9 +438,9 @@ begin
         if FormatSettings.DecimalSeparator = ',' then
         begin
 
-            var getRiskClassA:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0');
-            var getRiskClassB:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0');
-            var getRiskClassC:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0');
+            var getRiskClassA:=Service.Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0');
+            var getRiskClassB:=Service.Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0');
+            var getRiskClassC:=Service.Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0');
 
             var RiskClassA:=((getRiskClassA).ToExtended * 100).ToString + '%';
             var RiskClassB:=((getRiskClassB).ToExtended * 100).ToString + '%';
@@ -461,9 +457,9 @@ begin
         end else if FormatSettings.DecimalSeparator = '.' then
         begin
 
-            var getRiskClassA:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0');
-            var getRiskClassB:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0');
-            var getRiskClassC:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0');
+            var getRiskClassA:=Service.Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0');
+            var getRiskClassB:=Service.Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0');
+            var getRiskClassC:=Service.Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0');
 
             var RiskClassA:=((StringReplace(getRiskClassA, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
             var RiskClassB:=((StringReplace(getRiskClassB, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
@@ -497,19 +493,19 @@ begin
         MainAppForm.ShapeAdminPassCap.ShapeText(10, 1, 'PASSWORD CHANGE', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeAppSettingsCap.ShapeText(10, 1, 'APPLICATION SETTINGS', [fsBold], 'Tahoma', 10, clWhite);
 
-        var getRange1A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','');
-        var getRange2A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','');
-        var getRange3A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3A','');
-        var getRange4A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','');
-        var getRange5A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5A','');
-        var getRange6A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6A','');
+        var getRange1A:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','');
+        var getRange2A:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','');
+        var getRange3A:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3A','');
+        var getRange4A:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','');
+        var getRange5A:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5A','');
+        var getRange6A:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6A','');
 
-        var getRange1B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1B','');
-        var getRange2B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2B','');
-        var getRange3B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','');
-        var getRange4B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4B','');
-        var getRange5B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
-        var getRange6B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
+        var getRange1B:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1B','');
+        var getRange2B:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2B','');
+        var getRange3B:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','');
+        var getRange4B:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4B','');
+        var getRange5B:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
+        var getRange6B:=Service.Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
 
         MainAppForm.txtRange1.Caption:=getRange1A + ' - ' + getRange1B;
         MainAppForm.txtRange2.Caption:=getRange2A + ' - ' + getRange2B;

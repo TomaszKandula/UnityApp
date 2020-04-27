@@ -102,8 +102,7 @@ uses
     Unity.Service,
     Unity.Helpers,
     Unity.Enums,
-    Unity.Constants,
-    Unity.Settings;
+    Unity.Constants;
 
 
 type
@@ -204,19 +203,18 @@ begin
     PanelContent.Borders(clWhite, clWhite,   clWhite, clWhite, clWhite);
     PanelFooter.Borders(clWhite,  clWhite,   clWhite, clWhite, clWhite);
 
-    var Settings: ISettings:=TSettings.Create();
-    if FileExists(Settings.PathLicence) then
+    if FileExists(Service.Settings.PathLicence) then
     begin
 
-        if Settings.Decode(TAppFiles.Licence, True) then
+        if Service.Settings.Decode(TAppFiles.Licence, True) then
         begin
             valVersion.Caption  :=THelpers.GetBuildInfoAsString;
-            valLicence.Caption  :=Settings.GetLicenceValue('LICENCE', 'Type');
-            valStatus.Caption   :=Settings.GetLicenceValue('LICENCE', 'Status');
-            valEmail.Caption    :=Settings.GetLicenceValue('DETAILS', 'Email1');
-            valSupport.Caption  :=Settings.GetLicenceValue('DETAILS', 'Email2');
-            valWebsite.Caption  :=Settings.GetLicenceValue('DETAILS', 'WebAddr');
-            valDeveloper.Caption:=Settings.GetLicenceValue('DETAILS', 'Author');
+            valLicence.Caption  :=Service.Settings.GetLicenceValue('LICENCE', 'Type');
+            valStatus.Caption   :=Service.Settings.GetLicenceValue('LICENCE', 'Status');
+            valEmail.Caption    :=Service.Settings.GetLicenceValue('DETAILS', 'Email1');
+            valSupport.Caption  :=Service.Settings.GetLicenceValue('DETAILS', 'Email2');
+            valWebsite.Caption  :=Service.Settings.GetLicenceValue('DETAILS', 'WebAddr');
+            valDeveloper.Caption:=Service.Settings.GetLicenceValue('DETAILS', 'Author');
         end;
 
     end;

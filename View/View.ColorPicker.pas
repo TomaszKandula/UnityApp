@@ -67,7 +67,7 @@ implementation
 
 uses
     View.Main,
-    Unity.Settings;
+    Unity.Service;
 
 
 var vColorsForm: TColorsForm;
@@ -118,25 +118,22 @@ end;
 
 procedure TColorsForm.ColorList1Select(Sender: TObject);
 begin
-    var Settings: ISettings:=TSettings.Create();
-    if ColorList1.Text = 'Font Color'       then ColorBox1.Brush.Color:=Settings.TodayFColor;
-    if ColorList1.Text = 'Background Color' then ColorBox1.Brush.Color:=Settings.TodayBColor;
+    if ColorList1.Text = 'Font Color'       then ColorBox1.Brush.Color:=Service.Settings.TodayFColor;
+    if ColorList1.Text = 'Background Color' then ColorBox1.Brush.Color:=Service.Settings.TodayBColor;
 end;
 
 
 procedure TColorsForm.ColorList2Select(Sender: TObject);
 begin
-    var Settings: TSettings:=TSettings.Create();
-    if ColorList2.Text = 'Font Color'       then ColorBox2.Brush.Color:=Settings.PastFColor;
-    if ColorList2.Text = 'Background Color' then ColorBox2.Brush.Color:=Settings.PastBColor;
+    if ColorList2.Text = 'Font Color'       then ColorBox2.Brush.Color:=Service.Settings.PastFColor;
+    if ColorList2.Text = 'Background Color' then ColorBox2.Brush.Color:=Service.Settings.PastBColor;
 end;
 
 
 procedure TColorsForm.ColorList3Select(Sender: TObject);
 begin
-    var Settings: TSettings:=TSettings.Create();
-    if ColorList3.Text = 'Font Color'       then ColorBox3.Brush.Color:=Settings.FutureFColor;
-    if ColorList3.Text = 'Background Color' then ColorBox3.Brush.Color:=Settings.FutureBColor;
+    if ColorList3.Text = 'Font Color'       then ColorBox3.Brush.Color:=Service.Settings.FutureFColor;
+    if ColorList3.Text = 'Background Color' then ColorBox3.Brush.Color:=Service.Settings.FutureBColor;
 end;
 
 
@@ -151,9 +148,8 @@ begin
 
     if ColorDialog.Execute() then
     begin
-        var Settings: TSettings:=TSettings.Create();
-        if ColorList1.Text = 'Font Color'       then Settings.TodayFColor:=ColorDialog.Color;
-        if ColorList1.Text = 'Background Color' then Settings.TodayBColor:=ColorDialog.Color;
+        if ColorList1.Text = 'Font Color'       then Service.Settings.TodayFColor:=ColorDialog.Color;
+        if ColorList1.Text = 'Background Color' then Service.Settings.TodayBColor:=ColorDialog.Color;
         ColorBox1.Brush.Color:=ColorDialog.Color;
     end;
 
@@ -165,9 +161,8 @@ begin
 
     if ColorDialog.Execute() then
     begin
-        var Settings: TSettings:=TSettings.Create();
-        if ColorList2.Text = 'Font Color'       then Settings.PastFColor:=ColorDialog.Color;
-        if ColorList2.Text = 'Background Color' then Settings.PastBColor:=ColorDialog.Color;
+        if ColorList2.Text = 'Font Color'       then Service.Settings.PastFColor:=ColorDialog.Color;
+        if ColorList2.Text = 'Background Color' then Service.Settings.PastBColor:=ColorDialog.Color;
         ColorBox2.Brush.Color:=ColorDialog.Color;
     end;
 
@@ -179,9 +174,8 @@ begin
 
     if ColorDialog.Execute() then
     begin
-        var Settings: TSettings:=TSettings.Create();
-        if ColorList3.Text = 'Font Color'       then Settings.FutureFColor:=ColorDialog.Color;
-        if ColorList3.Text = 'Background Color' then Settings.FutureBColor:=ColorDialog.Color;
+        if ColorList3.Text = 'Font Color'       then Service.Settings.FutureFColor:=ColorDialog.Color;
+        if ColorList3.Text = 'Background Color' then Service.Settings.FutureBColor:=ColorDialog.Color;
         ColorBox3.Brush.Color:=ColorDialog.Color;
     end;
 

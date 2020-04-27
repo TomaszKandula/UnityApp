@@ -75,6 +75,7 @@ type
         property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
         property NewSessionId: string read GetNewSessionId;
         property CheckConfigFile: boolean read ConfigFileOK;
+        procedure Initialize(AConfigFileName: string);
         function Encode(ConfigType: TAppFiles): boolean;
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function ConfigToMemory(): boolean;
@@ -150,6 +151,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
+        procedure Initialize(AConfigFileName: string); virtual;
         function Encode(ConfigType: TAppFiles): boolean; virtual;
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean; virtual;
         function ConfigToMemory: boolean; virtual;
@@ -203,24 +205,8 @@ uses
 
 constructor TSettings.Create();
 begin
-
     FTMIG:=TMemIniFile.Create('');
     FTMIL:=TMemIniFile.Create('');
-
-    FWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
-    FDirWinTemp    :=GetEnvironmentVariable('TEMP');
-    FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
-
-    FDirRoaming :=TPath.GetPublicPath() + TPath.DirectorySeparatorChar + 'Unity Platform' + TPath.DirectorySeparatorChar;
-    FDirLayouts :=FDirRoaming + 'layouts' + TPath.DirectorySeparatorChar;
-    FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
-    FPathConfig :=FDirRoaming + TCommon.ConfigFile;
-
-    FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
-    FPathLicence:=FDirApplication + TCommon.LicenceFile;
-
-    if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
-
 end;
 
 
@@ -245,6 +231,30 @@ begin
         FUrlLayoutsLst:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
         Result:=True;
     end;
+
+end;
+
+
+procedure TSettings.Initialize(AConfigFileName: string);
+begin
+
+    FWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+    FDirWinTemp    :=GetEnvironmentVariable('TEMP');
+    FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
+
+    FDirRoaming :=TPath.GetPublicPath() + TPath.DirectorySeparatorChar + 'Unity Platform' + TPath.DirectorySeparatorChar;
+    FDirLayouts :=FDirRoaming + 'layouts' + TPath.DirectorySeparatorChar;
+    FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
+
+    if not String.IsNullOrEmpty(AConfigFileName) then
+        FPathConfig:=FDirRoaming + AConfigFileName
+    else
+        FPathConfig:=FDirRoaming + TCommon.ConfigFile;
+
+    FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
+    FPathLicence:=FDirApplication + TCommon.LicenceFile;
+
+    if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
 
 end;
 
