@@ -131,11 +131,11 @@ object ReportsForm: TReportsForm
   end
   object PanelDesc: TPanel
     AlignWithMargins = True
-    Left = 293
+    Left = 288
     Top = 10
-    Width = 321
+    Width = 326
     Height = 326
-    Margins.Left = 10
+    Margins.Left = 5
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 5
@@ -151,7 +151,7 @@ object ReportsForm: TReportsForm
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 301
+      Width = 306
       Height = 306
       Margins.Left = 10
       Margins.Top = 10
@@ -168,7 +168,7 @@ object ReportsForm: TReportsForm
       AlignWithMargins = True
       Left = 20
       Top = 20
-      Width = 281
+      Width = 286
       Height = 286
       Margins.Left = 20
       Margins.Top = 20
@@ -183,6 +183,7 @@ object ReportsForm: TReportsForm
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 0
+      ExplicitWidth = 281
     end
   end
 end

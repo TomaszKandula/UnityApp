@@ -22,10 +22,7 @@ type
 
 
     EThreadStackFinalized = class(Exception);
-
-
     TSimpleThread = class;
-
 
     TThreadQueue = class
     strict private
@@ -208,7 +205,7 @@ begin
         try
             FHandlePoolEvent(Data, Thread);
         except
-            {Do nothing}
+            // Do nothing
         end;
 
     end;
