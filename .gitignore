@@ -22,4 +22,5 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-[Bb]uild/
+[Bb]uild/[Ww]in32/
+[Bb]uild/[Ww]in64/
