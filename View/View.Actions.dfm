@@ -1754,6 +1754,7 @@ object ActionsForm: TActionsForm
             Top = 17
             Width = 59
             Height = 13
+            Hint = 'Invoiced amount (to be paid)'
             Caption = '{Amount}'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
@@ -1780,6 +1781,7 @@ object ActionsForm: TActionsForm
             Top = 36
             Width = 62
             Height = 13
+            Hint = 'Left to pay'
             Caption = '{OpenAm}'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText

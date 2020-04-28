@@ -53,6 +53,8 @@ type
         function GetUrlReleaseMan(): string;
         function GetUrlLayoutsLst(): string;
         function ConfigFileOK(): boolean;
+        function CustomConfig(): boolean;
+        function TestEnvSetup(): boolean;
         property WinUserName: string read GetWinUserName;
         property PathEventLog: string read GetPathEventLog;
         property PathConfig: string read GetPathConfig;
@@ -75,6 +77,8 @@ type
         property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
         property NewSessionId: string read GetNewSessionId;
         property CheckConfigFile: boolean read ConfigFileOK;
+        property IsUsedCustomConfig: boolean read CustomConfig;
+        property IsTestEnvSetup: boolean read TestEnvSetup;
         procedure Initialize(AConfigFileName: string);
         function Encode(ConfigType: TAppFiles): boolean;
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
@@ -118,6 +122,8 @@ type
         var FUrlReleaseMan: string;
         var FUrlLayoutsLst: string;
         var FConfigFileOK: boolean;
+        var FIsUsedCustomConfig: boolean;
+        var FIsTestEnvSetup: boolean;
         function GetReleaseDateTime(): TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
         function GetReleaseNumber(): cardinal;
@@ -148,6 +154,8 @@ type
         function GetUrlReleaseMan(): string;
         function GetUrlLayoutsLst(): string;
         function ConfigFileOK(): boolean;
+        function CustomConfig(): boolean;
+        function TestEnvSetup(): boolean;
     public
         constructor Create();
         destructor Destroy(); override;
@@ -182,6 +190,8 @@ type
         property UrlReleaseMan: string read GetUrlReleaseMan;
         property UrlLayoutsLst: string read GetUrlLayoutsLst;
         property CheckConfigFile: boolean read ConfigFileOK;
+        property IsUsedCustomConfig: boolean read CustomConfig;
+        property IsTestEnvSetup: boolean read TestEnvSetup;
         property ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
         property TodayFColor: TColor read GetTodayFColor write SetTodayFColor;
         property TodayBColor: TColor read GetTodayBColor write SetTodayBColor;
@@ -247,9 +257,19 @@ begin
     FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
 
     if not String.IsNullOrEmpty(AConfigFileName) then
-        FPathConfig:=FDirRoaming + AConfigFileName
+    begin
+        FIsUsedCustomConfig:=True;
+        FPathConfig:=FDirRoaming + AConfigFileName;
+
+        if AConfigFileName.Contains('TEST') or AConfigFileName.Contains('ENV') or AConfigFileName.Contains('DEV') then
+            FIsTestEnvSetup:=True;
+
+    end
     else
+    begin
+        FIsUsedCustomConfig:=False;
         FPathConfig:=FDirRoaming + TCommon.ConfigFile;
+    end;
 
     FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
     FPathLicence:=FDirApplication + TCommon.LicenceFile;
@@ -717,6 +737,18 @@ end;
 function TSettings.ConfigFileOK(): boolean;
 begin
     Result:=FConfigFileOK;
+end;
+
+
+function TSettings.CustomConfig(): boolean;
+begin
+    Result:=FIsUsedCustomConfig;
+end;
+
+
+function TSettings.TestEnvSetup(): boolean;
+begin
+    Result:=FIsTestEnvSetup;
 end;
 
 

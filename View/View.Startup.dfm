@@ -3796,4 +3796,20 @@ object StartupForm: TStartupForm
       C14186C107446AD0A4653B738D146C1799AFA65646E3E7A50000000049454E44
       AE426082}
   end
+  object LabelTest: TLabel
+    Left = 804
+    Top = 540
+    Width = 119
+    Height = 13
+    Caption = 'Custom config is enabled'
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+  end
 end

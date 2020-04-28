@@ -137,6 +137,7 @@ type
         var FCtrlStatusRefs: TFCtrlStatusRefs;
         var FTotalAmountAggr: double;
         var FDocumentType: string;
+        var FTotals: TStringGrid;
         procedure SetHTMLTable(NewValue: string);
         procedure SetHTMLTemp(NewValue: string);
         procedure SetHTMLRow(NewValue: string);
@@ -189,6 +190,7 @@ type
         function  BuildHTML(): integer;
         function  StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
         procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
+        function MakeTotals(): string;
     public
         constructor Create();
         destructor Destroy(); override;
@@ -233,12 +235,14 @@ uses
 
 constructor TDocument.Create();
 begin
+    if not Assigned(FTotals) then FTotals:=TStringGrid.Create(nil);
 end;
 
 
 destructor TDocument.Destroy();
 begin
     inherited;
+    if Assigned(FTotals) then FTotals.Free();
 end;
 
 
@@ -303,6 +307,7 @@ begin
     MailBody  :=StringReplace(MailBody,    '{ADDR_LBU}',     LBUAddress,   [rfReplaceAll]);
     MailBody  :=StringReplace(MailBody,    '{EMAIL}',        MailFrom,     [rfReplaceAll]);
     MailBody  :=StringReplace(MailBody,    '{TEL}',          Telephone,    [rfReplaceAll]);
+    MailBody  :=StringReplace(MailBody,    '{TOTALS}',       MakeTotals(), [rfReplaceAll]);
 
     case InvFilter of
 
@@ -338,9 +343,18 @@ begin
         False: MailCc:=TArray<string>.Create();
     end;
 
-    var CallResponse: TCallResponse;
-    CallResponse:=SendNowSync();
-    Result:=CallResponse.IsSucceeded;
+    var SL:=TStringList.Create();
+    try
+        SL.Text:=MailBody;
+        Sl.SaveToFile('i:\email_' + Random(100000).ToString() + '.htm');
+    finally
+        Sl.Free();
+    end;
+    Result:=True;
+
+//    var CallResponse: TCallResponse;
+//    CallResponse:=SendNowSync();
+//    Result:=CallResponse.IsSucceeded;
 
 end;
 
@@ -376,16 +390,74 @@ begin
 end;
 
 
+function TDocument.MakeTotals(): string;
+begin
+
+    if FTotals.RowCount = 1 then
+    begin
+        Result:='<!-- NO SUBTOTALS -->';
+        Exit();
+    end;
+
+    const Table = '<table class="data"><tr><th class="col4">Currency:</th><th class="col5-h">Total:</th><th class="col6-h">O/S Total:</th></tr>{ROWS}</table>';
+    const Row = '<tr><td class="col4">{ISO}</td><td class="col5">{AMT}</td><td class="col6">{OSAMT}</td></tr>';
+
+    var Sums:='';
+    FTotals.MSort(0, TDataType.TString, False);
+
+    var UniqueList:=TStringList.Create();
+    try
+
+        UniqueList.Sorted:=True;
+        UniqueList.Duplicates:=TDuplicates.dupIgnore;
+
+        for var RowsIndex:=0 to FTotals.RowCount - 1 do
+            UniqueList.Add(FTotals.Cells[0, RowsIndex]);
+
+        for var ListIndex:=0 to UniqueList.Count - 1 do
+        begin
+
+            var TotalAm: double:=0;
+            var TotalOsAm: double:=0;
+
+            for var ValIndex:=0 to FTotals.RowCount do
+            begin
+
+                if UniqueList.Strings[ListIndex] = FTotals.Cells[0, ValIndex] then
+                begin
+                    TotalAm:=TotalAm + FTotals.Cells[1, ValIndex].ToDouble();
+                    TotalOsAm:=TotalOsAm + FTotals.Cells[2, ValIndex].ToDouble();
+                end;
+
+            end;
+
+            Sums:=Row;
+            Sums:=Sums
+                .Replace('{ISO}', UniqueList.Strings[ListIndex])
+                .Replace('{AMT}', FormatFloat('#,##0.00', TotalAm))
+                .Replace('{OSAMT}', FormatFloat('#,##0.00', TotalOsAm));
+
+        end;
+
+        Result:=Table.Replace('{ROWS}', Sums);
+
+    finally
+        UniqueList.Free();
+    end;
+
+end;
+
+
 procedure TDocument.OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
 begin
 
     var CurAmount:=SG.Cells[FOpenItemsRefs.CurAmCol, ActualRow];
-    var Amount   :=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
+    var CurOpenAmount:=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
 
-    FTotalAmountAggr:=FTotalAmountAggr + Amount.ToDouble();
+    FTotalAmountAggr:=FTotalAmountAggr + SG.Cells[FOpenItemsRefs.OpenAmCol, ActualRow].ToDouble();
 
     CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
-    Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
+    CurOpenAmount:=FormatFloat('#,##0.00', StrToFloat(CurOpenAmount));
 
     FHTMLTemp:=HTMLRow;
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[FOpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
@@ -393,7 +465,7 @@ begin
     FHTMLTemp:=StringReplace(FHTMLTemp, '{DUE_DAT}', SG.Cells[FOpenItemsRefs.DueDtCol,  ActualRow], [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CUR}', SG.Cells[FOpenItemsRefs.ISOCol,    ActualRow], [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_AMT}', CurAmount, [rfReplaceAll]);
-    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_OSA}', Amount,    [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_OSA}', CurOpenAmount,    [rfReplaceAll]);
 
     // -------------------------------------------------------------------
     // Text on the invoice may be very long (but not more than 200 chars),
@@ -407,6 +479,12 @@ begin
     HtmlStatement:=HtmlStatement + FHTMLTemp;
     Inc(FItems);
 
+    // Add invoice to helper grid for generating totals
+    FTotals.RowCount:=FItems;
+    FTotals.Cells[0, FItems - 1]:=SG.Cells[FOpenItemsRefs.ISOCol,       ActualRow];
+    FTotals.Cells[1, FItems - 1]:=SG.Cells[FOpenItemsRefs.CurAmCol,     ActualRow];
+    FTotals.Cells[2, FItems - 1]:=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
+
 end;
 
 
@@ -419,6 +497,7 @@ begin
     FPos:=0;
     FItems:=0;
     FTotalAmountAggr:=0;
+    FTotals.ClearAll(1, 0, 0, False);
 
     FHTMLTable:=FCommonHTMLTable;
     FHTMLRow  :=FCommonHTMLRow;

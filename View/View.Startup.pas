@@ -48,6 +48,7 @@ type
         ShapeLine: TShape;
         imgCover: TImage;
         imgUnityLogo: TImage;
+    LabelTest: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -188,6 +189,15 @@ begin
 
     if not String.IsNullOrEmpty(FCurrentSessionLog) then
         MainAppForm.InitMainWnd();
+
+    if Service.Settings.IsUsedCustomConfig then
+    begin
+        LabelTest.Visible:=True;
+
+        if Service.Settings.IsTestEnvSetup then
+            MainAppForm.AppNotification.Visible:=True;
+
+    end;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin

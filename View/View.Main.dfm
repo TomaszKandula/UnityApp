@@ -16970,6 +16970,58 @@ object MainForm: TMainForm
       ShowHint = True
       ExplicitHeight = 14
     end
+    object AppNotification: TPanel
+      AlignWithMargins = True
+      Left = 647
+      Top = 0
+      Width = 303
+      Height = 35
+      Margins.Left = 400
+      Margins.Top = 0
+      Margins.Right = 400
+      Margins.Bottom = 15
+      Align = alClient
+      BevelOuter = bvNone
+      Color = clInfoBk
+      ParentBackground = False
+      TabOrder = 0
+      Visible = False
+      ExplicitLeft = 547
+      ExplicitWidth = 503
+      object txtNotification: TLabel
+        AlignWithMargins = True
+        Left = 5
+        Top = 8
+        Width = 293
+        Height = 22
+        Margins.Left = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Align = alClient
+        Alignment = taCenter
+        Caption = 'Test environment is enabled.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -15
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        ExplicitTop = 7
+        ExplicitWidth = 190
+        ExplicitHeight = 18
+      end
+      object lineTop: TBevel
+        Left = 0
+        Top = 0
+        Width = 303
+        Height = 5
+        Align = alTop
+        Shape = bsTopLine
+        ExplicitLeft = 272
+        ExplicitTop = 16
+        ExplicitWidth = 50
+      end
+    end
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]

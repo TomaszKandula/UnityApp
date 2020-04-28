@@ -532,6 +532,9 @@ type
         txtInfoLine3: TLabel;
         Action_InGoogle: TMenuItem;
         Action_CopySelection: TMenuItem;
+        AppNotification: TPanel;
+        txtNotification: TLabel;
+    lineTop: TBevel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
