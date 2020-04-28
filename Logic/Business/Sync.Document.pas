@@ -343,18 +343,9 @@ begin
         False: MailCc:=TArray<string>.Create();
     end;
 
-    var SL:=TStringList.Create();
-    try
-        SL.Text:=MailBody;
-        Sl.SaveToFile('i:\email_' + Random(100000).ToString() + '.htm');
-    finally
-        Sl.Free();
-    end;
-    Result:=True;
-
-//    var CallResponse: TCallResponse;
-//    CallResponse:=SendNowSync();
-//    Result:=CallResponse.IsSucceeded;
+    var CallResponse: TCallResponse;
+    CallResponse:=SendNowSync();
+    Result:=CallResponse.IsSucceeded;
 
 end;
 
