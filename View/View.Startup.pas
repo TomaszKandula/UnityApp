@@ -192,6 +192,7 @@ begin
 
     if Service.Settings.IsUsedCustomConfig then
     begin
+
         LabelTest.Visible:=True;
 
         if Service.Settings.IsTestEnvSetup then

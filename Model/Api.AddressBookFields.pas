@@ -27,12 +27,12 @@ type
     public
         const _Id              = 'Id';
         const _SourceDbName    = 'SourceDbName';
-        const _CustomerNumber  = 'CustomerNumber';
-        const _CustomerName    = 'CustomerName';
-        const _ContactPerson   = 'ContactPerson';
-        const _RegularEmails   = 'RegularEmails';
-        const _StatementEmails = 'StatementEmails';
-        const _PhoneNumbers    = 'PhoneNumbers';
+        const _CustomerNumber  = 'Customer Number';
+        const _CustomerName    = 'Customer Name';
+        const _ContactPerson   = 'Contact Person';
+        const _RegularEmails   = 'Regular Emails';
+        const _StatementEmails = 'Statement Emails';
+        const _PhoneNumbers    = 'Phone Numbers';
         property Id:              integer read FId              write FId;
         property SourceDbName:    string  read FSourceDbName    write FSourceDbName;
         property CustomerNumber:  Int64   read FCustomerNumber  write FCustomerNumber;

@@ -46,6 +46,7 @@ type
         PanelMain: TPanel;
         TextWarn: TLabel;
         procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
         procedure btnSearchClick(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure btnUnhideClick(Sender: TObject);
@@ -61,19 +62,16 @@ type
         var FCompareValue: string;
         var FSearchColumn: integer;
         var FActualRow:    integer;
-        var FGrid:      TStringGrid;
-        var FColName:   string;
-        var FColNumber: string;
+        var FGrid:         TStringGrid;
+        var FSelColumn:    integer;
         procedure InitSearch;
-        function  TryToInt(StrInput: string): boolean;
         function  SearchPartialPrepare(ActualRow: integer): string;
         procedure SearchPartialShowAll(ActualRow: integer);
         procedure SearchPartialNextBreak();
-    public
-        property Grid:      TStringGrid read FGrid      write FGrid;
-        property ColName:   string      read FColName   write FColName;
-        property ColNumber: string      read FColNumber write FColNumber;
         procedure PerformSearch();
+    public
+        property Grid:  TStringGrid read FGrid      write FGrid;
+        property SelColumn: integer read FSelColumn write FSelColumn;
     end;
 
 
@@ -105,21 +103,6 @@ end;
 
 
 {$REGION 'LOCAL HELPERS'}
-
-
-function TGridSearchForm.TryToInt(StrInput: string): boolean;
-begin
-
-    Result:=True;
-
-    try
-        StrToInt64(StrInput);
-
-    except
-        Result:=False;
-    end;
-
-end;
 
 
 function TGridSearchForm.SearchPartialPrepare(ActualRow: integer): string;
@@ -170,10 +153,10 @@ begin
 
     FCompareValue:='';
     FSearchString:=EditSearch.Text;
-    FSearchColumn:=0;
+    FSearchColumn:=FSelColumn;
     FActualRow   :=0;
 
-    if (FSearchString = '') or (FSearchString = TChars.SPACE) then
+    if String.IsNullOrWhitespace(FSearchString) then
     begin
 
         THelpers.MsgCall(
@@ -186,9 +169,9 @@ begin
 
     end;
 
-    FIsNumber:=TryToInt(FSearchString);
-    if not CaseSensitive.Checked then FSearchString:=UpperCase(FSearchString) else FSearchString:=FSearchString;
-    if FIsNumber then FSearchColumn:=FGrid.GetCol(FColNumber) else FSearchColumn:=FGrid.GetCol(FColName);
+    if not CaseSensitive.Checked then
+        FSearchString:=UpperCase(FSearchString)
+            else FSearchString:=FSearchString;
 
     SetLength(FGroupping, 0);
 
@@ -208,15 +191,15 @@ begin
         if (FIsNext) and (FFoundRow > FSearchEnd) then FFoundRow:=FFoundRow - 1;
         FSearchEnd:=1;
 
-        for var iCNT: integer:=FFoundRow downto FSearchEnd do
+        for var Index:=FFoundRow downto FSearchEnd do
         begin
 
-            FCompareValue:=SearchPartialPrepare(iCNT);
+            FCompareValue:=SearchPartialPrepare(Index);
 
             if Pos(FSearchString, FCompareValue) > 0 then
             begin
 
-                FFoundRow:=iCNT;
+                FFoundRow:=Index;
 
                 // Exit on found given item
                 if not (ShowAll.Checked) then
@@ -225,7 +208,7 @@ begin
                     Break;
                 end;
 
-                SearchPartialShowAll(iCNT);
+                SearchPartialShowAll(Index);
 
             end
             else
@@ -244,15 +227,15 @@ begin
         if (FIsNext) and (FFoundRow < FSearchEnd) then FFoundRow:=FFoundRow + 1;
         FSearchEnd:=FGrid.RowCount - 1;
 
-        for var iCNT: integer:=FFoundRow to FSearchEnd do
+        for var Index:=FFoundRow to FSearchEnd do
         begin
 
-            FCompareValue:=SearchPartialPrepare(iCNT);
+            FCompareValue:=SearchPartialPrepare(Index);
 
             if Pos(FSearchString, FCompareValue) > 0 then
             begin
 
-                FFoundRow:=iCNT;
+                FFoundRow:=Index;
 
                 // Exit when found given item
                 if not (ShowAll.Checked) then
@@ -261,7 +244,7 @@ begin
                     Break;
                 end;
 
-                SearchPartialShowAll(iCNT);
+                SearchPartialShowAll(Index);
 
             end
             else
@@ -281,10 +264,12 @@ begin
         if not (FFoundRow = 0) then
         begin
             FGrid.Row:=FFoundRow;
-            FGrid.Col:=FGrid.GetCol(FColName);
+            FGrid.Col:=FSelColumn;
         end
         else
-        THelpers.MsgCall(GridSearchForm.Handle, TAppMessage.Info, 'Cannot find specified customer.');
+        begin
+            THelpers.MsgCall(GridSearchForm.Handle, TAppMessage.Info, 'Cannot find specified customer.');
+        end;
 
     end
     else
@@ -325,8 +310,12 @@ end;
 procedure TGridSearchForm.FormCreate(Sender: TObject);
 begin
     PanelEditSearch.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    FColName  :='';
-    FColNumber:='';
+end;
+
+
+procedure TGridSearchForm.FormShow(Sender: TObject);
+begin
+    TextSearch.Caption:='Search phrase (' + FGrid.Cells[FSelColumn, 0] + '):';
 end;
 
 
@@ -338,17 +327,19 @@ end;
 
 procedure TGridSearchForm.btnSearchClick(Sender: TObject);
 begin
-    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then PerformSearch();
+    if (FSelColumn > 0) and (Assigned(FGrid)) then PerformSearch();
 end;
 
 
 procedure TGridSearchForm.btnUnhideClick(Sender: TObject);
 begin
-    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then
+
+    if Assigned(FGrid) then
     begin
         MainForm.Action_RemoveFiltersClick(Self);
         btnUnhide.Enabled:=False;
     end;
+
 end;
 
 
@@ -373,6 +364,7 @@ end;
 procedure TGridSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FFoundRow:=0;
+    FSelColumn:=0;
     FIsNext:=False;
     EditSearch.Text:='';
     CheckUp.Checked:=False;

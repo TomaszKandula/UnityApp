@@ -258,10 +258,12 @@ begin
 
     if not String.IsNullOrEmpty(AConfigFileName) then
     begin
+
         FIsUsedCustomConfig:=True;
         FPathConfig:=FDirRoaming + AConfigFileName;
 
-        if AConfigFileName.Contains('TEST') or AConfigFileName.Contains('ENV') or AConfigFileName.Contains('DEV') then
+        var LConfigFileName:=AConfigFileName.ToLower();
+        if LConfigFileName.Contains('test') or LConfigFileName.Contains('env') or LConfigFileName.Contains('dev') then
             FIsTestEnvSetup:=True;
 
     end

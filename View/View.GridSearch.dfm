@@ -19,6 +19,7 @@ object GridSearchForm: TGridSearchForm
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object PanelMain: TPanel
@@ -97,9 +98,9 @@ object GridSearchForm: TGridSearchForm
       object TextSearch: TLabel
         Left = 7
         Top = 4
-        Width = 119
+        Width = 73
         Height = 13
-        Caption = 'Customer name/number:'
+        Caption = 'Search phrase:'
       end
       object PanelEditSearch: TPanel
         AlignWithMargins = True

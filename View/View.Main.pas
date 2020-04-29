@@ -534,7 +534,9 @@ type
         Action_CopySelection: TMenuItem;
         AppNotification: TPanel;
         txtNotification: TLabel;
-    lineTop: TBevel;
+        lineTop: TBevel;
+        txtCompanies: TLabel;
+        valCompanies: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -866,6 +868,7 @@ type
         procedure SkypeCallUpdate(CallTime: cardinal);
         procedure FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
         function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
+        function  CompanyListToText(LoadedCompanies: TList<string>): string;
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
@@ -1112,6 +1115,7 @@ begin
     valCurrentTime.Caption:='';
     valUpTime.Caption     :='';
     valAadUser.Caption    :='';
+    valCompanies.Caption  :='n/a';
 end;
 
 
@@ -1282,6 +1286,13 @@ begin
 end;
 
 
+function TMainForm.CompanyListToText(LoadedCompanies: TList<string>): string;
+begin
+    for var Index:=0 to LoadedCompanies.Count - 1 do
+        Result:=Result + LoadedCompanies.Items[Index] + '  ';
+end;
+
+
 procedure TMainForm.SetActiveTabsheet(TabSheet: TTabSheet);
 begin
 
@@ -1436,7 +1447,7 @@ begin
 
     var Col:=sgAgeView.GetCol(TCustomerSnapshotEx._FollowUp);
 
-    for var Index:=0 to Source.RowCount - 1 do
+    for var Index:=1 to Source.RowCount do
     begin
 
         if not String.IsNullOrWhitespace(Source.Cells[Col, Index]) then
@@ -1794,6 +1805,7 @@ begin
     Service.Mediator.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
     UpdateFollowUps(sgAgeView);
 
+    valCompanies.Caption:=CompanyListToText(FLoadedCompanies);
     SwitchTimers(TurnedOn);
     BusyForm.Close();
 
@@ -3176,7 +3188,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
+    btnSearchAbClick(Self);
 end;
 
 
@@ -3576,8 +3588,7 @@ end;
 procedure TMainForm.Action_SearchClick(Sender: TObject);
 begin
     GridSearchForm.Grid     :=MainForm.sgAgeView;
-    GridSearchForm.ColName  :=TCustomerSnapshotEx._CustomerName;
-    GridSearchForm.ColNumber:=TCustomerSnapshotEx._CustomerNumber;
+    GridSearchForm.SelColumn:=MainForm.sgAgeView.Col;
     THelpers.WndCall(GridSearchForm, TWindowState.Modeless, MainForm);
 end;
 
@@ -4057,8 +4068,9 @@ end;
 
 procedure TMainForm.btnSearchAbClick(Sender: TObject);
 begin
-    //THelpers.WndCall(SqlSearchForm, TWindowState.Modeless, MainForm);
-    THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
+    GridSearchForm.Grid     :=MainForm.sgAddressBook;
+    GridSearchForm.SelColumn:=MainForm.sgAddressBook.Col;
+    THelpers.WndCall(GridSearchForm, TWindowState.Modeless, MainForm);
 end;
 
 
