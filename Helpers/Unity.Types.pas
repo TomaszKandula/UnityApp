@@ -67,6 +67,7 @@ type
     TSetUserCompanyList    = procedure(CallResponse: TCallResponse) of object;
     TGetOpenItems          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
     TGetBiReports          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
+    TAddBulkToAddressBook  = procedure(CallResponse: TCallResponse) of object;
 
 
 implementation

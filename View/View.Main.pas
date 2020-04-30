@@ -882,6 +882,7 @@ type
         procedure GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure WriteToExcel_Callback(CallResponse: TCallResponse);
         procedure LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+        procedure AddBulkToAddressBook_Callback(CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
@@ -2021,6 +2022,21 @@ begin
     begin
         btnRatingClick(Self);
     end;
+
+end;
+
+
+procedure TMainForm.AddBulkToAddressBook_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[AddBulkToAddressBook_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'Selected items have been added successfully to Address Book.');
 
 end;
 
@@ -3396,23 +3412,30 @@ end;
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
 
-    if sgAgeView.Selection.Bottom - sgAgeView.Selection.Top > 1 then
+    var Col1:=sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName);
+    var Col2:=sgAgeView.GetCol(TCustomerSnapshotEx._CustomerNumber);
+    var Col3:=sgAgeView.GetCol(TCustomerSnapshotEx._CustomerName);
+
+    var CustDetailsList:=TList<TCustomerDetails>.Create();
+
+    for var Index:=sgAgeView.Selection.Bottom downto sgAgeView.Selection.Top do
     begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Bulk insertion is not supported in this version.');
-        Exit();
+
+        var CustDetails: TCustomerDetails;
+
+        CustDetails.SourceDBName   :=sgAgeView.Cells[Col1, Index];
+        CustDetails.CustomerNumber :=sgAgeView.Cells[Col2, Index].ToInteger();
+        CustDetails.CustomerName   :=sgAgeView.Cells[Col3, Index];
+        CustDetails.ContactPerson  :=' ';
+        CustDetails.RegularEmails  :=' ';
+        CustDetails.StatementEmails:=' ';
+        CustDetails.PhoneNumbers   :=' ';
+
+        CustDetailsList.Add(CustDetails);
+
     end;
 
-    var CustDetails: TCustomerDetails;
-
-    CustDetails.SourceDBName   :=sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName), sgAgeView.Row];
-    CustDetails.CustomerNumber :=sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._CustomerNumber), sgAgeView.Row].ToInteger();
-    CustDetails.CustomerName   :=sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._CustomerName), sgAgeView.Row];
-    CustDetails.ContactPerson  :=' ';
-    CustDetails.RegularEmails  :=' ';
-    CustDetails.StatementEmails:=' ';
-    CustDetails.PhoneNumbers   :=' ';
-
-    Service.Mediator.AddressBook.AddToAddressBookAsync(CustDetails, AddToAddressBook_Callback);
+    Service.Mediator.AddressBook.AddBulkToAddressBookAsync(CustDetailsList, AddBulkToAddressBook_Callback);
 
 end;
 

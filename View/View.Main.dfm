@@ -17015,8 +17015,6 @@ object MainForm: TMainForm
       ParentBackground = False
       TabOrder = 0
       Visible = False
-      ExplicitLeft = 547
-      ExplicitWidth = 503
       object txtNotification: TLabel
         AlignWithMargins = True
         Left = 5
@@ -17035,7 +17033,6 @@ object MainForm: TMainForm
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
-        ExplicitTop = 7
         ExplicitWidth = 190
         ExplicitHeight = 18
       end

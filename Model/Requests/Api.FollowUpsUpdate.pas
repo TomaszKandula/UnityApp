@@ -44,7 +44,8 @@ end;
 
 destructor TFollowUpsUpdate.Destroy();
 begin
-    for var FollowUpsData: TFollowUpData in FFollowUpsData do if Assigned(FollowUpsData) then FollowUpsData.Free();
+    for var FollowUpsData: TFollowUpData in FFollowUpsData do
+        if Assigned(FollowUpsData) then FollowUpsData.Free();
     inherited;
 end;
 

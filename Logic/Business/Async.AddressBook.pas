@@ -59,6 +59,13 @@ type
         /// It is not recommended to use nil in this method.
         /// </remarks>
         procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails);
+        /// <summary>
+        /// Insert async. address book listed new companies and notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure AddBulkToAddressBookAsync(PayLoad: TList<TCustomerDetails>; Callback: TAddBulkToAddressBook);
     end;
 
 
@@ -75,6 +82,7 @@ type
         procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook); virtual;
         function DelFromAddressBookAwaited(Id: integer): TCallResponse; virtual;
         procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails); virtual;
+        procedure AddBulkToAddressBookAsync(PayLoad: TList<TCustomerDetails>; Callback: TAddBulkToAddressBook); virtual;
     end;
 
 
@@ -97,7 +105,9 @@ uses
     Api.AddressBookUpdated,
     Api.AddressBookItemDel,
     Api.AddressBookAdd,
-    Api.AddressBookAdded;
+    Api.AddressBookAdded,
+    Api.AddressBookAddBulk,
+    Api.AddressBookAddedBulk;
 
 
 constructor TAddressBook.Create();
@@ -480,9 +490,6 @@ end;
 procedure TAddressBook.GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails);
 begin
 
-    var LCustDetails: TCustomerDetails;
-    var CallResponse: TCallResponse;
-
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
@@ -499,6 +506,8 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetCustomerDetailsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
+        var LCustDetails: TCustomerDetails;
+        var CallResponse: TCallResponse;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
@@ -552,6 +561,93 @@ begin
         TThread.Synchronize(nil, procedure
         begin
             if Assigned(Callback) then Callback(LCustDetails, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+procedure TAddressBook.AddBulkToAddressBookAsync(PayLoad: TList<TCustomerDetails>; Callback: TAddBulkToAddressBook);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'addressbook/bulk/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[AddBulkToAddressBookAsync]: Executing POST ' + Rest.ClientBaseURL);
+
+        var Request:=TAddressBookAddBulk.Create(PayLoad.Count);
+        try
+
+            for var Index:=0 to PayLoad.Count - 1 do
+            begin
+                Request.AddressBookData[Index].SourceDbName  :=PayLoad[Index].SourceDBName;
+                Request.AddressBookData[Index].CustomerNumber:=PayLoad[Index].CustomerNumber;
+                Request.AddressBookData[Index].CustomerName  :=PayLoad[Index].CustomerName;
+            end;
+
+            Request.UserAlias:=Service.SessionData.AliasName;
+            Rest.CustomBody:=TJson.ObjectToJsonString(Request);
+
+        finally
+            Request.Free();
+            PayLoad.Free();
+        end;
+
+        var LCallResponse: TCallResponse;
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var Response:=TJson.JsonToObject<TAddressBookAddedBulk>(Rest.Content);
+                try
+                    LCallResponse.IsSucceeded:=True;
+                    LCallResponse.ReturnedCode:=Rest.StatusCode;
+                    Service.Logger.Log('[AddBulkToAddressBookAsync]: Returned status code is ' + Rest.StatusCode.ToString());
+                finally
+                    Response.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    LCallResponse.LastMessage:='[AddBulkToAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        LCallResponse.LastMessage:='[AddBulkToAddressBookAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        LCallResponse.LastMessage:='[AddBulkToAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                LCallResponse.ReturnedCode:=Rest.StatusCode;
+                LCallResponse.IsSucceeded:=False;
+                Service.Logger.Log(LCallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                LCallResponse.IsSucceeded:=False;
+                LCallResponse.LastMessage:='[AddBulkToAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(LCallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(LCallResponse);
         end);
 
     end);
