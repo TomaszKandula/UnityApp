@@ -47,9 +47,7 @@ type
         const AppCaption:     string    = 'Unity Platform';
         const UnityReader:    string    = 'UnityReader.exe';
         const LicenceFile:    string    = 'Unity.lic';
-        const ReleaseFile:    string    = 'Release.zip';
         const LayoutPak:      string    = 'Layouts.zip';
-        const ManifestFile:   string    = 'Unity.manifest';
         const ConfigFile:     string    = 'Config.cfg';
     end;
 
@@ -66,14 +64,6 @@ type
         const Semicolon = ';';
         const Comma     = ',';
         const Pipe      = '|';
-    end;
-
-
-    TQms = class abstract
-        const Open     = 'OPEN';
-        const Pending  = 'PENDING';
-        const Rejected = 'REJECTED';
-        const Solved   = 'SOLVED';
     end;
 
 

@@ -191,14 +191,10 @@ begin
         MainAppForm.InitMainWnd();
 
     if Service.Settings.IsUsedCustomConfig then
-    begin
-
         LabelTest.Visible:=True;
 
-        if Service.Settings.IsTestEnvSetup then
-            MainAppForm.AppNotification.Visible:=True;
-
-    end;
+    if Service.Settings.IsTestEnvSetup then
+        MainAppForm.AppNotification.Visible:=True;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin

@@ -220,21 +220,24 @@ begin
     // ----------------------------------------------------
     // Allow to use different config file than default one.
     // ----------------------------------------------------
-    if not(ParamCount = 0) then Service.Settings.Initialize(ParamStr(1)) else Service.Settings.Initialize(String.Empty);
+    if not(ParamCount = 0) then
+        Service.Settings.Initialize(ParamStr(1))
+            else Service.Settings.Initialize(String.Empty);
 
     var PathAppDir :=Service.Settings.DirApplication;
     var PathHomeDir:=Service.Settings.DirRoaming;
+    var BinFileName:=Service.Settings.BinFileName;
 
     // --------------------------------
     // Check Config.cfg and Config.bin.
     // --------------------------------
-    if not FileExists(PathHomeDir + 'Config.cfg') then
+    if not FileExists(PathHomeDir + TCommon.ConfigFile) then
     begin
 
-        if FileExists(PathHomeDir + 'Config.bin') then
+        if FileExists(PathHomeDir + BinFileName) then
         begin
             // Recover and re-open
-            TFile.Copy(PathHomeDir + 'Config.bin', PathHomeDir + 'Config.cfg');
+            TFile.Copy(PathHomeDir + BinFileName, PathHomeDir + TCommon.ConfigFile);
             Sleep(2500);
             ShellExecute(MainForm.Handle, 'open', PChar(PathAppDir + 'Unity.exe'), nil, nil, SW_SHOWNORMAL);
             ExitProcess(0);
@@ -242,7 +245,7 @@ begin
         else
         begin
             Application.MessageBox(
-                PCHar('Cannot find Config.bin. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
+                PCHar('Cannot find ' + BinFileName + '. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
                 PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
@@ -258,7 +261,7 @@ begin
     if not Service.Settings.CheckConfigFile then
     begin
         Application.MessageBox(
-            PCHar('Cannot find Config.cfg. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
+            PCHar('Cannot find configuration file. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
             PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
         );
         ExitProcess(0);

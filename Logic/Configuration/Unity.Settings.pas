@@ -55,6 +55,7 @@ type
         function ConfigFileOK(): boolean;
         function CustomConfig(): boolean;
         function TestEnvSetup(): boolean;
+        function GetBinFileName(): string;
         property WinUserName: string read GetWinUserName;
         property PathEventLog: string read GetPathEventLog;
         property PathConfig: string read GetPathConfig;
@@ -79,6 +80,7 @@ type
         property CheckConfigFile: boolean read ConfigFileOK;
         property IsUsedCustomConfig: boolean read CustomConfig;
         property IsTestEnvSetup: boolean read TestEnvSetup;
+        property BinFileName: string read GetBinFileName;
         procedure Initialize(AConfigFileName: string);
         function Encode(ConfigType: TAppFiles): boolean;
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
@@ -105,8 +107,9 @@ type
     /// </summary>
     TSettings = class(TInterfacedObject, ISettings)
     strict private
-        var FTMIG: TMemIniFile;
-        var FTMIL: TMemIniFile;
+        var FAppSettings: TMemIniFile;
+        var FAppLicence: TMemIniFile;
+        var FAppEnviron: TMemIniFile;
         var FLastSessionId: string;
         var FWinUserName: string;
         var FPathEventLog: string;
@@ -124,6 +127,7 @@ type
         var FConfigFileOK: boolean;
         var FIsUsedCustomConfig: boolean;
         var FIsTestEnvSetup: boolean;
+        var FBinFileName: string;
         function GetReleaseDateTime(): TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
         function GetReleaseNumber(): cardinal;
@@ -156,6 +160,7 @@ type
         function ConfigFileOK(): boolean;
         function CustomConfig(): boolean;
         function TestEnvSetup(): boolean;
+        function GetBinFileName(): string;
     public
         constructor Create();
         destructor Destroy(); override;
@@ -192,6 +197,7 @@ type
         property CheckConfigFile: boolean read ConfigFileOK;
         property IsUsedCustomConfig: boolean read CustomConfig;
         property IsTestEnvSetup: boolean read TestEnvSetup;
+        property BinFileName: string read GetBinFileName;
         property ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
         property TodayFColor: TColor read GetTodayFColor write SetTodayFColor;
         property TodayBColor: TColor read GetTodayBColor write SetTodayBColor;
@@ -215,15 +221,21 @@ uses
 
 constructor TSettings.Create();
 begin
-    FTMIG:=TMemIniFile.Create('');
-    FTMIL:=TMemIniFile.Create('');
+
+    if not Assigned(FAppSettings) then FAppSettings:=TMemIniFile.Create('');
+    if not Assigned(FAppLicence) then FAppLicence:=TMemIniFile.Create('');
+
+    var InfFileName:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar + 'Unity.inf';
+    if not Assigned(FAppEnviron) then FAppEnviron:=TMemIniFile.Create(InfFileName);
+
 end;
 
 
 destructor TSettings.Destroy();
 begin
-    FTMIG.Free();
-    FTMIL.Free();
+    if Assigned(FAppSettings) then FAppSettings.Free();
+    if Assigned(FAppLicence) then FAppLicence.Free();
+    if Assigned(FAppEnviron) then FAppEnviron.Free();
     inherited;
 end;
 
@@ -233,12 +245,10 @@ begin
 
     Result:=False;
 
-    if Assigned(FTMIG) then
+    if Assigned(FAppSettings) then
     begin
         FConfigFileOK:=Decode(Configuration, True);
-        FUrlReleasePak:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
-        FUrlReleaseMan:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
-        FUrlLayoutsLst:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
+        FUrlLayoutsLst:=FAppSettings.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
         Result:=True;
     end;
 
@@ -252,29 +262,36 @@ begin
     FDirWinTemp    :=GetEnvironmentVariable('TEMP');
     FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
 
-    FDirRoaming :=TPath.GetPublicPath() + TPath.DirectorySeparatorChar + 'Unity Platform' + TPath.DirectorySeparatorChar;
+    var test:=FAppEnviron.SectionExists('Environment');
+
+    var LDataFolder:=FAppEnviron.ReadString('Environment', 'DataFolder', '');
+    var LBinSource :=FAppEnviron.ReadString('Environment', 'BinSource', '');
+    var LSetup     :=FAppEnviron.ReadString('Environment', 'Setup', '').ToLower();
+
+    FBinFileName:=LBinSource;
+    FDirRoaming:=TPath.GetPublicPath()
+        + TPath.DirectorySeparatorChar
+        + LDataFolder
+        + TPath.DirectorySeparatorChar;
+
     FDirLayouts :=FDirRoaming + 'layouts' + TPath.DirectorySeparatorChar;
     FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
+    FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
+    FPathLicence:=FDirApplication + TCommon.LicenceFile;
+
+    if (LSetup = 'test') or (LSetup = 'env') or (LSetup = 'dev') then
+        FIsTestEnvSetup:=True;
 
     if not String.IsNullOrEmpty(AConfigFileName) then
     begin
-
-        FIsUsedCustomConfig:=True;
         FPathConfig:=FDirRoaming + AConfigFileName;
-
-        var LConfigFileName:=AConfigFileName.ToLower();
-        if LConfigFileName.Contains('test') or LConfigFileName.Contains('env') or LConfigFileName.Contains('dev') then
-            FIsTestEnvSetup:=True;
-
+        FIsUsedCustomConfig:=True;
     end
     else
     begin
-        FIsUsedCustomConfig:=False;
         FPathConfig:=FDirRoaming + TCommon.ConfigFile;
+        FIsUsedCustomConfig:=False;
     end;
-
-    FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
-    FPathLicence:=FDirApplication + TCommon.LicenceFile;
 
     if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
 
@@ -305,7 +322,7 @@ begin
         try
 
             if ConfigType = TAppFiles.Configuration then
-                FTMIG.GetStrings(hStream);
+                FAppSettings.GetStrings(hStream);
 
             hStream.SaveToStream(rStream);
             rStream.Position:=0;
@@ -403,10 +420,10 @@ begin
             begin
 
                 if ConfigType = TAppFiles.Configuration then
-                    FTMIG.SetStrings(hString);
+                    FAppSettings.SetStrings(hString);
 
                 if ConfigType = TAppFiles.Licence then
-                        FTMIL.SetStrings(hString);
+                        FAppLicence.SetStrings(hString);
 
                 Result:=True;
 
@@ -438,73 +455,73 @@ end;
 function TSettings.GetLicenceValue(Section: string; Key: string): string;
 begin
     Result:='n/a';
-    if Assigned(FTMIL) then
-        Result:=FTMIL.ReadString(Section, Key, 'n/a');
+    if Assigned(FAppLicence) then
+        Result:=FAppLicence.ReadString(Section, Key, 'n/a');
 end;
 
 
 function TSettings.GetStringValue(Section: string; Key: string; Default: string): string;
 begin
     Result:=Default;
-    if Assigned(FTMIG) then
-        Result:=FTMIG.ReadString(Section, Key, Default);
+    if Assigned(FAppSettings) then
+        Result:=FAppSettings.ReadString(Section, Key, Default);
 end;
 
 
 procedure TSettings.SetStringValue(Section: string; Key: string; Value: string);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.WriteString(Section, Key, Value);
+    if Assigned(FAppSettings) then
+        FAppSettings.WriteString(Section, Key, Value);
 end;
 
 
 function TSettings.GetIntegerValue(Section: string; Key: string; Default: integer): integer;
 begin
     Result:=Default;
-    if Assigned(FTMIG) then
-        Result:=FTMIG.ReadInteger(Section, Key, Default);
+    if Assigned(FAppSettings) then
+        Result:=FAppSettings.ReadInteger(Section, Key, Default);
 end;
 
 
 procedure TSettings.SetIntegerValue(Section: string; Key: string; Value: integer);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.WriteInteger(Section, Key, Value);
+    if Assigned(FAppSettings) then
+        FAppSettings.WriteInteger(Section, Key, Value);
 end;
 
 
 procedure TSettings.GetSectionValues(Section: string; var Values: TStringList);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.ReadSectionValues(Section, Values);
+    if Assigned(FAppSettings) then
+        FAppSettings.ReadSectionValues(Section, Values);
 end;
 
 
 procedure TSettings.GetSection(Section: string; var Keys: TStringList);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.ReadSection(Section, Keys);
+    if Assigned(FAppSettings) then
+        FAppSettings.ReadSection(Section, Keys);
 end;
 
 
 procedure TSettings.GetSections(List: TStringList);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.ReadSections(List);
+    if Assigned(FAppSettings) then
+        FAppSettings.ReadSections(List);
 end;
 
 
 procedure TSettings.DeleteSection(SectionName: string);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.EraseSection(SectionName);
+    if Assigned(FAppSettings) then
+        FAppSettings.EraseSection(SectionName);
 end;
 
 
 procedure TSettings.DeleteKey(Section: string; Ident: string);
 begin
-    if Assigned(FTMIG) then
-        FTMIG.DeleteKey(Section, Ident);
+    if Assigned(FAppSettings) then
+        FAppSettings.DeleteKey(Section, Ident);
 end;
 
 
@@ -576,9 +593,9 @@ begin
     // Get release number from release manifest hosted at:
     // https://unityinfo.azurewebsites.net/release/package/unity.manifest.
     // -------------------------------------------------------------------
-    if Assigned(FTMIG) then
+    if Assigned(FAppSettings) then
     begin
-        Result:=StrToIntDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
+        Result:=StrToIntDef(FAppSettings.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
     end;
 
 end;
@@ -592,8 +609,8 @@ begin
     // ----------------------------------------------------
     // Get update time and date registered in setting file.
     // ----------------------------------------------------
-    if Assigned(FTMIG) then
-        Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDtFormat.NullDate);
+    if Assigned(FAppSettings) then
+        Result:=StrToDateTimeDef(FAppSettings.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDtFormat.NullDate);
 
 end;
 
@@ -601,60 +618,60 @@ end;
 function TSettings.GetTodayFColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(FTMIG)) then
+    if not(Assigned(FAppSettings)) then
         Exit()
     else
-        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
+        Result:=FAppSettings.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
 end;
 
 
 function TSettings.GetTodayBColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(FTMIG)) then
+    if not(Assigned(FAppSettings)) then
         Exit()
     else
-        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
+        Result:=FAppSettings.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
 end;
 
 
 function TSettings.GetPastFColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(FTMIG)) then
+    if not(Assigned(FAppSettings)) then
         Exit()
     else
-        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
+        Result:=FAppSettings.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
 end;
 
 
 function TSettings.GetPastBColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(FTMIG)) then
+    if not(Assigned(FAppSettings)) then
         Exit()
     else
-        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
+        Result:=FAppSettings.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
 end;
 
 
 function TSettings.GetFutureFColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(FTMIG)) then
+    if not(Assigned(FAppSettings)) then
         Exit()
     else
-        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
+        Result:=FAppSettings.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
 end;
 
 
 function TSettings.GetFutureBColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(FTMIG)) then
+    if not(Assigned(FAppSettings)) then
         Exit()
     else
-        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
+        Result:=FAppSettings.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
 end;
 
 
@@ -754,12 +771,18 @@ begin
 end;
 
 
+function TSettings.GetBinFileName(): string;
+begin
+    Result:=FBinFileName;
+end;
+
+
 procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
 begin
 
-    if Assigned(FTMIG) then
+    if Assigned(FAppSettings) then
     begin
-        FTMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
+        FAppSettings.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
         Encode(TAppFiles.Configuration);
     end;
 
@@ -769,9 +792,9 @@ end;
 procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
 
-    if Assigned(FTMIG) then
+    if Assigned(FAppSettings) then
     begin
-        FTMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
+        FAppSettings.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
         Encode(TAppFiles.Configuration);
     end;
 
@@ -780,48 +803,48 @@ end;
 
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit();
-    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
+    if not(Assigned(FAppSettings)) then Exit();
+    FAppSettings.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
     Encode(Configuration);
 end;
 
 
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit();
-    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
+    if not(Assigned(FAppSettings)) then Exit();
+    FAppSettings.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
     Encode(Configuration);
 end;
 
 
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit();
-    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
+    if not(Assigned(FAppSettings)) then Exit();
+    FAppSettings.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
     Encode(Configuration);
 end;
 
 
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit();
-    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
+    if not(Assigned(FAppSettings)) then Exit();
+    FAppSettings.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
     Encode(Configuration);
 end;
 
 
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit();
-    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
+    if not(Assigned(FAppSettings)) then Exit();
+    FAppSettings.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
     Encode(Configuration);
 end;
 
 
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit();
-    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
+    if not(Assigned(FAppSettings)) then Exit();
+    FAppSettings.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
     Encode(Configuration);
 end;
 
