@@ -103,3 +103,49 @@ Development environment uses the following:
 1. citeam-dev/1305_UnityDB_Env (Database).
 
 Both Production and Testing is deployed to the Software Centre for end-users and test-users. Development environment is only for developers.
+
+# Microsoft Skype/Lync
+
+---
+
+Unity Platform uses Skype API, it therefore requires assemblies:
+
+1. Microsoft.Lync.Controls.dll
+1. Microsoft.Lync.Controls.Framework.dll
+1. Microsoft.Lync.Model.dll
+1. Microsoft.Lync.Utilities.dll
+1. Microsoft.Office.Uc.dll
+
+Additionally, there is LyncCall.exe file compiled separately.
+
+# Chromium Embedded
+
+---
+
+Unity Platform requires Chromium engine, the source is here:
+
+[https://github.com/salvadordf/CEF4Delphi](https://github.com/salvadordf/CEF4Delphi)
+
+The `bin` folder should contains:
+
+1. locales\*.pak
+1. swiftshader\libEGL.dll
+1. swiftshader\libGLESv2.dll
+1. chrome_elf.dll
+1. d3dcompiler_47.dll
+1. libcef.dll
+1. libEGL.dll
+1. libGLESv2.dll
+1. natives_blob.bin
+1. snapshot_blob.bin
+1. v8_context_snapshot.bin
+1. icudtl.dat
+1. cef_sandbox.lib
+1. libcef.lib
+1. cef.pak
+1. cef_100_percent.pak
+1. cef_200_percent.pak
+1. cef_extensions.pak
+1. devtools_resources.pak
+
+Additionally, there is SubProcess.exe which is separately compiled.
