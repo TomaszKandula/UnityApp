@@ -104,11 +104,11 @@ Development environment uses the following:
 
 Both Production and Testing is deployed to the Software Centre for end-users and test-users. Development environment is only for developers.
 
-# Microsoft Skype/Lync
+# Microsoft Skype for Business (Lync.exe)
 
 ---
 
-Unity Platform uses Skype API, it therefore requires assemblies:
+Unity Platform uses Skype API, it therefore requires following assemblies:
 
 1. Microsoft.Lync.Controls.dll
 1. Microsoft.Lync.Controls.Framework.dll
@@ -116,7 +116,7 @@ Unity Platform uses Skype API, it therefore requires assemblies:
 1. Microsoft.Lync.Utilities.dll
 1. Microsoft.Office.Uc.dll
 
-Additionally, there is LyncCall.exe file compiled separately.
+Additionally, there is LyncCall.exe file compiled separately (associated project in C#). This file must be placed in `bin` folder.
 
 # Chromium Embedded
 
@@ -126,11 +126,8 @@ Unity Platform requires Chromium engine, the source is here:
 
 [https://github.com/salvadordf/CEF4Delphi](https://github.com/salvadordf/CEF4Delphi)
 
-The `bin` folder should contains:
+The `bin` folder should contain:
 
-1. locales\*.pak
-1. swiftshader\libEGL.dll
-1. swiftshader\libGLESv2.dll
 1. chrome_elf.dll
 1. d3dcompiler_47.dll
 1. libcef.dll
@@ -148,4 +145,27 @@ The `bin` folder should contains:
 1. cef_extensions.pak
 1. devtools_resources.pak
 
-Additionally, there is SubProcess.exe which is separately compiled.
+Add folder with theirs content:
+
+1. locales
+1. swiftshader
+1. swiftshader
+
+Additionally, there is SubProcess.exe which is compiled separately.
+
+WARNING!
+
+With RAD Studio 10.3 Rio - new CEF4Delphi, `SubProcess.exe` does not work properly, latest library `libcef.dll` (ver. 74.1.19.0) cannot be loaded, only older version works (ver. 3.x) works. 
+The cause is unknown. There is no official fix and the issue has been closed: [https://github.com/salvadordf/CEF4Delphi/issues/167](https://github.com/salvadordf/CEF4Delphi/issues/167). 
+
+The workaround is, build everything with latest CEF4Delphi and use latest binaries and libraries, except `SubProcess.exe` which must be compiled with  older RAD Studio Tokyo; 
+then everything works as expected.
+
+# Licence file (Unity.lic)
+
+---
+
+Licence file is encoded and it is a legacy file that stores basic information about distribution. This is because Unity Platform (formerly TR Tool 2017) was created as a private project (non-DFDS), 
+as a proof of concept of a desktop client aiming to replace old Excel file automated with VBA. 
+
+This file is scheduled for cancellation.
