@@ -1,0 +1,4 @@
+[Environment]
+DataFolder=Unity Platform
+BinSource=Config.bin
+Setup=PROD
