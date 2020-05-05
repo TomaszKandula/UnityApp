@@ -860,7 +860,6 @@ type
         procedure SetButtonsGlyphs();
         procedure SetSettingsPanel(IsLocked: boolean);
         procedure InitializeScreenSettings();
-        function  AddressBookExclusion: boolean;
         procedure ClearMainViewInfo();
         procedure ClearAgingSummary();
         procedure ClearOpenItemsSummary();
@@ -870,8 +869,6 @@ type
         function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
         function  CompanyListToText(LoadedCompanies: TList<string>): string;
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
-        procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
-        procedure AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
         procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
         procedure ScanSnapshots_Callback(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
@@ -1636,25 +1633,6 @@ begin
 end;
 
 
-function TMainForm.AddressBookExclusion(): boolean;
-begin
-    // ----------------------------------------------------------------------
-    // Indicates editable columns. Use it to examin if user should be able to
-    // edit selected cell in TStrigGrid component.
-    // ----------------------------------------------------------------------
-    if (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._StatementEmails))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._PhoneNumbers))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._ContactPerson))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookFields._RegularEmails))
-    then
-        // Do not exclude above columns from editing
-        Result:=False
-    else
-        // Exclude anything else from editing
-        Result:=True;
-end;
-
-
 procedure TMainForm.InitializeScreenSettings();
 begin
 
@@ -1727,38 +1705,6 @@ begin
     FIsAddressBookOpened:=True;
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     Service.Logger.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
-
-end;
-
-
-procedure TMainForm.UpdateAddressBook_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, CallResponse.LastMessage);
-        Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'Address Book has been updated successfully.');
-    Service.Logger.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
-
-end;
-
-
-procedure TMainForm.AddToAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'New data has been added to Address Book successfully.');
-    Service.Logger.Log('[AddToAddressBookAsync_Callback]: New data has been inserted to Adddress Book successfully.');
 
 end;
 
@@ -2800,29 +2746,35 @@ begin
     // ------------------------------------------------------------
     // Count current follow-ups and display in notification baloon.
     // ------------------------------------------------------------
-    var Sum:=0;
+
+    var TotalSum:=0;
+    var UserSum:=0;
     var ActiveUser:=Service.SessionData.AliasName.ToLower();
 
-    for var iCNT:=1 to sgAgeView.RowCount - 1 do
+    for var Index:=1 to sgAgeView.RowCount - 1 do
     begin
 
-        var FollowUpDate:=THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._FollowUp), iCNT]);
+        var FollowUpDate:=THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._FollowUp), Index]);
         var CurrentDate :=THelpers.CDate(valCurrentDate.Caption);
-        var AssignedUser:=sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._PersonResponsible), iCNT].ToLower();
+        var AssignedUser:=sgAgeView.Cells[sgAgeView.GetCol(TCustomerSnapshotEx._PersonResponsible), Index].ToLower();
 
-        if (FollowUpDate = CurrentDate) {and (ActiveUser = AssignedUser)} then Inc(Sum);
+        if (FollowUpDate = CurrentDate) then
+        begin
+
+            Inc(TotalSum);
+
+            if ActiveUser = AssignedUser then
+                Inc(UserSum);
+
+        end;
 
     end;
 
-    if Sum > 0 then
+    if TotalSum > 0 then
     begin
-
         TrayIcon.Visible:=True;
-        TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + TChars.CRLF +
-                              'Let''s bother some customers and collect some money money!' + TChars.CRLF;
-
+        TrayIcon.BalloonHint:=TMessages.FollowUpMessage.Replace('{USER_SUM}', UserSum.ToString()).Replace('{TOTAL_SUM}', TotalSum.ToString());
         TrayIcon.ShowBalloonHint();
-
     end;
 
 end;

@@ -138,6 +138,7 @@ type
         var FTotalAmountAggr: double;
         var FDocumentType: string;
         var FTotals: TStringGrid;
+        var FOutputToFiles: boolean;
         procedure SetHTMLTable(NewValue: string);
         procedure SetHTMLTemp(NewValue: string);
         procedure SetHTMLRow(NewValue: string);
@@ -161,6 +162,7 @@ type
         procedure SetOpenItemsRefs(NewValue: TFOpenItemsRefs);
         procedure SetCtrlStatusRefs(NewValue: TFCtrlStatusRefs);
         procedure SetControlStatus(NewValue: TStringGrid);
+        procedure SetOutputToFiles(NewVaue: boolean);
         function  GetDocumentType(): string;
         function  GetTotalAmountAggr(): double;
         function  GetHTMLTable(): string;
@@ -186,6 +188,7 @@ type
         function  GetOpenItemsRefs(): TFOpenItemsRefs;
         function  GetCtrlStatusRefs(): TFCtrlStatusRefs;
         function  GetControlStatus(): TStringGrid;
+        function  GetOutputToFiles(): boolean;
         procedure SaveOutput(FileName: string);
         function  BuildHTML(): integer;
         function  StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
@@ -217,6 +220,7 @@ type
         property SourceDBName: string read GetSourceDBName write SetSourceDBName;
         property CustNumber: integer read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
+        property OutputToFiles: boolean read GetOutputToFiles write SetOutputToFiles;
         function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
         function SendDocument(IsUserInCopy: boolean; IsSourceInCopy: boolean): boolean;
     end;
@@ -346,6 +350,18 @@ begin
     var CallResponse: TCallResponse;
     CallResponse:=SendNowSync();
     Result:=CallResponse.IsSucceeded;
+
+    if FOutputToFiles then
+    begin
+
+        var TempDir:=Service.Settings.DirWinTemp + '\Unity Platform Emails';
+        if not DirectoryExists(TempDir) then
+            CreateDir(TempDir);
+
+        var ToFileName:='Email_' + Random(900000).ToString() + '.html';
+        SaveOutput(ToFileName);
+
+    end;
 
 end;
 
@@ -644,6 +660,12 @@ begin
 end;
 
 
+function TDocument.GetOutputToFiles(): boolean;
+begin
+    Result:=FOutputToFiles;
+end;
+
+
 function TDocument.GetDocumentType(): string;
 begin
     Result:=FDocumentType;
@@ -791,6 +813,12 @@ end;
 procedure TDocument.SetControlStatus(NewValue: TStringGrid);
 begin
     FControlStatus:=NewValue;
+end;
+
+
+procedure TDocument.SetOutputToFiles(NewVaue: boolean);
+begin
+    FOutputToFiles:=NewVaue;
 end;
 
 

@@ -197,7 +197,6 @@ uses
 begin
 
     {$WARN SYMBOL_PLATFORM OFF}
-    // Microsoft Windows only
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     var RegSettings: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
@@ -216,6 +215,28 @@ begin
     RegSettings.LongTimeFormat      :='hh:mm:ss';
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
+
+    // -------------------------------------
+    // Exit program if Unity.inf is missing.
+    // -------------------------------------
+    var EnvSetupFile:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar + 'Unity.inf';
+    if not FileExists(EnvSetupFile) then
+    begin
+
+            Application.MessageBox(
+                PCHar(
+                    'Cannot find ' +
+                    TCommon.EnvSetupFile +
+                    '. ' +
+                    TCommon.AppCaption +
+                    ' will be closed. Please contact IT support or reinstall the application.'
+                ),
+                PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
+            );
+
+            ExitProcess(0);
+
+    end;
 
     // ----------------------------------------------------
     // Allow to use different config file than default one.

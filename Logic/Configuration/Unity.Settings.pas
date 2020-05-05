@@ -262,8 +262,6 @@ begin
     FDirWinTemp    :=GetEnvironmentVariable('TEMP');
     FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
 
-    var test:=FAppEnviron.SectionExists('Environment');
-
     var LDataFolder:=FAppEnviron.ReadString('Environment', 'DataFolder', '');
     var LBinSource :=FAppEnviron.ReadString('Environment', 'BinSource', '');
     var LSetup     :=FAppEnviron.ReadString('Environment', 'Setup', '').ToLower();

@@ -57,7 +57,6 @@ type
         var FIsNext:       boolean;
         var FGroupping:    TArray<integer>;
         var FSearchEnd:    integer;
-        var FIsNumber:     boolean;
         var FSearchString: string;
         var FCompareValue: string;
         var FSearchColumn: integer;
