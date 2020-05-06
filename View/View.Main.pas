@@ -3426,117 +3426,86 @@ begin
 end;
 
 
-// Filter via INF4 (to be removed)
 procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._Inf4;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Inf4;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Inf4);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via Sales Responsible
 procedure TMainForm.Action_SalesRespClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._SalesResponsible;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.SalesResponsible;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._SalesResponsible);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter vi Person Responsible
 procedure TMainForm.Action_PersonRespClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._PersonResponsible;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.PersonResponsible;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._PersonResponsible);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via Customer Group
 procedure TMainForm.Action_CustomerGrpClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._CustomerGroup;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.CustomerGroup;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._CustomerGroup);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via Account Type
 procedure TMainForm.Action_AccountTypeClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._AccountType;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.AccountType;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._AccountType);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via FOLLOW UP
 procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._FollowUp;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Follow;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._FollowUp);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via COCODE
 procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._SourceDbName;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.CoCode;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via FREE 1
 procedure TMainForm.Action_Free1Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._Free1;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Free1;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Free1);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via FREE 2
 procedure TMainForm.Action_Free2Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._Free2;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Free2;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Free2);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via FREE 3
 procedure TMainForm.Action_Free3Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TCustomerSnapshotEx._Free3;
-    FilterForm.FOverdue  :=TCustomerSnapshotEx._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Free3;
+    FilterForm.SourceGrid:=MainForm.sgAgeView;
+    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Free3);
     THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
-// Filter via REMOVE ALL FILTERS
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 begin
 
@@ -3545,7 +3514,6 @@ begin
     for var Index:=1 to sgAgeView.RowCount - 1 do
         sgAgeView.RowHeights[Index]:=sgAgeView.sgRowHeight;
 
-    FilterForm.FilterClearAll();
     sgAgeView.Freeze(False);
 
 end;

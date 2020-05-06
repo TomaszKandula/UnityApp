@@ -43,114 +43,36 @@ type
         const FBackRed = $008080FF;
         const FBackYellow = $00CCFFFF;
         const FBackGreen = $00ACAC59;
-        /// <summary>
-        /// Result message of a task executed by ToExcel method.
-        /// </summary>
         property ToExcelResult: string read FToExcelResult;
-        /// <summary>
-        /// Result message of a task executed by ImportCSV method.
-        /// </summary>
         property CsvImportResult: string read FCsvImportResult;
-        /// <summary>
-        /// Result message of a task executed by ExportCSV method.
-        /// </summary>
         property CsvExportResult: string read FCsvExportResult;
-        /// <summary>
-        /// Allow to either copy from, paste to, or cut data.
-        /// </summary>
         procedure CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
-        /// <summary>
-        /// Unknown.
-        /// </summary>
         procedure DelEsc(Mode: TActions; pCol, pRow: integer);
-        /// <summary>
-        /// Remove al the data from the rows and cols. Reset number of cols and rows to 1.
-        /// </summary>
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
-        /// <summary>
-        /// Alow to remove entire row from the grid.
-        /// </summary>
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
-        /// <summary>
-        /// Defines how to draw grid.
-        /// </summary>
         procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
-        /// <summary>
-        /// Defines how to color values (numbers) in grid.
-        /// </summary>
         procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
-        /// <summary>
-        /// Sets width of the columns in grid. It takes into account padding and longest text length in row. It requires max col length.
-        /// </summary>
         procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
-        /// <summary>
-        /// Setup appropiate row height.
-        /// </summary>
         procedure SetRowHeight(RowHeight, Header: integer);
-        /// <summary>
-        /// Hide currently selected column.
-        /// </summary>
         procedure HideThisColumns();
-        /// <summary>
-        /// Setup default column width, this ultimately unhides all hidden columns (width = -1).
-        /// </summary>
         procedure ShowAllColumns();
-        /// <summary>
-        /// Merge sort method.
-        /// </summary>
 	    procedure MSort(const SortCol: integer; const datatype: TDataType; const ascending: boolean);
-        /// <summary>
-        /// Auto thumb size custom implementation.
-        /// </summary>
-        /// <remarks>
-        /// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component,
-        /// or default string grid scroll behaviour with no auto thumb size.
-        /// </remarks>
         procedure AutoThumbSize();
-        /// <summary>
-        /// Return column namber for given column name. By default it skips first column (Lp) and first row (header).
-        /// Fixed column and row must be explicitly provided if defaults cannot be used.
-        /// </summary>
         function GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
-        /// <summary>
-        /// Allow to disable component painting. It will not process
-        /// the events and will not repaint it, so it can be operated
-        /// from worker thread safely.
-        /// </summary>
         procedure Freeze(PaintWnd: boolean);
-        /// <summary>
-        /// Parse CSV data into grids.
-        /// </summary>
         function ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
-        /// <summary>
-        /// Convert all data in TStringGrid to CSV file with choosen delimiter. Note, this method is
-        /// executed within main thread, with large dataset it may be more feasible to run it in worker thread.
-        /// </summary>
         function ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
-        /// <summary>
-        /// Export to Excel file current grid content.
-        /// </summary>
         procedure ExportXLS(AFileName: string; ASheetName: string);
-        /// <summary>
-        /// Select all rows and columns (except first row which is presumbly a column title).
-        /// </summary>
         procedure SelectAll();
-        /// <summary>
-        /// Hide all grids (along with header grids).
-        /// </summary>
         procedure HideGrids();
-        /// <summary>
-        /// Show all grids (along with header grids).
-        /// </summary>
         procedure ShowGrids();
-        /// <summary>
-        /// Enable edit option of the cells.
-        /// </summary>
         procedure AllowEditing();
-        /// <summary>
-        /// Disable cells editing.
-        /// </summary>
         procedure QuitEditing();
+
+        procedure ShowAllRows();
+        procedure ShowRow(ColumnNumber: integer; Condition: string);
+        procedure HideRow(ColumnNumber: integer; Condition: string);
+
     end;
 
 
@@ -402,7 +324,8 @@ begin
 end;
 
 
-procedure TStringGrid.DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
+procedure TStringGrid.DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor;
+    BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
 begin
 
     // Extend drawing on headers if false
@@ -877,6 +800,33 @@ procedure TStringGrid.QuitEditing();
 begin
     Self.Options:=Self.Options - [goEditing];
     Self.EditorMode:=False;
+end;
+
+
+procedure TStringGrid.ShowAllRows();
+begin
+    // Aways start from first row
+    for var Index:=1 to Self.RowCount - 1 do
+        if Self.RowHeights[Index] = sgRowHidden then
+            Self.RowHeights[Index]:=sgRowHeight;
+end;
+
+
+procedure TStringGrid.ShowRow(ColumnNumber: integer; Condition: string);
+begin
+    // Aways start from first row
+    for var Index:=1 to Self.RowCount - 1 do
+        if Self.Cells[ColumnNumber, Index] = Condition then
+            Self.RowHeights[Index]:=sgRowHeight;
+end;
+
+
+procedure TStringGrid.HideRow(ColumnNumber: integer; Condition: string);
+begin
+    // Aways start from first row
+    for var Index:=1 to Self.RowCount - 1 do
+        if Self.Cells[ColumnNumber, Index] = Condition then
+            Self.RowHeights[Index]:=sgRowHidden;
 end;
 
 

@@ -21,6 +21,7 @@ object FilterForm: TFilterForm
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object PanelBackground: TPanel
@@ -161,7 +162,6 @@ object FilterForm: TFilterForm
           FFFFFFFFFFFFFFFFFFFF79797972727272727272727272727272727272727272
           7272727272727272727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
         Spacing = 15
-        OnClick = btnRemoveClick
       end
       object cbSelectAll: TCheckBox
         AlignWithMargins = True
