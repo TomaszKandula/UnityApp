@@ -47,6 +47,7 @@ type
         const EnvSetupFile:   string  = 'Unity.inf';
         const LayoutPak:      string  = 'Layouts.zip';
         const ConfigFile:     string  = 'Config.cfg';
+        const GridLayout:     string  = 'GridLayout.json';
     end;
 
 

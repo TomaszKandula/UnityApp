@@ -537,6 +537,7 @@ type
         lineTop: TBevel;
         txtCompanies: TLabel;
         valCompanies: TLabel;
+        Action_SaveGridLayout: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -816,6 +817,7 @@ type
         procedure Page8Show(Sender: TObject);
         procedure Page9Show(Sender: TObject);
         procedure Page10Show(Sender: TObject);
+        procedure Action_SaveGridLayoutClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -947,7 +949,8 @@ uses
     Api.OpenItemsFields,
     Api.AddressBookFields,
     Api.CustomerSnapshotEx,
-    Api.UserGeneralCommentUpdate;
+    Api.UserGeneralCommentUpdate,
+    Layout.AgeViewModel;
 
 
 var VMainForm: TMainForm;
@@ -1728,7 +1731,10 @@ begin
 
         for var iCNT:=0 to ReturnedData.RowCount - 1 do
             for var jCNT:=0 to ReturnedData.ColCount - 1 do
+            begin
                 sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+                if iCNT = 0 then sgAgeView.ColWidths[jCNT]:=ReturnedData.ColWidths[jCNT];
+            end;
 
         Service.Logger.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
 
@@ -1737,7 +1743,7 @@ begin
         Service.Logger.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
     end;
 
-    sgAgeView.SetColWidth(10, 20, 400);
+    //sgAgeView.SetColWidth(10, 20, 400);
     FLoadedAgeDate:=THelpers.FormatDateTime(PayLoad.AgeDate, TCalendar.DateOnly);
     valCutOffDate.Caption:=FLoadedAgeDate;
 
@@ -3583,6 +3589,25 @@ end;
 procedure TMainForm.Action_ShowAllColumnsClick(Sender: TObject);
 begin
     sgAgeView.ShowAllColumns();
+end;
+
+
+procedure TMainForm.Action_SaveGridLayoutClick(Sender: TObject);
+begin
+
+    var CallResponse: TCallResponse;
+    CallResponse:=Service.Mediator.Utility.SaveAgeLayoutSync(Service.Settings.DirLayouts + TCommon.GridLayout, sgAgeView);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[Actions_LayoutSaveClick]: Error has been thrown: ' + CallResponse.LastMessage);
+    end
+    else
+    begin
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'Layout has been saved successfully.');
+    end;
+
 end;
 
 

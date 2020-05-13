@@ -72,6 +72,7 @@ uses
     Unity.Settings in 'Logic\Configuration\Unity.Settings.pas',
     Unity.EventLogger in 'Logic\Logger\Unity.EventLogger.pas',
     Unity.ThreadUtilities in 'Logic\Logger\Unity.ThreadUtilities.pas',
+    Layout.AgeViewModel in 'Model\Layout.AgeViewModel.pas',
     Api.ReportListFields in 'Model\Api.ReportListFields.pas',
     Api.UserDailyCommentsFields in 'Model\Api.UserDailyCommentsFields.pas',
     Api.AddressBookFields in 'Model\Api.AddressBookFields.pas',
@@ -162,6 +163,7 @@ uses
     Api.AddressBookAddedBulk in 'Model\Responses\Api.AddressBookAddedBulk.pas',
     Sync.Mailer in 'Logic\Business\Sync.Mailer.pas',
     Sync.Document in 'Logic\Business\Sync.Document.pas',
+    Sync.Utility in 'Logic\Business\Sync.Utility.pas',
     Async.Accounts in 'Logic\Business\Async.Accounts.pas',
     Async.Utilities in 'Logic\Business\Async.Utilities.pas',
     Async.AddressBook in 'Logic\Business\Async.AddressBook.pas',
@@ -223,18 +225,18 @@ begin
     if not FileExists(EnvSetupFile) then
     begin
 
-            Application.MessageBox(
-                PCHar(
-                    'Cannot find ' +
-                    TCommon.EnvSetupFile +
-                    '. ' +
-                    TCommon.AppCaption +
-                    ' will be closed. Please contact IT support or reinstall the application.'
-                ),
-                PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
-            );
+        Application.MessageBox(
+            PCHar(
+                'Cannot find ' +
+                TCommon.EnvSetupFile +
+                '. ' +
+                TCommon.AppCaption +
+                ' will be closed. Please contact IT support or reinstall the application.'
+            ),
+            PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
+        );
 
-            ExitProcess(0);
+        ExitProcess(0);
 
     end;
 

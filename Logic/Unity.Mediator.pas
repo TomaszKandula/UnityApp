@@ -18,7 +18,8 @@ uses
     Async.GeneralTables,
     Async.Mailer,
     Async.OpenItems,
-    Async.Utilities;
+    Async.Utilities,
+    Sync.Utility;
 
 
 type
@@ -36,6 +37,7 @@ type
         function GetMailer():        IMailer;
         function GetOpenItems():     IOpenItems;
         function GetUtilities():     IUtilities;
+        function GetUtility():       IUtility;
         property Accounts:      IAccounts      read GetAccounts;
         property AddressBook:   IAddressBook   read GetAddressBook;
         property Comments:      IComments      read GetComments;
@@ -46,6 +48,7 @@ type
         property Mailer:        IMailer        read GetMailer;
         property OpenItems:     IOpenItems     read GetOpenItems;
         property Utilities:     IUtilities     read GetUtilities;
+        property Utility:       IUtility       read GetUtility;
         procedure ForceInitialize();
     end;
 
@@ -62,6 +65,7 @@ type
         function GetMailer():        IMailer;
         function GetOpenItems():     IOpenItems;
         function GetUtilities():     IUtilities;
+        function GetUtility():       IUtility;
         var FAccounts:               IAccounts;
         var FAddressBook:            IAddressBook;
         var FComments:               IComments;
@@ -72,6 +76,7 @@ type
         var FMailer:                 IMailer;
         var FOpenItems:              IOpenItems;
         var FUtilities:              IUtilities;
+        var FUtility:                IUtility;
     public
         // A direct implementation of dependency injection at a class level
         // allow to inject mock interfaces to the class for test purposes
@@ -85,7 +90,8 @@ type
             const GeneralTables: IGeneralTables = nil;
             const Mailer:        IMailer        = nil;
             const OpenItems:     IOpenItems     = nil;
-            const Utilities:     IUtilities     = nil
+            const Utilities:     IUtilities     = nil;
+            const Utility:       IUtility       = nil
         );
         destructor Destroy(); override;
         // Use this method to ensure all interfaces are created regardless,
@@ -101,6 +107,7 @@ type
         property Mailer:         IMailer        read GetMailer;
         property OpenItems:      IOpenItems     read GetOpenItems;
         property Utilities:      IUtilities     read GetUtilities;
+        property Utility:        IUtility       read GetUtility;
     end;
 
 
@@ -117,19 +124,21 @@ constructor TMediator.Create(
     const GeneralTables: IGeneralTables = nil;
     const Mailer:        IMailer        = nil;
     const OpenItems:     IOpenItems     = nil;
-    const Utilities:     IUtilities     = nil
+    const Utilities:     IUtilities     = nil;
+    const Utility:       IUtility       = nil
 );
 begin
-    FAccounts      :=Accounts;
-    FAddressBook   :=AddressBook;
-    FComments      :=Comments;
-    FCompanies     :=Companies;
-    FDebtors       :=Debtors;
-    FDocuments     :=Documents;
-    FGeneralTables :=GeneralTables;
-    FMailer        :=Mailer;
-    FOpenItems     :=OpenItems;
-    FUtilities     :=Utilities;
+    FAccounts     :=Accounts;
+    FAddressBook  :=AddressBook;
+    FComments     :=Comments;
+    FCompanies    :=Companies;
+    FDebtors      :=Debtors;
+    FDocuments    :=Documents;
+    FGeneralTables:=GeneralTables;
+    FMailer       :=Mailer;
+    FOpenItems    :=OpenItems;
+    FUtilities    :=Utilities;
+    FUtility      :=Utility;
 end;
 
 
@@ -151,6 +160,7 @@ begin
     if not Assigned(FMailer)        then FMailer       :=TMailer.Create();
     if not Assigned(FOpenItems)     then FOpenItems    :=TOpenItems.Create();
     if not Assigned(FUtilities)     then FUtilities    :=TUtilities.Create();
+    if not Assigned(FUtility)       then FUtility      :=TUtility.Create();
 end;
 
 
@@ -211,6 +221,12 @@ end;
 function TMediator.GetUtilities(): IUtilities;
 begin
     Result:=FUtilities;
+end;
+
+
+function TMediator.GetUtility(): IUtility;
+begin
+    Result:=FUtility;
 end;
 
 

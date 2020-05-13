@@ -48,6 +48,9 @@ type
         /// Allow to async. check latest available release version (hosted in the Software Centre). If the current software version is lower
         /// than available for download, then we will prompt the user and exit the application.
         /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
         function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse;
         /// <summary>
         /// Allows to recalculate async. aging summary and risk class based on provided age grid.
@@ -91,8 +94,6 @@ implementation
 uses
     System.SysUtils,
     System.Classes,
-    System.Win.ComObj,
-    System.Variants,
     REST.Types,
     REST.Json,
     Unity.Enums,
@@ -102,6 +103,7 @@ uses
     Api.ReturnClientInfo,
     Api.ReturnReportList,
     Api.ReportListFields,
+    Api.CustomerSnapshotEx,
     Bcrypt;
 
 
