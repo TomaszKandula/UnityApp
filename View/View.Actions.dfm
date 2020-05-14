@@ -87,7 +87,7 @@ object ActionsForm: TActionsForm
         DefaultRowHeight = 17
         RowCount = 2
         GradientEndColor = 15527148
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
         PopupMenu = MainForm.PopupCommonMenu
         TabOrder = 0
         OnDrawCell = OpenItemsGridDrawCell

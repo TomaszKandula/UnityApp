@@ -56,6 +56,7 @@ type
     strict private
         function  FLoadToGridSync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
         procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
+        procedure SetDefaultHeader(var SourceGrid: TStringGrid);
     public
         constructor Create();
         destructor Destroy(); override;
@@ -79,7 +80,8 @@ uses
     Api.UserCompanySelection,
     Api.ReturnSsisData,
     Api.ReturnOpenItems,
-    Api.OpenItemsFields;
+    Api.OpenItemsFields,
+    Layout.AgeViewModel;
 
 
 constructor TOpenItems.Create();
@@ -90,6 +92,31 @@ end;
 destructor TOpenItems.Destroy();
 begin
     inherited;
+end;
+
+
+procedure TOpenItems.SetDefaultHeader(var SourceGrid: TStringGrid);
+begin
+    SourceGrid.Cells[0, 0]:='';
+    SourceGrid.Cells[1 ,0]:=TOpenItemsFields._InvoiceNumber;
+    SourceGrid.Cells[2 ,0]:=TOpenItemsFields._Text;
+    SourceGrid.Cells[3 ,0]:=TOpenItemsFields._AdditionalText;
+    SourceGrid.Cells[4, 0]:=TOpenItemsFields._OpenAmount;
+    SourceGrid.Cells[5, 0]:=TOpenItemsFields._Amount;
+    SourceGrid.Cells[6, 0]:=TOpenItemsFields._OpenCurAmount;
+    SourceGrid.Cells[7, 0]:=TOpenItemsFields._CurAmount;
+    SourceGrid.Cells[8, 0]:=TOpenItemsFields._Iso;
+    SourceGrid.Cells[9 ,0]:=TOpenItemsFields._DueDate;
+    SourceGrid.Cells[10,0]:=TOpenItemsFields._ValueDate;
+    SourceGrid.Cells[11,0]:=TOpenItemsFields._ControlStatus;
+    SourceGrid.Cells[12,0]:=TOpenItemsFields._PmtStatus;
+    SourceGrid.Cells[13,0]:=TOpenItemsFields._Address1;
+    SourceGrid.Cells[14,0]:=TOpenItemsFields._Address2;
+    SourceGrid.Cells[15,0]:=TOpenItemsFields._Address3;
+    SourceGrid.Cells[16,0]:=TOpenItemsFields._PostalNumber;
+    SourceGrid.Cells[17,0]:=TOpenItemsFields._PostalArea;
+    SourceGrid.Cells[18,0]:=TOpenItemsFields._SourceDbName;
+    SourceGrid.Cells[19,0]:=TOpenItemsFields._CustNumber;
 end;
 
 
@@ -204,48 +231,68 @@ begin
                     Grid.RowCount:=RowCount + 1; // Add header
                     Grid.ColCount:=20;
 
-                    Grid.Cells[0, 0]:='';
-                    Grid.Cells[1 ,0]:=TOpenItemsFields._InvoiceNumber;
-                    Grid.Cells[2 ,0]:=TOpenItemsFields._Text;
-                    Grid.Cells[3 ,0]:=TOpenItemsFields._AdditionalText;
-                    Grid.Cells[4, 0]:=TOpenItemsFields._OpenAmount;
-                    Grid.Cells[5, 0]:=TOpenItemsFields._Amount;
-                    Grid.Cells[6, 0]:=TOpenItemsFields._OpenCurAmount;
-                    Grid.Cells[7, 0]:=TOpenItemsFields._CurAmount;
-                    Grid.Cells[8, 0]:=TOpenItemsFields._Iso;
-                    Grid.Cells[9 ,0]:=TOpenItemsFields._DueDate;
-                    Grid.Cells[10,0]:=TOpenItemsFields._ValueDate;
-                    Grid.Cells[11,0]:=TOpenItemsFields._ControlStatus;
-                    Grid.Cells[12,0]:=TOpenItemsFields._PmtStatus;
-                    Grid.Cells[13,0]:=TOpenItemsFields._Address1;
-                    Grid.Cells[14,0]:=TOpenItemsFields._Address2;
-                    Grid.Cells[15,0]:=TOpenItemsFields._Address3;
-                    Grid.Cells[16,0]:=TOpenItemsFields._PostalNumber;
-                    Grid.Cells[17,0]:=TOpenItemsFields._PostalArea;
-                    Grid.Cells[18,0]:=TOpenItemsFields._SourceDbName;
-                    Grid.Cells[19,0]:=TOpenItemsFields._CustNumber;
+                    if not FileExists(Service.Settings.DirLayouts + TCommon.OpenItemsLayout) then
+                    begin
+                        SetDefaultHeader(Grid);
+                        Grid.SetColWidth(10, 20, 400);
+                    end
+                    else
+                    begin
+
+                        var LLayoutColumns: TLayoutColumns;
+                        try
+
+                            var LResponse:=Service.Mediator.Utility.LoadAgeLayoutSync(
+                                Service.Settings.DirLayouts + TCommon.OpenItemsLayout,
+                                LLayoutColumns
+                            );
+
+                            if not LResponse.IsSucceeded then
+                            begin
+                                SetDefaultHeader(Grid);
+                                Grid.SetColWidth(10, 20, 400);
+                            end
+                            else
+                            begin
+
+                                Grid.ColCount:=Length(LLayoutColumns.Columns);
+
+                                for var Index:=0 to Grid.ColCount - 1 do
+                                begin
+                                    var ColumnNumber:=LLayoutColumns.Columns[Index].Number;
+                                    Grid.Cells[ColumnNumber, 0] :=LLayoutColumns.Columns[Index].Name;
+                                    Grid.ColWidths[ColumnNumber]:=LLayoutColumns.Columns[Index].Width;
+                                end;
+
+                            end;
+
+                        finally
+                            LLayoutColumns.Free();
+                        end;
+
+                    end;
 
                     for var Index:=1 to RowCount do
                     begin
-                        Grid.Cells[1, Index]:=ReturnOpenItems.OpenItems[Index - 1].InvoiceNumber;
-                        Grid.Cells[2, Index]:=ReturnOpenItems.OpenItems[Index - 1].Text;
-                        Grid.Cells[3, Index]:=ReturnOpenItems.OpenItems[Index - 1].AdditionalText;
-                        Grid.Cells[4, Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenAmount.ToString();
-                        Grid.Cells[5, Index]:=ReturnOpenItems.OpenItems[Index - 1].Amount.ToString();
-                        Grid.Cells[6, Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenCurAmount.ToString();
-                        Grid.Cells[7, Index]:=ReturnOpenItems.OpenItems[Index - 1].CurAmount.ToString();
-                        Grid.Cells[8, Index]:=ReturnOpenItems.OpenItems[Index - 1].Iso;
-                        Grid.Cells[9, Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].DueDate, TCalendar.DateOnly);
-                        Grid.Cells[10,Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].ValueDate, TCalendar.DateOnly);
-                        Grid.Cells[11,Index]:=ReturnOpenItems.OpenItems[Index - 1].ControlStatus.ToString();
-                        Grid.Cells[12,Index]:=ReturnOpenItems.OpenItems[Index - 1].PmtStatus.ToString();
-                        Grid.Cells[13,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address1;
-                        Grid.Cells[14,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address2;
-                        Grid.Cells[15,Index]:=ReturnOpenItems.OpenItems[Index - 1].Address3;
-                        Grid.Cells[16,Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalNumber;
-                        Grid.Cells[17,Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalArea;
-                        Grid.Cells[18,Index]:=ReturnOpenItems.OpenItems[Index - 1].SourceDbName;
-                        Grid.Cells[19,Index]:=ReturnOpenItems.OpenItems[Index - 1].CustNumber.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._InvoiceNumber), Index]:=ReturnOpenItems.OpenItems[Index - 1].InvoiceNumber;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._Text), Index]:=ReturnOpenItems.OpenItems[Index - 1].Text;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._AdditionalText), Index]:=ReturnOpenItems.OpenItems[Index - 1].AdditionalText;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._OpenAmount), Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenAmount.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._Amount), Index]:=ReturnOpenItems.OpenItems[Index - 1].Amount.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._OpenCurAmount), Index]:=ReturnOpenItems.OpenItems[Index - 1].OpenCurAmount.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._CurAmount), Index]:=ReturnOpenItems.OpenItems[Index - 1].CurAmount.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._Iso), Index]:=ReturnOpenItems.OpenItems[Index - 1].Iso;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._DueDate), Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].DueDate, TCalendar.DateOnly);
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._ValueDate),Index]:=THelpers.FormatDateTime(ReturnOpenItems.OpenItems[Index - 1].ValueDate, TCalendar.DateOnly);
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._ControlStatus),Index]:=ReturnOpenItems.OpenItems[Index - 1].ControlStatus.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._PmtStatus),Index]:=ReturnOpenItems.OpenItems[Index - 1].PmtStatus.ToString();
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._Address1),Index]:=ReturnOpenItems.OpenItems[Index - 1].Address1;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._Address2),Index]:=ReturnOpenItems.OpenItems[Index - 1].Address2;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._Address3),Index]:=ReturnOpenItems.OpenItems[Index - 1].Address3;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._PostalNumber),Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalNumber;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._PostalArea),Index]:=ReturnOpenItems.OpenItems[Index - 1].PostalArea;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._SourceDbName),Index]:=ReturnOpenItems.OpenItems[Index - 1].SourceDbName;
+                        Grid.Cells[Grid.GetCol(TOpenItemsFields._CustNumber),Index]:=ReturnOpenItems.OpenItems[Index - 1].CustNumber.ToString();
                     end;
 
                     CallResponse.IsSucceeded:=True;

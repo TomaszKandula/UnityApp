@@ -216,7 +216,6 @@ type
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
         function  GetRunningApps(SearchName: string): boolean;
-        procedure ApplyFixedGridWidth(Grid: TStringGrid; ColWidth: integer);
         procedure GetFirstComment(var Text: TMemo);
         procedure UpdateOpenItems();
         procedure UpdateDaily();
@@ -334,18 +333,6 @@ begin
         end;
 
         CloseHandle(Snap);
-    end;
-
-end;
-
-
-procedure TActionsForm.ApplyFixedGridWidth(Grid: TStringGrid; ColWidth: integer);
-begin
-
-    for var Index:=0 to Grid.ColCount - 1 do
-    begin
-        if (Grid.ColWidths[Index] <> -1) or (Index <> 0) then Grid.ColWidths[Index]:=ColWidth;
-        if Index = 0 then Grid.ColWidths[Index]:=10;
     end;
 
 end;
@@ -1018,7 +1005,10 @@ begin
         begin
 
             for var ColIndex:=0 to PayLoad.ColCount - 1 do
+            begin
                 OpenItemsGrid.Cells[ColIndex, RowIndex]:=PayLoad.Cells[ColIndex, RowIndex];
+                if RowIndex = 0 then OpenItemsGrid.ColWidths[ColIndex]:=PayLoad.ColWidths[ColIndex];
+            end;
 
             if RowIndex > 0 then
             begin
@@ -1032,8 +1022,6 @@ begin
 
     finally
         OpenItemsGrid.Freeze(False);
-        //OpenItemsGrid.SetColWidth(10, 20, 400);
-        ApplyFixedGridWidth(OpenItemsGrid, 80);
     end;
 
     ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) + ' ' + FLedgerIso;
@@ -1077,6 +1065,8 @@ begin
     DailyComGrid.ColCount:=11;
     DailyComGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
     DailyComGrid.Visible:=True;
+
+    OpenItemsGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
 
     Cust_Name.Caption    :='Not found!';
     Cust_Number.Caption  :='Not found!';
@@ -1142,8 +1132,6 @@ begin
 
             OpenItemsGrid.Freeze(False);
             OpenItemsGrid.AutoThumbSize;
-            //OpenItemsGrid.SetColWidth(10, 20, 400);
-            ApplyFixedGridWidth(OpenItemsGrid, 80);
 
             GetFirstComment(DailyCom);
             Screen.Cursor:=crDefault;

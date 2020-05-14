@@ -17560,10 +17560,6 @@ object MainForm: TMainForm
       Caption = 'Show all columns'
       OnClick = Action_ShowAllColumnsClick
     end
-    object Action_SaveGridLayout: TMenuItem
-      Caption = 'Save grid layout'
-      OnClick = Action_SaveGridLayoutClick
-    end
     object N22: TMenuItem
       Caption = '-'
     end
@@ -17571,6 +17567,10 @@ object MainForm: TMainForm
       Caption = 'Reset column widths'
       ShortCut = 49239
       OnClick = Action_AutoColumnSizeClick
+    end
+    object Action_SaveAgeViewLayout: TMenuItem
+      Caption = 'Save grid layout'
+      OnClick = Action_SaveAgeViewLayoutClick
     end
   end
   object PopupTracker: TPopupMenu
@@ -27289,6 +27289,13 @@ object MainForm: TMainForm
     object Action_TurnRowHighlight: TMenuItem
       Caption = 'Row highlight'
       OnClick = Action_TurnRowHighlightClick
+    end
+    object N11: TMenuItem
+      Caption = '-'
+    end
+    object Action_SaveOpenItemsLayout: TMenuItem
+      Caption = 'Save grid layout'
+      OnClick = Action_SaveOpenItemsLayoutClick
     end
   end
   object TimerFollowUp: TTimer

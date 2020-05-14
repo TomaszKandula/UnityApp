@@ -537,7 +537,9 @@ type
         lineTop: TBevel;
         txtCompanies: TLabel;
         valCompanies: TLabel;
-        Action_SaveGridLayout: TMenuItem;
+        Action_SaveAgeViewLayout: TMenuItem;
+        Action_SaveOpenItemsLayout: TMenuItem;
+    N11: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -817,7 +819,8 @@ type
         procedure Page8Show(Sender: TObject);
         procedure Page9Show(Sender: TObject);
         procedure Page10Show(Sender: TObject);
-        procedure Action_SaveGridLayoutClick(Sender: TObject);
+        procedure Action_SaveAgeViewLayoutClick(Sender: TObject);
+        procedure Action_SaveOpenItemsLayoutClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -1729,11 +1732,11 @@ begin
         sgAgeView.RowCount:=ReturnedData.RowCount;
         sgAgeView.ColCount:=ReturnedData.ColCount;
 
-        for var iCNT:=0 to ReturnedData.RowCount - 1 do
-            for var jCNT:=0 to ReturnedData.ColCount - 1 do
+        for var IndexRow:=0 to ReturnedData.RowCount - 1 do
+            for var IndexCol:=0 to ReturnedData.ColCount - 1 do
             begin
-                sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
-                if iCNT = 0 then sgAgeView.ColWidths[jCNT]:=ReturnedData.ColWidths[jCNT];
+                sgAgeView.Cells[IndexCol, IndexRow]:=ReturnedData.Cells[IndexCol, IndexRow];
+                if IndexRow = 0 then sgAgeView.ColWidths[IndexCol]:=ReturnedData.ColWidths[IndexCol];
             end;
 
         Service.Logger.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
@@ -1743,7 +1746,6 @@ begin
         Service.Logger.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
     end;
 
-    //sgAgeView.SetColWidth(10, 20, 400);
     FLoadedAgeDate:=THelpers.FormatDateTime(PayLoad.AgeDate, TCalendar.DateOnly);
     valCutOffDate.Caption:=FLoadedAgeDate;
 
@@ -2849,6 +2851,10 @@ begin
         Action_TurnRowHighlight.Enabled  :=False;
     end;
 
+    if ActionsForm.OpenItemsGrid.Focused then
+        Action_SaveOpenItemsLayout.Enabled:=True
+            else Action_SaveOpenItemsLayout.Enabled:=False;
+
 end;
 
 
@@ -3108,6 +3114,27 @@ begin
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then THelpers.TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
     if ActionsForm.DailyComGrid.Focused  then THelpers.TurnRowHighlight(ActionsForm.DailyComGrid, Action_TurnRowHighlight);
+
+end;
+
+
+procedure TMainForm.Action_SaveOpenItemsLayoutClick(Sender: TObject);
+begin
+
+    if not ActionsForm.Visible then Exit();
+
+    var CallResponse: TCallResponse;
+    CallResponse:=Service.Mediator.Utility.SaveAgeLayoutSync(Service.Settings.DirLayouts + TCommon.OpenItemsLayout, ActionsForm.OpenItemsGrid);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        Service.Logger.Log('[Actions_LayoutSaveClick]: Error has been thrown: ' + CallResponse.LastMessage);
+    end
+    else
+    begin
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'Layout has been saved successfully.');
+    end;
 
 end;
 
@@ -3592,11 +3619,11 @@ begin
 end;
 
 
-procedure TMainForm.Action_SaveGridLayoutClick(Sender: TObject);
+procedure TMainForm.Action_SaveAgeViewLayoutClick(Sender: TObject);
 begin
 
     var CallResponse: TCallResponse;
-    CallResponse:=Service.Mediator.Utility.SaveAgeLayoutSync(Service.Settings.DirLayouts + TCommon.GridLayout, sgAgeView);
+    CallResponse:=Service.Mediator.Utility.SaveAgeLayoutSync(Service.Settings.DirLayouts + TCommon.AgeViewLayout, sgAgeView);
 
     if not CallResponse.IsSucceeded then
     begin

@@ -48,7 +48,7 @@ type
         ShapeLine: TShape;
         imgCover: TImage;
         imgUnityLogo: TImage;
-    LabelTest: TLabel;
+        LabelTest: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
