@@ -157,7 +157,7 @@ begin
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/details/';
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[GetCompanyListingsAsync]: Executing POST ' + Rest.ClientBaseURL);
+        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing POST ' + Rest.ClientBaseURL);
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
@@ -177,18 +177,18 @@ begin
                 CallResponse.LastMessage:=ReturnCompanyDetails.Error.ErrorDesc;
                 CallResponse.ErrorCode  :=ReturnCompanyDetails.Error.ErrorCode;
                 CallResponse.IsSucceeded:=True;
-                Service.Logger.Log('[GetCompanyListingsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
+                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompanyListingsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetCompanyListingsAsync]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCompanyListingsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
                 CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -200,7 +200,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCompanyListingsAsync]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 

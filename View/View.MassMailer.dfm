@@ -700,13 +700,18 @@ object MassMailerForm: TMassMailerForm
         Align = alClient
         BorderStyle = bsNone
         Columns = <>
+        ColumnClick = False
         FlatScrollBars = True
         GridLines = True
+        HideSelection = False
+        MultiSelect = True
         ReadOnly = True
+        RowSelect = True
         TabOrder = 0
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
+        ExplicitTop = 0
       end
     end
     object GroupEmails: TGroupBox

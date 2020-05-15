@@ -228,7 +228,7 @@ begin
         FCompanyDetails[Index, 5]:=Exclusions;
 
         var PreservedLen:=Length(FLbuEmails);
-        SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.CompanyDetails[Index].CompanyPhones), 2);
+        SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.CompanyDetails[Index].CompanyEmails), 2);
 
         for var jCNT:=0 to Length(CompanyDetails.CompanyDetails[Index].CompanyEmails) - 1 do
         begin
@@ -751,7 +751,15 @@ end;
 
 procedure TMassMailerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+
     if Key = VK_TAB then Text_Subject.SetFocus();
+
+    // <CTRL> + <C>
+    if (Key = 67) and (Shift = [ssCtrl]) then
+    begin
+        //...place selected lines to clipboard
+    end;
+
 end;
 
 
