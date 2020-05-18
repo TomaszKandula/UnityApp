@@ -699,18 +699,19 @@ object MassMailerForm: TMassMailerForm
         Margins.Bottom = 5
         Align = alClient
         BorderStyle = bsNone
+        Checkboxes = True
         Columns = <>
         ColumnClick = False
         FlatScrollBars = True
         GridLines = True
         HideSelection = False
-        MultiSelect = True
         ReadOnly = True
         RowSelect = True
         TabOrder = 0
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
+        OnItemChecked = CustomerListItemChecked
         ExplicitTop = 0
       end
     end

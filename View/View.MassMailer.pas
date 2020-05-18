@@ -104,6 +104,7 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure cbNotDueOnlyClick(Sender: TObject);
         procedure cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure CustomerListItemChecked(Sender: TObject; Item: TListItem);
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
@@ -112,6 +113,7 @@ type
         var FIsDataLoaded:  boolean;
         var FLbuEmails: TArray<TArray<string>>;
         var FCompanyDetails: TArray<TArray<string>>;
+        var FExcludedFields: TArray<integer>;
         const FLargestSubitemTxt = -1;
         const FSizeOfTxtInHeader = -2;
         procedure ListViewAutoFit(List: TListView; const AutoFit: integer);
@@ -140,6 +142,7 @@ implementation
 
 
 uses
+    Vcl.Clipbrd,
     View.BusyScreen,
     View.Main,
     View.Calendar,
@@ -246,22 +249,22 @@ end;
 procedure TMassMailerForm.SetCompanyDetails(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
 begin
 
-    for var iCNT:=0 to TargetList.Items.Count - 1 do
+    for var ItemsCount:=0 to TargetList.Items.Count - 1 do
     begin
 
-        for var jCNT:=0 to Length(SourceArray) - 1 do
+        for var SrcCount:=0 to Length(SourceArray) - 1 do
         begin
 
-            var ListSourceDbName:=SourceArray[jCNT, 0];
-            var CompSourceDbName:=TargetList.Items[iCNT].SubItems[5];
+            var ListSourceDbName:=SourceArray[SrcCount, 0];
+            var CompSourceDbName:=TargetList.Items[ItemsCount].SubItems[5];
 
             if ListSourceDbName = CompSourceDbName then
             begin
-                TargetList.Items[iCNT].SubItems[7]{LbuName}    :=SourceArray[jCNT, 1{LbuName}];
-                TargetList.Items[iCNT].SubItems[8]{LbuAddress} :=SourceArray[jCNT, 2{LbuAddress}];
-                TargetList.Items[iCNT].SubItems[9]{LbuPhones}  :=SourceArray[jCNT, 3{LbuPhones}];
-                TargetList.Items[iCNT].SubItems[10]{Exclusions}:=SourceArray[jCNT, 5{Exclusions}];
-                TargetList.Items[iCNT].SubItems[6]{BanksHtml}  :=SourceArray[jCNT, 4{BanksHtml}];
+                TargetList.Items[ItemsCount].SubItems[7]:=SourceArray[SrcCount, 1]; // LbuName
+                TargetList.Items[ItemsCount].SubItems[8]:=SourceArray[SrcCount, 2]; // LbuAddress
+                TargetList.Items[ItemsCount].SubItems[9] :=SourceArray[SrcCount,3]; // LbuPhones
+                TargetList.Items[ItemsCount].SubItems[10]:=SourceArray[SrcCount,5]; // Exclusions
+                TargetList.Items[ItemsCount].SubItems[6] :=SourceArray[SrcCount,4]; // BanksHtml
             end;
 
         end;
@@ -277,15 +280,15 @@ begin
     if List.Items.Count > 0 then
     begin
 
-        for var iCNT:=0 to List.Items.Count - 1 do
+        for var Index:=0 to List.Items.Count - 1 do
         begin
 
-            var lstSourceDbName  :=List.Items[iCNT].SubItems[5]{SourceDbName};
-            var lstCustomerNumber:=List.Items[iCNT].SubItems[0]{CustomerNumber};
+            var lstSourceDbName  :=List.Items[Index].SubItems[5]; // SourceDbName
+            var lstCustomerNumber:=List.Items[Index].SubItems[0]; // CustomerNumber
 
             var EmailAddress:=GetEmailAddress(lstSourceDbName, lstCustomerNumber, MainForm.sgAddressBook);
 
-            if not(string.IsNullOrEmpty(EmailAddress)) then List.Items[iCNT].SubItems[4]{StatementEmails}:=EmailAddress
+            if not(string.IsNullOrEmpty(EmailAddress)) then List.Items[Index].SubItems[4]:=EmailAddress // StatementEmails
                 else EmailAddress:='Not found!';
 
         end;
@@ -300,9 +303,9 @@ begin
 
     LbuEmailsList.Clear();
 
-    for var iCNT:=0 to Length(Source) - 1 do
-        if Source[iCNT, 0] = SelectedCompany then
-            LbuEmailsList.Items.Add(Source[iCNT, 1]);
+    for var Index:=0 to Length(Source) - 1 do
+        if Source[Index, 0] = SelectedCompany then
+            LbuEmailsList.Items.Add(Source[Index, 1]);
 
 end;
 
@@ -316,8 +319,8 @@ begin
         NoDuplicates.Sorted:=True;
         NoDuplicates.Duplicates:=dupIgnore;
 
-        for var iCNT:=0 to Length(Source) - 1 do
-            NoDuplicates.Add(Source[iCNT, 0]);
+        for var Index:=0 to Length(Source) - 1 do
+            NoDuplicates.Add(Source[Index, 0]);
 
         LbuCompanyList.Clear();
         LbuCompanyList.Items.AddStrings(NoDuplicates);
@@ -338,13 +341,12 @@ begin
     ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
     SetLbuCompanies(selCompany, FLbuEmails);
 
-    MainForm.TimerCustSnapshots.Enabled:=False;
-    Service.Logger.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
-
-    Text_Subject.SetFocus();
     FIsDataLoaded:=True;
     Screen.Cursor:=crDefault;
+
+    Text_Subject.SetFocus();
     MainForm.UpdateStatusBar(TStatusBar.Ready);
+    CustomerList.ClearSelection();
 
 end;
 
@@ -418,8 +420,8 @@ begin
     // -----------------------------------
     // Get item count for sendable emails.
     // -----------------------------------
-    for var iCNT:=0 to CustomerList.Items.Count - 1 do
-        if CustomerList.Items[iCNT].SubItems[4] <> 'Not found!' then
+    for var Index:=0 to CustomerList.Items.Count - 1 do
+        if CustomerList.Items[Index].SubItems[4] <> 'Not found!' then
             ItemCount:=ItemCount + 1;
 
     var MessStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
@@ -506,12 +508,12 @@ begin
 
     var lsColumns: TListColumn;
 
-    for var iCNT:=0 to 11 do
+    for var Index:=0 to 11 do
     begin
 
         lsColumns:=CustomerList.Columns.Add;
 
-        case iCNT of
+        case Index of
             // Visible fields
             0:  lsColumns.Caption:='Lp';
             1:  lsColumns.Caption:='Customer number';
@@ -539,6 +541,10 @@ begin
     PanelEmailContainer.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelSubject.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelMessage.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+
+    // Exclude certain fields (columns) from copy to clipboard function
+    // Warning: We count field/column number from 0, thus it is N-1
+    FExcludedFields:=TArray<integer>.Create(6, 7, 8, 9, 10);
 
     lstLbuEmails.Clear();
 
@@ -586,20 +592,16 @@ end;
 
 procedure TMassMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    // ------------------------------------------------
-    // Turn on disabled timer for open items scanner,
-    // so open items will not change during processing.
-    // ------------------------------------------------
     FIsDataLoaded:=False;
     CustomerList.Clear();
-    MainForm.TimerCustSnapshots.Enabled:=True;
-    Service.Logger.Log('[TMassMailerForm.FormClose]: Mass mailer has been closed, open items loader is resumed.');
 end;
 
 
 procedure TMassMailerForm.FormDestroy(Sender: TObject);
 begin
-    // Do nonthing
+    SetLength(FExcludedFields, 0);
+    SetLength(FLbuEmails, 0);
+    SetLength(FCompanyDetails, 0);
 end;
 
 
@@ -607,6 +609,12 @@ end;
 
 
 {$REGION 'MOUSE CLICK EVENTS'}
+
+
+procedure TMassMailerForm.CustomerListItemChecked(Sender: TObject; Item: TListItem);
+begin
+    Item.Selected:=True;
+end;
 
 
 procedure TMassMailerForm.selCompanySelect(Sender: TObject);
@@ -626,11 +634,11 @@ begin
 
     if CustomerList.Items.Count = 0 then Exit();
 
-    for var iCNT:=0 to CustomerList.Items.Count - 1 do
+    for var Index:=0 to CustomerList.Items.Count - 1 do
     begin
 
-        if CustomerList.Items[iCNT].SubItems[5]{SourceDbName} = selCompany.Text then
-            CustomerList.Items[iCNT].SubItems[3]{SentFrom}:=lstLbuEmails.Items[lstLbuEmails.ItemIndex];
+        if CustomerList.Items[Index].SubItems[5] = selCompany.Text then // SourceDbName
+            CustomerList.Items[Index].SubItems[3]:=lstLbuEmails.Items[lstLbuEmails.ItemIndex]; // SentFrom
 
     end;
 
@@ -757,7 +765,37 @@ begin
     // <CTRL> + <C>
     if (Key = 67) and (Shift = [ssCtrl]) then
     begin
-        //...place selected lines to clipboard
+
+        var ClipboardContent:='';
+
+        for var ItemsCount:=0 to CustomerList.Items.Count - 1 do
+        begin
+
+            if CustomerList.Items[ItemsCount].Checked then
+            begin
+
+                var ColumnsContent:='';
+
+                for var ColCounts:=0 to CustomerList.Items[ItemsCount].SubItems.Count - 1 do
+                begin
+
+                    if not TArrayUtils<integer>.Contains(ColCounts, FExcludedFields) then
+                        ColumnsContent:=ColumnsContent + CustomerList.Items[ItemsCount].SubItems[ColCounts] + TChars.Tab;
+
+                end;
+
+                ClipboardContent:=ClipboardContent + ColumnsContent + TChars.CrLf;
+
+            end;
+
+        end;
+
+        if not String.IsNullOrEmpty(ClipboardContent) then
+        begin
+            ClipBoard.AsText:=ClipboardContent;
+            THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'Clipboard has been populated successfully.');
+        end;
+
     end;
 
 end;
