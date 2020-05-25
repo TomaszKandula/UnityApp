@@ -7,6 +7,21 @@ interface
 type
 
 
+    TLayoutType = class abstract
+        const Custom  = 'Custom';
+        const Defined = 'Defined';
+    end;
+
+
+    TFilterType = class abstract
+    public
+        const ReminderOverdueAll:   string = 'OverdueAll';
+        const ReminderOverdueRange: string = 'OverdueRange';
+        const StatementAllItems:    string = 'AllItems';
+        const StatementAllFuture:   string = 'AllFuture';
+    end;
+
+
     TConfigSections = class abstract
         const PasswordSection    = 'PASSWORD';
         const ApplicationDetails = 'APPLICATION';

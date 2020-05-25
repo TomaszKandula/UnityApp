@@ -12,9 +12,7 @@ uses
     System.Generics.Collections,
     System.Classes,
     Unity.Types,
-    Unity.Records,
-    Api.RegisteredEmails,
-    Api.BankDetails;
+    Unity.Records;
 
 
 type
@@ -22,14 +20,6 @@ type
 
     ICompanies = interface(IInterface)
     ['{E7616759-7564-44A4-BEEF-BDD220040E1E}']
-        /// <summary>
-        /// Allow to load async. company data as name, address, phone etc.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics);
         /// <summary>
         /// Allow to load async. lists of company data as name, address, phone etc.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -49,7 +39,6 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics); virtual;
         procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails); virtual;
     end;
 
@@ -64,9 +53,7 @@ uses
     REST.Json,
     Unity.Helpers,
     Unity.Service,
-    Api.ReturnCompanyData,
     Api.ReturnCompanyDetails,
-    Api.CompanyDetails,
     Api.UserCompanySelection;
 
 
@@ -81,70 +68,6 @@ begin
 end;
 
 
-procedure TCompanies.GetCompanySpecificsAsync(SourceDBName: string; Callback: TGetCompanySpecifics);
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-		Rest.AccessToken:=Service.AccessToken;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/' + SourceDBName;
-        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetCompanyDetailsAsync]: Executing GET ' + Rest.ClientBaseURL);
-
-        var CallResponse: TCallResponse;
-        var ReturnCompanyData: TReturnCompanyData;
-        try
-
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
-            begin
-                ReturnCompanyData:=TJson.JsonToObject<TReturnCompanyData>(Rest.Content);
-                CallResponse.IsSucceeded:=True;
-                Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
-
-            end;
-
-        except on
-            E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(ReturnCompanyData, CallResponse);
-            if Assigned(ReturnCompanyData) then ReturnCompanyData.Free();
-        end);
-
-    end);
-
-    NewTask.Start();
-
-end;
-
-
 procedure TCompanies.GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails);
 begin
 
@@ -155,7 +78,7 @@ begin
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/return/details/';
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/details/';
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[GetCompanyDetailsAsync]: Executing POST ' + Rest.ClientBaseURL);
 

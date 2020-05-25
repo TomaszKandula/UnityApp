@@ -72,7 +72,6 @@ type
         function GetAccessTokenAsync(): boolean;
         function GetScreenDataSync(): boolean;
         function GetGeneralTablesAsync(): boolean;
-        function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
         procedure SetSessionLog(SessionEventLog: string);
@@ -221,9 +220,9 @@ begin
             ChangeProgressBar(25, 'Getting access token... done.', ProgressBar);
         end;
 
-        // ----------------------------
-        // Upload application settings.
-        // ----------------------------
+        // -------------------------
+        // Register current session.
+        // -------------------------
         Sleep(50);
         ChangeProgressBar(33, 'Registering session...', ProgressBar);
 
@@ -284,43 +283,6 @@ begin
 
             Service.Logger.Log('No update has been found.');
             ChangeProgressBar(60, 'Checking for updates... done.', ProgressBar);
-
-        end;
-
-        // --------------------------------------
-        // Load/Sync all html layouts for emails.
-        // --------------------------------------
-        Sleep(50);
-        ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
-
-        if not GetHtmlLayoutsSync(Service.Settings.UrlLayoutsLst + TCommon.LayoutPak, Service.Settings.DirLayouts + TCommon.LayoutPak, Service.Settings.DirLayouts) then
-        begin
-            Service.Logger.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(
-                StartupForm.Handle,
-                TAppMessage.Error,
-                'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.'
-            );
-            ExitAppSync();
-        end
-        else
-        begin
-
-            if THelpers.UnzippLayouts(Service.Settings.DirLayouts + TCommon.LayoutPak, Service.Settings.DirLayouts) then
-            begin
-                Service.Logger.Log('Html layouts has been synchronized.');
-                ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
-            end
-            else
-            begin
-                Service.Logger.Log('[UnzippLayouts]: Cannot unzipp resource file.');
-                THelpers.MsgCall(
-                    StartupForm.Handle,
-                    TAppMessage.Error,
-                    'An error occured [UnzippLayouts]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.'
-                );
-                ExitAppSync();
-            end;
 
         end;
 
@@ -549,36 +511,6 @@ begin
         Service.Mediator.GeneralTables.GetPersonResponsibleAsync(MainAppForm.sgPersonResp, nil);
         Service.Mediator.GeneralTables.GetAccountTypeAsync(MainAppForm.sgAccountType, nil);
         Service.Mediator.GeneralTables.GetCustomerGroupAsync(MainAppForm.sgCustomerGr, nil);
-    except
-        on E: Exception do
-        begin
-            LastErrorMsg:=E.Message;
-            Result:=False;
-        end;
-
-    end;
-
-end;
-
-
-function TStartupForm.GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
-begin
-
-    Result:=True;
-
-    var HttpResponse: IHttpResponse;
-    var HttpClient:   THttpClient:=THTTPClient.Create();
-    var FileStream:   TFileStream:=TFileStream.Create(FileLayoutPak, fmCreate);
-    try
-
-        try
-            HttpResponse:=HttpClient.Get(UrlLayoutPak);
-            FileStream.CopyFrom(HttpResponse.ContentStream, HttpResponse.ContentLength);
-        finally
-            HttpClient.Free();
-            FileStream.Free();
-        end;
-
     except
         on E: Exception do
         begin

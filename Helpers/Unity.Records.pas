@@ -15,7 +15,6 @@ interface
 uses
     Unity.Enums,
     Unity.Grid,
-    Unity.References,
     Unity.ListView,
     Api.BankDetails;
 
@@ -82,18 +81,6 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables that holds details of sent document to be posted in database history table.
-    /// </summary>
-    TSentDocument = record
-        SourceDBName:       string;
-        ReportedCustomer:   integer;
-        ReportedAggrAmount: double;
-        ReportedAgeDate:    string;
-        PreservedEmail:     string;
-        DocumentType:       string;
-    end;
-
-    /// <summary>
     /// Carries a group of variables for DailyComments/GeneralComments table operations.
     /// </summary>
     TCommentExists = record
@@ -156,38 +143,6 @@ type
         Free3:          string;
         UserComment:    string;
         UserAlias:      string;
-    end;
-
-    /// <summary>
-    /// Carries a group of variables with information necessary to process emails with current account statement(s).
-    /// </summary>
-    TAccDocumentPayLoad = record
-        Layout:         TDocMode;
-        Subject:        string;
-        &Message:       string;
-        InvFilter:      TInvoiceFilter;
-        BeginDate:      string;
-        EndDate:        string;
-        SendFrom:       string;
-        MailTo:         TArray<string>;
-        SourceDBName:   string;
-        CustNumber:     integer;
-        CustName:       string;
-        LBUName:        string;
-        LBUAddress:     string;
-        Telephone:      string;
-        BankDetails:    string;
-        Exclusions:     TArray<integer>;
-        Series:         boolean;
-        ItemNo:         integer;
-        MailerList:     TListView;
-        OpenItems:      TStringGrid;
-        OpenItemsRefs:  TFOpenItemsRefs;
-        ControlStatus:  TStringGrid;
-        CtrlStatusRefs: TFCtrlStatusRefs;
-        IsCtrlStatus:   boolean;
-        IsUserInCopy:   boolean;
-        IsSourceInCopy: boolean;
     end;
 
     /// <summary>

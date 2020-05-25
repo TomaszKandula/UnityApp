@@ -73,13 +73,6 @@ type
         Modeless
     );
 
-    TInvoiceFilter = (
-        ReminderOvd,
-        ReminderNonOvd,
-        ShowAllItems,
-        SendNotDue
-    );
-
     TAppFiles = (
         Configuration,
         Licence

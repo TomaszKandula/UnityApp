@@ -10,7 +10,6 @@ interface
 
 
 uses
-    System.Rtti,
     System.Generics.Collections,
     System.Generics.Defaults,
     System.Classes,
@@ -25,9 +24,7 @@ uses
     Unity.Types,
     Unity.Enums,
     Unity.Grid,
-    Unity.Records,
-    Unity.References,
-    Api.BankDetails;
+    Unity.Records;
 
 
 type
@@ -42,18 +39,8 @@ type
     end;
 
 
-    TRecordUtils<T: record> = class abstract
-    public
-        class function GetFields(const Struct: T): TList<string>; static;
-    end;
-
-
     THelpers = class abstract
     strict private
-        const HtmlBanks = '<p class="p">{ROWS}</p>';
-        const HtmlRow   = '<b>Bank Details</b>: <br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br><br>';
-        const HtmlBic   = '(BIC: {BIC_NUMBER})';
-        const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const HEAP_ZERO_MEMORY = $00000008;
         const SID_REVISION = 1;
         const ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
@@ -61,10 +48,8 @@ type
         class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
         class procedure GetBuildInfo(var V1, V2, V3, V4: word); static;
     public
-        /// <summary>For Windows internal messaging between objects.</summary>
-        const WM_GETINFO = WM_USER + 120;
-        /// <summary>For Windows external messaging between different applications.</summary>
-        const WM_EXTINFO = WM_APP + 150;
+        const WM_GETINFO = WM_USER + 120; // For Windows internal messaging between objects
+        const WM_EXTINFO = WM_APP + 150; // For Windows external messaging between different applications
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
@@ -85,13 +70,9 @@ type
         class function GetSourceDBName(CoCode: string; Prefix: string): string; static;
         class function GetBuildInfoAsString: string; static;
         class function GetOSVer(CheckForOsName: boolean): string; static;
-        class function Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean; static;
-        class function UnzippLayouts(FileName: string; DestDir: string): boolean; static;
-        class function LoadFileToStr(const FileName: TFileName): string; static;
         class function GetCurrentUserSid: string; static;
         class procedure RemoveAllInFolder(const Path: string; const Pattern: string); static;
         class function FormatDateTime(InputDateTime: string; Returns: TCalendar): string; static;
-        class function BankListToHtml(BankDetails: TArray<TBankDetails>): string; static;
         class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
         class function StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>; static;
         class function WordCount(const InputStr: string): cardinal; static;
@@ -106,7 +87,6 @@ implementation
 uses
     System.StrUtils,
     System.Variants,
-    System.Zip,
     Vcl.Graphics,
     Unity.Constants,
     Unity.Settings,
@@ -150,32 +130,6 @@ begin
     ToArray:=FromArray;
     SetLength(ToArray, Length(FromArray));
     FromArray:=nil;
-end;
-
-
-class function TRecordUtils<T>.GetFields(const Struct: T): TList<string>;
-begin
-
-    var RttiContext: TRttiContext;
-    var RttiType:    TRttiType;
-    var RttiField:   TRttiField;
-
-    try
-
-        RttiContext:=TRttiContext.Create();
-        Result:=TList<string>.Create();
-
-        for RttiField in RttiContext.GetType(TypeInfo(T)).GetFields do
-        begin
-            RttiType:=RttiField.FieldType;
-            Result.Add(RttiType.Name);
-        end;
-
-    except
-        on E: Exception do
-
-    end;
-
 end;
 
 
@@ -747,89 +701,6 @@ begin
 end;
 
 
-class function THelpers.Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean;
-begin
-
-    Result:=False;
-
-    var RS: TResourceStream:=TResourceStream.CreateFromID(hInstance, ItemID, RT_RCDATA);
-    try
-
-        RS.Position:=0;
-        if not ShouldFileStay then
-            DeleteFile(PChar(FileName));
-
-        try
-            RS.SaveToFile(FileName);
-
-        except
-            on E: Exception do
-            begin
-                LastErrorMsg:='Cannot extract file from resource container. Exception has been thrown: ' + E.Message;
-                Exit();
-            end;
-
-        end;
-
-        Result:=True;
-
-    finally
-        RS.Free();
-    end;
-
-end;
-
-//lekage TMBCSEncoding in System.SysUtils
-class function THelpers.UnzippLayouts(FileName: string; DestDir: string): boolean;
-begin
-
-    var ZipFile:=TZipFile.Create();
-    try
-
-        try
-
-            ZipFile.Open(FileName, zmRead);
-
-            for var iCNT:=0 to ZipFile.FileCount - 1 do
-            begin
-                var FullPath:=DestDir + ZipFile.FileName[iCNT];
-                ZipFile.Extract(iCNT, DestDir, True);
-            end;
-
-            Result:=True;
-
-        except
-            Result:=False;
-
-        end;
-
-    finally
-        ZipFile.Free();
-        DeleteFile(PChar(FileName));
-    end;
-
-end;
-
-
-class function THelpers.LoadFileToStr(const FileName: TFileName): string;
-begin
-
-    var FileStream:=TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-    try
-
-        if FileStream.Size > 0 then
-        begin
-            SetLength(Result, FileStream.Size);
-            FileStream.Read(Pointer(Result)^, FileStream.Size);
-        end;
-
-    finally
-        FileStream.Free();
-    end;
-
-end;
-
-
 class function THelpers.GetCurrentUserSid: string;
 begin
 
@@ -905,41 +776,6 @@ begin
         TCalendar.DateOnly: Result:=TempStr[0];
         TCalendar.DateTime: Result:=TempStr[0] + ' ' + NewTime[0];
     end;
-
-end;
-
-
-class function THelpers.BankListToHtml(BankDetails: TArray<TBankDetails>): string;
-begin
-
-    Result:=HtmlEmpty;
-    if Length(BankDetails) = 0 then Exit();
-
-    var HtmlLines: string;
-    for var iCNT:=0 to Length(BankDetails) - 1 do
-    begin
-
-        var HtmlLine:=HtmlRow;
-        HtmlLines:=HtmlLines + #13#10 + HtmlLine
-            .Replace('{BANK_NAME}', BankDetails[iCNT].BankName)
-            .Replace('{ISO}',       BankDetails[iCNT].BankIso)
-            .Replace('{BANK_ACC}',  BankDetails[iCNT].BankAcc);
-
-        if not String.IsNullOrEmpty(BankDetails[iCNT].BankCode) then
-        begin
-            var BicLine:=HtmlBic;
-            BicLine:=BicLine.Replace('{BIC_NUMBER}', BankDetails[iCNT].BankCode);
-            HtmlLines:=HtmlLines.Replace('{BIC}', BicLine);
-        end
-        else
-        begin
-            HtmlLines:=HtmlLines.Replace('{BIC}', '');
-        end;
-
-    end;
-
-    var HtmlOutput:=HtmlBanks;
-    Result:=HtmlOutput.Replace('{ROWS}', HtmlLines);
 
 end;
 

@@ -34,8 +34,7 @@ uses
     Unity.Records,
     Unity.Grid,
     Unity.Panel,
-    Unity.References,
-    Api.ReturnCompanyData;
+    Api.SentDocument;
 
 
 type
@@ -204,24 +203,15 @@ type
         var FSourceDBName: string;
         var FCustName: string;
         var FCustNumber: Int64;
-        var FLbuName: string;
-        var FLbuAddress: string;
-        var FLbuPhones: string;
         var FLbuSendFrom: string;
-        var FLbuBanksHtml: string;
-        var FExclusions: TArray<integer>;
         var FOpenItemsTotal: TOpenItemsTotal;
-        var FPayLoad: TAccDocumentPayLoad;
         var FIsDataLoaded: boolean;
-        var OpenItemsRefs: TFOpenItemsRefs;
-        var CtrlStatusRefs: TFCtrlStatusRefs;
         function  GetRunningApps(SearchName: string): boolean;
         procedure GetFirstComment(var Text: TMemo);
         procedure UpdateOpenItems();
         procedure UpdateDaily();
         procedure UpdateGeneral();
         procedure UpdateCustDetails();
-        procedure UpdateCompanyDetails();
         procedure UpdateData();
         procedure InitializePanels();
         procedure InitializeSpeedButtons();
@@ -234,7 +224,8 @@ type
         procedure SaveCustomerDetails();
         procedure SaveGeneralComment();
         procedure SaveDailyComment();
-        procedure SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure ExecuteMailer();
+        procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure InsertAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
@@ -242,18 +233,12 @@ type
         procedure GetDailyComments_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
         procedure GetGeneralComment_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
         procedure GetCustomerDetails_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
-        procedure GetCompanySpecifics_Callback(CompanySpecifics: TReturnCompanyData; CallResponse: TCallResponse);
         procedure GetOpenItems_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
     public
         property SourceDBName: string read FSourceDBName;
         property CustName: string read FCustName;
         property CustNumber: Int64 read FCustNumber;
-        property LbuName: string read FLbuName;
-        property LbuAddress: string read FLbuAddress;
-        property LbuPhones: string read FLbuPhones;
         property LbuSendFrom: string read FLbuSendFrom;
-        property LbuBanksHtml: string read FLbuBanksHtml;
-        property Exclusions: TArray<integer> read FExclusions;
     end;
 
 
@@ -283,7 +268,8 @@ uses
     Api.OpenItemsFields,
     Api.UserDailyCommentsFields,
     Api.CustomerSnapshotEx,
-    Api.AddressBookFields;
+    Api.AddressBookFields,
+    Api.SendDocument;
 
 
 var vActionsForm: TActionsForm;
@@ -352,7 +338,6 @@ begin
     UpdateDaily();
     UpdateGeneral();
     UpdateCustDetails();
-    UpdateCompanyDetails();
 end;
 
 
@@ -360,12 +345,6 @@ procedure TActionsForm.UpdateCustDetails();
 begin
     FCustDetailsId:=0;
     Service.Mediator.AddressBook.GetCustomerDetailsAsync(CustNumber, SourceDBName, GetCustomerDetails_Callback);
-end;
-
-
-procedure TActionsForm.UpdateCompanyDetails();
-begin
-    Service.Mediator.Companies.GetCompanySpecificsAsync(SourceDBName, GetCompanySpecifics_Callback);
 end;
 
 
@@ -724,24 +703,52 @@ begin
 end;
 
 
+procedure TActionsForm.ExecuteMailer();
+begin
+
+    var FPayLoad:=TSendDocument.Create(1);
+
+    FPayLoad.LayoutType     :=TLayoutType.Defined;
+    FPayLoad.ReportedAgeDate:=MainForm.LoadedAgeDate;
+    FPayLoad.Subject        :='Account Statement';
+    FPayLoad.Message        :='';
+    FPayLoad.UserEmail      :=Service.SessionData.EmailAddress;
+    FPayLoad.InvoiceFilter  :=TFilterType.StatementAllItems;
+    FPayLoad.BeginDate      :=DateToStr(Now());
+    FPayLoad.EndDate        :=DateToStr(Now());
+    FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
+    FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
+    FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
+
+    FPayLoad.Documents[0].CustomerNumber:=ActionsForm.CustNumber;
+    FPayLoad.Documents[0].SourceDbName  :=ActionsForm.SourceDBName;
+    FPayLoad.Documents[0].SendFrom      :=ActionsForm.LbuSendFrom;
+    FPayLoad.Documents[0].EmailTo       :=ActionsForm.Cust_Mail.Text;
+
+    Screen.Cursor:=crHourGlass;
+    Service.Mediator.Documents.SendAccountDocumentAsync(FPayLoad, SendAccountDocument_Callback);
+
+end;
+
+
 {$ENDREGION}
 
 
 {$REGION 'CALLBACKS'}
 
 
-procedure TActionsForm.SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+procedure TActionsForm.SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
 begin
 
     Screen.Cursor:=crDefault;
 
-    if not CallResponse.IsSucceeded then
+    if not Response.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
         Exit();
     end;
 
-    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, CallResponse.LastMessage);
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
     UpdateDaily();
 
 end;
@@ -938,43 +945,6 @@ begin
     end;
 
     SetControls();
-
-end;
-
-
-procedure TActionsForm.GetCompanySpecifics_Callback(CompanySpecifics: TReturnCompanyData; CallResponse: TCallResponse);
-begin
-
-    var LbuEmails:=TStringList.Create();
-    try
-
-        if not CallResponse.IsSucceeded then
-        begin
-            THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-            Service.Logger.Log('[GetCompanySpecifics_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-            LbuEmails.Free();
-            Exit();
-        end;
-
-        FLbuName   :=CompanySpecifics.CompanyName;
-        FLbuAddress:=CompanySpecifics.CompanyAddress;
-        FExclusions:=CompanySpecifics.Exclusions;
-
-        FLbuPhones   :=THelpers.ArrayStrToString(CompanySpecifics.CompanyPhones, ';');
-        FLbuBanksHtml:=THelpers.BankListToHtml(CompanySpecifics.CompanyBanks);
-
-        selSendFrom.Clear();
-        THelpers.StrArrayToStrings(CompanySpecifics.CompanyEmails, LbuEmails);
-        selSendFrom.Items.AddStrings(LbuEmails);
-        if selSendFrom.Items.Count > 0 then
-        begin
-            selSendFrom.ItemIndex:=0;
-            FLbuSendFrom:=selSendFrom.Text;
-        end;
-
-    finally
-        LbuEmails.Free();
-    end;
 
 end;
 
@@ -1240,7 +1210,7 @@ procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=True;
     //THelpers.WndCall(QmsForm, Modal, ActionsForm);
-    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -1248,7 +1218,7 @@ procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=False;
     //THelpers.WndCall(QmsForm, Modal, ActionsForm);
-    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'This feature is disabled in beta version.');
+    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'This feature is disabled in this version.');
 end;
 
 
@@ -1277,39 +1247,7 @@ begin
 
     if THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
-    OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
-    CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
-
-    var ListEmailsTo:=THelpers.StringToArray(Cust_Mail.Text, ';');
-
-    FPayLoad.Layout        :=TDocMode.Defined;
-    FPayLoad.Subject       :='Account Statement';
-    FPayLoad.Message       :='';
-    FPayLoad.InvFilter     :=TInvoiceFilter.ShowAllItems;
-    FPayLoad.BeginDate     :='';
-    FPayLoad.EndDate       :='';
-    FPayLoad.SendFrom      :=LbuSendFrom;
-    FPayLoad.MailTo        :=ListEmailsTo;
-    FPayLoad.SourceDBName  :=SourceDBName;
-    FPayLoad.CustNumber    :=CustNumber;
-    FPayLoad.CustName      :=CustName;
-    FPayLoad.LBUName       :=LbuName;
-    FPayLoad.LBUAddress    :=LbuAddress;
-    FPayLoad.Telephone     :=LbuPhones;
-    FPayLoad.BankDetails   :=LbuBanksHtml;
-    FPayLoad.Exclusions    :=Exclusions;
-    FPayLoad.Series        :=False;
-    FPayLoad.ItemNo        :=0;
-    FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;
-    FPayLoad.OpenItemsRefs :=OpenItemsRefs;
-    FPayLoad.ControlStatus :=MainForm.sgControlStatus;
-    FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
-    FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
-    FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
-    FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
-
-    Screen.Cursor:=crHourGlass;
-    Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
+    ExecuteMailer();
 
 end;
 

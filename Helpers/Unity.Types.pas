@@ -20,8 +20,8 @@ uses
     Unity.Grid,
     Unity.Records,
     Api.ReturnCompanyDetails,
-    Api.ReturnCompanyData,
-    Api.UserCompanyList;
+    Api.UserCompanyList,
+    Api.SentDocument;
 
 
 type
@@ -42,10 +42,7 @@ type
     TGetDailyComments      = procedure(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse) of object;
     TGetGeneralComments    = procedure(Comments: TGeneralCommentFields; CallResponse: TCallResponse) of object;
     TGetCompanyDetails     = procedure(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse) of object;
-    TGetCompanySpecifics   = procedure(CompanySpecifics: TReturnCompanyData; CallResponse: TCallResponse) of object;
     TReadAgeView           = procedure(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
-    TSendAccDocument       = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
-    TSendAccDocuments      = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
     TGetTables             = procedure(CallResponse: TCallResponse) of object;
     TGetInvoiceList        = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
     TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; CallResponse: TCallResponse) of object;
@@ -68,6 +65,7 @@ type
     TGetOpenItems          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
     TGetBiReports          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
     TAddBulkToAddressBook  = procedure(CallResponse: TCallResponse) of object;
+    TSendAccountDocument   = procedure(CallResponse: TCallResponse; Response: TSentDocument) of object;
 
 
 implementation

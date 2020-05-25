@@ -29,9 +29,9 @@ uses
     Unity.Panel,
     Unity.ListView,
     Unity.Records,
-    Unity.References,
     Unity.Enums,
-    Api.ReturnCompanyDetails;
+    Api.ReturnCompanyDetails,
+    Api.SentDocument;
 
 
 type
@@ -106,29 +106,21 @@ type
         procedure cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure CustomerListItemChecked(Sender: TObject; Item: TListItem);
     strict private
-        var OpenItemsRefs: TFOpenItemsRefs;
-        var CtrlStatusRefs: TFCtrlStatusRefs;
-        var FPayLoad: TAccDocumentPayLoad;
-        var FItemCount: integer;
         var FIsDataLoaded:  boolean;
         var FLbuEmails: TArray<TArray<string>>;
         var FCompanyDetails: TArray<TArray<string>>;
-        var FExcludedFields: TArray<integer>;
         const FLargestSubitemTxt = -1;
         const FSizeOfTxtInHeader = -2;
         procedure ListViewAutoFit(List: TListView; const AutoFit: integer);
         function GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
-        procedure SetCompanyDetails(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
         procedure SetEmailAddresses(List: TListView);
         procedure SetLbuEmails(var LbuEmailsList: TListBox; SelectedCompany: string; Source: TArray<TArray<string>>);
         procedure SetLbuCompanies(var LbuCompanyList: TComboBox; Source: TArray<TArray<string>>);
         procedure FinishStartUp();
         procedure LoadFromGrid();
         procedure ExecuteMailer();
-    public
-        property ItemCount: integer read FItemCount write FItemCount;
         procedure GetCompanyDetails_Callback(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse);
-        procedure SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
     end;
 
 
@@ -154,7 +146,10 @@ uses
     Api.ReturnOpenItems,
     Api.OpenItemsFields,
     Api.CustomerSnapshotEx,
-    Api.AddressBookFields;
+    Api.AddressBookFields,
+    Api.SendDocument,
+    Api.DocumentFields,
+    Api.DocumentStatusFields;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -219,16 +214,7 @@ begin
     for var Index:=0 to Items - 1 do
     begin
 
-        var LbuPhones :=THelpers.ArrayStrToString(CompanyDetails.CompanyDetails[Index].CompanyPhones, ';');
-        var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.CompanyDetails[Index].Exclusions, ';');
-        var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.CompanyDetails[Index].CompanyBanks);
-
         FCompanyDetails[Index, 0]:=CompanyDetails.CompanyDetails[Index].SourceDbName;
-        FCompanyDetails[Index, 1]:=CompanyDetails.CompanyDetails[Index].CompanyName;
-        FCompanyDetails[Index, 2]:=CompanyDetails.CompanyDetails[Index].CompanyAddress;
-        FCompanyDetails[Index, 3]:=LbuPhones;
-        FCompanyDetails[Index, 4]:=LbuBanks;
-        FCompanyDetails[Index, 5]:=Exclusions;
 
         var PreservedLen:=Length(FLbuEmails);
         SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.CompanyDetails[Index].CompanyEmails), 2);
@@ -242,34 +228,6 @@ begin
     end;
 
     FinishStartUp();
-
-end;
-
-
-procedure TMassMailerForm.SetCompanyDetails(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
-begin
-
-    for var ItemsCount:=0 to TargetList.Items.Count - 1 do
-    begin
-
-        for var SrcCount:=0 to Length(SourceArray) - 1 do
-        begin
-
-            var ListSourceDbName:=SourceArray[SrcCount, 0];
-            var CompSourceDbName:=TargetList.Items[ItemsCount].SubItems[5];
-
-            if ListSourceDbName = CompSourceDbName then
-            begin
-                TargetList.Items[ItemsCount].SubItems[7]:=SourceArray[SrcCount, 1]; // LbuName
-                TargetList.Items[ItemsCount].SubItems[8]:=SourceArray[SrcCount, 2]; // LbuAddress
-                TargetList.Items[ItemsCount].SubItems[9] :=SourceArray[SrcCount,3]; // LbuPhones
-                TargetList.Items[ItemsCount].SubItems[10]:=SourceArray[SrcCount,5]; // Exclusions
-                TargetList.Items[ItemsCount].SubItems[6] :=SourceArray[SrcCount,4]; // BanksHtml
-            end;
-
-        end;
-
-    end;
 
 end;
 
@@ -337,7 +295,6 @@ end;
 procedure TMassMailerForm.FinishStartUp();
 begin
 
-    SetCompanyDetails(CustomerList, FCompanyDetails);
     ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
     SetLbuCompanies(selCompany, FLbuEmails);
 
@@ -367,7 +324,6 @@ begin
             var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._CustomerName), iCNT];
             var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName), iCNT];
 
-            // Visible fields
             Item:=MassMailerForm.CustomerList.Items.Add();
             Item.Caption:=IntToStr(iCNT);
             Item.SubItems.Add(LCustomerNumber);
@@ -376,13 +332,6 @@ begin
             Item.SubItems.Add('Not set!');
             Item.SubItems.Add('Not found!');
             Item.SubItems.Add(LSourceDbName);
-
-            // Hidden fields
-            Item.SubItems.Add('empty');
-            Item.SubItems.Add('empty');
-            Item.SubItems.Add('empty');
-            Item.SubItems.Add('empty');
-            Item.SubItems.Add('empty');
 
         end;
 
@@ -410,46 +359,61 @@ begin
 
     if THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Question2, 'Do you want to send it now?') = IDNO then Exit();
 
-    var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
+    var InvFilter: string;
 
-    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
-    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
-    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
-    if cbNotDueOnly.Checked  then InvFilter:=TInvoiceFilter.SendNotDue;
+    if cbShowAll.Checked     then InvFilter:=TFilterType.StatementAllItems;
+    if cbOverdueOnly.Checked then InvFilter:=TFilterType.ReminderOverdueAll;
+    if cbNonOverdue.Checked  then InvFilter:=TFilterType.ReminderOverdueRange;
+    if cbNotDueOnly.Checked  then InvFilter:=TFilterType.StatementAllFuture;
 
-    // -----------------------------------
-    // Get item count for sendable emails.
-    // -----------------------------------
+    var TotalItems:=0;
     for var Index:=0 to CustomerList.Items.Count - 1 do
         if CustomerList.Items[Index].SubItems[4] <> 'Not found!' then
-            ItemCount:=ItemCount + 1;
+            Inc(TotalItems);
 
-    var MessStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
+    var BeginDate:='';
+    var EndDate:='';
 
-    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TOpenItemsFields._PmtStatus), TDataType.TFloat, True);
-    OpenItemsRefs.InitWith(MainForm.sgOpenItems);
-    CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
+    if String.IsNullOrEmpty(ValBeginDate.Caption) then BeginDate:=DateToStr(Now()) else BeginDate:=ValBeginDate.Caption;
+    if String.IsNullOrEmpty(ValEndDate.Caption) then EndDate:=DateToStr(Now()) else EndDate:=ValEndDate.Caption;
 
-    FPayLoad.Layout        :=TDocMode.Custom;
-    FPayLoad.Subject       :=Text_Subject.Text;
-    FPayLoad.Message       :=MessStr;
-    FPayLoad.InvFilter     :=InvFilter;
-    FPayLoad.BeginDate     :=ValBeginDate.Caption;
-    FPayLoad.EndDate       :=ValEndDate.Caption;
-    FPayLoad.MailerList    :=MassMailerForm.CustomerList;
-    FPayLoad.OpenItems     :=MainForm.sgOpenItems;
-    FPayLoad.OpenItemsRefs :=OpenItemsRefs;
-    FPayLoad.ControlStatus :=MainForm.sgControlStatus;
-    FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
+    var FPayLoad:=TSendDocument.Create(TotalItems);
+
+    FPayLoad.LayoutType     :=TLayoutType.Custom;
+    FPayLoad.ReportedAgeDate:=MainForm.LoadedAgeDate;
+    FPayLoad.Subject        :=Text_Subject.Text;
+    FPayLoad.Message        :=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
+    FPayLoad.UserEmail      :=Service.SessionData.EmailAddress;
+    FPayLoad.InvoiceFilter  :=InvFilter;
+    FPayLoad.BeginDate      :=BeginDate;
+    FPayLoad.EndDate        :=EndDate;
     FPayLoad.IsCtrlStatus  :=cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=cbUserInCopy.Checked;
     FPayLoad.IsSourceInCopy:=cbIncludeSource.Checked;
+
+    for var Index:=0 to CustomerList.Items.Count - 1 do
+    begin
+
+        if CustomerList.Items[Index].SubItems[4] <> 'Not found!' then
+        begin
+
+            var Obj:=TDocumentFields.Create();
+            Obj.CustomerNumber:=CustomerList.Items[Index].SubItems[0].ToInt64(); // Customer Number
+            Obj.SourceDbName  :=CustomerList.Items[Index].SubItems[5]; // SourceDbName
+            Obj.SendFrom      :=CustomerList.Items[Index].SubItems[3]; // Send from
+            Obj.EmailTo       :=CustomerList.Items[Index].SubItems[4]; // Send to
+
+            FPayLoad.Documents[Index]:=Obj;
+
+        end;
+
+    end;
 
     Screen.Cursor:=crHourGlass;
     MainForm.UpdateStatusBar(TStatusBar.Processing);
     BusyForm.Show();
 
-    Service.Mediator.Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentsAsync_Callback);
+    Service.Mediator.Documents.SendAccountDocumentAsync(FPayLoad, SendAccountDocument_Callback);
 
 end;
 
@@ -460,39 +424,34 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TMassMailerForm.SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
-
-    procedure ActivityProgressOff();
-    begin
-        Screen.Cursor:=crDefault;
-        MainForm.UpdateStatusBar(TStatusBar.Ready);
-        BusyForm.Close();
-    end;
-
+procedure TMassMailerForm.SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
 begin
 
-    if not CallResponse.IsSucceeded then
+    Screen.Cursor:=crDefault;
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
+    BusyForm.Close();
+
+    if not Response.IsSucceeded then
     begin
-        ActivityProgressOff();
-        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
         Exit();
     end;
 
-    if CallResponse.LastMessage <> 'Processed.' then
+    for var ListIndex:=0 to CustomerList.Items.Count - 1 do
     begin
 
-        if ProcessingItemNo > -1 then
+        for var ResponseIndex:=0 to Length(Response.SentDocuments) - 1 do
         begin
-            CustomerList.Items[ProcessingItemNo].SubItems[2]:='Sent';
-            ItemCount:=MassMailerForm.ItemCount - 1;
-        end
 
-    end
-    else if CallResponse.LastMessage = 'Processed.' then
-    begin
-        ActivityProgressOff();
-        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed.');
+            if (CustomerList.Items[ListIndex].SubItems[0] = Response.SentDocuments[ResponseIndex].CustomerNumber.ToString())
+            and (CustomerList.Items[ListIndex].SubItems[5] = Response.SentDocuments[ResponseIndex].SourceDbName) then
+                CustomerList.Items[ListIndex].SubItems[2]:='Yes';
+
+        end;
+
     end;
+
+    THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed within ' + Response.Meta.ProcessingTimeSpan + '.');
 
 end;
 
@@ -514,7 +473,6 @@ begin
         lsColumns:=CustomerList.Columns.Add;
 
         case Index of
-            // Visible fields
             0:  lsColumns.Caption:='Lp';
             1:  lsColumns.Caption:='Customer number';
             2:  lsColumns.Caption:='Customer name';
@@ -522,29 +480,13 @@ begin
             4:  lsColumns.Caption:='Send from';
             5:  lsColumns.Caption:='Send to';
             6:  lsColumns.Caption:='Source';
-            // Hidden (helper) fields
-            7:  lsColumns.Caption:='BanksHtml';
-            8:  lsColumns.Caption:='LbuName';
-            9:  lsColumns.Caption:='LbuAddress';
-            10: lsColumns.Caption:='LbuPhone';
-            11: lsColumns.Caption:='Exclusions';
         end;
 
     end;
 
-    CustomerList.Column[7].Width:=0;
-    CustomerList.Column[8].Width:=0;
-    CustomerList.Column[9].Width:=0;
-    CustomerList.Column[10].Width:=0;
-    CustomerList.Column[11].Width:=0;
-
     PanelEmailContainer.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelSubject.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelMessage.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-
-    // Exclude certain fields (columns) from copy to clipboard function
-    // Warning: We count field/column number from 0, thus it is N-1
-    FExcludedFields:=TArray<integer>.Create(6, 7, 8, 9, 10);
 
     lstLbuEmails.Clear();
 
@@ -599,7 +541,6 @@ end;
 
 procedure TMassMailerForm.FormDestroy(Sender: TObject);
 begin
-    SetLength(FExcludedFields, 0);
     SetLength(FLbuEmails, 0);
     SetLength(FCompanyDetails, 0);
 end;
@@ -777,12 +718,7 @@ begin
                 var ColumnsContent:='';
 
                 for var ColCounts:=0 to CustomerList.Items[ItemsCount].SubItems.Count - 1 do
-                begin
-
-                    if not TArrayUtils<integer>.Contains(ColCounts, FExcludedFields) then
                         ColumnsContent:=ColumnsContent + CustomerList.Items[ItemsCount].SubItems[ColCounts] + TChars.Tab;
-
-                end;
 
                 ClipboardContent:=ClipboardContent + ColumnsContent + TChars.CrLf;
 

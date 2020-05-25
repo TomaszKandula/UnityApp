@@ -58,8 +58,7 @@ uses
     Unity.Panel,
     Unity.ComboBox,
     Unity.Enums,
-    Unity.Records,
-    Unity.References;
+    Unity.Records;
 
 
 type
@@ -539,7 +538,7 @@ type
         valCompanies: TLabel;
         Action_SaveAgeViewLayout: TMenuItem;
         Action_SaveOpenItemsLayout: TMenuItem;
-    N11: TMenuItem;
+        N11: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);

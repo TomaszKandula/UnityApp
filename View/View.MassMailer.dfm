@@ -712,7 +712,6 @@ object MassMailerForm: TMassMailerForm
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
         OnItemChecked = CustomerListItemChecked
-        ExplicitTop = 0
       end
     end
     object GroupEmails: TGroupBox

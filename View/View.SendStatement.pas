@@ -26,7 +26,7 @@ uses
     Unity.Grid,
     Unity.Panel,
     Unity.Records,
-    Unity.References;
+    Api.SentDocument;
 
 
 type
@@ -77,11 +77,8 @@ type
         procedure cbNotDueOnlyClick(Sender: TObject);
         procedure cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     strict private
-        var OpenItemsRefs: TFOpenItemsRefs;
-        var CtrlStatusRefs: TFCtrlStatusRefs;
-        var FPayLoad: TAccDocumentPayLoad;
         procedure ExecuteMailer();
-        procedure SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
     end;
 
 
@@ -102,7 +99,8 @@ uses
     Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
-    Unity.Service;
+    Unity.Service,
+    Api.SendDocument;
 
 
 var vSendForm: TSendForm;
@@ -129,46 +127,39 @@ begin
 
     if THelpers.MsgCall(SendForm.Handle, TAppMessage.Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
-    var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
+    var InvFilter: string;
 
-    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
-    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
-    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
-    if cbNotDueOnly.Checked  then InvFilter:=TInvoiceFilter.SendNotDue;
+    if cbShowAll.Checked     then InvFilter:=TFilterType.StatementAllItems;
+    if cbOverdueOnly.Checked then InvFilter:=TFilterType.ReminderOverdueAll;
+    if cbNonOverdue.Checked  then InvFilter:=TFilterType.ReminderOverdueRange;
+    if cbNotDueOnly.Checked  then InvFilter:=TFilterType.StatementAllFuture;
 
-    var TempStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
-    var ListEmailsTo:=THelpers.StringToArray(ActionsForm.Cust_Mail.Text, ';');
+    var BeginDate:='';
+    var EndDate:='';
 
-    OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
-    CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
+    if String.IsNullOrEmpty(ValBeginDate.Caption) then BeginDate:=DateToStr(Now()) else BeginDate:=ValBeginDate.Caption;
+    if String.IsNullOrEmpty(ValEndDate.Caption) then EndDate:=DateToStr(Now()) else EndDate:=ValEndDate.Caption;
 
-    FPayLoad.Layout        :=TDocMode.Custom;
-    FPayLoad.Subject       :='Account Statement';
-    FPayLoad.Message       :=TempStr;
-    FPayLoad.InvFilter     :=InvFilter;
-    FPayLoad.BeginDate     :=ValBeginDate.Caption;
-    FPayLoad.EndDate       :=ValEndDate.Caption;
-    FPayLoad.SendFrom      :=ActionsForm.LbuSendFrom;
-    FPayLoad.MailTo        :=ListEmailsTo;
-    FPayLoad.SourceDBName  :=ActionsForm.SourceDBName;
-    FPayLoad.CustName      :=ActionsForm.CustName;
-    FPayLoad.CustNumber    :=ActionsForm.CustNumber;
-    FPayLoad.LBUName       :=ActionsForm.LbuName;
-    FPayLoad.LBUAddress    :=ActionsForm.LbuAddress;
-    FPayLoad.Telephone     :=ActionsForm.LbuPhones;
-    FPayLoad.BankDetails   :=ActionsForm.LbuBanksHtml;
-    FPayLoad.Exclusions    :=ActionsForm.Exclusions;
-    FPayLoad.Series        :=False;
-    FPayLoad.ItemNo        :=0;
-    FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;
-    FPayLoad.OpenItemsRefs :=OpenItemsRefs;
-    FPayLoad.ControlStatus :=MainForm.sgControlStatus;
-    FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
+    var FPayLoad:=TSendDocument.Create(1);
+
+    FPayLoad.LayoutType     :=TLayoutType.Custom;
+    FPayLoad.ReportedAgeDate:=MainForm.LoadedAgeDate;
+    FPayLoad.Subject        :='Account Statement';
+    FPayLoad.Message        :=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
+    FPayLoad.UserEmail      :=Service.SessionData.EmailAddress;
+    FPayLoad.InvoiceFilter  :=InvFilter;
+    FPayLoad.BeginDate      :=BeginDate;
+    FPayLoad.EndDate        :=EndDate;
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
     FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
 
-    Service.Mediator.Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
+    FPayLoad.Documents[0].CustomerNumber:=ActionsForm.CustNumber;
+    FPayLoad.Documents[0].SourceDbName  :=ActionsForm.SourceDBName;
+    FPayLoad.Documents[0].SendFrom      :=ActionsForm.LbuSendFrom;
+    FPayLoad.Documents[0].EmailTo       :=ActionsForm.Cust_Mail.Text;
+
+    Service.Mediator.Documents.SendAccountDocumentAsync(FPayLoad, SendAccountDocument_Callback);
     SendForm.Enabled:=False;
     Screen.Cursor:=crHourGlass;
 
@@ -181,20 +172,20 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TSendForm.SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+procedure TSendForm.SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
 begin
 
+    Close();
     Screen.Cursor:=crDefault;
 
-    if not CallResponse.IsSucceeded then
+    if not Response.IsSucceeded then
     begin
-        THelpers.MsgCall(SendForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
         Exit();
     end;
 
     SendForm.Enabled:=True;
-    THelpers.MsgCall(SendForm.Handle, TAppMessage.Info, CallResponse.LastMessage);
-    Close();
+    THelpers.MsgCall(SendForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
 
 end;
 
