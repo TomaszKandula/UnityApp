@@ -30,7 +30,7 @@ uses
     Unity.ListView,
     Unity.Records,
     Unity.Enums,
-    Api.ReturnCompanyDetails,
+    Api.ReturnCompanyEmails,
     Api.SentDocument;
 
 
@@ -108,7 +108,7 @@ type
     strict private
         var FIsDataLoaded:  boolean;
         var FLbuEmails: TArray<TArray<string>>;
-        var FCompanyDetails: TArray<TArray<string>>;
+        var FCompanyEmails: TArray<TArray<string>>;
         const FLargestSubitemTxt = -1;
         const FSizeOfTxtInHeader = -2;
         procedure ListViewAutoFit(List: TListView; const AutoFit: integer);
@@ -119,7 +119,7 @@ type
         procedure FinishStartUp();
         procedure LoadFromGrid();
         procedure ExecuteMailer();
-        procedure GetCompanyDetails_Callback(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse);
+        procedure GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
         procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
     end;
 
@@ -197,32 +197,32 @@ begin
 end;
 
 
-procedure TMassMailerForm.GetCompanyDetails_Callback(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse);
+procedure TMassMailerForm.GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
 begin
 
-    if not CallResponse.IsSucceeded then
+    if not Response.IsSucceeded then
     begin
-        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[GetCompanyDetails_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
+        Service.Logger.Log('[GetCompanyEmails_Callback]: Error has been thrown "' + Response.Error.ErrorDesc + '".');
         Exit();
     end;
 
-    var Items:=Length(CompanyDetails.CompanyDetails);
+    var Items:=Length(Response.Details);
     if not Items > 0 then Exit();
 
-    SetLength(FCompanyDetails, Items, 6);
+    SetLength(FCompanyEmails, Items, 6);
     for var Index:=0 to Items - 1 do
     begin
 
-        FCompanyDetails[Index, 0]:=CompanyDetails.CompanyDetails[Index].SourceDbName;
+        FCompanyEmails[Index, 0]:=Response.Details[Index].SourceDbName;
 
         var PreservedLen:=Length(FLbuEmails);
-        SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.CompanyDetails[Index].CompanyEmails), 2);
+        SetLength(FLbuEmails, PreservedLen + Length(Response.Details[Index].CompanyEmails), 2);
 
-        for var jCNT:=0 to Length(CompanyDetails.CompanyDetails[Index].CompanyEmails) - 1 do
+        for var jCNT:=0 to Length(Response.Details[Index].CompanyEmails) - 1 do
         begin
-            FLbuEmails[jCNT + PreservedLen, 0]:=CompanyDetails.CompanyDetails[Index].SourceDbName;
-            FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.CompanyDetails[Index].CompanyEmails[jCNT];
+            FLbuEmails[jCNT + PreservedLen, 0]:=Response.Details[Index].SourceDbName;
+            FLbuEmails[jCNT + PreservedLen, 1]:=Response.Details[Index].CompanyEmails[jCNT];
         end;
 
     end;
@@ -501,7 +501,7 @@ procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
     lstLbuEmails.Clear();
     SetLength(FLbuEmails, 0, 2);
-    SetLength(FCompanyDetails, 0, 6);
+    SetLength(FCompanyEmails, 0, 6);
 end;
 
 
@@ -518,7 +518,7 @@ begin
         begin
             LoadFromGrid();
             SetEmailAddresses(CustomerList);
-            Service.Mediator.Companies.GetCompanyDetailsAsync(MainForm.LoadedCompanies, GetCompanyDetails_Callback);
+            Service.Mediator.Companies.GetCompanyEmailsAsync(MainForm.LoadedCompanies, GetCompanyEmails_Callback);
         end);
 
     end;
@@ -542,7 +542,7 @@ end;
 procedure TMassMailerForm.FormDestroy(Sender: TObject);
 begin
     SetLength(FLbuEmails, 0);
-    SetLength(FCompanyDetails, 0);
+    SetLength(FCompanyEmails, 0);
 end;
 
 

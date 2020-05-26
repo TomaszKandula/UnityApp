@@ -1,4 +1,4 @@
-unit Api.ReturnCompanyDetails;
+unit Api.ReturnCompanyEmails;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -14,38 +14,38 @@ interface
 uses
     Api.ErrorHandler,
     Api.MetaData,
-    Api.CompanyDetails;
+    Api.DetailsFields;
 
 
 type
 
 
-	TReturnCompanyDetails = class
+	TReturnCompanyEmails = class
 	strict private
-        var FCompanyDetails: TArray<TCompanyDetails>;
-        var FIsSucceeded:    boolean;
-        var FError:          TErrorHandler;
-        var FMeta:           TMetaData;
+        var FDetails:     TArray<TDetailsFields>;
+        var FIsSucceeded: boolean;
+        var FError:       TErrorHandler;
+        var FMeta:        TMetaData;
 	public
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
-        property CompanyDetails: TArray<TCompanyDetails> read FCompanyDetails write FCompanyDetails;
-        property IsSucceeded:    boolean                 read FIsSucceeded    write FIsSucceeded;
-        property Error:          TErrorHandler           read FError          write FError;
-        property Meta:           TMetaData               read FMeta           write FMeta;
+        property Details:     TArray<TDetailsFields> read FDetails     write FDetails;
+        property IsSucceeded: boolean                read FIsSucceeded write FIsSucceeded;
+        property Error:       TErrorHandler          read FError       write FError;
+        property Meta:        TMetaData              read FMeta        write FMeta;
 	end;
 
 
 implementation
 
 
-destructor TReturnCompanyDetails.Destroy();
+destructor TReturnCompanyEmails.Destroy();
 begin
 
-    for var CompanyDetails: TCompanyDetails in FCompanyDetails do
-        if Assigned(CompanyDetails) then CompanyDetails.Free();
+    for var Details: TDetailsFields in FDetails do
+        if Assigned(Details) then Details.Free();
 
     if Assigned(FError) then FError.Free();
     if Assigned(FMeta) then FMeta.Free();

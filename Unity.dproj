@@ -117,10 +117,10 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2301;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2307;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Build>2301</VerInfo_Build>
+        <VerInfo_Build>2307</VerInfo_Build>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_PreRelease>false</VerInfo_PreRelease>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
@@ -206,7 +206,7 @@
         <DCCReference Include="Model\Api.AccountTypeFields.pas"/>
         <DCCReference Include="Model\Api.CustomerGroupFields.pas"/>
         <DCCReference Include="Model\Api.OpenItemsFields.pas"/>
-        <DCCReference Include="Model\Api.CompanyDetails.pas"/>
+        <DCCReference Include="Model\Api.DetailsFields.pas"/>
         <DCCReference Include="Model\Api.UserPermissions.pas"/>
         <DCCReference Include="Model\Api.CustomerSnapshot.pas"/>
         <DCCReference Include="Model\Api.CustomerSnapshotEx.pas"/>
@@ -230,13 +230,13 @@
         <DCCReference Include="Model\Requests\Api.AddressBookAdd.pas"/>
         <DCCReference Include="Model\Requests\Api.AddressBookUpdate.pas"/>
         <DCCReference Include="Model\Requests\Api.UserCustSnapshotList.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserSessionAdded.pas"/>
         <DCCReference Include="Model\Requests\Api.UpdateFreeFields.pas"/>
         <DCCReference Include="Model\Requests\Api.FollowUpsUpdate.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserSessionChecked.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserCompanyList.pas"/>
         <DCCReference Include="Model\Requests\Api.UserRatingAdd.pas"/>
         <DCCReference Include="Model\Requests\Api.UserRatingUpdate.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserSessionChecked.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserCompanyList.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserSessionAdded.pas"/>
         <DCCReference Include="Model\Responses\Api.UserCompaniesUpdated.pas"/>
         <DCCReference Include="Model\Responses\Api.CustSortingOptions.pas"/>
         <DCCReference Include="Model\Responses\Api.UserSessionLogsSaved.pas"/>
@@ -276,7 +276,7 @@
         <DCCReference Include="Model\Responses\Api.ReturnCustomerReport.pas"/>
         <DCCReference Include="Model\Responses\Api.UserPermissionList.pas"/>
         <DCCReference Include="Model\Responses\Api.LatestAzureJobStatus.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCompanyDetails.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCompanyEmails.pas"/>
         <DCCReference Include="Model\Responses\Api.ReturnReportList.pas"/>
         <DCCReference Include="Model\Responses\Api.AddressBookAddedBulk.pas"/>
         <DCCReference Include="Model\Responses\Api.SentDocument.pas"/>

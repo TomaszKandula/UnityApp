@@ -1,4 +1,4 @@
-unit Api.CompanyDetails;
+unit Api.DetailsFields;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -18,7 +18,7 @@ uses
 type
 
 
-    TCompanyDetails = class
+    TDetailsFields = class
     strict private
         var FSourceDbName:  string;
         var FCompanyEmails: TArray<string>;
@@ -26,15 +26,15 @@ type
         destructor Destroy(); override;
         const _SourceDbName  = 'SourceDbName';
         const _CompanyEmails = 'Company Emails';
-        property SourceDbName:   string         read FSourceDbName   write FSourceDbName;
-        property CompanyEmails:  TArray<string> read FCompanyEmails  write FCompanyEmails;
+        property SourceDbName:   string         read FSourceDbName  write FSourceDbName;
+        property CompanyEmails:  TArray<string> read FCompanyEmails write FCompanyEmails;
     end;
 
 
 implementation
 
 
-destructor TCompanyDetails.Destroy();
+destructor TDetailsFields.Destroy();
 begin
     inherited;
 end;

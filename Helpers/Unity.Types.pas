@@ -19,9 +19,9 @@ interface
 uses
     Unity.Grid,
     Unity.Records,
-    Api.ReturnCompanyDetails,
+    Api.SentDocument,
     Api.UserCompanyList,
-    Api.SentDocument;
+    Api.ReturnCompanyEmails;
 
 
 type
@@ -31,41 +31,39 @@ type
     TSidArray = array[0..260] of Char;
 
     // Callback signatures
-    TSubmitRating          = procedure(CallResponse: TCallResponse) of object;
-    TUpdateRating          = procedure(CallResponse: TCallResponse) of object;
-    TOpenAddressBook       = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
-    TUpdateAddressBook     = procedure(CallResponse: TCallResponse) of object;
+    TAddBulkToAddressBook  = procedure(CallResponse: TCallResponse) of object;
     TAddToAddressBook      = procedure(ReturnedId: integer; CallResponse: TCallResponse) of object;
-    TGetCustomerDetails    = procedure(CustDetails: TCustomerDetails; CallResponse: TCallResponse) of object;
+    TCheckGivenPassword    = procedure(CallResponse: TCallResponse) of object;
+    TCheckRelease          = procedure(ClientInfo: TClientInfo; CallResponse: TCallResponse) of object;
+    TDeleteFromTrackerList = procedure(CallResponse: TCallResponse) of object;
     TEditDailyComment      = procedure(CallResponse: TCallResponse) of object;
     TEditGeneralComment    = procedure(CallResponse: TCallResponse) of object;
+    TExcelExport           = procedure(CallResponse: TCallResponse) of object;
+    TFollowUpUpdate        = procedure(CallResponse: TCallResponse) of object;
+    TFreeFieldsUpdate      = procedure(CallResponse: TCallResponse) of object;
+    TGetAgingReport        = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
+    TGetBiReports          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
+    TGetCompanyEmails      = procedure(CompanyEmails: TReturnCompanyEmails; CallResponse: TCallResponse) of object;
+    TGetCustomerDetails    = procedure(CustDetails: TCustomerDetails; CallResponse: TCallResponse) of object;
     TGetDailyComments      = procedure(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse) of object;
     TGetGeneralComments    = procedure(Comments: TGeneralCommentFields; CallResponse: TCallResponse) of object;
-    TGetCompanyDetails     = procedure(CompanyDetails: TReturnCompanyDetails; CallResponse: TCallResponse) of object;
-    TReadAgeView           = procedure(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
-    TGetTables             = procedure(CallResponse: TCallResponse) of object;
-    TGetInvoiceList        = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
-    TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; CallResponse: TCallResponse) of object;
-    TDeleteFromTrackerList = procedure(CallResponse: TCallResponse) of object;
-    TSendUserFeedback      = procedure(CallResponse: TCallResponse) of object;
-    TScanOpenItems         = procedure(CanGetAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
-    TReadOpenItems         = procedure(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
-    TExcelExport           = procedure(CallResponse: TCallResponse) of object;
-    TCheckGivenPassword    = procedure(CallResponse: TCallResponse) of object;
-    TSetNewPassword        = procedure(CallResponse: TCallResponse) of object;
-    TCheckRelease          = procedure(ClientInfo: TClientInfo; CallResponse: TCallResponse) of object;
-    TFreeFieldsUpdate      = procedure(CallResponse: TCallResponse) of object;
-    TFollowUpUpdate        = procedure(CallResponse: TCallResponse) of object;
-    TRecalcAgeViewSummary  = procedure(PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
-    TGetAgingReport        = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
-    TLoadRating            = procedure(UserRating: TRating; CallResponse: TCallResponse) of object;
-    TScanSnapshots         = procedure(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse) of object;
-    TGetUserCompanyList    = procedure(PayLoad: TUserCompanyList; CallResponse: TCallResponse) of object;
-    TSetUserCompanyList    = procedure(CallResponse: TCallResponse) of object;
     TGetOpenItems          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
-    TGetBiReports          = procedure(PayLoad: TStringGrid; CallResponse: TCallResponse) of object;
-    TAddBulkToAddressBook  = procedure(CallResponse: TCallResponse) of object;
+    TGetTables             = procedure(CallResponse: TCallResponse) of object;
+    TGetUserCompanyList    = procedure(PayLoad: TUserCompanyList; CallResponse: TCallResponse) of object;
+    TLoadRating            = procedure(UserRating: TRating; CallResponse: TCallResponse) of object;
+    TOpenAddressBook       = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
+    TReadAgeView           = procedure(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
+    TReadOpenItems         = procedure(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
+    TRecalcAgeViewSummary  = procedure(PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
+    TScanOpenItems         = procedure(CanGetAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
+    TScanSnapshots         = procedure(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse) of object;
     TSendAccountDocument   = procedure(CallResponse: TCallResponse; Response: TSentDocument) of object;
+    TSendUserFeedback      = procedure(CallResponse: TCallResponse) of object;
+    TSetNewPassword        = procedure(CallResponse: TCallResponse) of object;
+    TSetUserCompanyList    = procedure(CallResponse: TCallResponse) of object;
+    TSubmitRating          = procedure(CallResponse: TCallResponse) of object;
+    TUpdateAddressBook     = procedure(CallResponse: TCallResponse) of object;
+    TUpdateRating          = procedure(CallResponse: TCallResponse) of object;
 
 
 implementation

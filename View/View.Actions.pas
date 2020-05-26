@@ -34,6 +34,7 @@ uses
     Unity.Records,
     Unity.Grid,
     Unity.Panel,
+    Api.ReturnCompanyEmails,
     Api.SentDocument;
 
 
@@ -234,6 +235,7 @@ type
         procedure GetGeneralComment_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
         procedure GetCustomerDetails_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
         procedure GetOpenItems_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
+        procedure GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
     public
         property SourceDBName: string read FSourceDBName;
         property CustName: string read FCustName;
@@ -335,9 +337,19 @@ end;
 
 procedure TActionsForm.UpdateData();
 begin
+
     UpdateDaily();
     UpdateGeneral();
     UpdateCustDetails();
+
+    var SelectedCompany:=TList<string>.Create();
+    SelectedCompany.Add(FSourceDBName);
+
+    Service.Mediator.Companies.GetCompanyEmailsAsync(
+        SelectedCompany,
+        GetCompanyEmails_Callback
+    );
+
 end;
 
 
@@ -1018,6 +1030,36 @@ begin
 end;
 
 
+procedure TActionsForm.GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
+begin
+
+    selSendFrom.Enabled:=True;
+    selSendFrom.Items.Clear();
+
+    if not Response.IsSucceeded then
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
+        Service.Logger.Log('[GetCompanyEmails_Callback]: Error has been thrown "' + Response.Error.ErrorDesc + '".');
+        selSendFrom.Enabled:=False;
+        Exit();
+    end;
+
+    if Length(Response.Details[0].CompanyEmails) = 0 then
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'Company have no emails assigned to it.');
+        selSendFrom.Enabled:=False;
+        Exit();
+    end;
+
+    for var Index:=0 to Length(Response.Details[0].CompanyEmails) - 1 do
+        selSendFrom.Items.Add(Response.Details[0].CompanyEmails[Index]);
+
+    selSendFrom.ItemIndex:=0;
+    FLbuSendFrom:=selSendFrom.Text;
+
+end;
+
+
 {$ENDREGION}
 
 
@@ -1246,6 +1288,12 @@ begin
     end;
 
     if THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Question2, 'Do you want to send it, right now?') = IDNO then Exit();
+
+    if FLbuSendFrom = '' then
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You must select Email From.');
+        Exit();
+    end;
 
     ExecuteMailer();
 

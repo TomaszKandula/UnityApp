@@ -27,7 +27,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails);
+        procedure GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails);
     end;
 
 
@@ -39,7 +39,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails); virtual;
+        procedure GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails); virtual;
     end;
 
 
@@ -53,7 +53,7 @@ uses
     REST.Json,
     Unity.Helpers,
     Unity.Service,
-    Api.ReturnCompanyDetails,
+    Api.ReturnCompanyEmails,
     Api.UserCompanySelection;
 
 
@@ -68,7 +68,7 @@ begin
 end;
 
 
-procedure TCompanies.GetCompanyDetailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyDetails);
+procedure TCompanies.GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -78,27 +78,28 @@ begin
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/details/';
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'companies/emails/';
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[GetCompanyDetailsAsync]: Executing POST ' + Rest.ClientBaseURL);
 
-        var UserCompanySelection:=TUserCompanySelection.Create();
-        try
-            UserCompanySelection.SelectedCoCodes:=SelectedCompanies.ToArray();
-            Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
-        finally
-            UserCompanySelection.Free();
-        end;
-
         var CallResponse: TCallResponse;
-        var ReturnCompanyDetails: TReturnCompanyDetails;
+        var ReturnCompanyEmails: TReturnCompanyEmails;
         try
+
+            var UserCompanySelection:=TUserCompanySelection.Create();
+            try
+                UserCompanySelection.SelectedCoCodes:=SelectedCompanies.ToArray();
+                Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            finally
+                SelectedCompanies.Free();
+                UserCompanySelection.Free();
+            end;
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-                ReturnCompanyDetails:=TJson.JsonToObject<TReturnCompanyDetails>(Rest.Content);
-                CallResponse.LastMessage:=ReturnCompanyDetails.Error.ErrorDesc;
-                CallResponse.ErrorCode  :=ReturnCompanyDetails.Error.ErrorCode;
+                ReturnCompanyEmails:=TJson.JsonToObject<TReturnCompanyEmails>(Rest.Content);
+                CallResponse.LastMessage:=ReturnCompanyEmails.Error.ErrorDesc;
+                CallResponse.ErrorCode  :=ReturnCompanyEmails.Error.ErrorCode;
                 CallResponse.IsSucceeded:=True;
                 Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
@@ -131,8 +132,8 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(ReturnCompanyDetails, CallResponse);
-            if Assigned(ReturnCompanyDetails) then ReturnCompanyDetails.Free();
+            if Assigned(Callback) then Callback(ReturnCompanyEmails, CallResponse);
+            if Assigned(ReturnCompanyEmails) then ReturnCompanyEmails.Free();
         end);
 
     end);
