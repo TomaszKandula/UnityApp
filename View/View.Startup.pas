@@ -454,7 +454,7 @@ begin
         MainAppForm.ShapeSummaryCap.ShapeText(10, 1, 'SUMMARY', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeExceedersCap.ShapeText(10, 1, 'CREDIT LIMITS', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeReloadCap.ShapeText(10, 1, 'ACTIONS', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.ShapeSumsCap.ShapeText(10, 1, 'SUMMARY', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeSumsCap.ShapeText(10, 1, 'INFO', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeAddressBookCap.ShapeText(10, 1, 'ACTIONS', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeTrackerInfoCap.ShapeText(10, 1, 'INFO', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeTablesInfoCap.ShapeText(10, 1, 'INFO', [fsBold], 'Tahoma', 10, clWhite);

@@ -11801,58 +11801,6 @@ object MainForm: TMainForm
             Brush.Style = bsClear
             Pen.Color = 14922344
           end
-          object valInvoices: TLabel
-            Left = 263
-            Top = 71
-            Width = 45
-            Height = 13
-            Caption = '{Value}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object valOpenItems: TLabel
-            Left = 263
-            Top = 33
-            Width = 45
-            Height = 13
-            Caption = '{Value}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object amtOutstanding: TLabel
-            Left = 494
-            Top = 33
-            Width = 59
-            Height = 13
-            Caption = '{Amount}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object valOverdue: TLabel
-            Left = 263
-            Top = 52
-            Width = 45
-            Height = 13
-            Caption = '{Value}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
           object txtReloadBtnA: TLabel
             Left = 79
             Top = 46
@@ -11879,58 +11827,6 @@ object MainForm: TMainForm
             Font.Style = []
             ParentFont = False
           end
-          object txtAllOpenItems: TLabel
-            Left = 143
-            Top = 33
-            Width = 70
-            Height = 13
-            Caption = 'All open items:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object txtInvoices: TLabel
-            Left = 143
-            Top = 71
-            Width = 105
-            Height = 13
-            Caption = 'Invoices/credit notes:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object txtOverdueItems: TLabel
-            Left = 383
-            Top = 52
-            Width = 85
-            Height = 13
-            Caption = 'Overdue amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object txtOutstanding: TLabel
-            Left = 383
-            Top = 33
-            Width = 61
-            Height = 13
-            Caption = 'O/S amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
           object ShapeReloadCap: TShape
             Left = 0
             Top = 0
@@ -11946,58 +11842,6 @@ object MainForm: TMainForm
             Height = 19
             Brush.Color = 14922344
             Pen.Color = 14922344
-          end
-          object amtUnallocated: TLabel
-            Left = 494
-            Top = 71
-            Width = 59
-            Height = 13
-            Caption = '{Amount}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object txtUnallocated: TLabel
-            Left = 383
-            Top = 71
-            Width = 99
-            Height = 13
-            Caption = 'Unallocated amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object txtOverdue: TLabel
-            Left = 143
-            Top = 52
-            Width = 74
-            Height = 13
-            Caption = 'Overdue items:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object amtOverdue: TLabel
-            Left = 494
-            Top = 52
-            Width = 59
-            Height = 13
-            Caption = '{Amount}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
           end
         end
       end

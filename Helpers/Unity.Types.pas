@@ -53,7 +53,7 @@ type
     TLoadRating            = procedure(UserRating: TRating; CallResponse: TCallResponse) of object;
     TOpenAddressBook       = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
     TReadAgeView           = procedure(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
-    TReadOpenItems         = procedure(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
+    TReadOpenItems         = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
     TRecalcAgeViewSummary  = procedure(PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
     TScanOpenItems         = procedure(CanGetAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
     TScanSnapshots         = procedure(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse) of object;

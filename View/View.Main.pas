@@ -218,14 +218,6 @@ type
         btnCloseAb: TImage;
         txtOpenAb: TLabel;
         txtCloseAb: TLabel;
-        txtAllOpenItems: TLabel;
-        txtInvoices: TLabel;
-        txtOverdueItems: TLabel;
-        txtOutstanding: TLabel;
-        valOpenItems: TLabel;
-        valInvoices: TLabel;
-        amtOutstanding: TLabel;
-        valOverdue: TLabel;
         btnExportAb: TImage;
         txtExportAb: TLabel;
         InvoiceTrackerHeader: TPanel;
@@ -262,11 +254,7 @@ type
         DebtorsBottomPanel: TPanel;
         SettingsMainPanel: TPanel;
         SettingsInnerPanel: TPanel;
-        amtUnallocated: TLabel;
-        txtUnallocated: TLabel;
         TimerCustSnapshots: TTimer;
-        txtOverdue: TLabel;
-        amtOverdue: TLabel;
         txtCutOffDate: TLabel;
         valRiskClassA: TLabel;
         valRiskClassB: TLabel;
@@ -866,8 +854,7 @@ type
         procedure InitializeScreenSettings();
         procedure ClearMainViewInfo();
         procedure ClearAgingSummary();
-        procedure ClearOpenItemsSummary();
-        procedure LoadOpenItems();
+        procedure LoadOpenItems(PageNumber: integer);
         procedure SkypeCallUpdate(CallTime: cardinal);
         procedure FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
         function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
@@ -875,7 +862,7 @@ type
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
         procedure ScanSnapshots_Callback(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse);
-        procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
+        procedure ReadOpenItems_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure FreeFieldsUpdate_Callback(CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
@@ -1093,10 +1080,8 @@ begin
 end;
 
 
-procedure TMainForm.LoadOpenItems();
+procedure TMainForm.LoadOpenItems(PageNumber: integer);
 begin
-
-    sgOpenItems.Freeze(True);
 
     if LoadedCompanies.Count = 0 then
     begin
@@ -1106,7 +1091,7 @@ begin
     end;
 
     Service.Logger.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
-    Service.Mediator.OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
+    Service.Mediator.OpenItems.ReadOpenItemsAsync(PageNumber, LoadedCompanies, ReadOpenItems_Callback);
 
 end;
 
@@ -1172,17 +1157,6 @@ begin
     valFollowsPast.Caption :='0';
     valFollowsNext.Caption :='0';
 
-end;
-
-
-procedure TMainForm.ClearOpenItemsSummary();
-begin
-    valOpenItems.Caption  :='0';
-    valOverdue.Caption    :='0';
-    valInvoices.Caption   :='0';
-    amtOverdue.Caption    :='0';
-    amtOutstanding.Caption:='0';
-    amtUnallocated.Caption:='0';
 end;
 
 
@@ -1752,9 +1726,8 @@ begin
     UpdateAgeSummary(PayLoad);
     Service.Logger.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
-    ClearOpenItemsSummary();
     UpdateStatusBar(TStatusBar.Downloading);
-    LoadOpenItems();
+    LoadOpenItems(1);
 
     Service.Mediator.AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
     UpdateFollowUps(sgAgeView);
@@ -1766,10 +1739,9 @@ begin
 end;
 
 
-procedure TMainForm.ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
+procedure TMainForm.ReadOpenItems_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
 
-    sgOpenItems.Freeze(False);
     UpdateStatusBar(TStatusBar.Ready);
 
     if not CallResponse.IsSucceeded then
@@ -1779,15 +1751,28 @@ begin
         Exit();
     end;
 
-    valOpenItems.Caption  :=FormatFloat('### ###',  OpenItemsData.TotalItems);
-    valInvoices.Caption   :=FormatFloat('### ###',  OpenItemsData.NumOfInvoices);
-    valOverdue.Caption    :=FormatFloat('### ###',  OpenItemsData.OverdueItems);
-    amtOutstanding.Caption:=FormatFloat('#,##0.00', OpenItemsData.OsAmount);
-    amtOverdue.Caption    :=FormatFloat('#,##0.00', OpenItemsData.OvdAmount);
-    amtUnallocated.Caption:=FormatFloat('#,##0.00', OpenItemsData.UnallocatedAmt);
+    sgOpenItems.Freeze(True);
+    try
 
-    sgOpenItems.SetColWidth(10, 20, 400);
-    Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
+        sgOpenItems.RowCount:=ReturnedData.RowCount;
+        sgOpenItems.ColCount:=ReturnedData.ColCount;
+
+        for var IndexRow:=0 to ReturnedData.RowCount - 1 do
+            for var IndexCol:=0 to ReturnedData.ColCount - 1 do
+            begin
+                sgOpenItems.Cells[IndexCol, IndexRow]:=ReturnedData.Cells[IndexCol, IndexRow];
+                if IndexRow = 0 then sgOpenItems.ColWidths[IndexCol]:=ReturnedData.ColWidths[IndexCol];
+            end;
+
+        Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open Items loaded.');
+
+    finally
+        sgOpenItems.Freeze(False);
+        sgOpenItems.SetColWidth(10, 20, 400);
+        Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
+    end;
+
+
 
 end;
 
@@ -2249,7 +2234,6 @@ begin
     FAllowClose:=False;
     EditUrlSection.Text:='';
     ClearMainViewInfo();
-    ClearOpenItemsSummary();
     ClearAgingSummary();
     InitializeScreenSettings;
     SetActiveTabsheet(TabSheet9);
@@ -4016,7 +4000,7 @@ end;
 
 procedure TMainForm.btnReloadClick(Sender: TObject);
 begin
-    LoadOpenItems();
+    LoadOpenItems(1);
 end;
 
 

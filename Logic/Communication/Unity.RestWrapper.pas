@@ -262,8 +262,9 @@ begin
         begin
 
             FRestRequest.Params.Clear;
-            for var iCNT:=0 to FQueryList.Count - 1 do
-                FRestRequest.AddParameter(FQueryList.Items[iCNT], FParamList.Items[iCNT]);
+            for var Index:=0 to FQueryList.Count - 1 do
+                FRestRequest.AddParameter(FQueryList.Items[Index], FParamList.Items[Index]);
+
         end;
 
     end;
@@ -280,8 +281,8 @@ begin
             begin
 
                 FRestRequest.Params.Clear;
-                for var iCNT:=0 to FQueryList.Count - 1 do
-                    FRestRequest.AddParameter(FQueryList.Items[iCNT], FParamList.Items[iCNT]);
+                for var Index:=0 to FQueryList.Count - 1 do
+                    FRestRequest.AddParameter(FQueryList.Items[Index], FParamList.Items[Index]);
 
             end;
 

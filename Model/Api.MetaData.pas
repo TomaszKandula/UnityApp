@@ -17,13 +17,19 @@ type
     TMetaData = class
     strict private
         var FRowsAffected:       integer;
+        var FRequestedPage:      integer;
+        var FTotalPages:         integer;
         var FProcessingTimeSpan: string;
         var FRequesterIpAddress: string;
     public
-        const _RowsAffected       = 'RowsAffected';
-        const _ProcessingTimeSpan = 'ProcessingTimeSpan';
-        const _RequesterIpAddress = 'RequesterIpAddress';
+        const _RowsAffected       = 'Rows Affected';
+        const _ProcessingTimeSpan = 'Processing TimeSpan';
+        const _RequesterIpAddress = 'Requester I pAddress';
+        const _RequestedPage      = 'Requested Page';
+        const _TotalPages         = 'Total Pages';
         property RowsAffected:       integer read FRowsAffected       write FRowsAffected;
+        property RequestedPage:      integer read FRequestedPage      write FRequestedPage;
+        property TotalPages:         integer read FTotalPages         write FTotalPages;
         property ProcessingTimeSpan: string  read FProcessingTimeSpan write FProcessingTimeSpan;
         property RequesterIpAddress: string  read FRequesterIpAddress write FRequesterIpAddress;
     end;

@@ -180,18 +180,6 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables for update open items summary.
-    /// </summary>
-    TOpenItemsPayLoad = record
-        TotalItems:     integer;
-        OverdueItems:   integer;
-        NumOfInvoices:  integer;
-        OsAmount:       double;
-        OvdAmount:      double;
-        UnallocatedAmt: double;
-    end;
-
-    /// <summary>
     /// Carries a group of variables for open items summary with ledger currency and other currency.
     /// </summary>
     TOpenItemsTotal = record
