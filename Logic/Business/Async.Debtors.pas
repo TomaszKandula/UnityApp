@@ -52,7 +52,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView);
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
         /// </summary>
@@ -77,7 +77,7 @@ type
         function CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse; virtual;
         procedure ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots); virtual;
         procedure GetAgingReportAsync(SelectedCompanies: TList<string>; AFileName: string; Callback: TGetAgingReport); virtual;
-        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView); virtual;
+        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView); virtual;
         function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse; virtual;
     end;
 
@@ -423,15 +423,11 @@ begin
 end;
 
 
-procedure TDebtors.ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
+procedure TDebtors.ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
-
-        var PayLoad: TAgingPayLoad;
-        var CallResponse: TCallResponse;
-        var Grid:=TStringGrid.Create(nil);
 
         var Rest:=Service.InvokeRest();
 		Rest.AccessToken:=Service.AccessToken;
@@ -441,200 +437,51 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[ReadAgeViewAsync]: Executing POST ' + Rest.ClientBaseURL);
 
-        var UserCustSnapshotList:=TUserCustSnapshotList.Create();
+        var ReturnCustomerSnapshots: TReturnCustomerSnapshots;
         try
-            UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
-            UserCustSnapshotList.SortMode:=SortMode;
-            Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
-        finally
-            UserCustSnapshotList.Free();
-        end;
 
-        try
+            var UserCustSnapshotList:=TUserCustSnapshotList.Create();
+            try
+                UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
+                UserCustSnapshotList.SortMode:=SortMode;
+                Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
+            finally
+                UserCustSnapshotList.Free();
+            end;
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var ReturnCustomerSnapshots:=TJson.JsonToObject<TReturnCustomerSnapshots>(Rest.Content);
-                try
-
-                    var RowCount:=Length(ReturnCustomerSnapshots.CustomerSnapshot);
-                    Grid.RowCount:=RowCount + 1; // Add header
-                    Grid.ColCount:=28;
-
-                    if not FileExists(Service.Settings.DirLayouts + TCommon.AgeViewLayout) then
-                    begin
-                        Grid.Cells[0, 0]:='';
-                        Grid.Cells[1, 0]:=TCustomerSnapshot._CustomerName;
-                        Grid.Cells[2, 0]:=TCustomerSnapshot._CustomerNumber;
-                        Grid.Cells[3, 0]:=TCustomerSnapshot._FollowUp;
-                        Grid.Cells[4, 0]:=TCustomerSnapshot._Overdue;
-                        Grid.Cells[5, 0]:=TCustomerSnapshot._NotDue;
-                        Grid.Cells[6, 0]:=TCustomerSnapshot._Range1;
-                        Grid.Cells[7, 0]:=TCustomerSnapshot._Range2;
-                        Grid.Cells[8, 0]:=TCustomerSnapshot._Range3;
-                        Grid.Cells[9, 0]:=TCustomerSnapshot._Range4;
-                        Grid.Cells[10,0]:=TCustomerSnapshot._Range5;
-                        Grid.Cells[11,0]:=TCustomerSnapshot._Range6;
-                        Grid.Cells[12,0]:=TCustomerSnapshot._Total;
-                        Grid.Cells[13,0]:=TCustomerSnapshot._SourceDbName;
-                        Grid.Cells[14,0]:=TCustomerSnapshot._Free1;
-                        Grid.Cells[15,0]:=TCustomerSnapshot._PersonResponsible;
-                        Grid.Cells[16,0]:=TCustomerSnapshot._SalesResponsible;
-                        Grid.Cells[17,0]:=TCustomerSnapshot._PaymentTerms;
-                        Grid.Cells[18,0]:=TCustomerSnapshot._Free2;
-                        Grid.Cells[19,0]:=TCustomerSnapshot._Free3;
-                        Grid.Cells[20,0]:=TCustomerSnapshot._CreditLimit;
-                        Grid.Cells[21,0]:=TCustomerSnapshot._CreditBalance;
-                        Grid.Cells[22,0]:='Risk Class'; // Autogenerated, setup only header
-                        Grid.Cells[23,0]:=TCustomerSnapshot._LedgerIso;
-                        Grid.Cells[24,0]:=TCustomerSnapshot._CustomerGroup;
-                        Grid.Cells[25,0]:=TCustomerSnapshot._AccountType;
-                        Grid.Cells[26,0]:=TCustomerSnapshot._Inf4;
-                        Grid.Cells[27,0]:=TCustomerSnapshot._Group3;
-                        Grid.SetColWidth(10, 20, 400);
-                    end
-                    else
-                    begin
-
-                        var LLayoutColumns: TLayoutColumns;
-                        try
-
-                            var LResponse:=Service.Mediator.Utility.LoadAgeLayoutSync(
-                                Service.Settings.DirLayouts + TCommon.AgeViewLayout,
-                                LLayoutColumns
-                            );
-
-                            if not LResponse.IsSucceeded then
-                            begin
-                                Grid.Cells[0, 0]:='';
-                                Grid.Cells[1, 0]:=TCustomerSnapshot._CustomerName;
-                                Grid.Cells[2, 0]:=TCustomerSnapshot._CustomerNumber;
-                                Grid.Cells[3, 0]:=TCustomerSnapshot._FollowUp;
-                                Grid.Cells[4, 0]:=TCustomerSnapshot._Overdue;
-                                Grid.Cells[5, 0]:=TCustomerSnapshot._NotDue;
-                                Grid.Cells[6, 0]:=TCustomerSnapshot._Range1;
-                                Grid.Cells[7, 0]:=TCustomerSnapshot._Range2;
-                                Grid.Cells[8, 0]:=TCustomerSnapshot._Range3;
-                                Grid.Cells[9, 0]:=TCustomerSnapshot._Range4;
-                                Grid.Cells[10,0]:=TCustomerSnapshot._Range5;
-                                Grid.Cells[11,0]:=TCustomerSnapshot._Range6;
-                                Grid.Cells[12,0]:=TCustomerSnapshot._Total;
-                                Grid.Cells[13,0]:=TCustomerSnapshot._SourceDbName;
-                                Grid.Cells[14,0]:=TCustomerSnapshot._Free1;
-                                Grid.Cells[15,0]:=TCustomerSnapshot._PersonResponsible;
-                                Grid.Cells[16,0]:=TCustomerSnapshot._SalesResponsible;
-                                Grid.Cells[17,0]:=TCustomerSnapshot._PaymentTerms;
-                                Grid.Cells[18,0]:=TCustomerSnapshot._Free2;
-                                Grid.Cells[19,0]:=TCustomerSnapshot._Free3;
-                                Grid.Cells[20,0]:=TCustomerSnapshot._CreditLimit;
-                                Grid.Cells[21,0]:=TCustomerSnapshot._CreditBalance;
-                                Grid.Cells[22,0]:='Risk Class'; // Autogenerated, setup only header
-                                Grid.Cells[23,0]:=TCustomerSnapshot._LedgerIso;
-                                Grid.Cells[24,0]:=TCustomerSnapshot._CustomerGroup;
-                                Grid.Cells[25,0]:=TCustomerSnapshot._AccountType;
-                                Grid.Cells[26,0]:=TCustomerSnapshot._Inf4;
-                                Grid.Cells[27,0]:=TCustomerSnapshot._Group3;
-                                Grid.SetColWidth(10, 20, 400);
-                            end
-                            else
-                            begin
-
-                                Grid.ColCount:=Length(LLayoutColumns.Columns);
-
-                                for var Index:=0 to Grid.ColCount - 1 do
-                                begin
-                                    var ColumnNumber:=LLayoutColumns.Columns[Index].Number;
-                                    Grid.Cells[ColumnNumber, 0] :=LLayoutColumns.Columns[Index].Name;
-                                    Grid.ColWidths[ColumnNumber]:=LLayoutColumns.Columns[Index].Width;
-                                end;
-
-                            end;
-
-                        finally
-                            LLayoutColumns.Free();
-                        end;
-
-                    end;
-
-                    for var Index:=1 to RowCount do
-                    begin
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._CustomerName), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].CustomerName;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._CustomerNumber), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].CustomerNumber.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._FollowUp), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].FollowUp;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Overdue), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Overdue.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._NotDue), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].NotDue.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Range1), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Range1.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Range2), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Range2.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Range3), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Range3.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Range4), Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Range4.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Range5),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Range5.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Range6),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Range6.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Total),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Total.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._SourceDbName),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].SourceDbName;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Free1),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Free1;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._PersonResponsible),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].PersonResponsible;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._SalesResponsible),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].SalesResponsible;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._PaymentTerms),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].PaymentTerms;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Free2),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Free2;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Free3),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Free3;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._CreditLimit),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].CreditLimit.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._CreditBalance),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].CreditBalance.ToString();
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._LedgerIso),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].LedgerIso;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._CustomerGroup),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].CustomerGroup;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._AccountType),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].AccountType;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Inf4),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Inf4;
-                        Grid.Cells[Grid.GetCol(TCustomerSnapshot._Group3),Index]:=ReturnCustomerSnapshots.CustomerSnapshot[Index - 1].Group3.ToString();
-                    end;
-
-                    PayLoad.AgeDate:=ReturnCustomerSnapshots.AgeDate;
-
-                    THelpers.ComputeAgeSummary(Grid, PayLoad);
-                    Service.Logger.Log('[ReadAgeViewAsync]: Aging summary has been calculated.');
-
-                    THelpers.ComputeRiskClass(Grid, PayLoad, RiskClassGroup);
-                    Service.Logger.Log('[ReadAgeViewAsync]: Risk class data has been calculated.');
-
-                    CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    ReturnCustomerSnapshots.Free();
-                end;
-
+                ReturnCustomerSnapshots:=TJson.JsonToObject<TReturnCustomerSnapshots>(Rest.Content);
+                Service.Logger.Log('[ReadAgeViewAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    ReturnCustomerSnapshots.Error.ErrorDesc:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[ReadAgeViewAsync]: Invalid server response. Please contact IT Support.'
+                        ReturnCustomerSnapshots.Error.ErrorDesc:='[ReadAgeViewAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[ReadAgeViewAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        ReturnCustomerSnapshots.Error.ErrorDesc:='[ReadAgeViewAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(ReturnCustomerSnapshots.Error.ErrorDesc);
 
             end;
 
         except
             on E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                ReturnCustomerSnapshots.Error.ErrorDesc:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(ReturnCustomerSnapshots.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CallResponse, Grid, PayLoad);
-            if Assigned(Grid) then Grid.Free();
+            if Assigned(Callback) then Callback(ReturnCustomerSnapshots);
+            if Assigned(ReturnCustomerSnapshots) then ReturnCustomerSnapshots.Free();
         end);
 
     end);

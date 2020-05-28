@@ -157,7 +157,7 @@ type
     /// <summary>
     /// Carries a group of variables for update ageing summary.
     /// </summary>
-    TAgingPayLoad = record
+    TAgingSummary = record
         AgeDate:     string;
         CustAll:     integer;
         ANotDue:     extended;

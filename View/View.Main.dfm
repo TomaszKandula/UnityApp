@@ -10204,10 +10204,6 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object DebtorsHeader: TPanel
         AlignWithMargins = True
         Left = 0
@@ -11630,10 +11626,6 @@ object MainForm: TMainForm
       Caption = 'Open Items'
       Highlighted = True
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object OpenItemsHeader: TPanel
         AlignWithMargins = True
         Left = 0
@@ -16769,7 +16761,7 @@ object MainForm: TMainForm
       Left = 52
       Top = 10
       Width = 195
-      Height = 29
+      Height = 33
       Margins.Left = 0
       Margins.Top = 10
       Margins.Right = 0
@@ -16782,6 +16774,7 @@ object MainForm: TMainForm
       Font.Name = 'Verdana'
       Font.Style = [fsBold]
       ParentFont = False
+      ExplicitHeight = 29
     end
     object imgAADUser: TImage
       AlignWithMargins = True
@@ -16933,7 +16926,7 @@ object MainForm: TMainForm
       Left = 1350
       Top = 18
       Width = 73
-      Height = 14
+      Height = 25
       Hint = 'Redeem access'
       Margins.Left = 0
       Margins.Top = 18
@@ -16951,6 +16944,7 @@ object MainForm: TMainForm
       ParentShowHint = False
       PopupMenu = PopupLogin
       ShowHint = True
+      ExplicitHeight = 14
     end
     object AppNotification: TPanel
       AlignWithMargins = True
@@ -16972,8 +16966,8 @@ object MainForm: TMainForm
         AlignWithMargins = True
         Left = 5
         Top = 8
-        Width = 190
-        Height = 18
+        Width = 293
+        Height = 22
         Margins.Left = 5
         Margins.Right = 5
         Margins.Bottom = 5
@@ -16986,6 +16980,8 @@ object MainForm: TMainForm
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
+        ExplicitWidth = 190
+        ExplicitHeight = 18
       end
       object lineTop: TBevel
         Left = 0

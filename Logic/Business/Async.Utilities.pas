@@ -325,10 +325,10 @@ begin
     begin
 
         var LCallResponse: TCallResponse;
-        var PayLoad: TAgingPayLoad;
+        var AgingSummary: TAgingSummary;
         try
-            THelpers.ComputeAgeSummary(Source, PayLoad);
-            THelpers.ComputeRiskClass(Source, PayLoad, RiskClassGroup);
+            THelpers.ComputeAgeSummary(Source, AgingSummary);
+            THelpers.ComputeRiskClass(Source, AgingSummary, RiskClassGroup);
             LCallResponse.IsSucceeded:=True;
         except
             on E: Exception do
@@ -342,7 +342,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(LCallResponse, PayLoad);
+            if Assigned(Callback) then Callback(LCallResponse, AgingSummary);
         end);
 
     end);

@@ -29,7 +29,8 @@ uses
     Api.UserGeneralComment,
     Api.ReturnOpenItems,
     Api.UserRating,
-    Api.AddressBookList;
+    Api.AddressBookList,
+    Api.ReturnCustomerSnapshots;
 
 
 type
@@ -59,9 +60,9 @@ type
     TGetUserCompanyList    = procedure(PayLoad: TUserCompanyList) of object;
     TLoadRating            = procedure(PayLoad: TUserRating) of object;
     TOpenAddressBook       = procedure(PayLoad: TAddressBookList) of object;
-    TReadAgeView           = procedure(CallResponse: TCallResponse; ReturnedData: TStringGrid; PayLoad: TAgingPayLoad) of object; // replace grid with class
+    TReadAgeView           = procedure(PayLoad: TReturnCustomerSnapshots) of object;
     TReadOpenItems         = procedure(PayLoad: TReturnOpenItems) of object;
-    TRecalcAgeViewSummary  = procedure(CallResponse: TCallResponse; PayLoad: TAgingPayLoad) of object;
+    TRecalcAgeViewSummary  = procedure(CallResponse: TCallResponse; PayLoad: TAgingSummary) of object;
     TScanSnapshots         = procedure(CallResponse: TCallResponse; CanGetAge: boolean; ReceivedTime: string) of object;
     TSendAccountDocument   = procedure(PayLoad: TSentDocument) of object;
     TSendUserFeedback      = procedure(CallResponse: TCallResponse) of object;

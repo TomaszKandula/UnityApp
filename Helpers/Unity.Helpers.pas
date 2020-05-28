@@ -76,8 +76,8 @@ type
         class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
         class function StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>; static;
         class function WordCount(const InputStr: string): cardinal; static;
-        class procedure ComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad); static;
-        class procedure ComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup); static;
+        class procedure ComputeAgeSummary(SourceGrid: TStringGrid; var AgingSummary: TAgingSummary); static;
+        class procedure ComputeRiskClass(var Grid: TStringGrid; var AgingSummary: TAgingSummary; RiskClassGroup: TRiskClassGroup); static;
     end;
 
 
@@ -846,52 +846,52 @@ begin
 end;
 
 
-class procedure THelpers.ComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
+class procedure THelpers.ComputeAgeSummary(SourceGrid: TStringGrid; var AgingSummary: TAgingSummary);
 begin
 
-    for var Index:=1 to Grid.RowCount - 1 do if Grid.RowHeights[Index] <> Grid.sgRowHidden then
+    for var Index:=1 to SourceGrid.RowCount - 1 do if SourceGrid.RowHeights[Index] <> SourceGrid.sgRowHidden then
     begin
 
-        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._NotDue), Index], 0);
-        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range1), Index], 0);
-        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range2), Index], 0);
-        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range3), Index], 0);
-        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range4), Index], 0);
-        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range5), Index], 0);
-        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Range6), Index], 0);
+        AgingSummary.ANotDue:=AgingSummary.ANotDue + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._NotDue), Index], 0);
+        AgingSummary.ARange1:=AgingSummary.ARange1 + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Range1), Index], 0);
+        AgingSummary.ARange2:=AgingSummary.ARange2 + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Range2), Index], 0);
+        AgingSummary.ARange3:=AgingSummary.ARange3 + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Range3), Index], 0);
+        AgingSummary.ARange4:=AgingSummary.ARange4 + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Range4), Index], 0);
+        AgingSummary.ARange5:=AgingSummary.ARange5 + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Range5), Index], 0);
+        AgingSummary.ARange6:=AgingSummary.ARange6 + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Range6), Index], 0);
 
-        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._Total), Index], 0);
-        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._CreditLimit), Index], 0);
+        AgingSummary.Balance:=AgingSummary.Balance + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._Total), Index], 0);
+        AgingSummary.Limits:=AgingSummary.Limits + StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._CreditLimit), Index], 0);
 
-        if StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._CreditBalance), Index], 0) < 0 then
+        if StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._CreditBalance), Index], 0) < 0 then
         begin
 
-            Inc(AgingPayLoad.Exceeders);
-            AgingPayLoad.TotalExceed:=
-                AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.GetCol(TCustomerSnapshotEx._CreditBalance), Index], 0));
+            Inc(AgingSummary.Exceeders);
+            AgingSummary.TotalExceed:=
+                AgingSummary.TotalExceed + Abs(StrToFloatDef(SourceGrid.Cells[SourceGrid.GetCol(TCustomerSnapshotEx._CreditBalance), Index], 0));
 
         end;
 
-        Inc(AgingPayLoad.CustAll);
+        Inc(AgingSummary.CustAll);
 
     end;
 
 end;
 
 
-class procedure THelpers.ComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
+class procedure THelpers.ComputeRiskClass(var Grid: TStringGrid; var AgingSummary: TAgingSummary; RiskClassGroup: TRiskClassGroup);
 begin
 
-    if AgingPayLoad.Balance = 0 then Exit();
+    if AgingSummary.Balance = 0 then Exit();
 
     var TotalPerItem: TArray<double>;
     var ListPosition: TArray<integer>;
     var Count: double:=0;
     var Rows: integer:=0;
 
-    AgingPayLoad.RCA:=AgingPayLoad.Balance * RiskClassGroup.Class_A;
-    AgingPayLoad.RCB:=AgingPayLoad.Balance * RiskClassGroup.Class_B;
-    AgingPayLoad.RCC:=AgingPayLoad.Balance * RiskClassGroup.Class_C;
+    AgingSummary.RCA:=AgingSummary.Balance * RiskClassGroup.Class_A;
+    AgingSummary.RCB:=AgingSummary.Balance * RiskClassGroup.Class_B;
+    AgingSummary.RCC:=AgingSummary.Balance * RiskClassGroup.Class_C;
 
     // Move totals and its positions into array
     for var Index:=1 to Grid.RowCount do if Grid.RowHeights[Index] <> Grid.sgRowHidden then
@@ -913,24 +913,24 @@ begin
         Count:=Count + TotalPerItem[Index];
 
         // Risk Class 'A'
-        if Count <= AgingPayLoad.RCA then
+        if Count <= AgingSummary.RCA then
         begin
             Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[Index]]:='A';
-            inc(AgingPayLoad.RCAcount);
+            inc(AgingSummary.RCAcount);
         end;
 
         // Risk Class 'B'
-        if (Count > AgingPayLoad.RCA) and (Count <= AgingPayLoad.RCA + AgingPayLoad.RCB) then
+        if (Count > AgingSummary.RCA) and (Count <= AgingSummary.RCA + AgingSummary.RCB) then
         begin
             Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[Index]]:='B';
-            inc(AgingPayLoad.RCBcount);
+            inc(AgingSummary.RCBcount);
         end;
 
         // Risk Class 'C'
-        if Count > AgingPayLoad.RCA + AgingPayLoad.RCB then
+        if Count > AgingSummary.RCA + AgingSummary.RCB then
         begin
             Grid.Cells[Grid.GetCol('Risk Class'), ListPosition[Index]]:='C';
-            inc(AgingPayLoad.RCCcount);
+            inc(AgingSummary.RCCcount);
         end;
 
     end;

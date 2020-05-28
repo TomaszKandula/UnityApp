@@ -63,7 +63,7 @@ type
         procedure LoadUniqueValues();
         procedure FilterSourceGrid();
         procedure FilterSelectCheck();
-        procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; PayLoad: TAgingPayLoad);
+        procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
     public
         property InUse:        boolean     read FInUse;
         property SourceGrid:   TStringGrid read FSourceGrid   write FSourceGrid;
@@ -236,7 +236,7 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TFilterForm.RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; PayLoad: TAgingPayLoad);
+procedure TFilterForm.RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
 begin
 
     Screen.Cursor:=crDefault;
@@ -251,7 +251,7 @@ begin
         Service.Logger.Log('[RecalcAgeViewSummary_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
     end;
 
-    MainForm.UpdateAgeSummary(PayLoad);
+    MainForm.UpdateAgeSummary(AgingSummary);
     MainForm.UpdateFollowUps(MainForm.sgAgeView);
 
 end;
