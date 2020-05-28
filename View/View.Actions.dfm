@@ -85,6 +85,7 @@ object ActionsForm: TActionsForm
         ColCount = 18
         DefaultColWidth = 10
         DefaultRowHeight = 17
+        DrawingStyle = gdsGradient
         RowCount = 2
         GradientEndColor = 15527148
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
@@ -1852,7 +1853,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 144
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1868,6 +1869,7 @@ object ActionsForm: TActionsForm
           Font.Style = []
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 144
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -1937,7 +1939,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 130
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1953,6 +1955,7 @@ object ActionsForm: TActionsForm
           Font.Style = []
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 130
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -2021,7 +2024,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 146
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2037,6 +2040,7 @@ object ActionsForm: TActionsForm
           Font.Style = []
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 146
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True
@@ -2074,6 +2078,7 @@ object ActionsForm: TActionsForm
           DefaultColWidth = 10
           DefaultRowHeight = 17
           DoubleBuffered = False
+          DrawingStyle = gdsGradient
           FixedColor = clWhite
           RowCount = 2
           GradientEndColor = 15527148

@@ -201,7 +201,7 @@ type
         procedure selSendFromSelect(Sender: TObject);
         procedure btnGoogleItClick(Sender: TObject);
     strict private
-        procedure SetDefaultHeader(var SourceGrid: TStringGrid);
+        procedure SetOpenItemsHeader(var SourceGrid: TStringGrid);
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FLedgerIso: string;
@@ -292,7 +292,7 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-procedure TActionsForm.SetDefaultHeader(var SourceGrid: TStringGrid);
+procedure TActionsForm.SetOpenItemsHeader(var SourceGrid: TStringGrid);
 begin
     SourceGrid.Cells[0, 0]:='';
     SourceGrid.Cells[1 ,0]:=TOpenItemsFields._InvoiceNumber;
@@ -965,7 +965,7 @@ end;
 procedure TActionsForm.GetCustomerDetails_Callback(PayLoad: TAddressBookItem);
 begin
 
-    if not PayLoad.IsSucceeded then
+    if (not PayLoad.IsSucceeded) and (PayLoad.Error.ErrorCode <> 'no_such_addressbook_item')  then
     begin
         THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
@@ -1015,7 +1015,7 @@ begin
 
         if not FileExists(Service.Settings.DirLayouts + TCommon.OpenItemsLayout) then
         begin
-            SetDefaultHeader(OpenItemsGrid);
+            SetOpenItemsHeader(OpenItemsGrid);
             OpenItemsGrid.SetColWidth(10, 20, 400);
         end
         else
@@ -1031,7 +1031,7 @@ begin
 
                 if not LResponse.IsSucceeded then
                 begin
-                    SetDefaultHeader(OpenItemsGrid);
+                    SetOpenItemsHeader(OpenItemsGrid);
                     OpenItemsGrid.SetColWidth(10, 20, 400);
                 end
                 else
@@ -1102,11 +1102,6 @@ begin
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._PostalArea)]  :=OpenItemsGrid.sgRowHidden;
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._CustNumber)]  :=OpenItemsGrid.sgRowHidden;
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._SourceDbName)]:=OpenItemsGrid.sgRowHidden;
-
-    // Make few columns thinner
-    OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Text)]:=40;
-    OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._Iso)]:=40;
-    OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._ControlStatus)]:=40;
 
     // Sort via payment status
     OpenItemsGrid.MSort(OpenItemsGrid.GetCol(TOpenItemsFields._PmtStatus), TDataType.TInteger, True);
@@ -1375,7 +1370,7 @@ begin
 
     if FLbuSendFrom = '' then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You must select Email From.');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'You must select e-mail to be sent from.');
         Exit();
     end;
 

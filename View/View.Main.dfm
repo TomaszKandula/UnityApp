@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9551,10 +9551,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object shapeFrame: TShape
         AlignWithMargins = True
         Left = 17
@@ -11569,8 +11565,9 @@ object MainForm: TMainForm
           DefaultColWidth = 40
           DefaultRowHeight = 25
           DoubleBuffered = True
+          DrawingStyle = gdsGradient
           RowCount = 2
-          GradientEndColor = clGradientInactiveCaption
+          GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
           ParentDoubleBuffered = False
           ParentShowHint = False
@@ -11924,6 +11921,7 @@ object MainForm: TMainForm
           ColCount = 39
           DefaultColWidth = 40
           DefaultRowHeight = 17
+          DrawingStyle = gdsGradient
           RowCount = 2
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
@@ -11986,10 +11984,6 @@ object MainForm: TMainForm
       Caption = 'Unidientified'
       Highlighted = True
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -12052,10 +12046,6 @@ object MainForm: TMainForm
       Caption = 'Address Book'
       Highlighted = True
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AddressBookHeader: TPanel
         Left = 0
         Top = 0
@@ -12504,6 +12494,7 @@ object MainForm: TMainForm
           DefaultColWidth = 40
           DefaultRowHeight = 17
           DoubleBuffered = True
+          DrawingStyle = gdsGradient
           RowCount = 2
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -12542,10 +12533,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object InvoiceTrackerHeader: TPanel
         Left = 0
         Top = 0
@@ -12660,6 +12647,7 @@ object MainForm: TMainForm
           ColCount = 11
           DefaultColWidth = 40
           DefaultRowHeight = 17
+          DrawingStyle = gdsGradient
           RowCount = 2
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -12695,10 +12683,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GeneralTablesHeader: TPanel
         Left = 0
         Top = 0
@@ -12800,16 +12784,12 @@ object MainForm: TMainForm
         Margins.Top = 0
         Margins.Right = 17
         Margins.Bottom = 17
-        ActivePage = Page1
+        ActivePage = Page8
         Align = alClient
         TabOrder = 1
         object Page1: TTabSheet
           Caption = 'Companies'
           OnShow = Page1Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CoCodesPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -12838,6 +12818,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -12861,10 +12842,6 @@ object MainForm: TMainForm
           Caption = 'Control Status'
           ImageIndex = 9
           OnShow = Page10Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ControlStatusPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -12895,6 +12872,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
@@ -12918,10 +12896,6 @@ object MainForm: TMainForm
           Caption = 'Paid Info'
           ImageIndex = 2
           OnShow = Page3Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PaidInfoPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -12952,6 +12926,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
@@ -12962,6 +12937,8 @@ object MainForm: TMainForm
               OnMouseEnter = sgPaidInfoMouseEnter
               OnMouseWheelDown = sgPaidInfoMouseWheelDown
               OnMouseWheelUp = sgPaidInfoMouseWheelUp
+              ExplicitLeft = 0
+              ExplicitTop = 0
               ColWidths = (
                 10
                 76)
@@ -12975,10 +12952,6 @@ object MainForm: TMainForm
           Caption = 'Payment Terms'
           ImageIndex = 1
           OnShow = Page2Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PmtTermsPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -13007,6 +12980,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
@@ -13030,10 +13004,6 @@ object MainForm: TMainForm
           Caption = 'Person Responsible'
           ImageIndex = 6
           OnShow = Page7Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PersonRespPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -13062,6 +13032,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -13085,10 +13056,6 @@ object MainForm: TMainForm
           Caption = 'Sales Responsible'
           ImageIndex = 5
           OnShow = Page6Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object SalesRespPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -13117,6 +13084,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -13140,10 +13108,6 @@ object MainForm: TMainForm
           Caption = 'Account Type'
           ImageIndex = 8
           OnShow = Page9Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object AccountTypePanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -13172,6 +13136,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -13195,10 +13160,6 @@ object MainForm: TMainForm
           Caption = 'Customer Group'
           ImageIndex = 7
           OnShow = Page8Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CustomerGrPanel: TPanel
             AlignWithMargins = True
             Left = 17
@@ -13227,6 +13188,7 @@ object MainForm: TMainForm
               ColCount = 2
               DefaultColWidth = 10
               DefaultRowHeight = 17
+              DrawingStyle = gdsGradient
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -13253,10 +13215,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object SettingsHeader: TPanel
         Left = 0
         Top = 0
@@ -13628,6 +13586,7 @@ object MainForm: TMainForm
             ColCount = 2
             DefaultColWidth = 30
             DefaultRowHeight = 17
+            DrawingStyle = gdsGradient
             Enabled = False
             RowCount = 2
             GradientEndColor = 15527148
@@ -13682,6 +13641,7 @@ object MainForm: TMainForm
             ColCount = 3
             DefaultColWidth = 30
             DefaultRowHeight = 17
+            DrawingStyle = gdsGradient
             Enabled = False
             RowCount = 2
             GradientEndColor = 15527148
@@ -14242,790 +14202,6 @@ object MainForm: TMainForm
               04C418B60000000049454E44AE426082}
             Stretch = True
             Transparent = True
-          end
-        end
-      end
-    end
-    object TabSheet5: TTabSheet
-      Caption = 'Queries'
-      ImageIndex = 8
-      OnShow = TabSheet5Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
-      object PanelFSC: TPanel
-        AlignWithMargins = True
-        Left = 17
-        Top = 17
-        Width = 600
-        Height = 659
-        Margins.Left = 17
-        Margins.Top = 17
-        Margins.Right = 17
-        Margins.Bottom = 17
-        Align = alLeft
-        BevelOuter = bvNone
-        TabOrder = 0
-        object Cap62: TShape
-          AlignWithMargins = True
-          Left = 10
-          Top = 10
-          Width = 580
-          Height = 19
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alTop
-          Brush.Color = 14922344
-          Pen.Color = 14922344
-          ExplicitLeft = 45
-          ExplicitTop = 16
-          ExplicitWidth = 265
-        end
-        object PanelFscGrid: TPanel
-          AlignWithMargins = True
-          Left = 10
-          Top = 49
-          Width = 580
-          Height = 313
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 0
-          object sgFSCview: TStringGrid
-            AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 576
-            Height = 309
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
-            Align = alClient
-            BorderStyle = bsNone
-            ColCount = 39
-            DefaultColWidth = 40
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect, goThumbTracking]
-            ParentShowHint = False
-            PopupMenu = PopupCommonMenu
-            ShowHint = False
-            TabOrder = 0
-            OnClick = sgFSCviewClick
-            OnDrawCell = sgFSCviewDrawCell
-            ColWidths = (
-              40
-              67
-              92
-              82
-              84
-              121
-              120
-              244
-              74
-              123
-              125
-              123
-              82
-              141
-              138
-              123
-              93
-              122
-              84
-              83
-              125
-              121
-              123
-              126
-              84
-              81
-              86
-              86
-              68
-              62
-              401
-              74
-              82
-              122
-              120
-              120
-              116
-              128
-              125)
-            RowHeights = (
-              17
-              17)
-          end
-        end
-        object PanelFscComment: TPanel
-          AlignWithMargins = True
-          Left = 10
-          Top = 527
-          Width = 580
-          Height = 122
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alBottom
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 1
-          object btnFscApprove: TSpeedButton
-            Left = 452
-            Top = 31
-            Width = 115
-            Height = 27
-            Cursor = crHandPoint
-            Caption = 'Approve'
-            Flat = True
-            Glyph.Data = {
-              36030000424D3603000000000000360000002800000010000000100000000100
-              18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-              FFFFFFFFFFFFEEF6EB8CC17752A33437941437941452A2338BC177EEF6EBFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF78B7611B85002E8F0934931137
-              94143794143493112E8F091B850077B65FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              4DA02D288C03379414379414288C03349311389515389515389515379414298D
-              034B9F2BFFFFFFFFFFFFFFFFFF79B761288C03389515379414208800D1E6CB3F
-              991F349311389515389515389515389515298D0377B65FFFFFFFEFF6EC1B8500
-              3794143895152B8E066BB053FFFFFFA6D098298D033895153895153895153895
-              153794141B8500EEF5EB8DC2792E8F093895152F900B3B9619FFFFFFFFFFFFFF
-              FFFF268B003694133895153895153895153895152E8F098BC17753A335349310
-              2E9009399518FFFFFFFFFFFFF6FAF5FFFFFF98C887298D033895153895153895
-              1538951534931152A23338951532910E5DA942FFFFFFFFFFFFEDF5EB479D29FF
-              FFFFFFFFFF2B8E07359311389515389515389515379414379414389515349311
-              3D981CFFFFFFFFFFFF3C971B198400ECF5EAFFFFFFD2E7CC1A85003794143895
-              1538951537941437941454A33634931031910D4B9F2D3C971B31910D31910C5D
-              A841FFFFFFFFFFFFA5CF971C860037941438951534931152A2348DC2792D8F09
-              389515349310359311389515379514218800C7E1BFFFFFFFFFFFFFB7D9AC1C86
-              003493112E8F098CC177F0F7ED1B850037941438951538951538951538951536
-              9413238900EFF6EDFFFFFFFFFFFFF4F9F3419A20198400EEF6EBFFFFFF7AB863
-              288C02389515389515389515389515389515359311228900C9E2C1FFFFFFEEF6
-              ED23890077B65FFFFFFFFFFFFFFFFFFF4EA12F288C0237941438951538951538
-              951538951536941320880078B7621D86004A9E2AFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFF7AB8631B85002D8F093493103794143794143493102E8F0914810078B7
-              60FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F7ED8DC27954A33638
-              951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
-            OnClick = btnFscApproveClick
-          end
-          object btnFscReject: TSpeedButton
-            Left = 452
-            Top = 64
-            Width = 115
-            Height = 27
-            Cursor = crHandPoint
-            Caption = 'Reject'
-            Flat = True
-            Glyph.Data = {
-              36030000424D3603000000000000360000002800000010000000100000000100
-              18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-              FFFFFFFFFFFFF0F0F58E8EDE5656D33A3ACE3A3ACE5656D38E8EDEF0F0F5FFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7C7CD92020D13333DA3535DA34
-              34DA3434DA3535DA3333DA2020D17C7CD9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              5252D32F2FDC3B3BDC2929D84A4ADE7D7DE77D7DE74F4FE03A3ADB3E3EDC2F2F
-              DC5252D3FFFFFFFFFFFFFFFFFF7F7FDE3131DD3939DC4141DEE3E3FAFFFFFFFF
-              FFFFFFFFFFFFFFF93333DB3F3FDD4040DD3131DD7F7FDEFFFFFFF0F0F82626DA
-              3E3EDF4242DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC3434D63F3FDF4040DF3434
-              DD4141DF2626DAF0F0F89393E93A3AE02E2EDDE3E3FAFFFFFFFFFFFFFFFFFFFF
-              FFFF4C4CD83C3CE14242E03232DEC6C6F53232DE3A3AE09393E95F5FE33E3EE1
-              5050E4FFFFFFFFFFFFFFFFFFFFFFFF6E6EDC3939E24444E22A2ADED1D1F8FFFF
-              FF5050E43E3EE15E5EE34747E23E3EE38383EDFFFFFFFFFFFFFFFFFF9A9AE434
-              34E34646E43232E1A6A6F2FFFFFFFFFFFF8383ED3E3EE34747E24848E53F3FE4
-              8484ECFFFFFFFFFFFFC7C7ED2F2FE14848E53B3BE37B7BECFFFFFFFFFFFFFFFF
-              FF8484EC3F3FE44848E56363EA4242E65454E4FFFFFFEBEBF53030DF4848E742
-              42E65A5AE9FFFFFFFFFFFFFFFFFFFFFFFF5454E44242E66363EA9898F24242E7
-              3939E7D9D9EE4242E14848E94747E84343E7FFFFFFFFFFFFFFFFFFFFFFFFE3E3
-              F53737E64242E79898F2F2F2FD3333E74C4CEA3E3EE54B4BEA4B4BEA3737E7F5
-              F5FEFFFFFFFFFFFFFFFFFFFFFFFE4B4BE24949EA3333E7F2F2FDFFFFFF8989F2
-              4040EA4E4EEB4E4EEB4040EAE9E9FDFFFFFFFFFFFFFFFFFFE3E3F24D4DE14848
-              EC4040EA8989F2FFFFFFFFFFFFFFFFFF6363EF4242EB4F4FED4C4CED5F5FE087
-              87E58787E55858DF3B3BE84D4DEE4242EB6363EFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFF8B8BF43838EC4848ED4B4BEF4949EF4949EF4B4BEF4848EE3838EC8B8B
-              F4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF2F2FE9D9DF66B6BF253
-              53F05353F06B6BF29D9DF6F2F2FEFFFFFFFFFFFFFFFFFFFFFFFF}
-            OnClick = btnFscRejectClick
-          end
-          object MemoBorders3: TShape
-            Left = 11
-            Top = 13
-            Width = 404
-            Height = 94
-            Pen.Color = clSkyBlue
-          end
-          object FSCComment: TMemo
-            Left = 14
-            Top = 15
-            Width = 400
-            Height = 90
-            Hint = 'Provide mandatory comment'
-            BorderStyle = bsNone
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            MaxLength = 255
-            ParentFont = False
-            ParentShowHint = False
-            ScrollBars = ssVertical
-            ShowHint = True
-            TabOrder = 0
-          end
-        end
-        object PanelFscDetails: TPanel
-          AlignWithMargins = True
-          Left = 10
-          Top = 382
-          Width = 580
-          Height = 125
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alBottom
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 2
-          object LabelOpAmountFsc: TLabel
-            Left = 21
-            Top = 7
-            Width = 70
-            Height = 13
-            Caption = 'Open Amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelAmountFsc: TLabel
-            Left = 21
-            Top = 26
-            Width = 41
-            Height = 13
-            Caption = 'Amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelOpAmCurrFsc: TLabel
-            Left = 21
-            Top = 45
-            Width = 126
-            Height = 13
-            Caption = 'Open Amount in currency:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelAmCurrFsc: TLabel
-            Left = 21
-            Top = 64
-            Width = 97
-            Height = 13
-            Caption = 'Amount in currency:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelFscDueDtFsc: TLabel
-            Left = 21
-            Top = 83
-            Width = 48
-            Height = 13
-            Caption = 'Due date:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelFscValDtFsc: TLabel
-            Left = 21
-            Top = 102
-            Width = 55
-            Height = 13
-            Caption = 'Value date:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object ValueOpAmountFsc: TLabel
-            Left = 160
-            Top = 7
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueAmountFsc: TLabel
-            Left = 160
-            Top = 26
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueOpAmCurrFsc: TLabel
-            Left = 160
-            Top = 45
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueAmCurrFsc: TLabel
-            Left = 160
-            Top = 64
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueDueDtFsc: TLabel
-            Left = 160
-            Top = 83
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueValDtFsc: TLabel
-            Left = 160
-            Top = 102
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object LabelDescFsc: TLabel
-            Left = 280
-            Top = 7
-            Width = 89
-            Height = 13
-            Caption = 'Query description:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object MemoBorders1: TShape
-            Left = 278
-            Top = 30
-            Width = 278
-            Height = 82
-            Pen.Color = clSkyBlue
-          end
-          object FscQueryDesc: TMemo
-            Left = 280
-            Top = 32
-            Width = 275
-            Height = 78
-            BorderStyle = bsNone
-            Color = clWhite
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            MaxLength = 255
-            ParentFont = False
-            ParentShowHint = False
-            ReadOnly = True
-            ScrollBars = ssVertical
-            ShowHint = False
-            TabOrder = 0
-          end
-        end
-      end
-      object PanelLBU: TPanel
-        AlignWithMargins = True
-        Left = 651
-        Top = 17
-        Width = 600
-        Height = 659
-        Margins.Left = 17
-        Margins.Top = 17
-        Margins.Right = 17
-        Margins.Bottom = 17
-        Align = alLeft
-        BevelOuter = bvNone
-        TabOrder = 1
-        object Cap63: TShape
-          AlignWithMargins = True
-          Left = 10
-          Top = 10
-          Width = 580
-          Height = 19
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alTop
-          Brush.Color = 14922344
-          Pen.Color = 14922344
-          ExplicitLeft = 18
-          ExplicitTop = 18
-          ExplicitWidth = 430
-        end
-        object PanelLbuGrid: TPanel
-          AlignWithMargins = True
-          Left = 10
-          Top = 49
-          Width = 580
-          Height = 313
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 0
-          object sgLBUview: TStringGrid
-            AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 576
-            Height = 309
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
-            Align = alClient
-            BorderStyle = bsNone
-            ColCount = 39
-            DefaultColWidth = 40
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect, goThumbTracking]
-            ParentShowHint = False
-            PopupMenu = PopupCommonMenu
-            ShowHint = False
-            TabOrder = 0
-            OnClick = sgLBUviewClick
-            OnDrawCell = sgLBUviewDrawCell
-            ColWidths = (
-              40
-              67
-              92
-              82
-              84
-              121
-              120
-              244
-              74
-              123
-              125
-              123
-              82
-              141
-              138
-              123
-              93
-              122
-              84
-              83
-              125
-              121
-              123
-              126
-              84
-              81
-              86
-              86
-              68
-              62
-              401
-              74
-              82
-              122
-              120
-              120
-              116
-              128
-              125)
-            RowHeights = (
-              17
-              17)
-          end
-        end
-        object PanelLbuComment: TPanel
-          AlignWithMargins = True
-          Left = 10
-          Top = 527
-          Width = 580
-          Height = 122
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alBottom
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 1
-          object btnLbuUpdate: TSpeedButton
-            Left = 452
-            Top = 31
-            Width = 115
-            Height = 27
-            Cursor = crHandPoint
-            Caption = 'Resolve'
-            Flat = True
-            Glyph.Data = {
-              36030000424D3603000000000000360000002800000010000000100000000100
-              18000000000000030000C40E0000C40E00000000000000000000C9C8C6EEEDEB
-              F4F4F3FFFDFCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFEFEEECDDDAD7E6DCD6C5D8DEA6E1F8FFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5F4F3E8DDD6
-              BCD8E04DC4F287D5F3ABE1F6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFDB0CED74BC3F15CC6EF5CC6EE87D5F3ABE1F6FF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF80CEEB
-              49B7E05EC7F05CC6EF5CC6EE87D5F3ABE1F6FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF88CFEA4AB7E15EC8F05CC6EE5CC6EE87
-              D5F3ABE1F6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFF86CEEA4BB8E15EC8F05CC6EE5CC6EE87D5F3ABE1F6FFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF85CEE94BB8E25EC8F05C
-              C6EE5CC6EE87D5F3ABE1F6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFF84CDE94BB9E35EC8F05CC6EE5CC6EE87D5F3ABE1F6FFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF83CDE94C
-              BAE35EC8F05CC6EE5CC6EE79D1F3DBECF2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF82CCE94CBAE45EC8F048C1EFBFE1ECF6EF
-              EAF9F7F0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFF81CCE83CB6E5BEE1EDFBF1EBFEFBED92A5E298ABE8FFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC6E3EDF9F0EAFFFBEE99AB
-              E46D88E06B87DEAAB9ECFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFF8F7F18FA2DC6E89E17891E1748EE07891E1FFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8E9ED56882
-              D6758FE26C88DEFCFDFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFF9FADDB7088D4FCFDFFFFFFFF}
-            OnClick = btnLbuUpdateClick
-          end
-          object MemoBorders4: TShape
-            Left = 8
-            Top = 13
-            Width = 404
-            Height = 94
-            Pen.Color = clSkyBlue
-          end
-          object LbuComment: TMemo
-            Left = 10
-            Top = 15
-            Width = 400
-            Height = 90
-            Hint = 'Provide mandatory comment'
-            BorderStyle = bsNone
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            MaxLength = 255
-            ParentFont = False
-            ParentShowHint = False
-            ScrollBars = ssVertical
-            ShowHint = True
-            TabOrder = 0
-          end
-        end
-        object PanelLbuDetails: TPanel
-          AlignWithMargins = True
-          Left = 10
-          Top = 382
-          Width = 580
-          Height = 125
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alBottom
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 2
-          object LabelOpAmountLbu: TLabel
-            Left = 21
-            Top = 7
-            Width = 70
-            Height = 13
-            Caption = 'Open Amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object ValueOpAmountLbu: TLabel
-            Left = 160
-            Top = 7
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueAmountLbu: TLabel
-            Left = 160
-            Top = 26
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueOpAmCurrLbu: TLabel
-            Left = 160
-            Top = 45
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueAmCurrLbu: TLabel
-            Left = 160
-            Top = 64
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueDueDtLbu: TLabel
-            Left = 160
-            Top = 83
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object ValueValDtLbu: TLabel
-            Left = 161
-            Top = 102
-            Width = 34
-            Height = 13
-            Caption = '{TEXT}'
-          end
-          object LabelDescLbu: TLabel
-            Left = 280
-            Top = 7
-            Width = 89
-            Height = 13
-            Caption = 'Query description:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelAmountLbu: TLabel
-            Left = 21
-            Top = 26
-            Width = 41
-            Height = 13
-            Caption = 'Amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelOpenAmCurrLbu: TLabel
-            Left = 21
-            Top = 45
-            Width = 126
-            Height = 13
-            Caption = 'Open Amount in currency:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelOpeAmCurrLbu: TLabel
-            Left = 21
-            Top = 64
-            Width = 97
-            Height = 13
-            Caption = 'Amount in currency:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelDueDtLbu: TLabel
-            Left = 21
-            Top = 83
-            Width = 48
-            Height = 13
-            Caption = 'Due date:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object LabelValDtLbu: TLabel
-            Left = 21
-            Top = 102
-            Width = 55
-            Height = 13
-            Caption = 'Value date:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object MemoBorders2: TShape
-            Left = 278
-            Top = 30
-            Width = 278
-            Height = 82
-            Pen.Color = clSkyBlue
-          end
-          object LbuQueryDesc: TMemo
-            Left = 280
-            Top = 32
-            Width = 275
-            Height = 78
-            BorderStyle = bsNone
-            Color = clWhite
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            MaxLength = 280
-            ParentFont = False
-            ParentShowHint = False
-            ReadOnly = True
-            ScrollBars = ssVertical
-            ShowHint = False
-            TabOrder = 0
           end
         end
       end

@@ -421,56 +421,6 @@ type
         Action_PersonResp: TMenuItem;
         Action_AccountType: TMenuItem;
         N24: TMenuItem;
-        TabSheet5: TTabSheet;
-        sgFSCview: TStringGrid;
-        sgLBUview: TStringGrid;
-        PanelFSC: TPanel;
-        PanelLBU: TPanel;
-        Cap62: TShape;
-        PanelFscGrid: TPanel;
-        Cap63: TShape;
-        PanelLbuGrid: TPanel;
-        FSCComment: TMemo;
-        btnFscApprove: TSpeedButton;
-        btnFscReject: TSpeedButton;
-        LbuComment: TMemo;
-        btnLbuUpdate: TSpeedButton;
-        PanelFscComment: TPanel;
-        PanelLbuComment: TPanel;
-        PanelFscDetails: TPanel;
-        PanelLbuDetails: TPanel;
-        LabelOpAmountFsc: TLabel;
-        LabelAmountFsc: TLabel;
-        LabelOpAmCurrFsc: TLabel;
-        LabelAmCurrFsc: TLabel;
-        LabelFscDueDtFsc: TLabel;
-        LabelFscValDtFsc: TLabel;
-        ValueOpAmountFsc: TLabel;
-        ValueAmountFsc: TLabel;
-        ValueOpAmCurrFsc: TLabel;
-        ValueAmCurrFsc: TLabel;
-        ValueDueDtFsc: TLabel;
-        ValueValDtFsc: TLabel;
-        FscQueryDesc: TMemo;
-        LabelDescFsc: TLabel;
-        MemoBorders1: TShape;
-        MemoBorders2: TShape;
-        MemoBorders3: TShape;
-        MemoBorders4: TShape;
-        LabelOpAmountLbu: TLabel;
-        ValueOpAmountLbu: TLabel;
-        ValueAmountLbu: TLabel;
-        ValueOpAmCurrLbu: TLabel;
-        ValueAmCurrLbu: TLabel;
-        ValueDueDtLbu: TLabel;
-        ValueValDtLbu: TLabel;
-        LabelDescLbu: TLabel;
-        LabelAmountLbu: TLabel;
-        LabelOpenAmCurrLbu: TLabel;
-        LabelOpeAmCurrLbu: TLabel;
-        LabelDueDtLbu: TLabel;
-        LabelValDtLbu: TLabel;
-        LbuQueryDesc: TMemo;
         Action_TurnRowHighlight: TMenuItem;
         AppHeader: TPanel;
         imgAppMenu: TImage;
@@ -770,13 +720,6 @@ type
         procedure Action_ViewOptionsClick(Sender: TObject);
         procedure Action_ShowNavigationClick(Sender: TObject);
         procedure TabSheet5Show(Sender: TObject);
-        procedure sgFSCviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure sgLBUviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure sgLBUviewClick(Sender: TObject);
-        procedure sgFSCviewClick(Sender: TObject);
-        procedure btnFscApproveClick(Sender: TObject);
-        procedure btnFscRejectClick(Sender: TObject);
-        procedure btnLbuUpdateClick(Sender: TObject);
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure PopupCommonMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
@@ -836,7 +779,7 @@ type
             targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
-        procedure SetDefaultHeader(var SourceGrid: TStringGrid);
+        procedure SetAgeViewHeader(var SourceGrid: TStringGrid);
         const FPermitCheckTimeout = 900000; // 15 min.
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
@@ -865,7 +808,6 @@ type
         procedure SetPanelBorders();
         procedure SetGridColumnWidths();
         procedure SetGridRowHeights();
-        procedure SetButtonsGlyphs();
         procedure SetSettingsPanel(IsLocked: boolean);
         procedure InitializeScreenSettings();
         procedure ClearMainViewInfo();
@@ -983,7 +925,7 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-procedure TMainForm.SetDefaultHeader(var SourceGrid: TStringGrid);
+procedure TMainForm.SetAgeViewHeader(var SourceGrid: TStringGrid);
 begin
     SourceGrid.Cells[0, 0]:='';
     SourceGrid.Cells[1, 0]:=TCustomerSnapshot._CustomerName;
@@ -1356,12 +1298,6 @@ begin
         txtTracker.Font.Color:=$006433C9;
     end;
 
-    if TabSheet = TabSheet5 then
-    begin
-        txtQueries.Font.Style:=[fsBold];
-        txtQueries.Font.Color:=$006433C9;
-    end;
-
     if TabSheet = TabSheet6 then
     begin
         txtUnidentified.Font.Style:=[fsBold];
@@ -1658,17 +1594,6 @@ begin
 end;
 
 
-procedure TMainForm.SetButtonsGlyphs();
-begin
-    // ---------------------------------------------------------------------------
-    // Make sure that the glyph styled buttons have proper transparency color set.
-    // Note: always set transparent color.
-    // ---------------------------------------------------------------------------
-    btnLbuUpdate.Glyph.Transparent:=True;
-    btnLbuUpdate.Glyph.TransparentColor:=clWhite;
-end;
-
-
 procedure TMainForm.InitializeScreenSettings();
 begin
 
@@ -1784,7 +1709,7 @@ begin
 
         if not FileExists(Service.Settings.DirLayouts + TCommon.AgeViewLayout) then
         begin
-            SetDefaultHeader(sgAgeView);
+            SetAgeViewHeader(sgAgeView);
             sgAgeView.SetColWidth(10, 20, 400);
         end
         else
@@ -1800,7 +1725,7 @@ begin
 
                 if not LResponse.IsSucceeded then
                 begin
-                    SetDefaultHeader(sgAgeView);
+                    SetAgeViewHeader(sgAgeView);
                     sgAgeView.SetColWidth(10, 20, 400);
                 end
                 else
@@ -2338,7 +2263,6 @@ begin
     SetPanelBorders();
     SetGridColumnWidths();
     SetGridRowHeights();
-    SetButtonsGlyphs();
 
     TimerUpTime.Enabled:=True;
     TimerCurrentTime.Enabled:=True;
@@ -2912,17 +2836,6 @@ begin
     sgCustomerGr.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
-
-procedure TMainForm.sgFSCviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgFSCview.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
-end;
-
-
-procedure TMainForm.sgLBUviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgLBUview.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
-end;
 
 {$ENDREGION}
 
@@ -3915,18 +3828,6 @@ begin
 end;
 
 
-procedure TMainForm.sgLBUviewClick(Sender: TObject);
-begin
-    // Empty
-end;
-
-
-procedure TMainForm.sgFSCviewClick(Sender: TObject);
-begin
-    // Empty
-end;
-
-
 procedure TMainForm.sgListSectionClick(Sender: TObject);
 begin
     imgSectionAdd.Enabled   :=True;
@@ -4273,24 +4174,6 @@ begin
 
     sgAddressBook.ExportCSV(MainForm.FileCSVExport, '|');
 
-end;
-
-
-procedure TMainForm.btnFscApproveClick(Sender: TObject);
-begin
-    // Empty
-end;
-
-
-procedure TMainForm.btnFscRejectClick(Sender: TObject);
-begin
-    // Empty
-end;
-
-
-procedure TMainForm.btnLbuUpdateClick(Sender: TObject);
-begin
-    // Empty
 end;
 
 
