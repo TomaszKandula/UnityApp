@@ -78,7 +78,7 @@ type
         procedure cbNotDueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     strict private
         procedure ExecuteMailer();
-        procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
+        procedure SendAccountDocument_Callback(PayLoad: TSentDocument);
     end;
 
 
@@ -172,15 +172,15 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TSendForm.SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
+procedure TSendForm.SendAccountDocument_Callback(PayLoad: TSentDocument);
 begin
 
     Close();
     Screen.Cursor:=crDefault;
 
-    if not Response.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
     end;
 

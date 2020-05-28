@@ -76,8 +76,6 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var CallResponse: TCallResponse;
-        var Response: TSentDocument;
         var Rest:=Service.InvokeRest();
 
 		Rest.AccessToken:=Service.AccessToken;
@@ -89,50 +87,42 @@ begin
         Rest.CustomBody:=TJson.ObjectToJsonString(SendDocument);
         SendDocument.Free();
 
+        var SentDocument: TSentDocument;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                Response:=TJson.JsonToObject<TSentDocument>(Rest.Content);
-
-                CallResponse.IsSucceeded:=Response.IsSucceeded;
-                CallResponse.LastMessage:=Response.Error.ErrorDesc;
-                CallResponse.ErrorCode  :=Response.Error.ErrorCode;
-
+                SentDocument:=TJson.JsonToObject<TSentDocument>(Rest.Content);
                 Service.Logger.Log('[SendAccountDocumentAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[SendAccountDocumentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    SentDocument.Error.ErrorDesc:='[SendAccountDocumentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[SendAccountDocumentAsync]: Invalid server response. Please contact IT Support.'
+                        SentDocument.Error.ErrorDesc:='[SendAccountDocumentAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SendAccountDocumentAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        SentDocument.Error.ErrorDesc:='[SendAccountDocumentAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(SentDocument.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SendAccountDocumentAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                SentDocument.Error.ErrorDesc:='[SendAccountDocumentAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(SentDocument.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CallResponse, Response);
-            if Assigned(Response) then Response.Free();
+            if Assigned(Callback) then Callback(SentDocument);
+            if Assigned(SentDocument) then SentDocument.Free();
         end);
 
     end);

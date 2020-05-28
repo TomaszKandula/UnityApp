@@ -82,7 +82,6 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[GetCompanyDetailsAsync]: Executing POST ' + Rest.ClientBaseURL);
 
-        var CallResponse: TCallResponse;
         var ReturnCompanyEmails: TReturnCompanyEmails;
         try
 
@@ -98,41 +97,35 @@ begin
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
                 ReturnCompanyEmails:=TJson.JsonToObject<TReturnCompanyEmails>(Rest.Content);
-                CallResponse.LastMessage:=ReturnCompanyEmails.Error.ErrorDesc;
-                CallResponse.ErrorCode  :=ReturnCompanyEmails.Error.ErrorCode;
-                CallResponse.IsSucceeded:=True;
                 Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    ReturnCompanyEmails.Error.ErrorDesc:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
+                        ReturnCompanyEmails.Error.ErrorDesc:='[GetCompanyDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        ReturnCompanyEmails.Error.ErrorDesc:='[GetCompanyDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(ReturnCompanyEmails.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                ReturnCompanyEmails.Error.ErrorDesc:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(ReturnCompanyEmails.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(ReturnCompanyEmails, CallResponse);
+            if Assigned(Callback) then Callback(ReturnCompanyEmails);
             if Assigned(ReturnCompanyEmails) then ReturnCompanyEmails.Free();
         end);
 

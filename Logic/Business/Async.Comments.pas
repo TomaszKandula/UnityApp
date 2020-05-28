@@ -720,9 +720,6 @@ end;
 procedure TComments.GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments);
 begin
 
-    var CallResponse: TCallResponse;
-    var TempComments: TGeneralCommentFields;
-
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
@@ -739,61 +736,42 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetGeneralCommentAsync]: Executing GET ' + Rest.ClientBaseURL);
 
+        var UserGeneralComment: TUserGeneralComment;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var UserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Rest.Content);
-                try
-
-                    TempComments.CommentId  :=UserGeneralComment.CommentId;
-                    TempComments.FollowUp   :=UserGeneralComment.FollowUp;
-                    TempComments.Free1      :=UserGeneralComment.Free1;
-                    TempComments.Free2      :=UserGeneralComment.Free2;
-                    TempComments.Free3      :=UserGeneralComment.Free3;
-                    TempComments.UserComment:=UserGeneralComment.UserComment;
-
-                    CallResponse.IsSucceeded:=UserGeneralComment.IsSucceeded;
-                    CallResponse.LastMessage:=UserGeneralComment.Error.ErrorDesc;
-                    CallResponse.ErrorCode  :=UserGeneralComment.Error.ErrorCode;
-                    Service.Logger.Log('[GetGeneralCommentAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    UserGeneralComment.Free();
-                end;
-
+                UserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Rest.Content);
+                Service.Logger.Log('[GetGeneralCommentAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetGeneralCommentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    UserGeneralComment.Error.ErrorDesc:='[GetGeneralCommentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetGeneralCommentAsync]: Invalid server response. Please contact IT Support.'
+                        UserGeneralComment.Error.ErrorDesc:='[GetGeneralCommentAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetGeneralCommentAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        UserGeneralComment.Error.ErrorDesc:='[GetGeneralCommentAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(UserGeneralComment.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetGeneralCommentAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                UserGeneralComment.Error.ErrorDesc:='[GetGeneralCommentAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(UserGeneralComment.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(TempComments, CallResponse);
+            if Assigned(Callback) then Callback(UserGeneralComment);
+            if Assigned(UserGeneralComment) then UserGeneralComment.Free();
         end);
 
     end);
@@ -885,9 +863,6 @@ end;
 procedure TComments.GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments);
 begin
 
-    var CallResponse: TCallResponse;
-    var TempComments:=TArray<TDailyCommentFields>.Create();
-
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
@@ -904,73 +879,42 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetDailyCommentsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
+        var UserDailyCommentsList: TUserDailyCommentsList;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Rest.Content);
-                try
-
-                    SetLength(TempComments, Length(UserDailyCommentsList.UserDailyComments));
-
-                    for var Index:=0 to Length(UserDailyCommentsList.UserDailyComments) - 1 do
-                    begin
-                        TempComments[Index].CommentId           :=UserDailyCommentsList.UserDailyComments[Index].CommentId;
-                        TempComments[Index].SourceDBName        :=UserDailyCommentsList.UserDailyComments[Index].SourceDBName;
-                        TempComments[Index].CustomerNumber      :=UserDailyCommentsList.UserDailyComments[Index].CustomerNumber;
-                        TempComments[Index].AgeDate             :=UserDailyCommentsList.UserDailyComments[Index].AgeDate;
-                        TempComments[Index].CallEvent           :=UserDailyCommentsList.UserDailyComments[Index].CallEvent;
-                        TempComments[Index].CallDuration        :=UserDailyCommentsList.UserDailyComments[Index].CallDuration;
-                        TempComments[Index].FixedStatementsSent :=UserDailyCommentsList.UserDailyComments[Index].FixedStatementsSent;
-                        TempComments[Index].CustomStatementsSent:=UserDailyCommentsList.UserDailyComments[Index].CustomStatementsSent;
-                        TempComments[Index].FixedRemindersSent  :=UserDailyCommentsList.UserDailyComments[Index].FixedRemindersSent;
-                        TempComments[Index].CustomRemindersSent :=UserDailyCommentsList.UserDailyComments[Index].CustomRemindersSent;
-                        TempComments[Index].UserComment         :=UserDailyCommentsList.UserDailyComments[Index].UserComment;
-                        TempComments[Index].UserAlias           :=UserDailyCommentsList.UserDailyComments[Index].UserAlias;
-                        TempComments[Index].EntryDateTime       :=UserDailyCommentsList.UserDailyComments[Index].EntryDateTime;
-                    end;
-
-                    CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
-                    CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
-                    CallResponse.ErrorCode  :=UserDailyCommentsList.Error.ErrorCode;
-                    Service.Logger.Log('[GetDailyCommentsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    UserDailyCommentsList.Free();
-                end;
-
+                UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Rest.Content);
+                Service.Logger.Log('[GetDailyCommentsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetDailyCommentsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    UserDailyCommentsList.Error.ErrorDesc:='[GetDailyCommentsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetDailyCommentsAsync]: Invalid server response. Please contact IT Support.'
+                        UserDailyCommentsList.Error.ErrorDesc:='[GetDailyCommentsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetDailyCommentsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        UserDailyCommentsList.Error.ErrorDesc:='[GetDailyCommentsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(UserDailyCommentsList.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetDailyCommentsAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                UserDailyCommentsList.Error.ErrorDesc:='[GetDailyCommentsAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(UserDailyCommentsList.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(TempComments, CallResponse);
+            if Assigned(Callback) then Callback(UserDailyCommentsList);
+            if Assigned(UserDailyCommentsList) then UserDailyCommentsList.Free();
         end);
 
     end);

@@ -58,7 +58,11 @@ uses
     Unity.Panel,
     Unity.ComboBox,
     Unity.Enums,
-    Unity.Records;
+    Unity.Records,
+    Api.ReturnCustomerReport,
+    Api.UserRating,
+    Api.AddressBookList,
+    Api.ReturnOpenItems;
 
 
 type
@@ -212,8 +216,7 @@ type
         ShapeReloadCap: TShape;
         ShapeSumsFrm: TShape;
         ShapeSumsCap: TShape;
-        btnReload: TImage;
-        txtReloadBtnA: TLabel;
+        txtBackBtn: TLabel;
         btnOpenAb: TImage;
         btnCloseAb: TImage;
         txtOpenAb: TLabel;
@@ -229,7 +232,7 @@ type
         GeneralTablesHeader: TPanel;
         ShapeTablesInfoFrm: TShape;
         ShapeTablesInfoCap: TShape;
-        txtReloadBtnB: TLabel;
+        txtNextBtn: TLabel;
         MainShape6: TPanel;
         AppFooter: TPanel;
         txtCurrentDate: TLabel;
@@ -527,6 +530,14 @@ type
         Action_SaveAgeViewLayout: TMenuItem;
         Action_SaveOpenItemsLayout: TMenuItem;
         N11: TMenuItem;
+        txtPage: TLabel;
+        txtSplitter: TLabel;
+        valPage: TLabel;
+        valPages: TLabel;
+        btnBack: TImage;
+        btnNext: TImage;
+        txtItems: TLabel;
+        valItems: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -560,8 +571,6 @@ type
         procedure sgAddressBookMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgOpenItemsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgOpenItemsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure btnReloadMouseEnter(Sender: TObject);
-        procedure btnReloadMouseLeave(Sender: TObject);
         procedure btnOpenAbMouseEnter(Sender: TObject);
         procedure btnOpenAbMouseLeave(Sender: TObject);
         procedure btnCloseAbMouseEnter(Sender: TObject);
@@ -786,7 +795,6 @@ type
         procedure btnSearchAbClick(Sender: TObject);
         procedure btnSearchAbMouseEnter(Sender: TObject);
         procedure btnSearchAbMouseLeave(Sender: TObject);
-        procedure btnReloadClick(Sender: TObject);
         procedure Action_HideThisColumnClick(Sender: TObject);
         procedure Action_ShowAllColumnsClick(Sender: TObject);
         procedure TimerPermitCheckTimer(Sender: TObject);
@@ -808,6 +816,12 @@ type
         procedure Page10Show(Sender: TObject);
         procedure Action_SaveAgeViewLayoutClick(Sender: TObject);
         procedure Action_SaveOpenItemsLayoutClick(Sender: TObject);
+        procedure btnBackClick(Sender: TObject);
+        procedure btnNextClick(Sender: TObject);
+        procedure btnBackMouseEnter(Sender: TObject);
+        procedure btnBackMouseLeave(Sender: TObject);
+        procedure btnNextMouseEnter(Sender: TObject);
+        procedure btnNextMouseLeave(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -854,22 +868,22 @@ type
         procedure InitializeScreenSettings();
         procedure ClearMainViewInfo();
         procedure ClearAgingSummary();
+        procedure ClearOpenItemsInfo();
         procedure LoadOpenItems(PageNumber: integer);
         procedure SkypeCallUpdate(CallTime: cardinal);
         procedure FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
         function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
         function  CompanyListToText(LoadedCompanies: TList<string>): string;
-        procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
-        procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
-        procedure ScanSnapshots_Callback(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse);
-        procedure ReadOpenItems_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        procedure OpenAddressBook_Callback(PayLoad: TAddressBookList);
+        procedure ReadAgeView_Callback(CallResponse: TCallResponse; ReturnedData: TStringGrid; PayLoad: TAgingPayLoad);
+        procedure ScanSnapshots_Callback(CallResponse: TCallResponse; CanGetAge: boolean; ReceivedTime: string);
+        procedure ReadOpenItems_Callback(PayLoad: TReturnOpenItems);
         procedure FreeFieldsUpdate_Callback(CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
         procedure BulkFollowUpUpdate_Callback(CallResponse: TCallResponse);
-        procedure GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
-        procedure WriteToExcel_Callback(CallResponse: TCallResponse);
-        procedure LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+        procedure GetAgingReport_Callback(CallResponse: TCallResponse);
+        procedure LoadRating_Callback(PayLoad: TUserRating);
         procedure AddBulkToAddressBook_Callback(CallResponse: TCallResponse);
     public
         var FRiskClassGroup: TRiskClassGroup;
@@ -934,7 +948,6 @@ uses
     Api.ReturnSalesResponsible,
     Api.ReturnPaymentTerms,
     Api.ReturnCustomerGroup,
-    Api.ReturnOpenItems,
     Api.OpenItemsFields,
     Api.AddressBookFields,
     Api.CustomerSnapshotEx,
@@ -1157,6 +1170,14 @@ begin
     valFollowsPast.Caption :='0';
     valFollowsNext.Caption :='0';
 
+end;
+
+
+procedure TMainForm.ClearOpenItemsInfo();
+begin
+    valPage.Caption :='0';
+    valPages.Caption:='0';
+    valItems.Caption:='0';
 end;
 
 
@@ -1652,28 +1673,46 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TMainForm.OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+procedure TMainForm.OpenAddressBook_Callback(PayLoad: TAddressBookList);
 begin
 
     BusyForm.Close();
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        Service.Logger.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Service.Logger.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
     sgAddressBook.Freeze(True);
     try
 
-        sgAddressBook.RowCount:=ReturnedData.RowCount;
-        sgAddressBook.ColCount:=ReturnedData.ColCount;
+        sgAddressBook.RowCount:=Length(PayLoad.AddressBook) + 1; // Add header
+        sgAddressBook.ColCount:=9;
 
-        for var iCNT:=0 to ReturnedData.RowCount - 1 do
-            for var jCNT:=0 to ReturnedData.ColCount - 1 do
-                sgAddressBook.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+        sgAddressBook.Cells[0, 0]:='';//empty lp column
+        sgAddressBook.Cells[1, 0]:=TAddressBookFields._Id;//hidden column
+        sgAddressBook.Cells[2, 0]:=TAddressBookFields._SourceDbName;
+        sgAddressBook.Cells[3, 0]:=TAddressBookFields._CustomerNumber;
+        sgAddressBook.Cells[4, 0]:=TAddressBookFields._CustomerName;
+        sgAddressBook.Cells[5, 0]:=TAddressBookFields._ContactPerson;
+        sgAddressBook.Cells[6, 0]:=TAddressBookFields._RegularEmails;
+        sgAddressBook.Cells[7, 0]:=TAddressBookFields._StatementEmails;
+        sgAddressBook.Cells[8, 0]:=TAddressBookFields._PhoneNumbers;
+
+        for var Index:=1 to sgAddressBook.RowCount - 1 do
+        begin
+            sgAddressBook.Cells[1, Index]:=PayLoad.AddressBook[Index - 1].Id.ToString();
+            sgAddressBook.Cells[2, Index]:=PayLoad.AddressBook[Index - 1].SourceDbName;
+            sgAddressBook.Cells[3, Index]:=PayLoad.AddressBook[Index - 1].CustomerNumber.ToString();
+            sgAddressBook.Cells[4, Index]:=PayLoad.AddressBook[Index - 1].CustomerName;
+            sgAddressBook.Cells[5, Index]:=PayLoad.AddressBook[Index - 1].ContactPerson;
+            sgAddressBook.Cells[6, Index]:=PayLoad.AddressBook[Index - 1].RegularEmails;
+            sgAddressBook.Cells[7, Index]:=PayLoad.AddressBook[Index - 1].StatementEmails;
+            sgAddressBook.Cells[8, Index]:=PayLoad.AddressBook[Index - 1].PhoneNumbers;
+        end;
 
     finally
         sgAddressBook.Freeze(False);
@@ -1688,7 +1727,7 @@ begin
 end;
 
 
-procedure TMainForm.ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
+procedure TMainForm.ReadAgeView_Callback(CallResponse: TCallResponse; ReturnedData: TStringGrid; PayLoad: TAgingPayLoad);
 begin
 
     if not CallResponse.IsSucceeded then
@@ -1739,30 +1778,106 @@ begin
 end;
 
 
-procedure TMainForm.ReadOpenItems_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+procedure TMainForm.ReadOpenItems_Callback(PayLoad: TReturnOpenItems);
 begin
 
     UpdateStatusBar(TStatusBar.Ready);
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
     sgOpenItems.Freeze(True);
     try
 
-        sgOpenItems.RowCount:=ReturnedData.RowCount;
-        sgOpenItems.ColCount:=ReturnedData.ColCount;
+        var RowCount:=Length(PayLoad.OpenItems);
+        sgOpenItems.RowCount:=RowCount + 1; // Add header
+        sgOpenItems.ColCount:=37;
 
-        for var IndexRow:=0 to ReturnedData.RowCount - 1 do
-            for var IndexCol:=0 to ReturnedData.ColCount - 1 do
-            begin
-                sgOpenItems.Cells[IndexCol, IndexRow]:=ReturnedData.Cells[IndexCol, IndexRow];
-                if IndexRow = 0 then sgOpenItems.ColWidths[IndexCol]:=ReturnedData.ColWidths[IndexCol];
-            end;
+        sgOpenItems.Cells[0, 0]:='';
+        sgOpenItems.Cells[1, 0]:=TOpenItemsFields._SourceDbName;
+        sgOpenItems.Cells[2, 0]:=TOpenItemsFields._CustNumber;
+        sgOpenItems.Cells[3, 0]:=TOpenItemsFields._VoucherType;
+        sgOpenItems.Cells[4, 0]:=TOpenItemsFields._OpenCurAmount;
+        sgOpenItems.Cells[5, 0]:=TOpenItemsFields._OpenAmount;
+        sgOpenItems.Cells[6, 0]:=TOpenItemsFields._CustName;
+        sgOpenItems.Cells[7, 0]:=TOpenItemsFields._Iso;
+        sgOpenItems.Cells[8, 0]:=TOpenItemsFields._CurAmount;
+        sgOpenItems.Cells[9, 0]:=TOpenItemsFields._Amount;
+        sgOpenItems.Cells[10,0]:=TOpenItemsFields._InvoiceNumber;
+        sgOpenItems.Cells[11,0]:=TOpenItemsFields._DueDate;
+        sgOpenItems.Cells[12,0]:=TOpenItemsFields._Inf4;
+        sgOpenItems.Cells[13,0]:=TOpenItemsFields._Inf7;
+        sgOpenItems.Cells[14,0]:=TOpenItemsFields._CreditLimit;
+        sgOpenItems.Cells[15,0]:=TOpenItemsFields._Country;
+        sgOpenItems.Cells[16,0]:=TOpenItemsFields._PmtTerms;
+        sgOpenItems.Cells[17,0]:=TOpenItemsFields._PmtStatus;
+        sgOpenItems.Cells[18,0]:=TOpenItemsFields._Agent;
+        sgOpenItems.Cells[19,0]:=TOpenItemsFields._ControlStatus;
+        sgOpenItems.Cells[20,0]:=TOpenItemsFields._Address1;
+        sgOpenItems.Cells[21,0]:=TOpenItemsFields._Address2;
+        sgOpenItems.Cells[22,0]:=TOpenItemsFields._Address3;
+        sgOpenItems.Cells[23,0]:=TOpenItemsFields._PostalNumber;
+        sgOpenItems.Cells[24,0]:=TOpenItemsFields._PostalArea;
+        sgOpenItems.Cells[25,0]:=TOpenItemsFields._GenAccNumber;
+        sgOpenItems.Cells[26,0]:=TOpenItemsFields._ValueDate;
+        sgOpenItems.Cells[27,0]:=TOpenItemsFields._Division;
+        sgOpenItems.Cells[28,0]:=TOpenItemsFields._Text;
+        sgOpenItems.Cells[29,0]:=TOpenItemsFields._DirectDebit;
+        sgOpenItems.Cells[30,0]:=TOpenItemsFields._AdditionalText;
+        sgOpenItems.Cells[31,0]:=TOpenItemsFields._SalesResponsible;
+        sgOpenItems.Cells[32,0]:=TOpenItemsFields._CustomerGroup;
+        sgOpenItems.Cells[33,0]:=TOpenItemsFields._PersonResponsible;
+        sgOpenItems.Cells[34,0]:=TOpenItemsFields._AccountType;
+        sgOpenItems.Cells[35,0]:=TOpenItemsFields._VoucherNumber;
+        sgOpenItems.Cells[36,0]:=TOpenItemsFields._VoucherDate;
+
+        for var Index:=1 to RowCount do
+        begin
+            sgOpenItems.Cells[1, Index]:=PayLoad.OpenItems[Index - 1].SourceDbName;
+            sgOpenItems.Cells[2, Index]:=PayLoad.OpenItems[Index - 1].CustNumber.ToString();
+            sgOpenItems.Cells[3, Index]:=PayLoad.OpenItems[Index - 1].VoucherType.ToString();
+            sgOpenItems.Cells[4, Index]:=PayLoad.OpenItems[Index - 1].OpenCurAmount.ToString();
+            sgOpenItems.Cells[5, Index]:=PayLoad.OpenItems[Index - 1].OpenAmount.ToString();
+            sgOpenItems.Cells[6, Index]:=PayLoad.OpenItems[Index - 1].CustName;
+            sgOpenItems.Cells[7, Index]:=PayLoad.OpenItems[Index - 1].Iso;
+            sgOpenItems.Cells[8, Index]:=PayLoad.OpenItems[Index - 1].CurAmount.ToString();
+            sgOpenItems.Cells[9, Index]:=PayLoad.OpenItems[Index - 1].Amount.ToString();
+            sgOpenItems.Cells[10,Index]:=PayLoad.OpenItems[Index - 1].InvoiceNumber;
+            sgOpenItems.Cells[11,Index]:=THelpers.FormatDateTime(PayLoad.OpenItems[Index - 1].DueDate, TCalendar.DateOnly);
+            sgOpenItems.Cells[12,Index]:=PayLoad.OpenItems[Index - 1].Inf4;
+            sgOpenItems.Cells[13,Index]:=PayLoad.OpenItems[Index - 1].Inf7;
+            sgOpenItems.Cells[14,Index]:=PayLoad.OpenItems[Index - 1].CreditLimit.ToString();
+            sgOpenItems.Cells[15,Index]:=PayLoad.OpenItems[Index - 1].Country.ToString();
+            sgOpenItems.Cells[16,Index]:=PayLoad.OpenItems[Index - 1].PmtTerms.ToString();
+            sgOpenItems.Cells[17,Index]:=PayLoad.OpenItems[Index - 1].PmtStatus.ToString();
+            sgOpenItems.Cells[18,Index]:=PayLoad.OpenItems[Index - 1].Agent;
+            sgOpenItems.Cells[19,Index]:=PayLoad.OpenItems[Index - 1].ControlStatus.ToString();
+            sgOpenItems.Cells[20,Index]:=PayLoad.OpenItems[Index - 1].Address1;
+            sgOpenItems.Cells[21,Index]:=PayLoad.OpenItems[Index - 1].Address2;
+            sgOpenItems.Cells[22,Index]:=PayLoad.OpenItems[Index - 1].Address3;
+            sgOpenItems.Cells[23,Index]:=PayLoad.OpenItems[Index - 1].PostalNumber;
+            sgOpenItems.Cells[24,Index]:=PayLoad.OpenItems[Index - 1].PostalArea;
+            sgOpenItems.Cells[25,Index]:=PayLoad.OpenItems[Index - 1].GenAccNumber.ToString();
+            sgOpenItems.Cells[26,Index]:=THelpers.FormatDateTime(PayLoad.OpenItems[Index - 1].ValueDate, TCalendar.DateOnly);
+            sgOpenItems.Cells[27,Index]:=PayLoad.OpenItems[Index - 1].Division.ToString();
+            sgOpenItems.Cells[28,Index]:=PayLoad.OpenItems[Index - 1].Text;
+            sgOpenItems.Cells[29,Index]:=PayLoad.OpenItems[Index - 1].DirectDebit;
+            sgOpenItems.Cells[30,Index]:=PayLoad.OpenItems[Index - 1].AdditionalText;
+            sgOpenItems.Cells[31,Index]:=PayLoad.OpenItems[Index - 1].SalesResponsible;
+            sgOpenItems.Cells[32,Index]:=PayLoad.OpenItems[Index - 1].CustomerGroup;
+            sgOpenItems.Cells[33,Index]:=PayLoad.OpenItems[Index - 1].PersonResponsible;
+            sgOpenItems.Cells[34,Index]:=PayLoad.OpenItems[Index - 1].AccountType;
+            sgOpenItems.Cells[35,Index]:=PayLoad.OpenItems[Index - 1].VoucherNumber.ToString();
+            sgOpenItems.Cells[36,Index]:=THelpers.FormatDateTime(PayLoad.OpenItems[Index - 1].VoucherDate, TCalendar.DateOnly);
+        end;
+
+        valPage.Caption :=PayLoad.Meta.RequestedPage.ToString();
+        valPages.Caption:=PayLoad.Meta.TotalPages.ToString();
+        valItems.Caption:=PayLoad.Meta.RowsAffected.ToString();
 
         Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open Items loaded.');
 
@@ -1771,8 +1886,6 @@ begin
         sgOpenItems.SetColWidth(10, 20, 400);
         Service.Logger.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
     end;
-
-
 
 end;
 
@@ -1789,7 +1902,7 @@ begin
 end;
 
 
-procedure TMainForm.ScanSnapshots_Callback(CanGetAge: boolean; ReceivedTime: string; CallResponse: TCallResponse);
+procedure TMainForm.ScanSnapshots_Callback(CallResponse: TCallResponse; CanGetAge: boolean; ReceivedTime: string);
 begin
 
     if not CallResponse.IsSucceeded then
@@ -1896,7 +2009,7 @@ begin
 end;
 
 
-procedure TMainForm.GetAgingReport_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+procedure TMainForm.GetAgingReport_Callback(CallResponse: TCallResponse);
 begin
 
     UpdateStatusBar(TStatusBar.Ready);
@@ -1908,28 +2021,10 @@ begin
         Exit();
     end;
 
-    UpdateStatusBar(TStatusBar.WritingXLS);
-    Service.Mediator.Utilities.WriteToExcelAsync(ReturnedData, FExcelFileName, WriteToExcel_Callback);
-
-end;
-
-
-procedure TMainForm.WriteToExcel_Callback(CallResponse: TCallResponse);
-begin
-
-    UpdateStatusBar(TStatusBar.Ready);
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[WriteToExcel_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
     if THelpers.MsgCall(
             MainForm.Handle,
             TAppMessage.Question2,
-            'Report has been exported and saved successfuly! Do you want to open it?') = IDYES then
+            'Report has been exported and saved successfuly!' + TChars.CrLf + 'Do you want to open it?') = IDYES then
     begin
 
         ShellExecute(
@@ -1946,20 +2041,17 @@ begin
 end;
 
 
-procedure TMainForm.LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+procedure TMainForm.LoadRating_Callback(PayLoad: TUserRating);
 begin
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[LoadRating_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[LoadRating_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
-    if Rating.UserRating = 0 then
-    begin
-        btnRatingClick(Self);
-    end;
+    if PayLoad.Rating = 0 then btnRatingClick(Self);
 
 end;
 
@@ -2235,6 +2327,7 @@ begin
     EditUrlSection.Text:='';
     ClearMainViewInfo();
     ClearAgingSummary();
+    ClearOpenItemsInfo();
     InitializeScreenSettings;
     SetActiveTabsheet(TabSheet9);
     Tables.ActivePage:=Page1;
@@ -3559,7 +3652,7 @@ begin
     begin
         FExcelFileName:=MainForm.FileXLExport.FileName;
         UpdateStatusBar(TStatusBar.MakeReport);
-        Service.Mediator.Debtors.GetAgingReportAsync(FLoadedCompanies, GetAgingReport_Callback);
+        Service.Mediator.Debtors.GetAgingReportAsync(FLoadedCompanies, FExcelFileName, GetAgingReport_Callback);
     end;
 
 end;
@@ -3998,9 +4091,20 @@ begin
 end;
 
 
-procedure TMainForm.btnReloadClick(Sender: TObject);
+procedure TMainForm.btnBackClick(Sender: TObject);
 begin
-    LoadOpenItems(1);
+    if (valPage.Caption = '0') or (valPage.Caption = '1') then Exit();
+    var NewPage:=StrToInt(valPage.Caption) - 1;
+    LoadOpenItems(NewPage);
+end;
+
+
+procedure TMainForm.btnNextClick(Sender: TObject);
+begin
+    var NewPage:=StrToInt(valPage.Caption) + 1;
+    var TotalPages:=StrToInt(valPages.Caption);
+    if NewPage > TotalPages then Exit();
+    LoadOpenItems(NewPage);
 end;
 
 
@@ -4756,17 +4860,27 @@ begin
 end;
 
 
-procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
+procedure TMainForm.btnBackMouseEnter(Sender: TObject);
 begin
-    txtReloadBtnA.Font.Color:=AppButtonTxtSelected;
-    txtReloadBtnB.Font.Color:=AppButtonTxtSelected;
+    txtBackBtn.Font.Color:=AppButtonTxtSelected;
 end;
 
 
-procedure TMainForm.btnReloadMouseLeave(Sender: TObject);
+procedure TMainForm.btnBackMouseLeave(Sender: TObject);
 begin
-    txtReloadBtnA.Font.Color:=AppButtonTxtNormal;
-    txtReloadBtnB.Font.Color:=AppButtonTxtNormal;
+    txtBackBtn.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TMainForm.btnNextMouseEnter(Sender: TObject);
+begin
+    txtNextBtn.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TMainForm.btnNextMouseLeave(Sender: TObject);
+begin
+    txtNextBtn.Font.Color:=AppButtonTxtNormal;
 end;
 
 

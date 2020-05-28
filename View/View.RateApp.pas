@@ -21,7 +21,8 @@ uses
     Vcl.ComCtrls,
     Unity.Enums,
     Unity.Panel,
-    Unity.Records;
+    Unity.Records,
+    Api.UserRating;
 
 
 type
@@ -73,7 +74,7 @@ type
         procedure SetRatingStars(RatingNumber: integer);
         procedure InsertRating();
         procedure UpdateRating();
-        procedure LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+        procedure LoadRating_Callback(PayLoad: TUserRating);
         procedure SubmitRating_Callback(CallResponse: TCallResponse);
         procedure UpdateRating_Callback(CallResponse: TCallResponse);
     public
@@ -211,7 +212,7 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TRateForm.LoadRating_Callback(Rating: TRating; CallResponse: TCallResponse);
+procedure TRateForm.LoadRating_Callback(PayLoad: TUserRating);
 begin
 
     FIsDataLoaded:=True;
@@ -219,14 +220,14 @@ begin
     ReportMemo.Enabled:=True;
     btnSendRating.Enabled:=True;
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(RateForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(RateForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
     end;
 
-    FSelectedRating:=Rating.UserRating;
-    ReportMemo.Text:=Rating.UserComment;
+    FSelectedRating:=PayLoad.Rating;
+    ReportMemo.Text:=PayLoad.Comment;
     SetRatingStars(FSelectedRating);
     FIsAppRated:=True;
 

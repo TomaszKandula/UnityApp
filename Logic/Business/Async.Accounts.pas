@@ -415,46 +415,41 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetUserCompanyListAsync]: Executing GET ' + Rest.ClientBaseURL);
 
-        var CallResponse: TCallResponse;
         var UserCompanyList: TUserCompanyList;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
                 UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Rest.Content);
-                CallResponse.IsSucceeded:=True;
                 Service.Logger.Log('[GetUserCompanyListAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetUserCompanyListAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    UserCompanyList.Error.ErrorDesc:='[GetUserCompanyListAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetUserCompanyListAsync]: Invalid server response. Please contact IT Support.'
+                        UserCompanyList.Error.ErrorDesc:='[GetUserCompanyListAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetUserCompanyListAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        UserCompanyList.Error.ErrorDesc:='[GetUserCompanyListAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(UserCompanyList.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetUserCompanyListAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                UserCompanyList.Error.ErrorDesc:='[GetUserCompanyListAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(UserCompanyList.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(UserCompanyList, CallResponse);
+            if Assigned(Callback) then Callback(UserCompanyList);
             if Assigned(UserCompanyList) then UserCompanyList.Free();
         end);
 
@@ -650,61 +645,42 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
-        var TempRating: TRating;
-        var CallResponse: TCallResponse;
+        var UserRating: TUserRating;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var UserRating:=TJson.JsonToObject<TUserRating>(Rest.Content);
-                try
-
-                    TempRating.UserRating :=UserRating.Rating;
-                    TempRating.UserComment:=UserRating.Comment;
-
-                    CallResponse.IsSucceeded :=UserRating.IsSucceeded;
-                    CallResponse.ErrorCode   :=UserRating.Error.ErrorCode;
-                    CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-
-                    Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    UserRating.Free();
-                end;
-
+                UserRating:=TJson.JsonToObject<TUserRating>(Rest.Content);
+                Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[LoadRatingAwaited]: Invalid server response. Please contact IT Support.'
+                        UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(UserRating.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[LoadRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(UserRating.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(TempRating, CallResponse);
+            if Assigned(Callback) then Callback(UserRating);
+            if Assigned(UserRating) then UserRating.Free();
         end);
 
     end);

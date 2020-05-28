@@ -63,7 +63,7 @@ type
         procedure LoadUniqueValues();
         procedure FilterSourceGrid();
         procedure FilterSelectCheck();
-        procedure RecalcAgeViewSummary_Callback(PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
+        procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; PayLoad: TAgingPayLoad);
     public
         property InUse:        boolean     read FInUse;
         property SourceGrid:   TStringGrid read FSourceGrid   write FSourceGrid;
@@ -236,7 +236,7 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TFilterForm.RecalcAgeViewSummary_Callback(PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
+procedure TFilterForm.RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; PayLoad: TAgingPayLoad);
 begin
 
     Screen.Cursor:=crDefault;

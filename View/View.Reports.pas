@@ -27,7 +27,8 @@ uses
     Vcl.Grids,
     Unity.Panel,
     Unity.Records,
-    Unity.Grid;
+    Unity.Grid,
+    Api.ReturnReportList;
 
 
 type
@@ -51,7 +52,7 @@ type
     public
         var FSetLastSelection: TTabSheet;
     strict private
-        procedure GetBiReports_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
+        procedure GetBiReports_Callback(PayLoad: TReturnReportList);
     end;
 
 
@@ -87,7 +88,7 @@ end;
 
 {$REGION 'CALLBACKS'}
 
-procedure TReportsForm.GetBiReports_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
+procedure TReportsForm.GetBiReports_Callback(PayLoad: TReturnReportList);
 begin
 
     PanelReportList.Enabled:=True;
@@ -96,22 +97,30 @@ begin
 
     Screen.Cursor:=crDefault;
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ReportsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[GetBiReports_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(ReportsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetBiReports_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
     sgReportList.Freeze(True);
     try
 
-        sgReportList.RowCount:=PayLoad.RowCount;
-        sgReportList.ColCount:=PayLoad.ColCount;
+        sgReportList.RowCount:=Length(PayLoad.ReportList) + 1; // add header
+        sgReportList.ColCount:=4;
 
-        for var RowIndex:=0 to sgReportList.RowCount - 1 do
-            for var ColIndex:=0 to PayLoad.ColCount - 1 do
-                sgReportList.Cells[ColIndex, RowIndex]:=PayLoad.Cells[ColIndex, RowIndex];
+        sgReportList.Cells[0, 0]:='';
+        sgReportList.Cells[1, 0]:=TReportListFields._ReportName;
+        sgReportList.Cells[2, 0]:=TReportListFields._ReportDesc;
+        sgReportList.Cells[3, 0]:=TReportListFields._ReportLink;
+
+        for var Index:=1 to sgReportList.RowCount - 1 do
+        begin
+            sgReportList.Cells[1, Index]:=PayLoad.ReportList[Index - 1].ReportName;
+            sgReportList.Cells[2, Index]:=PayLoad.ReportList[Index - 1].ReportDesc;
+            sgReportList.Cells[3, Index]:=PayLoad.ReportList[Index - 1].ReportLink;
+        end;
 
         // Hide helper columns
         sgReportList.ColWidths[sgReportList.GetCol(TReportListFields._ReportDesc)]:=sgReportList.sgRowHidden;

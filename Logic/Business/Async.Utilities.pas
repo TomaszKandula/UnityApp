@@ -10,9 +10,11 @@ interface
 
 uses
     System.Threading,
+    System.Generics.Collections,
     Unity.Grid,
     Unity.Types,
-    Unity.Records;
+    Unity.Records,
+    Api.CustomerSnapshotEx;
 
 
 type
@@ -20,14 +22,6 @@ type
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
-        /// <summary>
-        /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure WriteToExcelAsync(Source: TStringGrid; FileName: string; Callback: TExcelExport);
         /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -79,7 +73,6 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure WriteToExcelAsync(Source: TStringGrid; FileName: string; Callback: TExcelExport); virtual;
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
         function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
@@ -94,6 +87,8 @@ implementation
 uses
     System.SysUtils,
     System.Classes,
+    System.Win.ComObj,
+    System.Variants,
     REST.Types,
     REST.Json,
     Unity.Enums,
@@ -103,7 +98,6 @@ uses
     Api.ReturnClientInfo,
     Api.ReturnReportList,
     Api.ReportListFields,
-    Api.CustomerSnapshotEx,
     Bcrypt;
 
 
@@ -115,49 +109,6 @@ end;
 destructor TUtilities.Destroy();
 begin
     inherited;
-end;
-
-
-procedure TUtilities.WriteToExcelAsync(Source: TStringGrid; FileName: string; Callback: TExcelExport);
-begin
-
-    var Grid:=TStringGrid.Create(nil);
-    Grid.RowCount:=Source.RowCount;
-    Grid.ColCount:=Source.ColCount;
-
-    for var iCNT:=0 to Source.RowCount - 1 do
-        for var jCNT:=0 to Source.ColCount - 1 do
-            Grid.Cells[jCNT, iCNT]:=Source.Cells[jCNT, iCNT];
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var CallResponse: TCallResponse;
-        try
-            Grid.ExportXLS(FileName, 'Aging Report');
-            Grid.Free();
-            Service.Logger.Log('[WriteToExcelAsync]: Excel has been saved to file "' + FileName + '".');
-            CallResponse.IsSucceeded:=True;
-        except
-            on E: Exception do
-            begin
-                if Assigned(Grid) then Grid.Free();
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[WriteToExcelAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(CallResponse);
-        end);
-
-    end);
-
-    NewTask.Start();
-
 end;
 
 
@@ -391,7 +342,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(PayLoad, LCallResponse);
+            if Assigned(Callback) then Callback(LCallResponse, PayLoad);
         end);
 
     end);
@@ -415,74 +366,42 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetBiReportsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
-        var LCallResponse: TCallResponse;
-        var LGrid:=TStringGrid.Create(nil);
+        var ReturnReportList: TReturnReportList;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var ReturnReportList:=TJson.JsonToObject<TReturnReportList>(Rest.Content);
-                try
-
-                    var RowCount:=Length(ReturnReportList.ReportList);
-                    LGrid.RowCount:=RowCount + 1; // Add header
-                    LGrid.ColCount:=4;
-
-                    LGrid.Cells[0, 0]:='';
-                    LGrid.Cells[1, 0]:=TReportListFields._ReportName;
-                    LGrid.Cells[2, 0]:=TReportListFields._ReportDesc;
-                    LGrid.Cells[3, 0]:=TReportListFields._ReportLink;
-
-                    for var Index:=1 to RowCount do
-                    begin
-                        LGrid.Cells[1, Index]:=ReturnReportList.ReportList[Index - 1].ReportName;
-                        LGrid.Cells[2, Index]:=ReturnReportList.ReportList[Index - 1].ReportDesc;
-                        LGrid.Cells[3, Index]:=ReturnReportList.ReportList[Index - 1].ReportLink;
-                    end;
-
-                    LCallResponse.IsSucceeded:=ReturnReportList.IsSucceeded;
-                    LCallResponse.ErrorCode  :=ReturnReportList.Error.ErrorCode;
-                    LCallResponse.LastMessage:=ReturnReportList.Error.ErrorDesc;
-
-                    Service.Logger.Log('[GetBiReportsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    ReturnReportList.Free();
-                end;
-
+                ReturnReportList:=TJson.JsonToObject<TReturnReportList>(Rest.Content);
+                Service.Logger.Log('[GetBiReportsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    LCallResponse.LastMessage:='[GetBiReportsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    ReturnReportList.Error.ErrorDesc:='[GetBiReportsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        LCallResponse.LastMessage:='[GetBiReportsAsync]: Invalid server response. Please contact IT Support.'
+                        ReturnReportList.Error.ErrorDesc:='[GetBiReportsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        LCallResponse.LastMessage:='[GetBiReportsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        ReturnReportList.Error.ErrorDesc:='[GetBiReportsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                LCallResponse.ReturnedCode:=Rest.StatusCode;
-                LCallResponse.IsSucceeded:=False;
-                Service.Logger.Log(LCallResponse.LastMessage);
+                Service.Logger.Log(ReturnReportList.Error.ErrorDesc);
 
             end;
 
         except
             on E: Exception do
             begin
-                LCallResponse.IsSucceeded:=False;
-                LCallResponse.LastMessage:='[GetBiReportsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                Service.Logger.Log(LCallResponse.LastMessage);
+                ReturnReportList.Error.ErrorDesc:='[GetBiReportsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                Service.Logger.Log(ReturnReportList.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(LGrid, LCallResponse);
-            if Assigned(LGrid) then LGrid.Free();
+            if Assigned(Callback) then Callback(ReturnReportList);
+            if Assigned(ReturnReportList) then ReturnReportList.Free();
         end);
 
     end);

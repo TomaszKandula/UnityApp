@@ -35,7 +35,11 @@ uses
     Unity.Grid,
     Unity.Panel,
     Api.ReturnCompanyEmails,
-    Api.SentDocument;
+    Api.SentDocument,
+    Api.AddressBookItem,
+    Api.UserDailyCommentsList,
+    Api.UserGeneralComment,
+    Api.ReturnOpenItems;
 
 
 type
@@ -197,6 +201,7 @@ type
         procedure selSendFromSelect(Sender: TObject);
         procedure btnGoogleItClick(Sender: TObject);
     strict private
+        procedure SetDefaultHeader(var SourceGrid: TStringGrid);
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FLedgerIso: string;
@@ -226,16 +231,16 @@ type
         procedure SaveGeneralComment();
         procedure SaveDailyComment();
         procedure ExecuteMailer();
-        procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
+        procedure SendAccountDocument_Callback(PayLoad: TSentDocument);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
-        procedure InsertAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
+        procedure InsertAddressBook_Callback(CallResponse: TCallResponse; ReturnedId: integer);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
-        procedure GetDailyComments_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
-        procedure GetGeneralComment_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
-        procedure GetCustomerDetails_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
-        procedure GetOpenItems_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
-        procedure GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
+        procedure GetDailyComments_Callback(PayLoad: TUserDailyCommentsList);
+        procedure GetGeneralComment_Callback(PayLoad: TUserGeneralComment);
+        procedure GetCustomerDetails_Callback(PayLoad: TAddressBookItem);
+        procedure GetOpenItems_Callback(PayLoad: TReturnOpenItems);
+        procedure GetCompanyEmails_Callback(PayLoad: TReturnCompanyEmails);
     public
         property SourceDBName: string read FSourceDBName;
         property CustName: string read FCustName;
@@ -266,7 +271,7 @@ uses
     Unity.Helpers,
     Unity.Enums,
     Unity.Sorting,
-    Api.ReturnOpenItems,
+    Layout.AgeViewModel,
     Api.OpenItemsFields,
     Api.UserDailyCommentsFields,
     Api.CustomerSnapshotEx,
@@ -285,6 +290,31 @@ end;
 
 
 {$REGION 'LOCAL HELPERS'}
+
+
+procedure TActionsForm.SetDefaultHeader(var SourceGrid: TStringGrid);
+begin
+    SourceGrid.Cells[0, 0]:='';
+    SourceGrid.Cells[1 ,0]:=TOpenItemsFields._InvoiceNumber;
+    SourceGrid.Cells[2 ,0]:=TOpenItemsFields._Text;
+    SourceGrid.Cells[3 ,0]:=TOpenItemsFields._AdditionalText;
+    SourceGrid.Cells[4, 0]:=TOpenItemsFields._OpenAmount;
+    SourceGrid.Cells[5, 0]:=TOpenItemsFields._Amount;
+    SourceGrid.Cells[6, 0]:=TOpenItemsFields._OpenCurAmount;
+    SourceGrid.Cells[7, 0]:=TOpenItemsFields._CurAmount;
+    SourceGrid.Cells[8, 0]:=TOpenItemsFields._Iso;
+    SourceGrid.Cells[9 ,0]:=TOpenItemsFields._DueDate;
+    SourceGrid.Cells[10,0]:=TOpenItemsFields._ValueDate;
+    SourceGrid.Cells[11,0]:=TOpenItemsFields._ControlStatus;
+    SourceGrid.Cells[12,0]:=TOpenItemsFields._PmtStatus;
+    SourceGrid.Cells[13,0]:=TOpenItemsFields._Address1;
+    SourceGrid.Cells[14,0]:=TOpenItemsFields._Address2;
+    SourceGrid.Cells[15,0]:=TOpenItemsFields._Address3;
+    SourceGrid.Cells[16,0]:=TOpenItemsFields._PostalNumber;
+    SourceGrid.Cells[17,0]:=TOpenItemsFields._PostalArea;
+    SourceGrid.Cells[18,0]:=TOpenItemsFields._SourceDbName;
+    SourceGrid.Cells[19,0]:=TOpenItemsFields._CustNumber;
+end;
 
 
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
@@ -749,14 +779,14 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TActionsForm.SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
+procedure TActionsForm.SendAccountDocument_Callback(PayLoad: TSentDocument);
 begin
 
     Screen.Cursor:=crDefault;
 
-    if not Response.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
     end;
 
@@ -807,7 +837,7 @@ begin
 end;
 
 
-procedure TActionsForm.InsertAddressBook_Callback(ReturnedId: integer; CallResponse: TCallResponse);
+procedure TActionsForm.InsertAddressBook_Callback(CallResponse: TCallResponse; ReturnedId: integer);
 begin
 
     if not CallResponse.IsSucceeded then
@@ -871,17 +901,17 @@ begin
 end;
 
 
-procedure TActionsForm.GetDailyComments_Callback(Comments: TArray<TDailyCommentFields>; CallResponse: TCallResponse);
+procedure TActionsForm.GetDailyComments_Callback(PayLoad: TUserDailyCommentsList);
 begin
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[GetDailyCommentsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetDailyCommentsAsync_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
-    var TotalRows:=Length(Comments);
+    var TotalRows:=Length(PayLoad.UserDailyComments);
     if TotalRows > 0 then
     begin
 
@@ -896,11 +926,11 @@ begin
             var Col4:=DailyComGrid.GetCol(TUserDailyCommentsFields._UserComment);
             var Col5:=DailyComGrid.GetCol(TUserDailyCommentsFields._UserAlias);
 
-            DailyComGrid.Cells[Col1, iCNT]:=Comments[iCNT - 1].CommentId.ToString();
-            DailyComGrid.Cells[Col2, iCNT]:=THelpers.FormatDateTime(Comments[iCNT - 1].EntryDateTime, TCalendar.DateTime);
-            DailyComGrid.Cells[Col3, iCNT]:=THelpers.FormatDateTime(Comments[iCNT - 1].AgeDate, TCalendar.DateOnly);
-            DailyComGrid.Cells[Col4, iCNT]:=Comments[iCNT - 1].UserComment;
-            DailyComGrid.Cells[Col5, iCNT]:=Comments[iCNT - 1].UserAlias;
+            DailyComGrid.Cells[Col1, iCNT]:=PayLoad.UserDailyComments[iCNT - 1].CommentId.ToString();
+            DailyComGrid.Cells[Col2, iCNT]:=THelpers.FormatDateTime(PayLoad.UserDailyComments[iCNT - 1].EntryDateTime, TCalendar.DateTime);
+            DailyComGrid.Cells[Col3, iCNT]:=THelpers.FormatDateTime(PayLoad.UserDailyComments[iCNT - 1].AgeDate, TCalendar.DateOnly);
+            DailyComGrid.Cells[Col4, iCNT]:=PayLoad.UserDailyComments[iCNT - 1].UserComment;
+            DailyComGrid.Cells[Col5, iCNT]:=PayLoad.UserDailyComments[iCNT - 1].UserAlias;
 
         end;
 
@@ -917,37 +947,37 @@ begin
 end;
 
 
-procedure TActionsForm.GetGeneralComment_Callback(Comments: TGeneralCommentFields; CallResponse: TCallResponse);
+procedure TActionsForm.GetGeneralComment_Callback(PayLoad: TUserGeneralComment);
 begin
 
-    if (not CallResponse.IsSucceeded) and (CallResponse.ErrorCode <> 'no_comment_found') then
+    if (not PayLoad.IsSucceeded) and (PayLoad.Error.ErrorCode <> 'no_comment_found') then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[GetGeneralCommentAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetGeneralCommentAsync_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
-    GeneralCom.Text:=Comments.UserComment;
+    GeneralCom.Text:=PayLoad.UserComment;
 
 end;
 
 
-procedure TActionsForm.GetCustomerDetails_Callback(CustDetails: TCustomerDetails; CallResponse: TCallResponse);
+procedure TActionsForm.GetCustomerDetails_Callback(PayLoad: TAddressBookItem);
 begin
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
     end;
 
     var Phones: string;
 
-    FCustDetailsId       :=CustDetails.Id;
-    Cust_Person.Text     :=CustDetails.ContactPerson;
-    Cust_MailGeneral.Text:=CustDetails.RegularEmails;
-    Cust_Mail.Text       :=CustDetails.StatementEmails;
-    Phones               :=CustDetails.PhoneNumbers;
+    FCustDetailsId       :=PayLoad.Id;
+    Cust_Person.Text     :=PayLoad.ContactPerson;
+    Cust_MailGeneral.Text:=PayLoad.RegularEmails;
+    Cust_Mail.Text       :=PayLoad.StatementEmails;
+    Phones               :=PayLoad.PhoneNumbers;
 
     if (Phones <> '') or (Phones <> ' ') then
     begin
@@ -961,13 +991,13 @@ begin
 end;
 
 
-procedure TActionsForm.GetOpenItems_Callback(PayLoad: TStringGrid; CallResponse: TCallResponse);
+procedure TActionsForm.GetOpenItems_Callback(PayLoad: TReturnOpenItems);
 begin
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[GetOpenItems_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetOpenItems_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
@@ -976,28 +1006,82 @@ begin
     FOpenItemsTotal.OpenCurAm:=0;
     FOpenItemsTotal.CurAm    :=0;
 
-    // Move data to grid
     OpenItemsGrid.Freeze(True);
     try
 
-        OpenItemsGrid.RowCount:=PayLoad.RowCount;
-        OpenItemsGrid.ColCount:=PayLoad.ColCount;
+        var RowCount:=Length(PayLoad.OpenItems);
+        OpenItemsGrid.RowCount:=RowCount + 1; // Add header
+        OpenItemsGrid.ColCount:=20;
 
-        for var RowIndex:=0 to PayLoad.RowCount - 1 do
+        if not FileExists(Service.Settings.DirLayouts + TCommon.OpenItemsLayout) then
+        begin
+            SetDefaultHeader(OpenItemsGrid);
+            OpenItemsGrid.SetColWidth(10, 20, 400);
+        end
+        else
         begin
 
-            for var ColIndex:=0 to PayLoad.ColCount - 1 do
-            begin
-                OpenItemsGrid.Cells[ColIndex, RowIndex]:=PayLoad.Cells[ColIndex, RowIndex];
-                if RowIndex = 0 then OpenItemsGrid.ColWidths[ColIndex]:=PayLoad.ColWidths[ColIndex];
+            var LLayoutColumns: TLayoutColumns;
+            try
+
+                var LResponse:=Service.Mediator.Utility.LoadAgeLayoutSync(
+                    Service.Settings.DirLayouts + TCommon.OpenItemsLayout,
+                    LLayoutColumns
+                );
+
+                if not LResponse.IsSucceeded then
+                begin
+                    SetDefaultHeader(OpenItemsGrid);
+                    OpenItemsGrid.SetColWidth(10, 20, 400);
+                end
+                else
+                begin
+
+                    OpenItemsGrid.ColCount:=Length(LLayoutColumns.Columns);
+
+                    for var Index:=0 to OpenItemsGrid.ColCount - 1 do
+                    begin
+                        var ColumnNumber:=LLayoutColumns.Columns[Index].Number;
+                        OpenItemsGrid.Cells[ColumnNumber, 0] :=LLayoutColumns.Columns[Index].Name;
+                        OpenItemsGrid.ColWidths[ColumnNumber]:=LLayoutColumns.Columns[Index].Width;
+                    end;
+
+                end;
+
+            finally
+                LLayoutColumns.Free();
             end;
 
-            if RowIndex > 0 then
+        end;
+
+        for var Index:=1 to RowCount do
+        begin
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._InvoiceNumber), Index]:=PayLoad.OpenItems[Index - 1].InvoiceNumber;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Text), Index]:=PayLoad.OpenItems[Index - 1].Text;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._AdditionalText), Index]:=PayLoad.OpenItems[Index - 1].AdditionalText;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._OpenAmount), Index]:=PayLoad.OpenItems[Index - 1].OpenAmount.ToString();
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Amount), Index]:=PayLoad.OpenItems[Index - 1].Amount.ToString();
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._OpenCurAmount), Index]:=PayLoad.OpenItems[Index - 1].OpenCurAmount.ToString();
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._CurAmount), Index]:=PayLoad.OpenItems[Index - 1].CurAmount.ToString();
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Iso), Index]:=PayLoad.OpenItems[Index - 1].Iso;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._DueDate), Index]:=THelpers.FormatDateTime(PayLoad.OpenItems[Index - 1].DueDate, TCalendar.DateOnly);
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._ValueDate),Index]:=THelpers.FormatDateTime(PayLoad.OpenItems[Index - 1].ValueDate, TCalendar.DateOnly);
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._ControlStatus),Index]:=PayLoad.OpenItems[Index - 1].ControlStatus.ToString();
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._PmtStatus),Index]:=PayLoad.OpenItems[Index - 1].PmtStatus.ToString();
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Address1),Index]:=PayLoad.OpenItems[Index - 1].Address1;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Address2),Index]:=PayLoad.OpenItems[Index - 1].Address2;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Address3),Index]:=PayLoad.OpenItems[Index - 1].Address3;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._PostalNumber),Index]:=PayLoad.OpenItems[Index - 1].PostalNumber;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._PostalArea),Index]:=PayLoad.OpenItems[Index - 1].PostalArea;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._SourceDbName),Index]:=PayLoad.OpenItems[Index - 1].SourceDbName;
+            OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._CustNumber),Index]:=PayLoad.OpenItems[Index - 1].CustNumber.ToString();
+
+            if Index > 0 then
             begin
-                FOpenItemsTotal.OpenAm   :=FOpenItemsTotal.OpenAm    + (PayLoad.Cells[PayLoad.GetCol(TOpenItemsFields._OpenAmount), RowIndex]).ToDouble;
-                FOpenItemsTotal.Am       :=FOpenItemsTotal.Am        + (PayLoad.Cells[PayLoad.GetCol(TOpenItemsFields._Amount), RowIndex]).ToDouble;
-                FOpenItemsTotal.OpenCurAm:=FOpenItemsTotal.OpenCurAm + (PayLoad.Cells[PayLoad.GetCol(TOpenItemsFields._OpenCurAmount), RowIndex]).ToDouble;
-                FOpenItemsTotal.CurAm    :=FOpenItemsTotal.CurAm     + (PayLoad.Cells[PayLoad.GetCol(TOpenItemsFields._CurAmount), RowIndex]).ToDouble;
+                FOpenItemsTotal.OpenAm   :=FOpenItemsTotal.OpenAm    + (OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._OpenAmount), Index]).ToDouble;
+                FOpenItemsTotal.Am       :=FOpenItemsTotal.Am        + (OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._Amount), Index]).ToDouble;
+                FOpenItemsTotal.OpenCurAm:=FOpenItemsTotal.OpenCurAm + (OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._OpenCurAmount), Index]).ToDouble;
+                FOpenItemsTotal.CurAm    :=FOpenItemsTotal.CurAm     + (OpenItemsGrid.Cells[OpenItemsGrid.GetCol(TOpenItemsFields._CurAmount), Index]).ToDouble;
             end;
 
         end;
@@ -1030,29 +1114,29 @@ begin
 end;
 
 
-procedure TActionsForm.GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
+procedure TActionsForm.GetCompanyEmails_Callback(PayLoad: TReturnCompanyEmails);
 begin
 
     selSendFrom.Enabled:=True;
     selSendFrom.Items.Clear();
 
-    if not Response.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
-        Service.Logger.Log('[GetCompanyEmails_Callback]: Error has been thrown "' + Response.Error.ErrorDesc + '".');
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetCompanyEmails_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         selSendFrom.Enabled:=False;
         Exit();
     end;
 
-    if Length(Response.Details[0].CompanyEmails) = 0 then
+    if Length(PayLoad.Details[0].CompanyEmails) = 0 then
     begin
         THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'Company have no emails assigned to it.');
         selSendFrom.Enabled:=False;
         Exit();
     end;
 
-    for var Index:=0 to Length(Response.Details[0].CompanyEmails) - 1 do
-        selSendFrom.Items.Add(Response.Details[0].CompanyEmails[Index]);
+    for var Index:=0 to Length(PayLoad.Details[0].CompanyEmails) - 1 do
+        selSendFrom.Items.Add(PayLoad.Details[0].CompanyEmails[Index]);
 
     selSendFrom.ItemIndex:=0;
     FLbuSendFrom:=selSendFrom.Text;

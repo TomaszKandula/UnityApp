@@ -119,8 +119,8 @@ type
         procedure FinishStartUp();
         procedure LoadFromGrid();
         procedure ExecuteMailer();
-        procedure GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
-        procedure SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
+        procedure GetCompanyEmails_Callback(PayLoad: TReturnCompanyEmails);
+        procedure SendAccountDocument_Callback(PayLoad: TSentDocument);
     end;
 
 
@@ -197,32 +197,32 @@ begin
 end;
 
 
-procedure TMassMailerForm.GetCompanyEmails_Callback(Response: TReturnCompanyEmails; CallResponse: TCallResponse);
+procedure TMassMailerForm.GetCompanyEmails_Callback(PayLoad: TReturnCompanyEmails);
 begin
 
-    if not Response.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
-        Service.Logger.Log('[GetCompanyEmails_Callback]: Error has been thrown "' + Response.Error.ErrorDesc + '".');
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetCompanyEmails_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 
-    var Items:=Length(Response.Details);
+    var Items:=Length(PayLoad.Details);
     if not Items > 0 then Exit();
 
     SetLength(FCompanyEmails, Items, 6);
     for var Index:=0 to Items - 1 do
     begin
 
-        FCompanyEmails[Index, 0]:=Response.Details[Index].SourceDbName;
+        FCompanyEmails[Index, 0]:=PayLoad.Details[Index].SourceDbName;
 
         var PreservedLen:=Length(FLbuEmails);
-        SetLength(FLbuEmails, PreservedLen + Length(Response.Details[Index].CompanyEmails), 2);
+        SetLength(FLbuEmails, PreservedLen + Length(PayLoad.Details[Index].CompanyEmails), 2);
 
-        for var jCNT:=0 to Length(Response.Details[Index].CompanyEmails) - 1 do
+        for var jCNT:=0 to Length(PayLoad.Details[Index].CompanyEmails) - 1 do
         begin
-            FLbuEmails[jCNT + PreservedLen, 0]:=Response.Details[Index].SourceDbName;
-            FLbuEmails[jCNT + PreservedLen, 1]:=Response.Details[Index].CompanyEmails[jCNT];
+            FLbuEmails[jCNT + PreservedLen, 0]:=PayLoad.Details[Index].SourceDbName;
+            FLbuEmails[jCNT + PreservedLen, 1]:=PayLoad.Details[Index].CompanyEmails[jCNT];
         end;
 
     end;
@@ -424,34 +424,34 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TMassMailerForm.SendAccountDocument_Callback(CallResponse: TCallResponse; Response: TSentDocument);
+procedure TMassMailerForm.SendAccountDocument_Callback(PayLoad: TSentDocument);
 begin
 
     Screen.Cursor:=crDefault;
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     BusyForm.Close();
 
-    if not Response.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, Response.Error.ErrorDesc);
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
     end;
 
     for var ListIndex:=0 to CustomerList.Items.Count - 1 do
     begin
 
-        for var ResponseIndex:=0 to Length(Response.SentDocuments) - 1 do
+        for var PayLoadIndex:=0 to Length(PayLoad.SentDocuments) - 1 do
         begin
 
-            if (CustomerList.Items[ListIndex].SubItems[0] = Response.SentDocuments[ResponseIndex].CustomerNumber.ToString())
-            and (CustomerList.Items[ListIndex].SubItems[5] = Response.SentDocuments[ResponseIndex].SourceDbName) then
+            if (CustomerList.Items[ListIndex].SubItems[0] = PayLoad.SentDocuments[PayLoadIndex].CustomerNumber.ToString())
+            and (CustomerList.Items[ListIndex].SubItems[5] = PayLoad.SentDocuments[PayLoadIndex].SourceDbName) then
                 CustomerList.Items[ListIndex].SubItems[2]:='Yes';
 
         end;
 
     end;
 
-    THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed within ' + Response.Meta.ProcessingTimeSpan + '.');
+    THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed within ' + PayLoad.Meta.ProcessingTimeSpan + '.');
 
 end;
 

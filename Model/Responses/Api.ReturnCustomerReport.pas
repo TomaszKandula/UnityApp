@@ -30,11 +30,11 @@ type
         var FMeta:               TMetaData;
     public
         destructor Destroy(); override;
-        const _AgeDate          = 'Age Date';
-        const _SnapshotDt       = 'Snapshot Date';
-        const _IsSucceeded      = 'IsSucceeded';
-        const _Error            = 'Error';
-        const _Meta             = 'Meta';
+        const _AgeDate     = 'Age Date';
+        const _SnapshotDt  = 'Snapshot Date';
+        const _IsSucceeded = 'IsSucceeded';
+        const _Error       = 'Error';
+        const _Meta        = 'Meta';
         property CustomerSnapshotEx: TArray<TCustomerSnapshotEx> read FCustomerSnapshotEx write FCustomerSnapshotEx;
         property AgeDate:            string                      read FAgeDate            write FAgeDate;
         property SnapshotDt:         string                      read FSnapshotDt         write FSnapshotDt;

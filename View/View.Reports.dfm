@@ -183,7 +183,6 @@ object ReportsForm: TReportsForm
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 0
-      ExplicitWidth = 281
     end
   end
 end

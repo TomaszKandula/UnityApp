@@ -59,7 +59,7 @@ type
         procedure RequestAgeReport();
         procedure ClearCompanyList();
         procedure CheckItem(var CheckEvent: boolean);
-        procedure GetUserCompanyList_Callback(PayLoad: TUserCompanyList; CallResponse: TCallResponse);
+        procedure GetUserCompanyList_Callback(PayLoad: TUserCompanyList);
         procedure SaveUserCompanyList_Callback(CallResponse: TCallResponse);
     end;
 
@@ -163,13 +163,13 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TCompanyListForm.GetUserCompanyList_Callback(PayLoad: TUserCompanyList; CallResponse: TCallResponse);
+procedure TCompanyListForm.GetUserCompanyList_Callback(PayLoad: TUserCompanyList);
 begin
 
-    if not CallResponse.IsSucceeded then
+    if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(CompanyListForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
-        Service.Logger.Log('[GetUserCompanyList_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        THelpers.MsgCall(CompanyListForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        Service.Logger.Log('[GetUserCompanyList_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
         Exit();
     end;
 

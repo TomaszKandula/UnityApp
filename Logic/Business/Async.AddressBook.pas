@@ -155,81 +155,42 @@ begin
             Service.Logger.Log('[OpenAddressBookAsync]: Executing GET ' + Rest.ClientBaseURL);
         end;
 
-        var CallResponse: TCallResponse;
-        var Grid:=TStringGrid.Create(nil);
+        var AddressBookList: TAddressBookList;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var AddressBookList:=TJson.JsonToObject<TAddressBookList>(Rest.Content);
-                try
-
-                    Grid.RowCount:=Length(AddressBookList.AddressBook) + 1; // Add header
-                    Grid.ColCount:=9;
-
-                    Grid.Cells[0, 0]:='';//empty lp column
-                    Grid.Cells[1, 0]:=TAddressBookFields._Id;//hidden column
-                    Grid.Cells[2, 0]:=TAddressBookFields._SourceDbName;
-                    Grid.Cells[3, 0]:=TAddressBookFields._CustomerNumber;
-                    Grid.Cells[4, 0]:=TAddressBookFields._CustomerName;
-                    Grid.Cells[5, 0]:=TAddressBookFields._ContactPerson;
-                    Grid.Cells[6, 0]:=TAddressBookFields._RegularEmails;
-                    Grid.Cells[7, 0]:=TAddressBookFields._StatementEmails;
-                    Grid.Cells[8, 0]:=TAddressBookFields._PhoneNumbers;
-
-                    for var Index:=1 to Grid.RowCount - 1 do
-                    begin
-                        Grid.Cells[1, Index]:=AddressBookList.AddressBook[Index - 1].Id.ToString();
-                        Grid.Cells[2, Index]:=AddressBookList.AddressBook[Index - 1].SourceDbName;
-                        Grid.Cells[3, Index]:=AddressBookList.AddressBook[Index - 1].CustomerNumber.ToString();
-                        Grid.Cells[4, Index]:=AddressBookList.AddressBook[Index - 1].CustomerName;
-                        Grid.Cells[5, Index]:=AddressBookList.AddressBook[Index - 1].ContactPerson;
-                        Grid.Cells[6, Index]:=AddressBookList.AddressBook[Index - 1].RegularEmails;
-                        Grid.Cells[7, Index]:=AddressBookList.AddressBook[Index - 1].StatementEmails;
-                        Grid.Cells[8, Index]:=AddressBookList.AddressBook[Index - 1].PhoneNumbers;
-                    end;
-
-                    CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    Service.Logger.Log('[OpenAddressBookAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    AddressBookList.Free();
-                end;
-
+                AddressBookList:=TJson.JsonToObject<TAddressBookList>(Rest.Content);
+                Service.Logger.Log('[OpenAddressBookAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[OpenAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    AddressBookList.Error.ErrorDesc:='[OpenAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[OpenAddressBookAsync]: Invalid server response. Please contact IT Support.'
+                        AddressBookList.Error.ErrorDesc:='[OpenAddressBookAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[OpenAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        AddressBookList.Error.ErrorDesc:='[OpenAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(AddressBookList.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[OpenAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                AddressBookList.Error.ErrorDesc:='[OpenAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(AddressBookList.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(Grid, CallResponse);
-            if Assigned(Grid) then Grid.Free();
+            if Assigned(Callback) then Callback(AddressBookList);
+            if Assigned(AddressBookList) then AddressBookList.Free();
         end);
 
     end);
@@ -407,7 +368,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(ReturnedId, CallResponse);
+            if Assigned(Callback) then Callback(CallResponse, ReturnedId);
         end);
 
     end);
@@ -506,61 +467,42 @@ begin
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetCustomerDetailsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
-        var LCustDetails: TCustomerDetails;
-        var CallResponse: TCallResponse;
+        var AddressBookItem: TAddressBookItem;
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
-
-                var AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Rest.Content);
-                try
-
-                    LCustDetails.Id             :=AddressBookItem.Id;
-                    LCustDetails.ContactPerson  :=AddressBookItem.ContactPerson;
-                    LCustDetails.RegularEmails  :=AddressBookItem.RegularEmails;
-                    LCustDetails.StatementEmails:=AddressBookItem.StatementEmails;
-                    LCustDetails.PhoneNumbers   :=AddressBookItem.PhoneNumbers;
-
-                    CallResponse.IsSucceeded:=True;
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-                    Service.Logger.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    AddressBookItem.Free();
-                end;
-
+                AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Rest.Content);
+                Service.Logger.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    AddressBookItem.Error.ErrorDesc:='[GetCustomerDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Invalid server response. Please contact IT Support.'
+                        AddressBookItem.Error.ErrorDesc:='[GetCustomerDetailsAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetCustomerDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        AddressBookItem.Error.ErrorDesc:='[GetCustomerDetailsAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
+                Service.Logger.Log(AddressBookItem.Error.ErrorDesc);
 
             end;
 
         except on
             E: Exception do
             begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCustomerDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
+                AddressBookItem.Error.ErrorDesc:='[GetCustomerDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(AddressBookItem.Error.ErrorDesc);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(LCustDetails, CallResponse);
+            if Assigned(Callback) then Callback(AddressBookItem);
+            if Assigned(AddressBookItem) then AddressBookItem.Free();
         end);
 
     end);
