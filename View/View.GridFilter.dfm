@@ -20,6 +20,7 @@ object FilterForm: TFilterForm
   Position = poMainFormCenter
   OnActivate = FormActivate
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96

@@ -28,6 +28,16 @@ type
 
 
     /// <summary>
+    /// Group of variabes that carries information on column filtering.
+    /// </summary>
+    TColumnData = record
+        ColumnName:   string;
+        ColumnNumber: integer;
+        IsFiltered:   boolean;
+        UniqueItems:  TArray<TArray<string>>;
+    end;
+
+    /// <summary>
     /// Group of variables that carries last response that have been returned after processing
     /// given requested. Returned Code field is present for failed REST calls (status code returned).
     /// </summary>

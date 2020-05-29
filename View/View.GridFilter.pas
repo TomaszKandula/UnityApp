@@ -16,6 +16,7 @@ uses
     System.Variants,
     System.Classes,
     System.StrUtils,
+    System.Generics.Collections,
     Vcl.Graphics,
     Vcl.Controls,
     Vcl.Forms,
@@ -50,15 +51,19 @@ type
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
         procedure btnFilterClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure cbSelectAllClick(Sender: TObject);
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
     strict private
+        var FFilteredColumns: cardinal;
+        var FFilterList:   TList<TColumnData>;
         var FInUse:        boolean;
         var CheckEvent:    boolean;
         var FColumnNumber: integer;
+        var FColumnName:   string;
         var FSourceGrid:   TStringGrid;
         procedure LoadUniqueValues();
         procedure FilterSourceGrid();
@@ -68,6 +73,7 @@ type
         property InUse:        boolean     read FInUse;
         property SourceGrid:   TStringGrid read FSourceGrid   write FSourceGrid;
         property ColumnNumber: integer     read FColumnNumber write FColumnNumber;
+        property ColumnName:   string      read FColumnName   write FColumnName;
     end;
 
 
@@ -135,68 +141,158 @@ begin
         Exit();
     end;
 
-    var StringList:=TStringList.Create;
-    try
+    // Check if column has been already queried
+    if FFilterList.Count > 0 then
+    begin
 
-        StringList.Sorted:=True;
-        StringList.Duplicates:=dupIgnore;
-
-        // Get unique values to string list, skip header
-        for var IndexRow:=1 to FSourceGrid.RowCount - 1 do
+        for var Index:=0 to FFilterList.Count - 1 do
         begin
 
-            var Value:=FSourceGrid.Cells[FColumnNumber, IndexRow].Trim();
+            // If so, ready the filter state
+            if FFilterList[Index].ColumnNumber = FColumnNumber then
+            begin
 
-            if FSourceGrid.RowHeights[IndexRow] = FSourceGrid.sgRowHidden then
-                Value:=Value + '&&False' else Value:=Value + '&&True';
+                FilterList.Clear();
 
-            StringList.Add(Value);
+                if FFilterList[Index].UniqueItems = nil then
+                begin
+                    THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, 'Array has not been created.');
+                    Exit();
+                end;
+
+                for var Items:=0 to Length(FFilterList[Index].UniqueItems) - 1 do
+                begin
+                    FilterList.Items.Add(FFilterList[Index].UniqueItems[Items, 0]);
+                    FilterList.Checked[FilterList.Items.Count - 1]:=FFilterList[Index].UniqueItems[Items, 1].ToBoolean();
+                end;
+
+            end;
 
         end;
 
-        // Move to filter list and untick hidden rows
-        for var IndexRow:=0 to StringList.Count - 1 do
-        begin
+    end
+    else
+    // Make new query and display unique values
+    begin
 
-            var Value:=StringList.Strings[IndexRow];
-            var Parsed:=Value.Split(['&&']);
+        var StringList:=TStringList.Create();
+        try
 
-            FilterList.Items.Add(Parsed[0]);
+            StringList.Sorted:=True;
+            StringList.Duplicates:=dupIgnore;
 
-            if Parsed[1] = 'False' then
-                FilterList.Checked[IndexRow]:=False
-                    else FilterList.Checked[IndexRow]:=True;
+            // Get unique values to string list, skip header
+            for var Index:=1 to FSourceGrid.RowCount - 1 do
+            begin
 
+                var Value:=FSourceGrid.Cells[FColumnNumber, Index].Trim();
+
+                if FSourceGrid.RowHeights[Index] = FSourceGrid.sgRowHidden then
+                    Value:=Value + '&&False' else Value:=Value + '&&True';
+
+                StringList.Add(Value);
+
+            end;
+
+            var NewColumnData: TColumnData;
+            NewColumnData.ColumnName:=FColumnName;
+            NewColumnData.ColumnNumber:=FColumnNumber;
+            NewColumnData.IsFiltered:=False;
+            SetLength(NewColumnData.UniqueItems, StringList.Count, 2);
+
+            for var Index:=0 to StringList.Count - 1 do
+            begin
+
+                var Value:=StringList.Strings[Index];
+                var Parsed:=Value.Split(['&&']);
+
+                FilterList.Items.Add(Parsed[0]);
+                NewColumnData.UniqueItems[Index, 0]:=Parsed[0];
+                NewColumnData.UniqueItems[Index, 1]:=Parsed[1];
+
+                if Parsed[1] = 'False' then
+                    FilterList.Checked[Index]:=False
+                        else FilterList.Checked[Index]:=True;
+
+            end;
+
+            FFilterList.Add(NewColumnData);
+
+        finally
+            StringList.Free();
         end;
 
-    finally
-        StringList.Free();
     end;
 
 end;
 
 
 procedure TFilterForm.FilterSourceGrid();
-begin
 
-    for var IndexLst:=0 to FilterList.Count - 1 do
+    function GetState(ASearchValue: string; AColumnDataPos: integer): boolean;
     begin
 
-        for var IndexSrc:=1 to FSourceGrid.RowCount - 1 do
+        Result:=False;
+
+        for var Index:=0 to Length(FFilterList[AColumnDataPos].UniqueItems) - 1 do
         begin
 
-            var Value:=FSourceGrid.Cells[ColumnNumber, IndexSrc].Trim();
-
-            if FilterList.Items[IndexLst] = Value then
+            if ASearchValue = FFilterList[AColumnDataPos].UniqueItems[Index, 0] then
             begin
-
-                if FilterList.Checked[IndexLst] = True then
-                    FSourceGrid.RowHeights[IndexSrc]:=FSourceGrid.sgRowHeight
-                        else FSourceGrid.RowHeights[IndexSrc]:=FSourceGrid.sgRowHidden;
-
+                Result:=FFilterList[AColumnDataPos].UniqueItems[Index, 1].ToBoolean();
+                Exit();
             end;
 
         end;
+
+    end;
+
+    function GetColumnDataPos(AColumnNumber: integer): integer;
+    begin
+
+        Result:=0;
+
+        for var Index:=0 to FFilterList.Count - 1 do
+        begin
+
+            if FFilterList[Index].ColumnNumber = AColumnNumber then
+            begin
+                Result:=Index;
+                Exit();
+            end;
+
+        end;
+
+    end;
+
+begin
+
+    var ColumnDataPos:=GetColumnDataPos(FColumnNumber);
+
+    var UpdatedColumnData: TColumnData;
+    UpdatedColumnData.ColumnName  :=FColumnName;
+    UpdatedColumnData.ColumnNumber:=FColumnNumber;
+    UpdatedColumnData.IsFiltered  :=True;
+    UpdatedColumnData.UniqueItems :=FFilterList[ColumnDataPos].UniqueItems;
+
+    FFilterList[ColumnDataPos]:=UpdatedColumnData;
+
+    for var Index:=0 to Length(FFilterList[ColumnDataPos].UniqueItems) - 1 do
+    begin
+        var IsChecked:=FilterList.Checked[Index];
+        FFilterList[ColumnDataPos].UniqueItems[Index, 1]:=IfThen(IsChecked, 'True', 'False');
+    end;
+
+    Inc(FFilteredColumns);
+
+    for var Index:=1 to FSourceGrid.RowCount - 1 do
+    begin
+
+        var Value:=FSourceGrid.Cells[ColumnNumber, Index].Trim();
+
+        if GetState(Value, ColumnDataPos) then
+            FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight
+                else FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
 
     end;
 
@@ -212,6 +308,7 @@ end;
 procedure TFilterForm.FormCreate(Sender: TObject);
 begin
     PanelListItems.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    if not Assigned(FFilterList) then FFilterList:=TList<TColumnData>.Create();
 end;
 
 
@@ -227,6 +324,18 @@ begin
     FilterSelectCheck();
     btnRemove.Enabled:=False;
     //FInUse:=
+end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
+
+
+procedure TFilterForm.FormDestroy(Sender: TObject);
+begin
+    if Assigned(FFilterList) then FFilterList.Free();
 end;
 
 
