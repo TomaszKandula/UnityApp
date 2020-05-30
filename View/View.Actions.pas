@@ -935,7 +935,7 @@ begin
         end;
 
         DailyComGrid.SetColWidth(10, 20, 400);
-        DailyComGrid.MSort(DailyComGrid.GetCol(TUserDailyCommentsFields._CommentId), TDataType.TInteger, False);
+        TSorting.MergeSort(DailyComGrid, DailyComGrid.GetCol(TUserDailyCommentsFields._CommentId), TDataType.TInteger, False);
         ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsFields._UserComment), DailyComGrid.Row];
 
     end
@@ -1104,7 +1104,7 @@ begin
     OpenItemsGrid.ColWidths[OpenItemsGrid.GetCol(TOpenItemsFields._SourceDbName)]:=OpenItemsGrid.sgRowHidden;
 
     // Sort via payment status
-    OpenItemsGrid.MSort(OpenItemsGrid.GetCol(TOpenItemsFields._PmtStatus), TDataType.TInteger, True);
+    TSorting.MergeSort(OpenItemsGrid, OpenItemsGrid.GetCol(TOpenItemsFields._PmtStatus), TDataType.TInteger, True);
 
 end;
 

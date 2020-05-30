@@ -56,7 +56,6 @@ type
         procedure SetRowHeight(RowHeight, Header: integer);
         procedure HideThisColumns();
         procedure ShowAllColumns();
-	    procedure MSort(const SortCol: integer; const datatype: TDataType; const ascending: boolean);
         procedure AutoThumbSize();
         function GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
         procedure Freeze(PaintWnd: boolean);
@@ -448,41 +447,6 @@ begin
     // Skip header
     for var iCNT:=1 to ColCount - 1 do
         if ColWidths[iCNT] = -1 then ColWidths[iCNT]:=100;
-
-end;
-
-
-procedure TStringGrid.MSort(const SortCol: integer; const DataType: TDataType; const Ascending: boolean);
-begin
-
-    var List:  TArray<integer>;
-    var TempGrid: TStringGrid:=TStringGrid.create(nil);
-    try
-        TempGrid.RowCount :=RowCount;
-        TempGrid.ColCount :=ColCount;
-        TempGrid.FixedRows:=FixedRows;
-        SetLength(List, RowCount - FixedRows);
-
-        for var Index: integer:=FixedRows to RowCount - 1 do
-        begin
-            List[Index - FixedRows]:=Index;
-            TempGrid.Rows[Index].Assign(Rows[Index]);
-        end;
-
-        TSorting.MergeSort(Self, List, SortCol, DataType, Ascending);
-
-        for var Index: integer:=0 to RowCount - FixedRows - 1 do
-        begin
-            Rows[Index + FixedRows].Assign(TempGrid.Rows[List[Index]]);
-        end;
-
-        Row:=FixedRows;
-
-    finally
-        TempGrid.Free;
-    end;
-
-    SetLength(List, 0);
 
 end;
 

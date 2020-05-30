@@ -71,7 +71,7 @@ type
         procedure UnfilterSourceGrid();
         procedure FilterSelectCheck();
         procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
-        function GetState(ASearchValue: string; AColumnDataPos: integer): boolean;
+        function GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): boolean;
         function GetColumnDataPos(AColumnNumber: integer): integer;
     public
         procedure RemoveAllFilters();
@@ -131,7 +131,7 @@ begin
 end;
 
 
-function TFilterForm.GetState(ASearchValue: string; AColumnDataPos: integer): boolean;
+function TFilterForm.GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): boolean;
 begin
 
     Result:=False;
@@ -141,8 +141,21 @@ begin
 
         if ASearchValue = FFilterList[AColumnDataPos].UniqueItems[Index, 0] then
         begin
+
             Result:=FFilterList[AColumnDataPos].UniqueItems[Index, 1].ToBoolean();
+
+            if not Result then
+            begin
+
+                var Values:=FFilterList[AColumnDataPos].UniqueItems[Index, 2];
+                Values:=Values + ' ' + RowIndex.ToString();
+
+                FFilterList[AColumnDataPos].UniqueItems[Index, 2]:=Values.TrimLeft();
+
+            end;
+
             Exit();
+
         end;
 
     end;
@@ -178,7 +191,7 @@ begin
         Exit();
     end;
 
-    if not FColumnNumber > 0 then
+    if FColumnNumber < 1 then
     begin
         THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, 'Invalid column selection.');
         Exit();
@@ -204,9 +217,7 @@ begin
             FilterList.Checked[FilterList.Items.Count - 1]:=FFilterList[ColumnDataPos].UniqueItems[Items, 1].ToBoolean();
         end;
 
-        if FFilterList[ColumnDataPos].IsFiltered then
-            btnRemove.Enabled:=True
-                else btnRemove.Enabled:=False;
+        if FFilterList[ColumnDataPos].IsFiltered then btnRemove.Enabled:=True else btnRemove.Enabled:=False;
 
     end
     else
@@ -245,15 +256,13 @@ begin
 
                 end;
 
-                var stop:=0;
-
             end;
 
             var NewColumnData: TColumnData;
             NewColumnData.ColumnName  :=FColumnName;
             NewColumnData.ColumnNumber:=FColumnNumber;
             NewColumnData.IsFiltered  :=False;
-            SetLength(NewColumnData.UniqueItems, StringList.Count, 2);
+            SetLength(NewColumnData.UniqueItems, StringList.Count, 3);
 
             for var Index:=0 to StringList.Count - 1 do
             begin
@@ -268,6 +277,7 @@ begin
                     FilterList.Items.Add(Parsed[0]);
                     NewColumnData.UniqueItems[Index, 0]:=Parsed[0];
                     NewColumnData.UniqueItems[Index, 1]:=Parsed[1];
+                    NewColumnData.UniqueItems[Index, 2]:='';
 
                     if Parsed[1] = 'False' then
                         FilterList.Checked[Index]:=False
@@ -291,21 +301,21 @@ end;
 procedure TFilterForm.FilterSourceGrid();
 begin
 
-    var ColumnDataPos:=GetColumnDataPos(FColumnNumber);
+    var LColumnDataPos:=GetColumnDataPos(FColumnNumber);
 
     var UpdatedColumnData: TColumnData;
     UpdatedColumnData.ColumnName  :=FColumnName;
     UpdatedColumnData.ColumnNumber:=FColumnNumber;
     UpdatedColumnData.IsFiltered  :=True;
-    UpdatedColumnData.UniqueItems :=FFilterList[ColumnDataPos].UniqueItems;
+    UpdatedColumnData.UniqueItems :=FFilterList[LColumnDataPos].UniqueItems;
 
     FInUse:=True;
-    FFilterList[ColumnDataPos]:=UpdatedColumnData;
+    FFilterList[LColumnDataPos]:=UpdatedColumnData;
 
-    for var Index:=0 to Length(FFilterList[ColumnDataPos].UniqueItems) - 1 do
+    for var Index:=0 to Length(FFilterList[LColumnDataPos].UniqueItems) - 1 do
     begin
         var IsChecked:=FilterList.Checked[Index];
-        FFilterList[ColumnDataPos].UniqueItems[Index, 1]:=IfThen(IsChecked, 'True', 'False');
+        FFilterList[LColumnDataPos].UniqueItems[Index, 1]:=IfThen(IsChecked, 'True', 'False');
     end;
 
     Inc(FFilteredColumns);
@@ -313,9 +323,9 @@ begin
     for var Index:=1 to FSourceGrid.RowCount - 1 do
     begin
 
-        var Value:=FSourceGrid.Cells[ColumnNumber, Index].Trim();
+        var Value:=FSourceGrid.Cells[FColumnNumber, Index].Trim();
 
-        if GetState(Value, ColumnDataPos) then
+        if GetState(Value, LColumnDataPos, Index) then
             FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight
                 else FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
 
@@ -327,6 +337,27 @@ end;
 procedure TFilterForm.UnfilterSourceGrid();
 begin
 
+    var LColumnDataPos:=GetColumnDataPos(FColumnNumber);
+    var ToUnfilter: string;
+
+    for var Index:=0 to Length(FFilterList[LColumnDataPos].UniqueItems) - 1 do
+        ToUnfilter:=ToUnfilter + ' ' + FFilterList[LColumnDataPos].UniqueItems[Index, 2];
+
+    ToUnfilter:=ToUnfilter.TrimLeft();
+    var Parsed:=ToUnfilter.Split([' ']);
+
+    for var Index:=1 to FSourceGrid.RowCount - 1 do
+        if TArrayUtils<string>.Contains(Index.ToString(), Parsed) then
+            FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
+
+    FFilterList.Delete(LColumnDataPos);
+    Dec(FFilteredColumns);
+
+    if FFilteredColumns = 0 then
+    begin
+        FFilterList.Clear();
+        FInUse:=False;
+    end;
 
 end;
 
@@ -334,7 +365,28 @@ end;
 procedure TFilterForm.RemoveAllFilters();
 begin
 
+    Screen.Cursor:=crHourGlass;
+    BusyForm.Show();
 
+    FSourceGrid.Freeze(True);
+
+    THelpers.ExecWithDelay(150, procedure
+    begin
+
+        for var Index:=1 to FSourceGrid.RowCount - 1 do
+            FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
+
+        Service.Mediator.Utilities.RecalcAgeViewSummaryAsync(
+            FSourceGrid,
+            MainForm.FRiskClassGroup,
+            RecalcAgeViewSummary_Callback
+        );
+
+    end);
+
+    FFilterList.Clear();
+    FFilteredColumns:=0;
+    FInUse:=False;
 
 end;
 
@@ -419,7 +471,7 @@ begin
     FSourceGrid.Freeze(True);
     Close();
 
-    THelpers.ExecWithDelay(500, procedure
+    THelpers.ExecWithDelay(150, procedure
     begin
 
         FilterSourceGrid();
@@ -437,7 +489,26 @@ end;
 
 procedure TFilterForm.btnRemoveClick(Sender: TObject);
 begin
-    UnfilterSourceGrid();
+
+    Screen.Cursor:=crHourGlass;
+    BusyForm.Show();
+
+    FSourceGrid.Freeze(True);
+    Close();
+
+    THelpers.ExecWithDelay(150, procedure
+    begin
+
+        UnfilterSourceGrid();
+
+        Service.Mediator.Utilities.RecalcAgeViewSummaryAsync(
+            FSourceGrid,
+            MainForm.FRiskClassGroup,
+            RecalcAgeViewSummary_Callback
+        );
+
+    end);
+
 end;
 
 

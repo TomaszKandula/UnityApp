@@ -3637,14 +3637,7 @@ end;
 
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 begin
-
-//    sgAgeView.Freeze(True);
-//
-//    for var Index:=1 to sgAgeView.RowCount - 1 do
-//        sgAgeView.RowHeights[Index]:=sgAgeView.sgRowHeight;
-//
-//    sgAgeView.Freeze(False);
-
+    FilterForm.RemoveAllFilters();
 end;
 
 
