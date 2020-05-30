@@ -54,9 +54,10 @@ type
         procedure FormDestroy(Sender: TObject);
         procedure btnFilterClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-        procedure cbSelectAllClick(Sender: TObject);
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
+        procedure cbSelectAllMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+        procedure btnRemoveClick(Sender: TObject);
     strict private
         var FFilteredColumns: cardinal;
         var FFilterList:   TList<TColumnData>;
@@ -67,9 +68,13 @@ type
         var FSourceGrid:   TStringGrid;
         procedure LoadUniqueValues();
         procedure FilterSourceGrid();
+        procedure UnfilterSourceGrid();
         procedure FilterSelectCheck();
         procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
+        function GetState(ASearchValue: string; AColumnDataPos: integer): boolean;
+        function GetColumnDataPos(AColumnNumber: integer): integer;
     public
+        procedure RemoveAllFilters();
         property InUse:        boolean     read FInUse;
         property SourceGrid:   TStringGrid read FSourceGrid   write FSourceGrid;
         property ColumnNumber: integer     read FColumnNumber write FColumnNumber;
@@ -114,14 +119,52 @@ begin
     var Check:=0;
 
     // Check if item is selected
-    for var iCNT:=0 to FilterList.Count - 1 do
-        if FilterList.Checked[iCNT] = True then
+    for var Index:=0 to FilterList.Count - 1 do
+        if FilterList.Checked[Index] = True then
             Inc(Check);
 
     // If all selected, then tick
     if Check = FilterList.Count then
         cbSelectAll.Checked:=True
             else cbSelectAll.Checked:=False;
+
+end;
+
+
+function TFilterForm.GetState(ASearchValue: string; AColumnDataPos: integer): boolean;
+begin
+
+    Result:=False;
+
+    for var Index:=0 to Length(FFilterList[AColumnDataPos].UniqueItems) - 1 do
+    begin
+
+        if ASearchValue = FFilterList[AColumnDataPos].UniqueItems[Index, 0] then
+        begin
+            Result:=FFilterList[AColumnDataPos].UniqueItems[Index, 1].ToBoolean();
+            Exit();
+        end;
+
+    end;
+
+end;
+
+
+function TFilterForm.GetColumnDataPos(AColumnNumber: integer): integer;
+begin
+
+    Result:=-1;
+
+    for var Index:=0 to FFilterList.Count - 1 do
+    begin
+
+        if FFilterList[Index].ColumnNumber = AColumnNumber then
+        begin
+            Result:=Index;
+            Exit();
+        end;
+
+    end;
 
 end;
 
@@ -141,78 +184,96 @@ begin
         Exit();
     end;
 
+    var ColumnDataPos:=GetColumnDataPos(FColumnNumber);
+    FilterList.Clear();
+
     // Check if column has been already queried
-    if FFilterList.Count > 0 then
+    // and if so, ready the filter state
+    if ColumnDataPos > -1 then
     begin
 
-        for var Index:=0 to FFilterList.Count - 1 do
+        if FFilterList[ColumnDataPos].UniqueItems = nil then
         begin
-
-            // If so, ready the filter state
-            if FFilterList[Index].ColumnNumber = FColumnNumber then
-            begin
-
-                FilterList.Clear();
-
-                if FFilterList[Index].UniqueItems = nil then
-                begin
-                    THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, 'Array has not been created.');
-                    Exit();
-                end;
-
-                for var Items:=0 to Length(FFilterList[Index].UniqueItems) - 1 do
-                begin
-                    FilterList.Items.Add(FFilterList[Index].UniqueItems[Items, 0]);
-                    FilterList.Checked[FilterList.Items.Count - 1]:=FFilterList[Index].UniqueItems[Items, 1].ToBoolean();
-                end;
-
-            end;
-
+            THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, 'Array has not been created.');
+            Exit();
         end;
+
+        for var Items:=0 to Length(FFilterList[ColumnDataPos].UniqueItems) - 1 do
+        begin
+            FilterList.Items.Add(FFilterList[ColumnDataPos].UniqueItems[Items, 0]);
+            FilterList.Checked[FilterList.Items.Count - 1]:=FFilterList[ColumnDataPos].UniqueItems[Items, 1].ToBoolean();
+        end;
+
+        if FFilterList[ColumnDataPos].IsFiltered then
+            btnRemove.Enabled:=True
+                else btnRemove.Enabled:=False;
 
     end
     else
     // Make new query and display unique values
     begin
 
+        btnRemove.Enabled:=False;
         var StringList:=TStringList.Create();
         try
 
             StringList.Sorted:=True;
             StringList.Duplicates:=dupIgnore;
 
-            // Get unique values to string list, skip header
+            // Put unique values to string list, skip header
             for var Index:=1 to FSourceGrid.RowCount - 1 do
             begin
 
                 var Value:=FSourceGrid.Cells[FColumnNumber, Index].Trim();
 
-                if FSourceGrid.RowHeights[Index] = FSourceGrid.sgRowHidden then
-                    Value:=Value + '&&False' else Value:=Value + '&&True';
+                if FInUse then
+                begin
 
-                StringList.Add(Value);
+                    if FSourceGrid.RowHeights[Index] = FSourceGrid.sgRowHeight then
+                    begin
+                        Value:=Value + '&&True';
+                        StringList.Add(Value);
+                    end;
+
+                end
+                else
+                begin
+
+                    if FSourceGrid.RowHeights[Index] = FSourceGrid.sgRowHidden then Value:=Value + '&&False';
+                    if FSourceGrid.RowHeights[Index] = FSourceGrid.sgRowHeight then Value:=Value + '&&True';
+                    StringList.Add(Value);
+
+                end;
+
+                var stop:=0;
 
             end;
 
             var NewColumnData: TColumnData;
-            NewColumnData.ColumnName:=FColumnName;
+            NewColumnData.ColumnName  :=FColumnName;
             NewColumnData.ColumnNumber:=FColumnNumber;
-            NewColumnData.IsFiltered:=False;
+            NewColumnData.IsFiltered  :=False;
             SetLength(NewColumnData.UniqueItems, StringList.Count, 2);
 
             for var Index:=0 to StringList.Count - 1 do
             begin
 
                 var Value:=StringList.Strings[Index];
-                var Parsed:=Value.Split(['&&']);
 
-                FilterList.Items.Add(Parsed[0]);
-                NewColumnData.UniqueItems[Index, 0]:=Parsed[0];
-                NewColumnData.UniqueItems[Index, 1]:=Parsed[1];
+                if Value.Contains('&&') then
+                begin
 
-                if Parsed[1] = 'False' then
-                    FilterList.Checked[Index]:=False
-                        else FilterList.Checked[Index]:=True;
+                    var Parsed:=Value.Split(['&&']);
+
+                    FilterList.Items.Add(Parsed[0]);
+                    NewColumnData.UniqueItems[Index, 0]:=Parsed[0];
+                    NewColumnData.UniqueItems[Index, 1]:=Parsed[1];
+
+                    if Parsed[1] = 'False' then
+                        FilterList.Checked[Index]:=False
+                            else FilterList.Checked[Index]:=True;
+
+                end;
 
             end;
 
@@ -228,43 +289,6 @@ end;
 
 
 procedure TFilterForm.FilterSourceGrid();
-
-    function GetState(ASearchValue: string; AColumnDataPos: integer): boolean;
-    begin
-
-        Result:=False;
-
-        for var Index:=0 to Length(FFilterList[AColumnDataPos].UniqueItems) - 1 do
-        begin
-
-            if ASearchValue = FFilterList[AColumnDataPos].UniqueItems[Index, 0] then
-            begin
-                Result:=FFilterList[AColumnDataPos].UniqueItems[Index, 1].ToBoolean();
-                Exit();
-            end;
-
-        end;
-
-    end;
-
-    function GetColumnDataPos(AColumnNumber: integer): integer;
-    begin
-
-        Result:=0;
-
-        for var Index:=0 to FFilterList.Count - 1 do
-        begin
-
-            if FFilterList[Index].ColumnNumber = AColumnNumber then
-            begin
-                Result:=Index;
-                Exit();
-            end;
-
-        end;
-
-    end;
-
 begin
 
     var ColumnDataPos:=GetColumnDataPos(FColumnNumber);
@@ -275,6 +299,7 @@ begin
     UpdatedColumnData.IsFiltered  :=True;
     UpdatedColumnData.UniqueItems :=FFilterList[ColumnDataPos].UniqueItems;
 
+    FInUse:=True;
     FFilterList[ColumnDataPos]:=UpdatedColumnData;
 
     for var Index:=0 to Length(FFilterList[ColumnDataPos].UniqueItems) - 1 do
@@ -299,6 +324,21 @@ begin
 end;
 
 
+procedure TFilterForm.UnfilterSourceGrid();
+begin
+
+
+end;
+
+
+procedure TFilterForm.RemoveAllFilters();
+begin
+
+
+
+end;
+
+
 {$ENDREGION}
 
 
@@ -307,6 +347,7 @@ end;
 
 procedure TFilterForm.FormCreate(Sender: TObject);
 begin
+    FilterList.Clear();
     PanelListItems.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     if not Assigned(FFilterList) then FFilterList:=TList<TColumnData>.Create();
 end;
@@ -314,7 +355,6 @@ end;
 
 procedure TFilterForm.FormShow(Sender: TObject);
 begin
-    FilterList.Clear();
     LoadUniqueValues();
 end;
 
@@ -322,8 +362,6 @@ end;
 procedure TFilterForm.FormActivate(Sender: TObject);
 begin
     FilterSelectCheck();
-    btnRemove.Enabled:=False;
-    //FInUse:=
 end;
 
 
@@ -348,20 +386,20 @@ end;
 procedure TFilterForm.RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
 begin
 
+    FSourceGrid.Freeze(False);
     Screen.Cursor:=crDefault;
     BusyForm.Close();
-
-    FSourceGrid.Freeze(False);
-    FSourceGrid.Repaint();
 
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
         Service.Logger.Log('[RecalcAgeViewSummary_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
     end;
 
     MainForm.UpdateAgeSummary(AgingSummary);
-    MainForm.UpdateFollowUps(MainForm.sgAgeView);
+    MainForm.UpdateFollowUps(FSourceGrid);
+    FSourceGrid.Repaint();
 
 end;
 
@@ -397,7 +435,13 @@ begin
 end;
 
 
-procedure TFilterForm.cbSelectAllClick(Sender: TObject);
+procedure TFilterForm.btnRemoveClick(Sender: TObject);
+begin
+    UnfilterSourceGrid();
+end;
+
+
+procedure TFilterForm.cbSelectAllMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
 
     FilterList.Freeze(True);

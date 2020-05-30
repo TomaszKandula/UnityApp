@@ -68,11 +68,9 @@ type
         procedure ShowGrids();
         procedure AllowEditing();
         procedure QuitEditing();
-
         procedure ShowAllRows();
         procedure ShowRow(ColumnNumber: integer; Condition: string);
         procedure HideRow(ColumnNumber: integer; Condition: string);
-
     end;
 
 
@@ -465,17 +463,17 @@ begin
         TempGrid.FixedRows:=FixedRows;
         SetLength(List, RowCount - FixedRows);
 
-        for var iCNT: integer:=FixedRows to RowCount - 1 do
+        for var Index: integer:=FixedRows to RowCount - 1 do
         begin
-            List[iCNT - FixedRows]:=iCNT;
-            TempGrid.Rows[iCNT].Assign(Rows[iCNT]);
+            List[Index - FixedRows]:=Index;
+            TempGrid.Rows[Index].Assign(Rows[Index]);
         end;
 
         TSorting.MergeSort(Self, List, SortCol, DataType, Ascending);
 
-        for var iCNT: integer:=0 to RowCount - FixedRows - 1 do
+        for var Index: integer:=0 to RowCount - FixedRows - 1 do
         begin
-            Rows[iCNT + FixedRows].Assign(TempGrid.Rows[List[iCNT]]);
+            Rows[Index + FixedRows].Assign(TempGrid.Rows[List[Index]]);
         end;
 
         Row:=FixedRows;
