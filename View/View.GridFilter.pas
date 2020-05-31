@@ -71,7 +71,7 @@ type
         procedure UnfilterSourceGrid();
         procedure FilterSelectCheck();
         procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
-        function GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): boolean;
+        function GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): integer;
         function GetColumnDataPos(AColumnNumber: integer): integer;
     public
         procedure RemoveAllFilters();
@@ -131,10 +131,10 @@ begin
 end;
 
 
-function TFilterForm.GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): boolean;
+function TFilterForm.GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): integer;
 begin
 
-    Result:=False;
+    Result:=-1;
 
     for var Index:=0 to Length(FFilterList[AColumnDataPos].UniqueItems) - 1 do
     begin
@@ -142,9 +142,12 @@ begin
         if ASearchValue = FFilterList[AColumnDataPos].UniqueItems[Index, 0] then
         begin
 
-            Result:=FFilterList[AColumnDataPos].UniqueItems[Index, 1].ToBoolean();
+            var LReturn:=FFilterList[AColumnDataPos].UniqueItems[Index, 1];
 
-            if not Result then
+            if LReturn = 'True'  then Result:=1;
+            if LReturn = 'False' then Result:=0;
+
+            if (LReturn = 0) and (FSourceGrid.RowHeights[RowIndex] = FSourceGrid.sgRowHeight) then
             begin
 
                 var Values:=FFilterList[AColumnDataPos].UniqueItems[Index, 2];
@@ -324,10 +327,9 @@ begin
     begin
 
         var Value:=FSourceGrid.Cells[FColumnNumber, Index].Trim();
-
-        if GetState(Value, LColumnDataPos, Index) then
-            FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight
-                else FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
+        // add here... checking for the same index number being in another filter(s)!
+        if GetState(Value, LColumnDataPos, Index) = 1 then FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
+        if GetState(Value, LColumnDataPos, Index) = 0 then FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
 
     end;
 
@@ -347,6 +349,7 @@ begin
     var Parsed:=ToUnfilter.Split([' ']);
 
     for var Index:=1 to FSourceGrid.RowCount - 1 do
+        // add here... checking for the same index number being in another filter(s)!
         if TArrayUtils<string>.Contains(Index.ToString(), Parsed) then
             FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
 

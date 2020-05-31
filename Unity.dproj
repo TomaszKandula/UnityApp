@@ -117,10 +117,10 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2410;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2414;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Build>2410</VerInfo_Build>
+        <VerInfo_Build>2414</VerInfo_Build>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_PreRelease>false</VerInfo_PreRelease>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
