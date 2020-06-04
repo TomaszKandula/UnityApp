@@ -26259,8 +26259,8 @@ object MainForm: TMainForm
     Visible = True
     OnClick = TrayIconClick
     OnDblClick = TrayIconDblClick
-    Left = 904
-    Top = 584
+    Left = 792
+    Top = 448
   end
   object PopupBook: TPopupMenu
     MenuAnimation = [maLeftToRight]
@@ -26473,5 +26473,11 @@ object MainForm: TMainForm
       Caption = 'Clear cache'
       OnClick = Action_ClearCacheClick
     end
+  end
+  object TimerRating: TTimer
+    Enabled = False
+    OnTimer = TimerRatingTimer
+    Left = 905
+    Top = 579
   end
 end

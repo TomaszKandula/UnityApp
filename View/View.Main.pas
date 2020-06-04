@@ -489,6 +489,7 @@ type
         btnNext: TImage;
         txtItems: TLabel;
         valItems: TLabel;
+        TimerRating: TTimer;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -766,6 +767,7 @@ type
         procedure btnBackMouseLeave(Sender: TObject);
         procedure btnNextMouseEnter(Sender: TObject);
         procedure btnNextMouseLeave(Sender: TObject);
+        procedure TimerRatingTimer(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -1031,12 +1033,14 @@ begin
         begin
             TimerFollowUp.Enabled:=True;
             TimerCustSnapshots.Enabled:=True;
+            TimerRating.Enabled:=True;
         end;
 
         TurnedOff:
         begin
             TimerFollowUp.Enabled:=False;
             TimerCustSnapshots.Enabled:=False;
+            TimerRating.Enabled:=False;
         end;
 
     end;
@@ -1448,13 +1452,8 @@ end;
 
 procedure TMainForm.UserRatingCheck();
 begin
-
-    // Executes after 5 minutes
-    THelpers.ExecWithDelay(300000, procedure
-    begin
-        Service.Mediator.Accounts.LoadRatingAsync(LoadRating_Callback);
-    end);
-
+    TimerRating.Interval:=300000; // 5 min.
+    TimerRating.Enabled:=True;
 end;
 
 
@@ -2901,6 +2900,13 @@ begin
 
     RedeemAccess();
 
+end;
+
+
+procedure TMainForm.TimerRatingTimer(Sender: TObject);
+begin
+    TimerRating.Enabled:=False;
+    Service.Mediator.Accounts.LoadRatingAsync(LoadRating_Callback);
 end;
 
 

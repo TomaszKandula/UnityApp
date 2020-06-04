@@ -45,6 +45,10 @@ type
         TextSearch: TLabel;
         PanelMain: TPanel;
         TextWarn: TLabel;
+        cbColumnList: TComboBox;
+        PanelGroup: TPanel;
+        PanelHeader: TPanel;
+        PanelButtons: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure btnSearchClick(Sender: TObject);
@@ -52,6 +56,7 @@ type
         procedure btnUnhideClick(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure cbColumnListSelect(Sender: TObject);
     strict private
         var FFoundRow:     integer;
         var FIsNext:       boolean;
@@ -63,6 +68,7 @@ type
         var FActualRow:    integer;
         var FGrid:         TStringGrid;
         var FSelColumn:    integer;
+        procedure UpdateSelection();
         procedure InitSearch;
         function  SearchPartialPrepare(ActualRow: integer): string;
         procedure SearchPartialShowAll(ActualRow: integer);
@@ -102,6 +108,13 @@ end;
 
 
 {$REGION 'LOCAL HELPERS'}
+
+
+procedure TGridSearchForm.UpdateSelection();
+begin
+    if String.IsNullOrWhitespace(cbColumnList.Text) then Exit();
+    FSelColumn:=MainForm.sgAgeView.GetCol(cbColumnList.Text);
+end;
 
 
 function TGridSearchForm.SearchPartialPrepare(ActualRow: integer): string;
@@ -314,7 +327,30 @@ end;
 
 procedure TGridSearchForm.FormShow(Sender: TObject);
 begin
-    TextSearch.Caption:='Search phrase (' + FGrid.Cells[FSelColumn, 0] + '):';
+
+    cbColumnList.Clear();
+    for var Index:=1 to FGrid.ColCount - 1 do
+    begin
+
+        if FGrid.ColWidths[Index] <> -1 then
+            cbColumnList.Items.Add(FGrid.Cells[Index, 0]);
+
+    end;
+
+    if cbColumnList.Items.Count = 0 then Exit();
+
+    var SelName:=FGrid.GetName(FSelColumn);
+    for var Index:=0 to cbColumnList.Items.Count - 1 do
+    begin
+
+        if SelName = cbColumnList.Items[Index] then
+        begin
+            cbColumnList.ItemIndex:=Index;
+            Exit();
+        end;
+
+    end;
+
 end;
 
 
@@ -322,6 +358,12 @@ end;
 
 
 {$REGION 'MOUSE CLICK EVENTS'}
+
+
+procedure TGridSearchForm.cbColumnListSelect(Sender: TObject);
+begin
+    UpdateSelection();
+end;
 
 
 procedure TGridSearchForm.btnSearchClick(Sender: TObject);

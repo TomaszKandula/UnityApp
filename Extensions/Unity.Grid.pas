@@ -58,6 +58,7 @@ type
         procedure ShowAllColumns();
         procedure AutoThumbSize();
         function GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
+        function GetName(ColumnNumber: integer): string;
         procedure Freeze(PaintWnd: boolean);
         function ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
         function ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
@@ -503,6 +504,12 @@ begin
         end;
     end;
 
+end;
+
+
+function TStringGrid.GetName(ColumnNumber: integer): string;
+begin
+    Result:=Self.Cells[ColumnNumber, 0];
 end;
 
 

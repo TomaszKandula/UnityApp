@@ -1,5 +1,5 @@
 #define MyAppName "Unity Platform Test"
-#define MyAppVersion "2.0.1.2300"
+#define MyAppVersion "2.0.1.2010"
 #define MyAppPublisher "Tomasz Kandula/DFDS Polska Sp. z o.o."
 #define MyAppURL "http://www.dfds.com/"
 #define MyAppExeName "Unity.exe"
@@ -19,7 +19,7 @@ DefaultDirName={#MyAppName}
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\Tools\_Setup
-OutputBaseFilename=Setup32_build2300_test
+OutputBaseFilename=Setup32_build2010_Test
 SetupIconFile=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Unity_Mutlisize_64.ico
 UninstallFilesDir={commonpf}\{#MyAppName}
 Compression=lzma
@@ -49,7 +49,7 @@ Name: "{commonappdata}\{#MyAppName}\sessions";
 Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\$programdata\Config.bin.TEST"; DestDir: "{commonappdata}\{#MyAppName}"; DestName: "Config.bin"; Flags: ignoreversion
 
 ;INF
-Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\Unity.inf.TEST"; DestDir: "{commonappdata}\{#MyAppName}"; DestName: "Unity.inf"; Flags: ignoreversion
+Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\Unity.inf.TEST"; DestDir: "{commonpf}\{#MyAppName}"; DestName: "Unity.inf"; Flags: ignoreversion
 
 ;EXE
 Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\Unity.exe"; DestDir: "{commonpf}\{#MyAppName}";  Flags: ignoreversion

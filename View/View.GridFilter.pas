@@ -147,7 +147,7 @@ begin
             if LReturn = 'True'  then Result:=1;
             if LReturn = 'False' then Result:=0;
 
-            if (LReturn = 0) and (FSourceGrid.RowHeights[RowIndex] = FSourceGrid.sgRowHeight) then
+            if (Result = 0) and (FSourceGrid.RowHeights[RowIndex] = FSourceGrid.sgRowHeight) then
             begin
 
                 var Values:=FFilterList[AColumnDataPos].UniqueItems[Index, 2];
