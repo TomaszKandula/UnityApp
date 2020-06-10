@@ -102,8 +102,8 @@ type
 
 
     /// <summary>
-    /// Implementation for handling the configuration file.
-    /// Do not use it directly.
+    /// Concrete implementation for handling the configuration file.
+    /// Never call it directly, you can inherit from this class and override the methods or/and extend them.
     /// </summary>
     TSettings = class(TInterfacedObject, ISettings)
     strict private

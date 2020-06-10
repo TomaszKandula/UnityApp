@@ -185,7 +185,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Service.Mediator.Accounts.SubmitRatingAsync(UserRating, SubmitRating_Callback);
+    Service.Mediator.Ratings.SubmitRatingAsync(UserRating, SubmitRating_Callback);
 
 end;
 
@@ -201,7 +201,7 @@ begin
     ReportMemo.Enabled:=False;
     btnSendRating.Enabled:=False;
 
-    Service.Mediator.Accounts.UpdateRatingAsync(UserRating, UpdateRating_Callback);
+    Service.Mediator.Ratings.UpdateRatingAsync(UserRating, UpdateRating_Callback);
 
 end;
 
@@ -296,7 +296,7 @@ begin
     if not FIsDataLoaded then
     begin
         Screen.Cursor:=crHourGlass;
-        Service.Mediator.Accounts.LoadRatingAsync(LoadRating_Callback);
+        Service.Mediator.Ratings.LoadRatingAsync(LoadRating_Callback);
     end;
 
 end;

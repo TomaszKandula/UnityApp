@@ -33,13 +33,13 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or/and and extend them.
     /// </remarks>
     TDocuments = class(TInterfacedObject, IDocuments)
     public
         constructor Create();
-        destructor Destroy(); override;
-        procedure SendAccountDocumentAsync(SendDocument: TSendDocument; Callback: TSendAccountDocument);
+        destructor  Destroy(); override;
+        procedure   SendAccountDocumentAsync(SendDocument: TSendDocument; Callback: TSendAccountDocument);
     end;
 
 
@@ -61,6 +61,7 @@ uses
 
 constructor TDocuments.Create();
 begin
+    inherited;
 end;
 
 

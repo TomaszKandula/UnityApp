@@ -71,18 +71,18 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or/and extend them.
     /// </remarks>
     TAddressBook = class(TInterfacedObject, IAddressBook)
     public
         constructor Create();
-        destructor Destroy(); override;
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil); virtual;
-        procedure UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook); virtual;
-        procedure AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook); virtual;
-        function DelFromAddressBookAwaited(Id: integer): TCallResponse; virtual;
-        procedure GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails); virtual;
-        procedure AddBulkToAddressBookAsync(PayLoad: TList<TCustomerDetails>; Callback: TAddBulkToAddressBook); virtual;
+        destructor  Destroy(); override;
+        procedure   OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil); virtual;
+        procedure   UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook); virtual;
+        procedure   AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook); virtual;
+        function    DelFromAddressBookAwaited(Id: integer): TCallResponse; virtual;
+        procedure   GetCustomerDetailsAsync(CustNumber: Int64; SourceDBName: string; Callback: TGetCustomerDetails); virtual;
+        procedure   AddBulkToAddressBookAsync(PayLoad: TList<TCustomerDetails>; Callback: TAddBulkToAddressBook); virtual;
     end;
 
 
@@ -112,6 +112,7 @@ uses
 
 constructor TAddressBook.Create();
 begin
+    inherited;
 end;
 
 

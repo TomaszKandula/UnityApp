@@ -18,7 +18,7 @@ uses
 type
 
     /// <summary>
-    /// Exposes properties and methods that allows easy utilisation of WebApi service throught REST.
+    /// Exposes properties and methods that allows easy utilisation of WebApi service throught REST with JSON or FORM URLENCODED content types.
     /// </summary>
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
@@ -101,8 +101,8 @@ type
 
 
     /// <summary>
-    /// Implementation of simple wrapper around TRESTClient, TRESTResponse, TRESTRequest classes.
-    /// Do not use it directly.
+    /// Concrete  implementation of simple wrapper around TRESTClient, TRESTResponse, TRESTRequest classes.
+    /// Never call it directly, you can inherit from this class and override the methods or/and extend them.
     /// </summary>
     TRESTful = class(TInterfacedObject, IRESTFul)
     strict private
@@ -167,6 +167,10 @@ type
     public
         constructor Create();
         destructor Destroy; override;
+        function Execute: boolean; virtual;
+        procedure AddParameter(QueryName: string; ParamValue: string); virtual;
+        procedure ClearParameters; virtual;
+        procedure SelectContentType(ContentType: TRESTContentType); virtual;
         property ExecuteError: string read GetExecuteError;
         property StatusCode: integer read GetStatusCode;
         property Content: string read GetContent;
@@ -192,10 +196,6 @@ type
         property RequestMethod: TRESTRequestMethod read GetRequestMethod write SetRequestMethod;
         property RequestSynchronizedEvents: boolean read GetRequestSynchronizedEvents write SetRequestSynchronizedEvents;
         property RequestTimeout: integer read GetRequestTimeout write SetRequestTimeout;
-        function Execute: boolean;
-        procedure AddParameter(QueryName: string; ParamValue: string);
-        procedure ClearParameters;
-        procedure SelectContentType(ContentType: TRESTContentType);
     end;
 
 
@@ -208,6 +208,8 @@ uses
 
 constructor TRESTful.Create();
 begin
+
+    inherited;
 
     FRestClient  :=TRESTClient.Create('');
     FRestResponse:=TRESTResponse.Create(nil);

@@ -72,12 +72,12 @@ type
     TUtilities = class(TInterfacedObject, IUtilities)
     public
         constructor Create();
-        destructor Destroy(); override;
-        procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
-        procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
-        function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
-        procedure RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary); virtual;
-        procedure GetBiReportsAsync(Callback: TGetBiReports); virtual;
+        destructor  Destroy(); override;
+        procedure   CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
+        procedure   SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
+        function    CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
+        procedure   RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary); virtual;
+        procedure   GetBiReportsAsync(Callback: TGetBiReports); virtual;
     end;
 
 
@@ -103,6 +103,7 @@ uses
 
 constructor TUtilities.Create();
 begin
+    inherited;
 end;
 
 

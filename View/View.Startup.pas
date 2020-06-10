@@ -244,7 +244,7 @@ begin
             // --------------------------------
             // API call to register session ID.
             // --------------------------------
-            Service.Mediator.Accounts.InitiateSessionAwaited(Service.SessionId, Service.Settings.WinUserName);
+            Service.Mediator.Sessions.InitiateSessionAwaited(Service.SessionId, Service.Settings.WinUserName);
 
             Service.Logger.Log('Unity has been boot up.');
             ChangeProgressBar(50, 'Initializing... done.', ProgressBar);
@@ -361,7 +361,7 @@ begin
     var LCallResponse: TCallResponse;
     var LNewAccessToken: string;
 
-    LCallResponse:=Service.Mediator.Accounts.RequestAccessTokenAwaited(LNewAccessToken);
+    LCallResponse:=Service.Mediator.Sessions.RequestAccessTokenAwaited(LNewAccessToken);
 
     if not LCallResponse.IsSucceeded then
     begin

@@ -50,15 +50,15 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or/and and extend them.
     /// </remarks>
     TOpenItems = class(TInterfacedObject, IOpenItems)
     public
         constructor Create();
-        destructor Destroy(); override;
-        function GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse; virtual;
-        procedure GetOpenItemsAsync(SourceDbName: string; CustomerNumber: Int64; Callback: TGetOpenItems); virtual;
-        procedure ReadOpenItemsAsync(PageNumber: integer;LoadedCompanies: TList<string>; Callback: TReadOpenItems); virtual;
+        destructor  Destroy(); override;
+        function    GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse; virtual;
+        procedure   GetOpenItemsAsync(SourceDbName: string; CustomerNumber: Int64; Callback: TGetOpenItems); virtual;
+        procedure   ReadOpenItemsAsync(PageNumber: integer;LoadedCompanies: TList<string>; Callback: TReadOpenItems); virtual;
     end;
 
 
@@ -82,6 +82,7 @@ uses
 
 constructor TOpenItems.Create();
 begin
+    inherited;
 end;
 
 

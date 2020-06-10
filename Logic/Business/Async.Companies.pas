@@ -33,13 +33,13 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or/and extend them.
     /// </remarks>
     TCompanies = class(TInterfacedObject, ICompanies)
     public
         constructor Create();
-        destructor Destroy(); override;
-        procedure GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails); virtual;
+        destructor  Destroy(); override;
+        procedure   GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails); virtual;
     end;
 
 
@@ -59,6 +59,7 @@ uses
 
 constructor TCompanies.Create();
 begin
+    inherited;
 end;
 
 

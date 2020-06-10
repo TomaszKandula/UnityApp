@@ -27,7 +27,9 @@ type
 
     IMediator = interface(IInterface)
     ['{6AE0D0FF-BA65-450C-9972-C226F01CBC99}']
-        function GetAccounts():      IAccounts;
+        function GetSessions():      ISessions;
+        function GetUsers():         IUsers;
+        function GetRatings():       IRatings;
         function GetAddressBook():   IAddressBook;
         function GetComments():      IComments;
         function GetCompanies():     ICompanies;
@@ -38,7 +40,9 @@ type
         function GetOpenItems():     IOpenItems;
         function GetUtilities():     IUtilities;
         function GetUtility():       IUtility;
-        property Accounts:      IAccounts      read GetAccounts;
+        property Sessions:      ISessions      read GetSessions;
+        property Users:         IUsers         read GetUsers;
+        property Ratings:       IRatings       read GetRatings;
         property AddressBook:   IAddressBook   read GetAddressBook;
         property Comments:      IComments      read GetComments;
         property Companies:     ICompanies     read GetCompanies;
@@ -53,9 +57,15 @@ type
     end;
 
 
+    /// <remarks>
+    /// Concrete implementation. Never call it directly, you can inherit from this class
+    /// and override the methods or/and extend them.
+    /// </remarks>
     TMediator = class(TInterfacedObject, IMediator)
     strict private
-        function GetAccounts():      IAccounts;
+        function GetSessions():      ISessions;
+        function GetUsers():         IUsers;
+        function GetRatings():       IRatings;
         function GetAddressBook():   IAddressBook;
         function GetComments():      IComments;
         function GetCompanies():     ICompanies;
@@ -66,7 +76,9 @@ type
         function GetOpenItems():     IOpenItems;
         function GetUtilities():     IUtilities;
         function GetUtility():       IUtility;
-        var FAccounts:               IAccounts;
+        var FSessions:               ISessions;
+        var FUsers:                  IUsers;
+        var FRatings:                IRatings;
         var FAddressBook:            IAddressBook;
         var FComments:               IComments;
         var FCompanies:              ICompanies;
@@ -78,26 +90,30 @@ type
         var FUtilities:              IUtilities;
         var FUtility:                IUtility;
     public
-        // A direct implementation of dependency injection at a class level
-        // allow to inject mock interfaces to the class for test purposes
+        // A direct implementation of dependency injection at a interface level
+        // allow to inject mock interfaces to the interface for test purposes
         constructor Create(
-            const Accounts:      IAccounts      = nil;
-            const AddressBook:   IAddressBook   = nil;
-            const Comments:      IComments      = nil;
-            const Companies:     ICompanies     = nil;
-            const Debtors:       IDebtors       = nil;
-            const Documents:     IDocuments     = nil;
-            const GeneralTables: IGeneralTables = nil;
-            const Mailer:        IMailer        = nil;
-            const OpenItems:     IOpenItems     = nil;
-            const Utilities:     IUtilities     = nil;
-            const Utility:       IUtility       = nil
+            const ASessions:      ISessions      = nil;
+            const AUsers:         IUsers         = nil;
+            const ARatings:       IRatings       = nil;
+            const AAddressBook:   IAddressBook   = nil;
+            const AComments:      IComments      = nil;
+            const ACompanies:     ICompanies     = nil;
+            const ADebtors:       IDebtors       = nil;
+            const ADocuments:     IDocuments     = nil;
+            const AGeneralTables: IGeneralTables = nil;
+            const AMailer:        IMailer        = nil;
+            const AOpenItems:     IOpenItems     = nil;
+            const AUtilities:     IUtilities     = nil;
+            const AUtility:       IUtility       = nil
         );
         destructor Destroy(); override;
-        // Use this method to ensure all interfaces are created regardless,
-        // if mock interfaces are used via consturctor or not
+        // Use this method to ensure all interfaces are created whether
+        // the mock interfaces are used via consturctor or not
         procedure ForceInitialize(); virtual;
-        property Accounts:       IAccounts      read GetAccounts;
+        property Sessions:       ISessions      read GetSessions;
+        property Users:          IUsers         read GetUsers;
+        property Ratings:        IRatings       read GetRatings;
         property AddressBook:    IAddressBook   read GetAddressBook;
         property Comments:       IComments      read GetComments;
         property Companies:      ICompanies     read GetCompanies;
@@ -115,30 +131,34 @@ implementation
 
 
 constructor TMediator.Create(
-    const Accounts:      IAccounts      = nil;
-    const AddressBook:   IAddressBook   = nil;
-    const Comments:      IComments      = nil;
-    const Companies:     ICompanies     = nil;
-    const Debtors:       IDebtors       = nil;
-    const Documents:     IDocuments     = nil;
-    const GeneralTables: IGeneralTables = nil;
-    const Mailer:        IMailer        = nil;
-    const OpenItems:     IOpenItems     = nil;
-    const Utilities:     IUtilities     = nil;
-    const Utility:       IUtility       = nil
+    const ASessions:      ISessions      = nil;
+    const AUsers:         IUsers         = nil;
+    const ARatings:       IRatings       = nil;
+    const AAddressBook:   IAddressBook   = nil;
+    const AComments:      IComments      = nil;
+    const ACompanies:     ICompanies     = nil;
+    const ADebtors:       IDebtors       = nil;
+    const ADocuments:     IDocuments     = nil;
+    const AGeneralTables: IGeneralTables = nil;
+    const AMailer:        IMailer        = nil;
+    const AOpenItems:     IOpenItems     = nil;
+    const AUtilities:     IUtilities     = nil;
+    const AUtility:       IUtility       = nil
 );
 begin
-    FAccounts     :=Accounts;
-    FAddressBook  :=AddressBook;
-    FComments     :=Comments;
-    FCompanies    :=Companies;
-    FDebtors      :=Debtors;
-    FDocuments    :=Documents;
-    FGeneralTables:=GeneralTables;
-    FMailer       :=Mailer;
-    FOpenItems    :=OpenItems;
-    FUtilities    :=Utilities;
-    FUtility      :=Utility;
+    FSessions     :=ASessions;
+    FUsers        :=AUsers;
+    FRatings      :=ARatings;
+    FAddressBook  :=AAddressBook;
+    FComments     :=AComments;
+    FCompanies    :=ACompanies;
+    FDebtors      :=ADebtors;
+    FDocuments    :=ADocuments;
+    FGeneralTables:=AGeneralTables;
+    FMailer       :=AMailer;
+    FOpenItems    :=AOpenItems;
+    FUtilities    :=AUtilities;
+    FUtility      :=AUtility;
 end;
 
 
@@ -150,7 +170,9 @@ end;
 
 procedure TMediator.ForceInitialize();
 begin
-    if not Assigned(FAccounts)      then FAccounts     :=TAccounts.Create();
+    if not Assigned(FSessions)      then FSessions     :=TSessions.Create();
+    if not Assigned(FUsers)         then FUsers        :=TUsers.Create();
+    if not Assigned(FRatings)       then FRatings      :=TRatings.Create();
     if not Assigned(FAddressBook)   then FAddressBook  :=TAddressBook.Create();
     if not Assigned(FComments)      then FComments     :=TComments.Create();
     if not Assigned(FCompanies)     then FCompanies    :=TCompanies.Create();
@@ -164,9 +186,21 @@ begin
 end;
 
 
-function TMediator.GetAccounts(): IAccounts;
+function TMediator.GetSessions(): ISessions;
 begin
-    Result:=FAccounts;
+    Result:=FSessions;
+end;
+
+
+function TMediator.GetUsers(): IUsers;
+begin
+    Result:=FUsers;
+end;
+
+
+function TMediator.GetRatings(): IRatings;
+begin
+    Result:=FRatings;
 end;
 
 

@@ -104,21 +104,21 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or/and extend them.
     /// </remarks>
     TComments = class(TInterfacedObject, IComments)
     public
         constructor Create();
-        destructor Destroy(); override;
-        procedure FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil); virtual;
-        procedure BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFollowUpUpdate = nil); virtual;
-        procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
-        procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
-        function CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
-        procedure GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments); virtual;
-        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse; virtual;
-        procedure GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments); virtual;
-        function UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse; virtual;
+        destructor  Destroy(); override;
+        procedure   FreeFieldsUpdateAsync(PayLoad: TFreeFieldsPayLoad; Callback: TFreeFieldsUpdate = nil); virtual;
+        procedure   BulkFollowUpUpdateAsync(PayLoad: TFollowUpsPayLoad; Callback: TFollowUpUpdate = nil); virtual;
+        procedure   EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil); virtual;
+        procedure   EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil); virtual;
+        function    CheckGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; var CommentExists: TCommentExists): TCallResponse; virtual;
+        procedure   GetGeneralCommentAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetGeneralComments); virtual;
+        function    CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var CommentExists: TCommentExists): TCallResponse; virtual;
+        procedure   GetDailyCommentsAsync(SourceDBName: string; CustNumber: integer; UserAlias: string; Callback: TGetDailyComments); virtual;
+        function    UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse; virtual;
     end;
 
 
@@ -155,6 +155,7 @@ uses
 
 constructor TComments.Create();
 begin
+    inherited;
 end;
 
 

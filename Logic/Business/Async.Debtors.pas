@@ -65,7 +65,7 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or extend them.
+    /// and override the methods or/and extend them.
     /// </remarks>
     TDebtors = class(TInterfacedObject, IDebtors)
     strict private
@@ -73,12 +73,12 @@ type
         const xlWARN_MESSAGE  = 'Invalid class string';
     public
         constructor Create();
-        destructor Destroy(); override;
-        function CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse; virtual;
-        procedure ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots); virtual;
-        procedure GetAgingReportAsync(SelectedCompanies: TList<string>; AFileName: string; Callback: TGetAgingReport); virtual;
-        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView); virtual;
-        function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse; virtual;
+        destructor  Destroy(); override;
+        function    CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse; virtual;
+        procedure   ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots); virtual;
+        procedure   GetAgingReportAsync(SelectedCompanies: TList<string>; AFileName: string; Callback: TGetAgingReport); virtual;
+        procedure   ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView); virtual;
+        function    GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse; virtual;
     end;
 
 
@@ -108,6 +108,7 @@ uses
 
 constructor TDebtors.Create();
 begin
+    inherited;
 end;
 
 

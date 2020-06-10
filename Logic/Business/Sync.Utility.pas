@@ -45,9 +45,9 @@ type
     TUtility = class(TInterfacedObject, IUtility)
     public
         constructor Create();
-        destructor Destroy(); override;
-        function LoadAgeLayoutSync(FileName: string; var ALayoutColumns: TLayoutColumns): TCallResponse; virtual;
-        function SaveAgeLayoutSync(FileName: string; SourceGrid: TStringGrid): TCallResponse; virtual;
+        destructor  Destroy(); override;
+        function    LoadAgeLayoutSync(FileName: string; var ALayoutColumns: TLayoutColumns): TCallResponse; virtual;
+        function    SaveAgeLayoutSync(FileName: string; SourceGrid: TStringGrid): TCallResponse; virtual;
     end;
 
 
@@ -63,6 +63,7 @@ uses
 
 constructor TUtility.Create();
 begin
+    inherited;
 end;
 
 

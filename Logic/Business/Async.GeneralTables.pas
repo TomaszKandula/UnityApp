@@ -113,20 +113,20 @@ type
 
     /// <remarks>
     /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// and override the methods or/and and extend them.
     /// </remarks>
     TGeneralTables = class(TInterfacedObject, IGeneralTables)
     public
         constructor Create();
-        destructor Destroy(); override;
-        procedure GetCompaniesAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetControlStatusAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetPaidInfoAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetPaymentTermsAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetSalesResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetPersonResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetAccountTypeAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
-        procedure GetCustomerGroupAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        destructor  Destroy(); override;
+        procedure   GetCompaniesAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetControlStatusAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetPaidInfoAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetPaymentTermsAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetSalesResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetPersonResponsibleAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetAccountTypeAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
+        procedure   GetCustomerGroupAsync(TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False); virtual;
     end;
 
 
@@ -161,6 +161,7 @@ uses
 
 constructor TGeneralTables.Create();
 begin
+    inherited;
 end;
 
 

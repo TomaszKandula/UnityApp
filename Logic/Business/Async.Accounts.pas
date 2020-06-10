@@ -18,7 +18,42 @@ uses
 type
 
 
-    IAccounts = interface(IInterface)
+    IUsers = interface(IInterface)
+    ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
+        /// <summary>
+        /// Allow to load async. list of company codes assigned to the current user.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList);
+        /// <summary>
+        /// Allow to write async. user choice of comapny codes to load.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+        /// <summary>
+        /// Allow to write async. user logs to database. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserLogsAwaited(): TCallResponse;
+        /// <summary>
+        /// Allows to get the user permissions. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetUserPermissionsAwaited(): TCallResponse;
+    end;
+
+
+    ISessions = interface(IInterface)
     ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
         /// <summary>
         //  Allow to request access token in exchange of client id and client secrets. It is necessary for further communication.
@@ -45,29 +80,11 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function CheckSessionAwaited(SessionId: string): TCallResponse;
-        /// <summary>
-        /// Allow to load async. list of company codes assigned to the current user.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList);
-        /// <summary>
-        /// Allow to write async. user choice of comapny codes to load.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        procedure SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
-        /// <summary>
-        /// Allow to write async. user logs to database. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function SaveUserLogsAwaited(): TCallResponse;
+    end;
+
+
+    IRatings = interface(IInterface)
+    ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
         /// <summary>
         /// Allow to load async. user rating with optional comment. There is no separate notification.
         /// </summary>
@@ -91,34 +108,47 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
-        /// <summary>
-        /// Allows to get the user permissions. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetUserPermissionsAwaited(): TCallResponse;
     end;
 
 
     /// <remarks>
-    /// Concrete implementation. Never call it directly, you can inherit from this class
-    /// and override the methods or and extend them.
+    /// Use this base class to provide template for common functionality for Users, Sessions and Ratings.
     /// </remarks>
-    TAccounts = class(TInterfacedObject, IAccounts)
+    TBaseAccounts = class(TInterfacedObject)
     public
         constructor Create();
-        destructor Destroy(); override;
-        function RequestAccessTokenAwaited(var AccessToken: string): TCallResponse; virtual;
-        function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse; virtual;
-        function CheckSessionAwaited(SessionId: string): TCallResponse; virtual;
-        procedure GetUserCompanyListAsync(Callback: TGetUserCompanyList); virtual;
-        procedure SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList); virtual;
-        function SaveUserLogsAwaited(): TCallResponse; virtual;
-        procedure LoadRatingAsync(Callback: TLoadRating); virtual;
-        procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating); virtual;
-        procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating); virtual;
-        function GetUserPermissionsAwaited(): TCallResponse; virtual;
+        destructor  Destroy(); override;
+    end;
+
+
+    TUsers = class(TBaseAccounts, IUsers)
+    public
+        constructor Create();
+        destructor  Destroy(); override;
+        procedure   GetUserCompanyListAsync(Callback: TGetUserCompanyList);
+        procedure   SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+        function    SaveUserLogsAwaited(): TCallResponse;
+        function    GetUserPermissionsAwaited(): TCallResponse;
+    end;
+
+
+    TSessions = class(TBaseAccounts, ISessions)
+    public
+        constructor Create();
+        destructor  Destroy(); override;
+        function    RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
+        function    InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
+        function    CheckSessionAwaited(SessionId: string): TCallResponse;
+    end;
+
+
+    TRatings = class(TBaseAccounts, IRatings)
+    public
+        constructor Create();
+        destructor  Destroy(); override;
+        procedure   LoadRatingAsync(Callback: TLoadRating);
+        procedure   SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
+        procedure   UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
     end;
 
 
@@ -150,254 +180,30 @@ uses
     Api.UserPermissionList;
 
 
-constructor TAccounts.Create();
+constructor TBaseAccounts.Create();
 begin
 end;
 
 
-destructor TAccounts.Destroy();
+destructor TBaseAccounts.Destroy();
 begin
     inherited;
 end;
 
 
-function TAccounts.RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
+constructor TUsers.Create();
 begin
-
-    var CallResponse: TCallResponse;
-    var NewAccessToken: string;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-        Rest.AccessToken:=String.Empty;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
-        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Rest.ClientBaseURL);
-
-        Rest.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
-        Rest.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
-        Rest.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
-
-        try
-
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
-            begin
-
-                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Rest.Content);
-                try
-                    NewAccessToken:=TokenGranted.AccessToken;
-                    CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
-                    CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
-                    CallResponse.ErrorCode  :=TokenGranted.Error.ErrorCode;
-                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-                finally
-                    TokenGranted.Free();
-                end;
-
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
-
-            end;
-
-        except on
-                E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-
-    AccessToken:=NewAccessToken;
-    Result:=CallResponse;
-
+    inherited;
 end;
 
 
-function TAccounts.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
+destructor TUsers.Destroy();
 begin
-
-    var CallResponse: TCallResponse;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-		Rest.AccessToken:=Service.AccessToken;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
-        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
-        Service.Logger.Log('[InitiateSessionAwaited]: Executing POST ' + Rest.ClientBaseURL);
-
-        var UserSessionAdd:=TUserSessionAdd.Create();
-        try
-            UserSessionAdd.AliasName:=AliasName;
-            Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
-        finally
-            UserSessionAdd.Free();
-        end;
-
-        try
-
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
-            begin
-
-                var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Rest.Content);
-                try
-                    CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
-                    CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
-                    CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
-                    Service.Logger.Log('[InitiateSessionAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-                finally
-                    UserSessionAdded.Free();
-                end;
-
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[InitiateSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[InitiateSessionAwaited]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[InitiateSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
-
-            end;
-
-        except on
-            E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[InitiateSessionAwaited]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=CallResponse;
-
+    inherited;
 end;
 
 
-function TAccounts.CheckSessionAwaited(SessionId: string): TCallResponse;
-begin
-
-    var CallResponse: TCallResponse;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-		Rest.AccessToken:=Service.AccessToken;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
-        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckSessionAwaited]: Executing GET ' + Rest.ClientBaseURL);
-
-        try
-
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
-            begin
-
-                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Rest.Content);
-                try
-
-                    CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
-                    CallResponse.LastMessage:=UserSessionChecked.Error.ErrorDesc;
-                    CallResponse.ErrorCode  :=UserSessionChecked.Error.ErrorCode;
-
-                    if CallResponse.IsSucceeded then
-                    begin
-
-                        Service.UpdateUserData(
-                            UserSessionChecked.UserId,
-                            UserSessionChecked.Department,
-                            UserSessionChecked.AliasName,
-                            UserSessionChecked.DisplayName,
-                            UserSessionChecked.EmailAddress
-                        );
-
-                    end;
-
-                    Service.Logger.Log('[CheckSessionAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    UserSessionChecked.Free();
-                end;
-
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[CheckSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[CheckSessionAwaited]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[CheckSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
-
-            end;
-
-        except on
-            E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[CheckSessionAwaited]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=CallResponse;
-
-end;
-
-
-procedure TAccounts.GetUserCompanyListAsync(Callback: TGetUserCompanyList);
+procedure TUsers.GetUserCompanyListAsync(Callback: TGetUserCompanyList);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -460,7 +266,7 @@ begin
 end;
 
 
-procedure TAccounts.SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+procedure TUsers.SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -540,7 +346,7 @@ begin
 end;
 
 
-function TAccounts.SaveUserLogsAwaited(): TCallResponse;
+function TUsers.SaveUserLogsAwaited(): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -627,7 +433,344 @@ begin
 end;
 
 
-procedure TAccounts.LoadRatingAsync(Callback: TLoadRating);
+function TUsers.GetUserPermissionsAwaited(): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
+            + 'accounts/permissions/'
+            + Service.SessionData.UnityUserId.ToString();
+
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[GetUserPermissionsAwaited]: Executing GET ' + Rest.ClientBaseURL);
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var UserPermissionList:=TJson.JsonToObject<TUserPermissionList>(Rest.Content);
+                try
+
+                    Service.UpdateUserPermissions(UserPermissionList.UserPermissions);
+
+                    CallResponse.IsSucceeded :=UserPermissionList.IsSucceeded;
+                    CallResponse.ErrorCode   :=UserPermissionList.Error.ErrorCode;
+                    CallResponse.LastMessage :=UserPermissionList.Error.ErrorDesc;
+                    CallResponse.ReturnedCode:=Rest.StatusCode;
+
+                    Service.Logger.Log('[GetUserPermissionsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    UserPermissionList.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetUserPermissionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
+
+end;
+
+
+constructor TSessions.Create();
+begin
+    inherited;
+end;
+
+
+destructor TSessions.Destroy();
+begin
+    inherited;
+end;
+
+
+function TSessions.RequestAccessTokenAwaited(var AccessToken: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var NewAccessToken: string;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+        Rest.AccessToken:=String.Empty;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_X_WWW_FORM_URLENCODED);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_LOGIN_URI') + 'oauth/authorize/';
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[RequestAccessTokenAwaited]: Executing POST ' + Rest.ClientBaseURL);
+
+        Rest.AddParameter('GrantType',    Service.Settings.GetStringValue('AUTHORIZATION', 'GRANT_TYPE'));
+        Rest.AddParameter('ClientId',     Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_ID'));
+        Rest.AddParameter('ClientSecret', Service.Settings.GetStringValue('AUTHORIZATION', 'CLIENT_SECRET'));
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Rest.Content);
+                try
+                    NewAccessToken:=TokenGranted.AccessToken;
+                    CallResponse.IsSucceeded:=TokenGranted.IsSucceeded;
+                    CallResponse.LastMessage:=TokenGranted.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=TokenGranted.Error.ErrorCode;
+                    Service.Logger.Log('[RequestAccessTokenAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+                finally
+                    TokenGranted.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[RequestAccessTokenAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+                E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[RequestAccessTokenAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    AccessToken:=NewAccessToken;
+    Result:=CallResponse;
+
+end;
+
+
+function TSessions.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
+        Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Service.Logger.Log('[InitiateSessionAwaited]: Executing POST ' + Rest.ClientBaseURL);
+
+        var UserSessionAdd:=TUserSessionAdd.Create();
+        try
+            UserSessionAdd.AliasName:=AliasName;
+            Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
+        finally
+            UserSessionAdd.Free();
+        end;
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Rest.Content);
+                try
+                    CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
+                    CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=UserSessionAdded.Error.ErrorCode;
+                    Service.Logger.Log('[InitiateSessionAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+                finally
+                    UserSessionAdded.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[InitiateSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[InitiateSessionAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[InitiateSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[InitiateSessionAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
+
+end;
+
+
+function TSessions.CheckSessionAwaited(SessionId: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest:=Service.InvokeRest();
+		Rest.AccessToken:=Service.AccessToken;
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+        Service.Logger.Log('[CheckSessionAwaited]: Executing GET ' + Rest.ClientBaseURL);
+
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+
+                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Rest.Content);
+                try
+
+                    CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
+                    CallResponse.LastMessage:=UserSessionChecked.Error.ErrorDesc;
+                    CallResponse.ErrorCode  :=UserSessionChecked.Error.ErrorCode;
+
+                    if CallResponse.IsSucceeded then
+                    begin
+
+                        Service.UpdateUserData(
+                            UserSessionChecked.UserId,
+                            UserSessionChecked.Department,
+                            UserSessionChecked.AliasName,
+                            UserSessionChecked.DisplayName,
+                            UserSessionChecked.EmailAddress
+                        );
+
+                    end;
+
+                    Service.Logger.Log('[CheckSessionAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+
+                finally
+                    UserSessionChecked.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckSessionAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        CallResponse.LastMessage:='[CheckSessionAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[CheckSessionAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                CallResponse.ReturnedCode:=Rest.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                Service.Logger.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckSessionAwaited]: Cannot execute the request. Description: ' + E.Message;
+                Service.Logger.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
+
+end;
+
+
+constructor TRatings.Create();
+begin
+    inherited;
+end;
+
+
+destructor TRatings.Destroy();
+begin
+    inherited;
+end;
+
+
+procedure TRatings.LoadRatingAsync(Callback: TLoadRating);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -690,7 +833,7 @@ begin
 end;
 
 
-procedure TAccounts.SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
+procedure TRatings.SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -777,7 +920,7 @@ begin
 end;
 
 
-procedure TAccounts.UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
+procedure TRatings.UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
 begin
 
     var CallResponse: TCallResponse;
@@ -861,83 +1004,6 @@ begin
     end);
 
     NewTask.Start();
-
-end;
-
-
-function TAccounts.GetUserPermissionsAwaited(): TCallResponse;
-begin
-
-    var CallResponse: TCallResponse;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-		Rest.AccessToken:=Service.AccessToken;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/permissions/'
-            + Service.SessionData.UnityUserId.ToString();
-
-        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[GetUserPermissionsAwaited]: Executing GET ' + Rest.ClientBaseURL);
-
-        try
-
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
-            begin
-
-                var UserPermissionList:=TJson.JsonToObject<TUserPermissionList>(Rest.Content);
-                try
-
-                    Service.UpdateUserPermissions(UserPermissionList.UserPermissions);
-
-                    CallResponse.IsSucceeded :=UserPermissionList.IsSucceeded;
-                    CallResponse.ErrorCode   :=UserPermissionList.Error.ErrorCode;
-                    CallResponse.LastMessage :=UserPermissionList.Error.ErrorDesc;
-                    CallResponse.ReturnedCode:=Rest.StatusCode;
-
-                    Service.Logger.Log('[GetUserPermissionsAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    UserPermissionList.Free();
-                end;
-
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[GetUserPermissionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                CallResponse.ReturnedCode:=Rest.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                Service.Logger.Log(CallResponse.LastMessage);
-
-            end;
-
-        except on
-            E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetUserPermissionsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                Service.Logger.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=CallResponse;
 
 end;
 

@@ -120,7 +120,7 @@ begin
 
     end;
 
-    Service.Mediator.Accounts.SetUserCompanyListAsync(MainForm.LoadedCompanies, SaveUserCompanyList_Callback);
+    Service.Mediator.Users.SetUserCompanyListAsync(MainForm.LoadedCompanies, SaveUserCompanyList_Callback);
 
  end;
 
@@ -237,7 +237,7 @@ begin
 
         THelpers.ExecWithDelay(500, procedure
         begin
-            Service.Mediator.Accounts.GetUserCompanyListAsync(GetUserCompanyList_Callback);
+            Service.Mediator.Users.GetUserCompanyListAsync(GetUserCompanyList_Callback);
         end);
 
     end;

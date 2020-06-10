@@ -1492,7 +1492,7 @@ procedure TMainForm.RedeemAccess();
 begin
 
     var CallResponse: TCallResponse;
-    CallResponse:=Service.Mediator.Accounts.CheckSessionAwaited(Service.SessionId);
+    CallResponse:=Service.Mediator.Sessions.CheckSessionAwaited(Service.SessionId);
 
     if CallResponse.IsSucceeded then
     begin
@@ -1511,7 +1511,7 @@ procedure TMainForm.GetUserPermissions();
 begin
 
     var LCallResponse: TCallResponse;
-    LCallResponse:=Service.Mediator.Accounts.GetUserPermissionsAwaited();
+    LCallResponse:=Service.Mediator.Users.GetUserPermissionsAwaited();
     Service.Logger.Log('[GetUserPermissions]: Getting current user permissions...');
 
     if not LCallResponse.IsSucceeded then
@@ -2454,7 +2454,7 @@ begin
             ChromiumWindow.CloseBrowser(True);
 
             var CallResponse: TCallResponse;
-            CallResponse:=Service.Mediator.Accounts.SaveUserLogsAwaited();
+            CallResponse:=Service.Mediator.Users.SaveUserLogsAwaited();
 
             if not CallResponse.IsSucceeded then
                 THelpers.MsgCall(MainForm.Handle, TAppMessage.Error, CallResponse.LastMessage);
@@ -2906,7 +2906,7 @@ end;
 procedure TMainForm.TimerRatingTimer(Sender: TObject);
 begin
     TimerRating.Enabled:=False;
-    Service.Mediator.Accounts.LoadRatingAsync(LoadRating_Callback);
+    Service.Mediator.Ratings.LoadRatingAsync(LoadRating_Callback);
 end;
 
 
