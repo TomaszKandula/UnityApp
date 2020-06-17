@@ -39,7 +39,7 @@ object SendForm: TSendForm
       AlignWithMargins = True
       Left = 20
       Top = 10
-      Width = 85
+      Width = 500
       Height = 13
       Margins.Left = 20
       Margins.Top = 10
@@ -47,6 +47,7 @@ object SendForm: TSendForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom message:'
+      ExplicitWidth = 85
     end
     object PanelMessage: TPanel
       AlignWithMargins = True

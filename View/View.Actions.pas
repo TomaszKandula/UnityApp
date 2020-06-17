@@ -758,7 +758,7 @@ begin
     FPayLoad.InvoiceFilter  :=TFilterType.StatementAllItems;
     FPayLoad.BeginDate      :=DateToStr(Now());
     FPayLoad.EndDate        :=DateToStr(Now());
-    FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
+    FPayLoad.IsCtrlStatus  :=not ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
     FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
 

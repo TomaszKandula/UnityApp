@@ -226,6 +226,8 @@ begin
         Exit();
     end;
 
+    if PayLoad.Rating = 0 then Exit();
+
     FSelectedRating:=PayLoad.Rating;
     ReportMemo.Text:=PayLoad.Comment;
     SetRatingStars(FSelectedRating);

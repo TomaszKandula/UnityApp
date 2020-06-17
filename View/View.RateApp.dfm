@@ -97,7 +97,7 @@ object RateForm: TRateForm
       AlignWithMargins = True
       Left = 10
       Top = 25
-      Width = 279
+      Width = 559
       Height = 37
       Margins.Left = 10
       Margins.Top = 25
@@ -114,12 +114,13 @@ object RateForm: TRateForm
       Font.Style = []
       ParentColor = False
       ParentFont = False
+      ExplicitWidth = 279
     end
     object txtComment: TLabel
       AlignWithMargins = True
       Left = 12
       Top = 158
-      Width = 98
+      Width = 555
       Height = 13
       Margins.Left = 12
       Margins.Top = 10
@@ -133,6 +134,7 @@ object RateForm: TRateForm
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
+      ExplicitWidth = 98
     end
     object PanelReportMemo: TPanel
       AlignWithMargins = True
@@ -223,8 +225,6 @@ object RateForm: TRateForm
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 2
-      ExplicitTop = 62
-      ExplicitHeight = 86
       object Image1: TImage
         AlignWithMargins = True
         Left = 145

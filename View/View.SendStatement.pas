@@ -150,7 +150,7 @@ begin
     FPayLoad.InvoiceFilter  :=InvFilter;
     FPayLoad.BeginDate      :=BeginDate;
     FPayLoad.EndDate        :=EndDate;
-    FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
+    FPayLoad.IsCtrlStatus  :=not ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
     FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
 
