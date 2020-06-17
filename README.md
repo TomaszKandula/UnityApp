@@ -25,7 +25,7 @@ The application requires additional folders and files in `C:\ProgramData` folder
 
 1. Add folder `C:\ProgramData\Unity Platform`.
 1. Copy Config.bin from `Build\Assets` folder to the `C:\ProgramData\Unity Platform`.
-1. Add to the `C:\ProgramData\Unity Platform` subfolders (empty) `cache`, `coockies`, `layouts` and `sessions`. 
+1. Add to the `C:\ProgramData\Unity Platform` subfolders (empty) `layouts` and `sessions`. 
 1. Copy Unity.inf from `Build\Assets` folder to `\Win32\bin\` and `\Win64\bin`.
 1. Copy all files from `Build\Assets\Images` folder to `\Win32\bin\assets` and `\Win64\bin\assets`.
 
@@ -124,49 +124,6 @@ Unity Platform uses Skype API, it therefore requires following assemblies:
 1. Microsoft.Office.Uc.dll
 
 There is no direct utilisation, it is used by `LyncCall.exe` which is compiled separately (associated project in C#). This file must be placed in `bin` folder.
-
-# Chromium Embedded
-
----
-
-Unity Platform requires Chromium engine, the source:
-
-[https://github.com/salvadordf/CEF4Delphi](https://github.com/salvadordf/CEF4Delphi)
-
-The `bin` folder should contain:
-
-1. chrome_elf.dll
-1. d3dcompiler_47.dll
-1. libcef.dll
-1. libEGL.dll
-1. libGLESv2.dll
-1. natives_blob.bin
-1. snapshot_blob.bin
-1. v8_context_snapshot.bin
-1. icudtl.dat
-1. cef_sandbox.lib
-1. libcef.lib
-1. cef.pak
-1. cef_100_percent.pak
-1. cef_200_percent.pak
-1. cef_extensions.pak
-1. devtools_resources.pak
-
-Add folder with theirs content:
-
-1. locales
-1. swiftshader
-
-Additionally, there is SubProcess.exe which is compiled separately.
-
-WARNING!
-
-`SubProcess.exe` does not work properly if compiled with With `RAD Studio 10.3 Rio` and new `CEF4Delphi` project, the problem is that the latest library `libcef.dll` (ver. 74.1.19.0) 
-cannot be loaded, only older version works (ver. 3.x to be exact). The cause is unknown. There is no official fix and the issue has been closed: 
-[https://github.com/salvadordf/CEF4Delphi/issues/167](https://github.com/salvadordf/CEF4Delphi/issues/167). 
-
-The workaround is, build everything with latest `CEF4Delphi` and use latest binaries and libraries, except `SubProcess.exe` which must be compiled with older `RAD Studio 10.2 Tokyo`; 
-then everything works as expected.
 
 # Licence file (Unity.lic)
 
