@@ -47,12 +47,6 @@ uses
     Vcl.OleCtrls,
     Vcl.Imaging.GIFImg,
     Vcl.ImgList,
-    uCEFChromium,
-    uCEFWindowParent,
-    uCEFChromiumWindow,
-    uCEFTypes,
-    uCEFInterfaces,
-    uCEFWinControl,
     Unity.Grid,
     Unity.Shape,
     Unity.Panel,
@@ -71,27 +65,7 @@ type
 
     TMainForm = class(TForm) // Representing main user window
         Action_GoogleIt: TMenuItem;
-        imgSSL: TImage;
-        imgNavCover: TImage;
-        Action_BrowserMode: TMenuItem;
         Action_AccountDetails: TMenuItem;
-        PanelLock: TPanel;
-        imgLock: TImage;
-        shapeUrlSection: TShape;
-        PanelUrl: TPanel;
-        PanelButtons: TPanel;
-        EditUrlSection: TEdit;
-        btnNavHome: TImage;
-        txtNavHome: TLabel;
-        PanelNavigation: TPanel;
-        btnNavBack: TImage;
-        btnNavForward: TImage;
-        btnNavReload: TImage;
-        txtNavBack: TLabel;
-        txtNavForward: TLabel;
-        txtNavReload: TLabel;
-        Action_ShowNavigation: TMenuItem;
-        N10: TMenuItem;
         btnRating: TPanel;
         imgRating: TImage;
         txtRating: TLabel;
@@ -390,8 +364,6 @@ type
         btnSettings: TPanel;
         imgSettings: TImage;
         txtSettings: TLabel;
-        ChromiumWindow: TChromiumWindow;
-        Chromium: TChromium;
         ControlStatusPanel: TPanel;
         sgControlStatus: TStringGrid;
         Tables: TPageControl;
@@ -463,9 +435,6 @@ type
         TimerPermitCheck: TTimer;
         PopupLogin: TPopupMenu;
         Action_LoginRedeem: TMenuItem;
-        N25: TMenuItem;
-        Action_ClearCoockies: TMenuItem;
-        Action_ClearCache: TMenuItem;
         imgOFF2: TImage;
         BevelSepLine: TBevel;
         txtInfoLine1: TLabel;
@@ -499,7 +468,6 @@ type
         procedure Action_AboutClick(Sender: TObject);
         procedure Action_OnTopClick(Sender: TObject);
         procedure Action_AccountDetailsClick(Sender: TObject);
-        procedure Action_BrowserModeClick(Sender: TObject);
         procedure Action_GoogleItClick(Sender: TObject);
         procedure TabSheet8Show(Sender: TObject);
         procedure imgKeyAddMouseEnter(Sender: TObject);
@@ -532,18 +500,6 @@ type
         procedure btnRatingClick(Sender: TObject);
         procedure btnRatingMouseEnter(Sender: TObject);
         procedure btnRatingMouseLeave(Sender: TObject);
-        procedure btnNavBackClick(Sender: TObject);
-        procedure btnNavBackMouseLeave(Sender: TObject);
-        procedure btnNavForwardClick(Sender: TObject);
-        procedure btnNavForwardMouseEnter(Sender: TObject);
-        procedure btnNavForwardMouseLeave(Sender: TObject);
-        procedure btnNavReloadClick(Sender: TObject);
-        procedure btnNavReloadMouseEnter(Sender: TObject);
-        procedure btnNavReloadMouseLeave(Sender: TObject);
-        procedure btnNavHomeClick(Sender: TObject);
-        procedure btnNavHomeMouseEnter(Sender: TObject);
-        procedure btnNavHomeMouseLeave(Sender: TObject);
-        procedure btnNavBackMouseEnter(Sender: TObject);
         procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
         procedure sgListValueClick(Sender: TObject);
         procedure sgListSectionClick(Sender: TObject);
@@ -719,7 +675,6 @@ type
         procedure Action_PersonRespClick(Sender: TObject);
         procedure Action_AccountTypeClick(Sender: TObject);
         procedure Action_ViewOptionsClick(Sender: TObject);
-        procedure Action_ShowNavigationClick(Sender: TObject);
         procedure TabSheet5Show(Sender: TObject);
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure PopupCommonMenuPopup(Sender: TObject);
@@ -744,11 +699,7 @@ type
         procedure Action_ShowAllColumnsClick(Sender: TObject);
         procedure TimerPermitCheckTimer(Sender: TObject);
         procedure Action_LoginRedeemClick(Sender: TObject);
-        procedure ChromiumAddressChange(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
-        procedure Action_ClearCoockiesClick(Sender: TObject);
-        procedure Action_ClearCacheClick(Sender: TObject);
         procedure PopupTrackerPopup(Sender: TObject);
-        procedure PopupLoginPopup(Sender: TObject);
         procedure Action_InGoogleClick(Sender: TObject);
         procedure Action_CopySelectionClick(Sender: TObject);
         procedure Page1Show(Sender: TObject);
@@ -771,15 +722,8 @@ type
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
-        procedure WndMessagesChromium(PassMsg: TMessage); // Chromium events
         procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend events
         procedure WndMessagesExternal(PassMsg: TMessage); // Get lync call details
-        procedure NotifyMoveOrResizeStarted;
-        procedure ChromiumModalLoopOn(PassMsg: TMessage);
-        procedure ChromiumModalLoopOff(PassMsg: TMessage);
-        procedure Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring;
-            targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
-            var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
         procedure SetAgeViewHeader(var SourceGrid: TStringGrid);
         const FPermitCheckTimeout = 900000; // 15 min.
@@ -1478,7 +1422,16 @@ begin
     var Url:=WideString(BaseUrl) + '?sessiontoken=' + Service.SessionId;
 
     try
-        Chromium.LoadURL(Url);
+
+        ShellExecute(
+            MainForm.Handle,
+            'open',
+            PChar('microsoft-edge:' + Url),
+            nil,
+            nil,
+            SW_SHOWNORMAL
+        );
+
         Service.Logger.Log('[RequestUnityWebWithToken]: Requested URL = "' + Url + '".');
     except
         on E: exception do
@@ -1537,7 +1490,6 @@ end;
 
 procedure TMainForm.SetPanelBorders();
 begin
-    PanelNavigation.Borders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     AppHeader.Borders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     DebtorsPanel.Borders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     OpenItemsPanel.Borders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
@@ -2108,37 +2060,6 @@ end;
 {$REGION 'MESSAGE PROCESSING'}
 
 
-procedure TMainForm.NotifyMoveOrResizeStarted();
-begin
-    if (ChromiumWindow <> nil) then ChromiumWindow.NotifyMoveOrResizeStarted();
-end;
-
-
-procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage);
-begin
-    if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=True;
-end;
-
-
-procedure TMainForm.ChromiumModalLoopOff(PassMsg: TMessage);
-begin
-    if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=False;
-end;
-
-
-procedure TMainForm.WndMessagesChromium(PassMsg: TMessage);
-begin
-
-    case PassMsg.Msg of
-        WM_MOVE:          NotifyMoveOrResizeStarted;
-        WM_MOVING:        NotifyMoveOrResizeStarted;
-        WM_ENTERMENULOOP: ChromiumModalLoopOn(PassMsg);
-        WM_EXITMENULOOP:  ChromiumModalLoopOff(PassMsg);
-    end;
-
-end;
-
-
 procedure TMainForm.WndMessagesExternal(PassMsg: TMessage);
 begin
 
@@ -2219,7 +2140,6 @@ end;
 procedure TMainForm.WndProc(var Msg: TMessage);
 begin
     inherited;
-    WndMessagesChromium(Msg);
     WndMessagesExternal(Msg);
     WndMessagesWindows(Msg);
 end;
@@ -2251,9 +2171,6 @@ procedure TMainForm.SetupMainWnd();
 begin
 
     if FHadFirstLoad then Exit();
-
-    ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
-    if not(Chromium.Initialized) then Chromium.CreateBrowser(ChromiumWindow, '');
 
     for var iCNT:=0 to TabSheets.PageCount - 1 do
         TabSheets.Pages[iCNT].TabVisible:=False;
@@ -2354,7 +2271,6 @@ begin
     FLoadedCompanies:=TList<string>.Create();
     FIsAppMenuLocked:=True;
     FAllowClose:=False;
-    EditUrlSection.Text:='';
     ClearMainViewInfo();
     ClearAgingSummary();
     ClearOpenItemsInfo();
@@ -2387,49 +2303,6 @@ end;
 {$REGION 'MISC. EVENTS'}
 
 
-procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject;
-    const browser: ICefBrowser;
-    const frame: ICefFrame;
-    const targetUrl, targetFrameName: ustring;
-    targetDisposition: TCefWindowOpenDisposition;
-    userGesture: Boolean;
-    const popupFeatures: TCefPopupFeatures;
-    var windowInfo: TCefWindowInfo;
-    var client: ICefClient;
-    var settings: TCefBrowserSettings;
-    var noJavascriptAccess: Boolean;
-    var Result: Boolean);
-begin
-
-    // Execute on "before popup" - ignore listed
-    // Optional: WOD_NEW_POPUP, WOD_NEW_WINDOW
-    Result:=(
-                targetDisposition in
-                [
-                    WOD_NEW_FOREGROUND_TAB,
-                    WOD_NEW_BACKGROUND_TAB
-                ]
-            );
-end;
-
-
-procedure TMainForm.ChromiumAddressChange(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
-begin
-
-    if Chromium.IsSameBrowser(browser) then
-    begin
-
-        var StrUrl: string:=url;
-        EditUrlSection.Text:=StrUrl;
-
-        if StrUrl.Contains('http://') then  imgSSL.Picture.LoadFromFile(Service.Settings.DirAssets + 'Insecure.bmp');
-        if StrUrl.Contains('https://') then imgSSL.Picture.LoadFromFile(Service.Settings.DirAssets + 'Secure.bmp');
-
-    end;
-
-end;
-
-
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
     // --------------------------------------------------------------------------------------
@@ -2451,7 +2324,6 @@ begin
         begin
 
             SwitchTimers(TAppTimers.TurnedOff);
-            ChromiumWindow.CloseBrowser(True);
 
             var CallResponse: TCallResponse;
             CallResponse:=Service.Mediator.Users.SaveUserLogsAwaited();
@@ -2960,32 +2832,6 @@ begin
 end;
 
 
-procedure TMainForm.PopupLoginPopup(Sender: TObject);
-begin
-
-    if TabSheets.ActivePage = TabSheet9 then
-    begin
-
-        Action_BrowserMode.Enabled  :=True;
-        Action_ClearCoockies.Enabled:=True;
-        Action_ClearCache.Enabled   :=True;
-
-        if Action_BrowserMode.Checked then
-            Action_ShowNavigation.Enabled:=False
-                else Action_ShowNavigation.Enabled:=True;
-
-    end
-    else
-    begin
-        Action_BrowserMode.Enabled   :=False;
-        Action_ShowNavigation.Enabled:=False;
-        Action_ClearCoockies.Enabled :=False;
-        Action_ClearCache.Enabled    :=False;
-    end;
-
-end;
-
-
 procedure TMainForm.PopupTrackerPopup(Sender: TObject);
 begin
 
@@ -3250,8 +3096,8 @@ begin
     ShellExecute(
         MainForm.Handle,
         'open',
-        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
-        PChar(AppParam),
+        PChar('microsoft-edge:' + AppParam),
+        nil,
         nil,
         SW_SHOWNORMAL
     );
@@ -3368,80 +3214,6 @@ begin
     RedeemAccess();
 end;
 
-
-procedure TMainForm.Action_ClearCoockiesClick(Sender: TObject);
-begin
-    if THelpers.MsgCall(MainForm.Handle, TAppMessage.Question2, 'Do you want to clear stored coockies?') = ID_YES then
-        Chromium.DeleteCookies();
-end;
-
-
-procedure TMainForm.Action_ClearCacheClick(Sender: TObject);
-begin
-    Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
-    Service.Settings.Encode(TAppFiles.Configuration);
-    THelpers.MsgCall(MainForm.Handle, TAppMessage.Info, 'The cache will be cleared next time you start the application.');
-end;
-
-
-procedure TMainForm.Action_ShowNavigationClick(Sender: TObject);
-begin
-
-    if Action_ShowNavigation.Checked then
-    begin
-        Action_ShowNavigation.Checked:=not Action_ShowNavigation.Checked;
-        PanelNavigation.Visible:=False;
-    end
-    else
-    begin
-        Action_ShowNavigation.Checked:=not Action_ShowNavigation.Checked;
-        PanelNavigation.Visible:=True;
-    end;
-
-end;
-
-
-procedure TMainForm.Action_BrowserModeClick(Sender: TObject);
-begin
-
-    if Action_BrowserMode.Checked then
-    begin
-
-        TabSheet9.PopupMenu:=nil;
-        Action_BrowserMode.Checked:=not Action_BrowserMode.Checked;
-
-        Action_AccountDetails.Visible:=True;
-        Action_LoginRedeem.Visible:=True;
-        N25.Visible:=True;
-
-        AppMenu.Width:=AppMenuShown;
-        AppHeader.Visible:=True;
-
-    end
-    else
-    begin
-
-        TabSheet9.PopupMenu:=PopupLogin;
-        Action_BrowserMode.Checked:=not Action_BrowserMode.Checked;
-
-        if not Action_ShowNavigation.Checked then
-        begin
-            Action_ShowNavigation.Checked:=not Action_ShowNavigation.Checked;
-            PanelNavigation.Visible:=True;
-        end;
-
-        Action_AccountDetails.Visible:=False;
-        Action_LoginRedeem.Visible:=False;
-        N25.Visible:=False;
-
-        AppMenu.Width:=AppMenuHidden;
-        AppHeader.Visible:=False;
-
-    end;
-
-end;
-
-
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
 
@@ -3466,10 +3238,10 @@ begin
         );
 
     ShellExecute(
-        ActionsForm.Handle,
+        MainForm.Handle,
         'open',
-        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
-        PChar(AppParam),
+        PChar('microsoft-edge:' + AppParam),
+        nil,
         nil,
         SW_SHOWNORMAL
     );
@@ -3867,89 +3639,6 @@ end;
 procedure TMainForm.btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
     EditPassword.PasswordChar:='*';
-end;
-
-
-procedure TMainForm.btnNavBackClick(Sender: TObject);
-begin
-    Chromium.GoBack();
-end;
-
-
-procedure TMainForm.btnNavBackMouseEnter(Sender: TObject);
-begin
-    txtNavBack.Font.Color:=AppMenuTextSelected;
-end;
-
-
-procedure TMainForm.btnNavBackMouseLeave(Sender: TObject);
-begin
-    txtNavBack.Font.Color:=AppMenuTextNormal;
-end;
-
-
-procedure TMainForm.btnNavForwardClick(Sender: TObject);
-begin
-    Chromium.GoForward();
-end;
-
-
-procedure TMainForm.btnNavForwardMouseEnter(Sender: TObject);
-begin
-    txtNavForward.Font.Color:=AppMenuTextSelected;
-end;
-
-
-procedure TMainForm.btnNavForwardMouseLeave(Sender: TObject);
-begin
-    txtNavForward.Font.Color:=AppMenuTextNormal;
-end;
-
-
-procedure TMainForm.btnNavReloadClick(Sender: TObject);
-begin
-
-    var Url: string:=EditUrlSection.Text;
-    if (String.IsNullOrEmpty(Url)) or (String.IsNullOrWhiteSpace(Url)) then Exit();
-
-    if Url.Contains(' ') then
-    begin
-        THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'The URL address cannot contain whitespaces. Please corrected and try again.');
-        Exit();
-    end;
-
-    Chromium.LoadURL(Url);
-
-end;
-
-
-procedure TMainForm.btnNavReloadMouseEnter(Sender: TObject);
-begin
-    txtNavReload.Font.Color:=AppMenuTextSelected;
-end;
-
-
-procedure TMainForm.btnNavReloadMouseLeave(Sender: TObject);
-begin
-    txtNavReload.Font.Color:=AppMenuTextNormal;
-end;
-
-
-procedure TMainForm.btnNavHomeClick(Sender: TObject);
-begin
-    RequestUnityWebWithToken();
-end;
-
-
-procedure TMainForm.btnNavHomeMouseEnter(Sender: TObject);
-begin
-    txtNavHome.Font.Color:=AppMenuTextSelected;
-end;
-
-
-procedure TMainForm.btnNavHomeMouseLeave(Sender: TObject);
-begin
-    txtNavHome.Font.Color:=AppMenuTextNormal;
 end;
 
 

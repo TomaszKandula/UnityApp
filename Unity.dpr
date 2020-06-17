@@ -294,97 +294,6 @@ begin
         Service.Settings.MakeNewSessionFile(Service.Settings.NewSessionId)
     );
 
-    // ----------------------------------------------------------------
-    // Clear cache directory content if previously ordered by the user.
-    // ----------------------------------------------------------------
-    if Service.Settings.GetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', '') = 'yes' then
-    begin
-        THelpers.RemoveAllInFolder(PathHomeDir + 'cache', '*.*');
-        Service.Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'no');
-        Service.Settings.Encode(TAppFiles.Configuration);
-    end;
-
-    // -------------------------------------------------------------------------------------------------------
-    // Initialize Chromium object before Chromium component is created within MainForm.
-    // <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
-    // <see cref="https://github.com/salvadordf/CEF4Delphi" />
-    // GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
-    // -------------------------------------------------------------------------------------------------------
-    GlobalCEFApp:=TCefApplication.Create();
-    var ChromiumExit: boolean:=False;
-
-    try
-
-        // ----------------------------------------------------------------------------------------
-        // Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
-        // ----------------------------------------------------------------------------------------
-        GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
-
-        try
-
-            // ---------------------------------------------------------------------------------------------------------------------------
-            // Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
-            // if we have main thread running. If not, we exit the program.
-            // Setup framework directory, explicitly to an absolute value. It ensures correct initialization.
-            // ---------------------------------------------------------------------------------------------------------------------------
-            GlobalCEFApp.FrameworkDirPath:=PathAppDir;
-
-            // ----------------------------------------------------------------------------------------------
-            // Setup resources directory, explicitly to an absolute value. It ensures correct initialization.
-            // ----------------------------------------------------------------------------------------------
-            GlobalCEFApp.ResourcesDirPath:=PathAppDir;
-
-            // --------------------------------------------------------------------------------------------
-            // Setup locales directory, explicitly to an absolute value. It ensures correct initialization.
-            // --------------------------------------------------------------------------------------------
-            GlobalCEFApp.LocalesDirPath:=PathAppDir + 'locales';
-
-            // -----------------------------------------------------------------
-            // Setup Coockies and Cache folders to allow store web browser data.
-            // Note: Do place those folders in Home path.
-            // -----------------------------------------------------------------
-            GlobalCEFApp.PersistSessionCookies:=False; // Do not store coockies without expiry/validity date!
-            GlobalCEFApp.Cache  :=PathHomeDir + 'cache';
-            GlobalCEFApp.Cookies:=PathHomeDir + 'coockies';
-
-            // -----------------------------------------------------------------------------------------------------------------
-            // Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
-            // -----------------------------------------------------------------------------------------------------------------
-            GlobalCEFApp.SetCurrentDir:=True;
-
-            if not(GlobalCEFApp.StartMainProcess) then
-            begin
-
-                Application.MessageBox(
-                    PChar('Chromium cannot detect main thread running. Program will be closed. Please contact IT support.'),
-                    PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
-                );
-
-                ChromiumExit:=True;
-
-            end;
-
-        except
-            on E: Exception do
-                Application.MessageBox(
-                    PChar('Chromium initialization failed, message received: ' + E.Message),
-                    PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
-                );
-        end;
-
-    finally
-
-        if ChromiumExit then
-        begin
-            Application.MessageBox(
-                PChar('Chromium initialization failed, GlobalCEFApp.StartMainProcess returned false, no exception has been thrown.'),
-                PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
-            );
-            ExitProcess(0);
-        end;
-
-    end;
-
     Application.Initialize();
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=True;
@@ -402,7 +311,6 @@ begin
 
     Application.Run;
     UnloadService();
-    GlobalCEFApp.Free();
 
 end.
 

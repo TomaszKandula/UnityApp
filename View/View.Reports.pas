@@ -197,8 +197,8 @@ begin
     ShellExecute(
         ReportsForm.Handle,
         'open',
-        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
-        PChar(ReportUrl),
+        PChar('microsoft-edge:' + ReportUrl),
+        nil,
         nil,
         SW_SHOWNORMAL
     );

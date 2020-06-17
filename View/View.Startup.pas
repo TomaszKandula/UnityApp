@@ -393,7 +393,7 @@ begin
         // ----------------------------------
         MainAppForm.FGridPicture:=TImage.Create(MainForm);
         MainAppForm.FGridPicture.SetBounds(0, 0, 16, 16);
-        THelpers.LoadImageFromStream(View.Main.MainForm.FGridPicture, Service.Settings.DirAssets + 'Star.bmp');
+        //THelpers.LoadImageFromStream(View.Main.MainForm.FGridPicture, Service.Settings.DirAssets + 'Star.bmp');
 
         // ---------------------------------------------------------------------
         // Setup timers, some of them may be removed after introducing REST API.

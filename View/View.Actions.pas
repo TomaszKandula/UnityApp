@@ -1401,8 +1401,8 @@ begin
     ShellExecute(
         ActionsForm.Handle,
         'open',
-        PChar(Service.Settings.DirApplication + TCommon.UnityReader),
-        PChar(AppParam),
+        PChar('microsoft-edge:' + AppParam),
+        nil,
         nil,
         SW_SHOWNORMAL
     );
