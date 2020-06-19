@@ -203,21 +203,13 @@ begin
     PanelContent.Borders(clWhite, clWhite,   clWhite, clWhite, clWhite);
     PanelFooter.Borders(clWhite,  clWhite,   clWhite, clWhite, clWhite);
 
-    if FileExists(Service.Settings.PathLicence) then
-    begin
-
-        if Service.Settings.Decode(TAppFiles.Licence, True) then
-        begin
-            valVersion.Caption  :=THelpers.GetBuildInfoAsString;
-            valLicence.Caption  :=Service.Settings.GetLicenceValue('LICENCE', 'Type');
-            valStatus.Caption   :=Service.Settings.GetLicenceValue('LICENCE', 'Status');
-            valEmail.Caption    :=Service.Settings.GetLicenceValue('DETAILS', 'Email1');
-            valSupport.Caption  :=Service.Settings.GetLicenceValue('DETAILS', 'Email2');
-            valWebsite.Caption  :=Service.Settings.GetLicenceValue('DETAILS', 'WebAddr');
-            valDeveloper.Caption:=Service.Settings.GetLicenceValue('DETAILS', 'Author');
-        end;
-
-    end;
+    valVersion.Caption  :=THelpers.GetBuildInfoAsString;
+    valLicence.Caption  :=String.Empty;
+    valStatus.Caption   :=String.Empty;
+    valEmail.Caption    :=String.Empty;
+    valSupport.Caption  :=String.Empty;
+    valWebsite.Caption  :=String.Empty;
+    valDeveloper.Caption:=String.Empty;
 
 end;
 

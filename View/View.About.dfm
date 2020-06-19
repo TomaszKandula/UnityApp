@@ -234,7 +234,7 @@ object AboutForm: TAboutForm
         Caption = 'Local IT support:'
       end
       object txtWebsite: TLabel
-        Left = 24
+        Left = 26
         Top = 38
         Width = 43
         Height = 13

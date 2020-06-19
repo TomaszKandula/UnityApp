@@ -50,7 +50,6 @@ uses
     Winapi.ShellApi,
     Vcl.Forms,
     Vcl.StdCtrls,
-    uCEFApplication,
     Unity.ChkListBox in 'Extensions\Unity.ChkListBox.pas',
     Unity.Edit in 'Extensions\Unity.Edit.pas',
     Unity.Panel in 'Extensions\Unity.Panel.pas',
@@ -216,60 +215,76 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
-    // -------------------------------------
-    // Exit program if Unity.inf is missing.
-    // -------------------------------------
-    var EnvSetupFile:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar + 'Unity.inf';
-    if not FileExists(EnvSetupFile) then
+    if ParamCount = 0 then
     begin
 
         Application.MessageBox(
-            PCHar(
-                'Cannot find ' +
-                TCommon.EnvSetupFile +
-                '. ' +
-                TCommon.AppCaption +
-                ' will be closed. Please contact IT support or reinstall the application.'
-            ),
-            PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
+            PCHar('Application can be invoked by the Luncher.exe only.'),
+            PChar(TCommon.AppCaption), MB_OK + MB_ICONWARNING
         );
-
         ExitProcess(0);
+
+    end
+    else
+    begin
+
+        if (ParamStr(1) = '-set') and
+           (ParamStr(2) <> String.Empty) and
+           (ParamStr(3) <> String.Empty) and
+           (ParamStr(4) <> String.Empty) then
+        begin
+
+            var LSourceConfig  :=LowerCase(ParamStr(2));
+            var LWritableConfig:=LowerCase(ParamStr(3));
+            var LEnvironment   :=LowerCase(ParamStr(4));
+
+            Service.Settings.Initialize(LSourceConfig, LWritableConfig, LEnvironment);
+
+        end
+        else
+        begin
+
+            Application.MessageBox(
+                PCHar('Application has been called with incorrect arguments(s).'),
+                PChar(TCommon.AppCaption), MB_OK + MB_ICONWARNING
+            );
+            ExitProcess(0);
+
+        end;
 
     end;
 
-    // ----------------------------------------------------
-    // Allow to use different config file than default one.
-    // ----------------------------------------------------
-    if not(ParamCount = 0) then
-        Service.Settings.Initialize(ParamStr(1))
-            else Service.Settings.Initialize(String.Empty);
-
     var PathAppDir :=Service.Settings.DirApplication;
-    var PathHomeDir:=Service.Settings.DirRoaming;
     var BinFileName:=Service.Settings.BinFileName;
 
     // --------------------------------
     // Check Config.cfg and Config.bin.
     // --------------------------------
-    if not FileExists(PathHomeDir + TCommon.ConfigFile) then
+    if not FileExists(PathAppDir + TCommon.ConfigFile) then
     begin
 
-        if FileExists(PathHomeDir + BinFileName) then
+        // Recover and re-open
+        if FileExists(PathAppDir + BinFileName) then
         begin
-            // Recover and re-open
-            TFile.Copy(PathHomeDir + BinFileName, PathHomeDir + TCommon.ConfigFile);
+
+            TFile.Copy(PathAppDir + BinFileName, PathAppDir + TCommon.ConfigFile);
             Sleep(2500);
-            ShellExecute(MainForm.Handle, 'open', PChar(PathAppDir + 'Unity.exe'), nil, nil, SW_SHOWNORMAL);
+
+            var ExecPath:=PathAppDir + 'Unity.exe -set ' + ParamStr(2) + ' ' + ParamStr(3) + ' ' + ParamStr(4);
+
+            ShellExecute(MainForm.Handle, 'open', PChar(ExecPath), nil, nil, SW_SHOWNORMAL);
             ExitProcess(0);
+
         end
         else
         begin
+
             Application.MessageBox(
                 PCHar('Cannot find ' + BinFileName + '. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
                 PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
+
         end;
 
     end;
@@ -281,11 +296,13 @@ begin
     // ------------------------------------------------------
     if not Service.Settings.CheckConfigFile then
     begin
+
         Application.MessageBox(
             PCHar('Cannot find configuration file. ' + TCommon.AppCaption + ' will be closed. Please contact IT support or reinstall the application.'),
             PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
         );
         ExitProcess(0);
+
     end;
 
     Service.Settings.MakeNewSessionId();

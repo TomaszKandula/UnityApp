@@ -13,7 +13,6 @@ object StartupForm: TStartupForm
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  Scaled = False
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -3589,7 +3588,7 @@ object StartupForm: TStartupForm
     ParentFont = False
   end
   object ShapeLine: TShape
-    Left = 13
+    Left = 8
     Top = 517
     Width = 926
     Height = 2

@@ -1,15 +1,14 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{E6C141C3-C8D1-4F51-B78A-D33DAD0B438F}</ProjectGuid>
-        <MainSource>Unity.dpr</MainSource>
+        <ProjectGuid>{BF55FD52-6FD3-478E-9EA4-2EAD787E80F4}</ProjectGuid>
         <ProjectVersion>18.7</ProjectVersion>
+        <FrameworkType>VCL</FrameworkType>
+        <MainSource>Luncher.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <FrameworkType>VCL</FrameworkType>
-        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-        <AppType>Application</AppType>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <TargetedPlatforms>3</TargetedPlatforms>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -35,12 +34,6 @@
         <Cfg_1>true</Cfg_1>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
-        <Cfg_1_Win64>true</Cfg_1_Win64>
-        <CfgParent>Cfg_1</CfgParent>
-        <Cfg_1>true</Cfg_1>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
         <Cfg_2>true</Cfg_2>
         <CfgParent>Base</CfgParent>
@@ -52,15 +45,7 @@
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
-        <Cfg_2_Win64>true</Cfg_2_Win64>
-        <CfgParent>Cfg_2</CfgParent>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_UsePackage>vclimg;vcl;vclx;dbrtl;Rave90VCL;bdertl;VclSmp;rtl;svnui;svn;TeeUI;TeeDB;Tee;vclactnband;vcldb;vcldbx;vcltouch;xmlrtl;dsnap;dsnapcon;vclib;ibxpress;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_110_150;Intraweb_110_150;vclie;websnap;webdsnap;inetdb;inetdbbde;inetdbxpress;soaprtl;vclribbon;dbexpress;DbxCommonDriver;DataSnapIndy10ServerTransport;DataSnapProviderClient;DbxClientDriver;DataSnapClient;dbxcds;DataSnapServer;AzureCloud;DBXInterBaseDriver;DBXMySQLDriver;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver;CodeSiteExpressVcl;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_DcuOutput>.\Build\$(Platform)\Dcu\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\Build\$(Platform)\Bin</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
@@ -68,77 +53,43 @@
         <DCC_S>false</DCC_S>
         <DCC_F>false</DCC_F>
         <DCC_K>false</DCC_K>
-        <SanitizedProjectName>Unity</SanitizedProjectName>
-        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;Data.Win;System.Win;FMX;System.Bindings;FireDAC.VCLUI;FireDAC.Comp.BatchMove;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
-        <VerInfo_MajorVer>0</VerInfo_MajorVer>
-        <VerInfo_MinorVer>1</VerInfo_MinorVer>
-        <VerInfo_Build>542</VerInfo_Build>
-        <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Locale>2057</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula for DFDS Polska sp. z o.o.;FileDescription=Unity for Debt Management;FileVersion=0.1.0.542;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska sp. z o.o.;OriginalFilename=Unity.exe;ProductName=Unity for Debt Management;ProductVersion=1.0.0.0;Comments=Unity for Debt Management</VerInfo_Keys>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+        <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
+        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <SanitizedProjectName>Luncher</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
-        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_UsePackage>DBXSqliteDriver;RESTComponents;bindcompdbx;IndyIPCommon;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;svnui;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;TeeDB;FireDAC;vcltouch;vcldb;bindcompfmx;svn;FireDACSqliteDriver;FireDACPgDriver;inetdb;CEF4Delphi;FMXTee;soaprtl;DbxCommonDriver;FmxTeeUI;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;Tee;fmxobj;vclwinx;rtl;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;dclusr;RESTBackendComponents;TeeUI;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <Icon_MainIcon>Unity_Mutlisize_32.ico</Icon_MainIcon>
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <UWP_DelphiLogo44>Images\UnityIcon_44.png</UWP_DelphiLogo44>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
-        <UWP_DelphiLogo150>Images\UnityIcon_150.png</UWP_DelphiLogo150>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>0</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
-        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <Icon_MainIcon>Unity_Mutlisize_64.ico</Icon_MainIcon>
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <UWP_DelphiLogo44>Images\UnityIcon_44.png</UWP_DelphiLogo44>
-        <UWP_DelphiLogo150>Images\UnityIcon_150.png</UWP_DelphiLogo150>
-        <DCC_Namespace>Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
-        <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>0</VerInfo_Build>
+        <DCC_UsePackage>DBXSqliteDriver;RESTComponents;bindcompdbx;IndyIPCommon;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;TeeDB;FireDAC;vcltouch;vcldb;bindcompfmx;FireDACSqliteDriver;FireDACPgDriver;inetdb;CEF4Delphi;FMXTee;soaprtl;DbxCommonDriver;FmxTeeUI;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;Tee;fmxobj;vclwinx;rtl;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;RESTBackendComponents;TeeUI;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
-        <DCC_MapFile>3</DCC_MapFile>
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+        <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_MajorVer>2</VerInfo_MajorVer>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2440;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.0.0;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
-        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
-        <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Build>2440</VerInfo_Build>
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_PreRelease>false</VerInfo_PreRelease>
-        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
-        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Release>1</VerInfo_Release>
-        <Debugger_RunParams>-set config.bin config.cfg.env test</Debugger_RunParams>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>0</VerInfo_Build>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Icon_MainIcon>Unity_Mutlisize_64.ico</Icon_MainIcon>
+        <UWP_DelphiLogo44>Images\UnityIcon_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>Images\UnityIcon_150.png</UWP_DelphiLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
-        <DCC_Description>Unity For Debt Management (RTM)</DCC_Description>
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
@@ -146,169 +97,19 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
-        <VerInfo_MajorVer>2</VerInfo_MajorVer>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>2211</VerInfo_Build>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula / DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=2.0.1.2211;InternalName=Unity;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=Unity.exe;ProductName=$(MSBuildProjectName);ProductVersion=2.0.1;Comments=Unity Platform;ProgramID=com.DFDS.$(MSBuildProjectName)</VerInfo_Keys>
-        <VerInfo_PreRelease>false</VerInfo_PreRelease>
-        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
-        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Release>1</VerInfo_Release>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>0</VerInfo_Build>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Extensions\Unity.ChkListBox.pas"/>
-        <DCCReference Include="Extensions\Unity.Edit.pas"/>
-        <DCCReference Include="Extensions\Unity.Panel.pas"/>
-        <DCCReference Include="Extensions\Unity.Shape.pas"/>
-        <DCCReference Include="Extensions\Unity.Grid.pas"/>
-        <DCCReference Include="Extensions\Unity.ListView.pas"/>
-        <DCCReference Include="Extensions\Unity.ComboBox.pas"/>
-        <DCCReference Include="Helpers\Unity.Crc32.pas"/>
-        <DCCReference Include="Helpers\Unity.Enums.pas"/>
-        <DCCReference Include="Helpers\Unity.Records.pas"/>
-        <DCCReference Include="Helpers\Unity.Constants.pas"/>
-        <DCCReference Include="Helpers\Unity.Sorting.pas"/>
-        <DCCReference Include="Helpers\Unity.Helpers.pas"/>
-        <DCCReference Include="Helpers\Unity.Types.pas"/>
-        <DCCReference Include="Logic\Unity.Mediator.pas"/>
-        <DCCReference Include="Logic\Unity.Service.pas"/>
-        <DCCReference Include="Logic\Communication\Unity.RestWrapper.pas"/>
-        <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
-        <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
-        <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
-        <DCCReference Include="Model\Layout.AgeViewModel.pas"/>
-        <DCCReference Include="Model\Api.DocumentStatusFields.pas"/>
-        <DCCReference Include="Model\Api.DocumentFields.pas"/>
-        <DCCReference Include="Model\Api.ReportListFields.pas"/>
-        <DCCReference Include="Model\Api.UserDailyCommentsFields.pas"/>
-        <DCCReference Include="Model\Api.AddressBookFields.pas"/>
-        <DCCReference Include="Model\Api.UserCompanyFields.pas"/>
-        <DCCReference Include="Model\Api.CompaniesFields.pas"/>
-        <DCCReference Include="Model\Api.ControlStatusFields.pas"/>
-        <DCCReference Include="Model\Api.PaidInfoFields.pas"/>
-        <DCCReference Include="Model\Api.PaymentTermsFields.pas"/>
-        <DCCReference Include="Model\Api.SalesResponsibleFields.pas"/>
-        <DCCReference Include="Model\Api.PersonResponsibleFields.pas"/>
-        <DCCReference Include="Model\Api.AccountTypeFields.pas"/>
-        <DCCReference Include="Model\Api.CustomerGroupFields.pas"/>
-        <DCCReference Include="Model\Api.OpenItemsFields.pas"/>
-        <DCCReference Include="Model\Api.DetailsFields.pas"/>
-        <DCCReference Include="Model\Api.UserPermissions.pas"/>
-        <DCCReference Include="Model\Api.CustomerSnapshot.pas"/>
-        <DCCReference Include="Model\Api.CustomerSnapshotEx.pas"/>
-        <DCCReference Include="Model\Api.FollowUpData.pas"/>
-        <DCCReference Include="Model\Api.FreeFields.pas"/>
-        <DCCReference Include="Model\Api.MetaData.pas"/>
-        <DCCReference Include="Model\Api.ErrorHandler.pas"/>
-        <DCCReference Include="Model\Api.BankDetails.pas"/>
-        <DCCReference Include="Model\Api.StatementData.pas"/>
-        <DCCReference Include="Model\Requests\Api.SendDocument.pas"/>
-        <DCCReference Include="Model\Requests\Api.AddressBookAddBulk.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserSessionAdd.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserCompanySelection.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserSessionLogs.pas"/>
-        <DCCReference Include="Model\Requests\Api.SendEmail.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserGeneralCommentAdd.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserGeneralCommentUpdate.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserDailyCommentAdd.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserDailyCommentUpdate.pas"/>
-        <DCCReference Include="Model\Requests\Api.LogSentDocument.pas"/>
-        <DCCReference Include="Model\Requests\Api.AddressBookAdd.pas"/>
-        <DCCReference Include="Model\Requests\Api.AddressBookUpdate.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserCustSnapshotList.pas"/>
-        <DCCReference Include="Model\Requests\Api.UpdateFreeFields.pas"/>
-        <DCCReference Include="Model\Requests\Api.FollowUpsUpdate.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserRatingAdd.pas"/>
-        <DCCReference Include="Model\Requests\Api.UserRatingUpdate.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserSessionChecked.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserCompanyList.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserSessionAdded.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserCompaniesUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.CustSortingOptions.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserSessionLogsSaved.pas"/>
-        <DCCReference Include="Model\Responses\Api.SentEmail.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserGeneralCommentAdded.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserGeneralCommentUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserGeneralComment.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserDailyCommentAdded.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserDailyCommentUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserDailyCommentsList.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserDailyCommentCheck.pas"/>
-        <DCCReference Include="Model\Responses\Api.LoggedSentDocument.pas"/>
-        <DCCReference Include="Model\Responses\Api.AddressBookList.pas"/>
-        <DCCReference Include="Model\Responses\Api.AddressBookItem.pas"/>
-        <DCCReference Include="Model\Responses\Api.AddressBookAdded.pas"/>
-        <DCCReference Include="Model\Responses\Api.AddressBookItemDel.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserRating.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserRatingAdded.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserRatingUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCompanies.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnAccountType.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnPaidInfo.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnControlStatus.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnPersonResponsible.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnSalesResponsible.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnPaymentTerms.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCustomerGroup.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnSsisData.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnOpenItems.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCustomerSnapshots.pas"/>
-        <DCCReference Include="Model\Responses\Api.TokenGranted.pas"/>
-        <DCCReference Include="Model\Responses\Api.AddressBookUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserGeneralCommentCheck.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnClientInfo.pas"/>
-        <DCCReference Include="Model\Responses\Api.FreeFieldsUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.FollowUpsUpdated.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCustomerReport.pas"/>
-        <DCCReference Include="Model\Responses\Api.UserPermissionList.pas"/>
-        <DCCReference Include="Model\Responses\Api.LatestAzureJobStatus.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnCompanyEmails.pas"/>
-        <DCCReference Include="Model\Responses\Api.ReturnReportList.pas"/>
-        <DCCReference Include="Model\Responses\Api.AddressBookAddedBulk.pas"/>
-        <DCCReference Include="Model\Responses\Api.SentDocument.pas"/>
-        <DCCReference Include="Logic\Business\Sync.Utility.pas"/>
-        <DCCReference Include="Logic\Business\Async.Accounts.pas"/>
-        <DCCReference Include="Logic\Business\Async.Utilities.pas"/>
-        <DCCReference Include="Logic\Business\Async.AddressBook.pas"/>
-        <DCCReference Include="Logic\Business\Async.Debtors.pas"/>
-        <DCCReference Include="Logic\Business\Async.OpenItems.pas"/>
-        <DCCReference Include="Logic\Business\Async.Comments.pas"/>
-        <DCCReference Include="Logic\Business\Async.Documents.pas"/>
-        <DCCReference Include="Logic\Business\Async.Companies.pas"/>
-        <DCCReference Include="Logic\Business\Async.Mailer.pas"/>
-        <DCCReference Include="Logic\Business\Async.GeneralTables.pas"/>
-        <DCCReference Include="View\View.BusyScreen.pas"/>
-        <DCCReference Include="View\View.Main.pas"/>
-        <DCCReference Include="View\View.About.pas"/>
-        <DCCReference Include="View\View.Actions.pas"/>
-        <DCCReference Include="View\View.Calendar.pas"/>
-        <DCCReference Include="View\View.ColorPicker.pas"/>
-        <DCCReference Include="View\View.EventLog.pas"/>
-        <DCCReference Include="View\View.UserFeedback.pas"/>
-        <DCCReference Include="View\View.GridFilter.pas"/>
-        <DCCReference Include="View\View.GridSearch.pas"/>
-        <DCCReference Include="View\View.MassMailer.pas"/>
-        <DCCReference Include="View\View.PhoneList.pas"/>
-        <DCCReference Include="View\View.Reports.pas"/>
-        <DCCReference Include="View\View.SendStatement.pas"/>
-        <DCCReference Include="View\View.Startup.pas"/>
-        <DCCReference Include="View\View.CompanyList.pas"/>
-        <DCCReference Include="View\View.RateApp.pas"/>
-        <None Include="Include\Cef.inc"/>
+        <DCCReference Include="View\View.Luncher.pas">
+            <Form>;
+
+
+{$R *.res</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -321,85 +122,20 @@
             <CfgParent>Base</CfgParent>
         </BuildConfiguration>
     </ItemGroup>
-    <Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
     <ProjectExtensions>
         <Borland.Personality>Delphi.Personality.12</Borland.Personality>
-        <Borland.ProjectType/>
+        <Borland.ProjectType>Application</Borland.ProjectType>
         <BorlandProject>
             <Delphi.Personality>
-                <VersionInfo>
-                    <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
-                    <VersionInfo Name="AutoIncBuild">True</VersionInfo>
-                    <VersionInfo Name="MajorVer">0</VersionInfo>
-                    <VersionInfo Name="MinorVer">1</VersionInfo>
-                    <VersionInfo Name="Release">0</VersionInfo>
-                    <VersionInfo Name="Build">542</VersionInfo>
-                    <VersionInfo Name="Debug">False</VersionInfo>
-                    <VersionInfo Name="PreRelease">True</VersionInfo>
-                    <VersionInfo Name="Special">False</VersionInfo>
-                    <VersionInfo Name="Private">False</VersionInfo>
-                    <VersionInfo Name="DLL">False</VersionInfo>
-                    <VersionInfo Name="Locale">2057</VersionInfo>
-                    <VersionInfo Name="CodePage">1252</VersionInfo>
-                </VersionInfo>
-                <VersionInfoKeys>
-                    <VersionInfoKeys Name="CompanyName">Tomasz Kandula for DFDS Polska sp. z o.o.</VersionInfoKeys>
-                    <VersionInfoKeys Name="FileDescription">Unity for Debt Management</VersionInfoKeys>
-                    <VersionInfoKeys Name="FileVersion">0.1.0.542</VersionInfoKeys>
-                    <VersionInfoKeys Name="InternalName">Unity</VersionInfoKeys>
-                    <VersionInfoKeys Name="LegalCopyright">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
-                    <VersionInfoKeys Name="LegalTrademarks">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
-                    <VersionInfoKeys Name="OriginalFilename">Unity.exe</VersionInfoKeys>
-                    <VersionInfoKeys Name="ProductName">Unity for Debt Management</VersionInfoKeys>
-                    <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
-                    <VersionInfoKeys Name="Comments">Unity for Debt Management</VersionInfoKeys>
-                </VersionInfoKeys>
                 <Source>
-                    <Source Name="MainSource">Unity.dpr</Source>
+                    <Source Name="MainSource">Luncher.dpr</Source>
                 </Source>
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
-            <Platforms>
-                <Platform value="Win32">True</Platform>
-                <Platform value="Win64">True</Platform>
-            </Platforms>
-            <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Release" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Build\Win32\Bin\Unity.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>Unity.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Images\UnityIcon_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
-                    <Platform Name="Win64">
-                        <RemoteDir>Assets\</RemoteDir>
-                        <RemoteName>Logo44x44.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Images\UnityIcon_150.png" Configuration="Debug" Class="UWP_DelphiLogo150">
-                    <Platform Name="Win64">
-                        <RemoteDir>Assets\</RemoteDir>
-                        <RemoteName>Logo150x150.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="Images\UnityIcon_150.png" Configuration="Debug" Class="UWP_DelphiLogo150">
                     <Platform Name="Win32">
                         <RemoteDir>Assets\</RemoteDir>
@@ -407,9 +143,15 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Build\Win32\Bin\Unity.exe" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Debug\Luncher.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>Unity.exe</RemoteName>
+                        <RemoteName>Luncher.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win32\Debug\Luncher.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>Luncher.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -696,29 +438,7 @@
                         <Operation>0</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="iPad_Launch1024">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSDevice64">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
-                        <Operation>1</Operation>
-                    </Platform>
-                </DeployClass>
                 <DeployClass Name="iPad_Launch1024x768">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSDevice64">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
-                        <Operation>1</Operation>
-                    </Platform>
-                </DeployClass>
-                <DeployClass Name="iPad_Launch1536">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
@@ -752,17 +472,6 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch1668x2388">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSDevice64">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
-                        <Operation>1</Operation>
-                    </Platform>
-                </DeployClass>
-                <DeployClass Name="iPad_Launch2048">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
@@ -818,17 +527,6 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch2732x2048">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSDevice64">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
-                        <Operation>1</Operation>
-                    </Platform>
-                </DeployClass>
-                <DeployClass Name="iPad_Launch768">
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
@@ -1162,9 +860,14 @@
                 <ProjectRoot Platform="OSX64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
             </Deployment>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
     <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
 </Project>

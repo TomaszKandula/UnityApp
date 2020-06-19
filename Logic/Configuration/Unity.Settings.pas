@@ -42,7 +42,6 @@ type
         function GetWinUserName(): string;
         function GetPathEventLog(): string;
         function GetPathConfig(): string;
-        function GetPathLicence(): string;
         function GetDirApplication(): string;
         function GetDirRoaming(): string;
         function GetDirLayouts(): string;
@@ -59,7 +58,6 @@ type
         property WinUserName: string read GetWinUserName;
         property PathEventLog: string read GetPathEventLog;
         property PathConfig: string read GetPathConfig;
-        property PathLicence: string read GetPathLicence;
         property DirApplication: string read GetDirApplication;
         property DirRoaming: string read GetDirRoaming;
         property DirLayouts: string read GetDirLayouts;
@@ -81,11 +79,10 @@ type
         property IsUsedCustomConfig: boolean read CustomConfig;
         property IsTestEnvSetup: boolean read TestEnvSetup;
         property BinFileName: string read GetBinFileName;
-        procedure Initialize(AConfigFileName: string);
+        procedure Initialize(ASrcConfig: string; AConfig: string; AMode: string);
         function Encode(ConfigType: TAppFiles): boolean;
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function ConfigToMemory(): boolean;
-        function GetLicenceValue(Section: string; Key: string): string;
         function GetStringValue(Section: string; Key: string; Default: string = ''): string;
         procedure SetStringValue(Section: string; Key: string; Value: string);
         function  GetIntegerValue(Section: string; Key: string; Default: integer = 0): integer;
@@ -109,12 +106,10 @@ type
     strict private
         var FAppSettings: TMemIniFile;
         var FAppLicence: TMemIniFile;
-        var FAppEnviron: TMemIniFile;
         var FLastSessionId: string;
         var FWinUserName: string;
         var FPathEventLog: string;
         var FPathConfig: string;
-        var FPathLicence: string;
         var FDirApplication: string;
         var FDirRoaming: string;
         var FDirLayouts: string;
@@ -147,7 +142,6 @@ type
         function GetWinUserName(): string;
         function GetPathEventLog(): string;
         function GetPathConfig(): string;
-        function GetPathLicence(): string;
         function GetDirApplication(): string;
         function GetDirRoaming(): string;
         function GetDirLayouts(): string;
@@ -164,7 +158,7 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure Initialize(AConfigFileName: string); virtual;
+        procedure Initialize(ASrcConfig: string; AConfig: string; AMode: string); virtual;
         function Encode(ConfigType: TAppFiles): boolean; virtual;
         function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean; virtual;
         function ConfigToMemory: boolean; virtual;
@@ -184,7 +178,6 @@ type
         property WinUserName: string read GetWinUserName;
         property PathEventLog: string read GetPathEventLog;
         property PathConfig: string read GetPathConfig;
-        property PathLicence: string read GetPathLicence;
         property DirApplication: string read GetDirApplication;
         property DirRoaming: string read GetDirRoaming;
         property DirLayouts: string read GetDirLayouts;
@@ -221,13 +214,8 @@ uses
 
 constructor TSettings.Create();
 begin
-
     if not Assigned(FAppSettings) then FAppSettings:=TMemIniFile.Create('');
     if not Assigned(FAppLicence) then FAppLicence:=TMemIniFile.Create('');
-
-    var InfFileName:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar + 'Unity.inf';
-    if not Assigned(FAppEnviron) then FAppEnviron:=TMemIniFile.Create(InfFileName);
-
 end;
 
 
@@ -235,7 +223,6 @@ destructor TSettings.Destroy();
 begin
     if Assigned(FAppSettings) then FAppSettings.Free();
     if Assigned(FAppLicence) then FAppLicence.Free();
-    if Assigned(FAppEnviron) then FAppEnviron.Free();
     inherited;
 end;
 
@@ -255,42 +242,20 @@ begin
 end;
 
 
-procedure TSettings.Initialize(AConfigFileName: string);
+procedure TSettings.Initialize(ASrcConfig: string; AConfig: string; AMode: string);
 begin
 
     FWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
     FDirWinTemp    :=GetEnvironmentVariable('TEMP');
     FDirApplication:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar;
+    FBinFileName   :=ASrcConfig;
+    FPathConfig    :=FDirApplication + AConfig;
 
-    var LDataFolder:=FAppEnviron.ReadString('Environment', 'DataFolder', '');
-    var LBinSource :=FAppEnviron.ReadString('Environment', 'BinSource', '');
-    var LSetup     :=FAppEnviron.ReadString('Environment', 'Setup', '').ToLower();
+    FDirLayouts :=FDirApplication + 'layouts'  + TPath.DirectorySeparatorChar;
+    FDirSessions:=FDirApplication + 'sessions' + TPath.DirectorySeparatorChar;
+    FDirAssets  :=FDirApplication + 'assets'   + TPath.DirectorySeparatorChar;
 
-    FBinFileName:=LBinSource;
-    FDirRoaming:=TPath.GetPublicPath()
-        + TPath.DirectorySeparatorChar
-        + LDataFolder
-        + TPath.DirectorySeparatorChar;
-
-    FDirLayouts :=FDirRoaming + 'layouts' + TPath.DirectorySeparatorChar;
-    FDirSessions:=FDirRoaming + 'sessions' + TPath.DirectorySeparatorChar;
-    FDirAssets  :=FDirApplication + 'assets' + TPath.DirectorySeparatorChar;
-    FPathLicence:=FDirApplication + TCommon.LicenceFile;
-
-    if (LSetup = 'test') or (LSetup = 'env') or (LSetup = 'dev') then
-        FIsTestEnvSetup:=True;
-
-    if not String.IsNullOrEmpty(AConfigFileName) then
-    begin
-        FPathConfig:=FDirRoaming + AConfigFileName;
-        FIsUsedCustomConfig:=True;
-    end
-    else
-    begin
-        FPathConfig:=FDirRoaming + TCommon.ConfigFile;
-        FIsUsedCustomConfig:=False;
-    end;
-
+    if (AMode = 'test') or (AMode = 'env') or (AMode = 'dev') then FIsTestEnvSetup:=True;
     if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
 
 end;
@@ -388,9 +353,6 @@ begin
             if ConfigType = TAppFiles.Configuration  then
                 rStream.LoadFromFile(FPathConfig);
 
-            if ConfigType = TAppFiles.Licence then
-                rStream.LoadFromFile(FPathLicence);
-
             for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
@@ -419,9 +381,6 @@ begin
 
                 if ConfigType = TAppFiles.Configuration then
                     FAppSettings.SetStrings(hString);
-
-                if ConfigType = TAppFiles.Licence then
-                        FAppLicence.SetStrings(hString);
 
                 Result:=True;
 
@@ -688,12 +647,6 @@ end;
 function TSettings.GetPathConfig(): string;
 begin
     Result:=FPathConfig;
-end;
-
-
-function TSettings.GetPathLicence(): string;
-begin
-    Result:=FPathLicence;
 end;
 
 
