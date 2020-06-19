@@ -124,12 +124,3 @@ Unity Platform uses Skype API, it therefore requires following assemblies:
 1. Microsoft.Office.Uc.dll
 
 There is no direct utilisation, it is used by `LyncCall.exe` which is compiled separately (associated project in C#). This file must be placed in `bin` folder.
-
-# Licence file (Unity.lic)
-
----
-
-Licence file is encoded and it is a legacy file that stores basic information about distribution. This is because Unity Platform (formerly TR Tool 2017) was created as a private project 
-(non-DFDS), as a proof of concept of a desktop client (being private venture) aiming to replace old Excel file automated with VBA. 
-
-This file is scheduled for cancellation. For this release it still must be placed in `bin` folder.
