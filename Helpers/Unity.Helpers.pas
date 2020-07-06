@@ -50,6 +50,7 @@ type
     public
         const WM_GETINFO = WM_USER + 120; // For Windows internal messaging between objects
         const WM_EXTINFO = WM_APP + 150; // For Windows external messaging between different applications
+        class function ExecuteProcess(const FileName, Params: string; Folder: string; WaitUntilTerminated, WaitUntilIdle, RunMinimized: boolean; var ErrorCode: integer): boolean;
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
@@ -130,6 +131,60 @@ begin
     ToArray:=FromArray;
     SetLength(ToArray, Length(FromArray));
     FromArray:=nil;
+end;
+
+
+class function THelpers.ExecuteProcess(const FileName, Params: string; Folder: string; WaitUntilTerminated, WaitUntilIdle, RunMinimized: boolean; var ErrorCode: integer): boolean;
+begin
+
+    var CmdLine:     string;
+    var WorkingDirP: PChar;
+    var StartupInfo: TStartupInfo;
+    var ProcessInfo: TProcessInformation;
+
+    Result:=true;
+
+    CmdLine:= '"' + FileName + '" ' + Params;
+
+    if Folder = '' then
+        Folder:=ExcludeTrailingPathDelimiter(ExtractFilePath(FileName));
+
+    ZeroMemory(@StartupInfo, SizeOf(StartupInfo));
+    StartupInfo.cb:=SizeOf(StartupInfo);
+
+    if RunMinimized then
+    begin
+        StartupInfo.dwFlags := STARTF_USESHOWWINDOW;
+        StartupInfo.wShowWindow := SW_SHOWMINIMIZED;
+    end;
+
+    if Folder <> '' then
+        WorkingDirP := pchar(Folder)
+    else
+        WorkingDirP := nil;
+
+    if not CreateProcess(nil, pchar(CmdLine), nil, nil, false, 0, nil, WorkingDirP, StartupInfo, ProcessInfo) then
+    begin
+        Result := false;
+        ErrorCode := GetLastError;
+        Exit();
+    end;
+
+    with ProcessInfo do
+    begin
+
+        CloseHandle(hThread);
+
+        if WaitUntilIdle then WaitForInputIdle(hProcess, INFINITE);
+        if WaitUntilTerminated then
+        repeat
+            Application.ProcessMessages;
+        until MsgWaitForMultipleObjects(1, hProcess, false, INFINITE, QS_ALLINPUT) <> WAIT_OBJECT_0 + 1;
+
+        CloseHandle(hProcess);
+
+    end;
+
 end;
 
 

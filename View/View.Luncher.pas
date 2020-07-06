@@ -56,7 +56,10 @@ type
         var FSetup:       string;
         var FUpdateUri:   string;
         var FExpandFile:  string;
+        procedure AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
+        procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
         function GetFileFromUrl(const AUri: string; const AFileName: string): integer;
+        procedure LunchAndCose(const AProgramFile: string; const Delay: integer);
         procedure CheckForUpdatesAsync(ACallback: TCheckForUpdates);
         procedure CheckForUpdates_Callback(ACallResponse: TCallResponse);
         procedure ExtractToFile(const AZipFileName: string; const AZippedFileIndex: Integer; const AExtractedFileName: string);
@@ -91,7 +94,10 @@ uses
     WinApi.UrlMon,
     Winapi.ShellAPI,
     REST.Types,
-    REST.Json;
+    REST.Json,
+    Unity.Enums,
+    Unity.Helpers,
+    Unity.RestWrapper;
 
 
 var
@@ -132,6 +138,47 @@ begin
 end;
 
 
+procedure TLuncherForm.AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
+begin
+
+    if Speed = 0 then Speed:=5;
+
+    var ExecTimerAsync: ITask:=TTask.Create(procedure
+    begin
+
+        for var iCNT:=AniFrom to AniTo do
+        begin
+
+            Sleep(Speed);
+
+            TThread.Synchronize(nil, procedure
+            begin
+
+                if AniTo > ProgressBar.MaxValue then
+                    AniTo:=ProgressBar.MaxValue;
+
+                ProgressBar.Progress:=iCNT;
+                Update();
+
+            end);
+
+        end;
+
+    end);
+
+    ExecTimerAsync.Start();
+
+end;
+
+
+procedure TLuncherForm.ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
+begin
+    AnimateProgressBar(ProgressBar.Progress, ProgressTarget, ProgressBar);
+    TextStatus.Caption:=Text;
+    Update();
+end;
+
+
 function TLuncherForm.GetFileFromUrl(const AUri: string; const AFileName: string): integer;
 begin
 
@@ -146,26 +193,23 @@ begin
 end;
 
 
-procedure TLuncherForm.CheckForUpdatesAsync(ACallback: TCheckForUpdates);
+procedure TLuncherForm.LunchAndCose(const AProgramFile: string; const Delay: integer);
 begin
 
-// perform async REST call
+    THelpers.ExecWithDelay(2500, procedure
+    begin
 
-end;
+        var LParams:='-set {0} {1} {2}';
+        LParams:=LParams.Replace('{0}', FBinSource).Replace('{1}', FCfgSource).Replace('{2}', FSetup);
 
+        var ErrorCode:=ShellExecute(LuncherForm.Handle, 'open', PChar(AProgramFile), PChar(LParams), nil, SW_SHOWNORMAL);
 
-procedure TLuncherForm.CheckForUpdates_Callback(ACallResponse: TCallResponse);
-begin
+        if ErrorCode < 32 then
+            THelpers.MsgCall(LuncherForm.Handle, TAppMessage.Error, 'Cannot execute, error code: ' + ErrorCode.ToString() + '.');
 
-//    - if should update:
-//      - download Unity.zip
-//      - unpack to Unity.exe
-//      - delete Unity.zip
-//      - lunch Unity.exe
-//      - close Luncher.exe
-//    - if should not update, then:
-//      - lunch Unity.exe
-//      - close Luncher.exe
+        ExitProcess(0);
+
+    end);
 
 end;
 
@@ -208,6 +252,54 @@ begin
 end;
 
 
+procedure TLuncherForm.CheckForUpdatesAsync(ACallback: TCheckForUpdates);
+begin
+
+// perform async REST call
+
+end;
+
+
+procedure TLuncherForm.CheckForUpdates_Callback(ACallResponse: TCallResponse);
+begin
+
+    if ACallResponse.IsSucceeded then
+    begin
+
+        var LProgramFile:=FProgramData + 'Unity.exe';
+
+        if ACallResponse.LastMessage = '' then
+        begin
+
+            const LUrlSource  = FUpdateUri + FExpandFile;
+            const LExpandFile = FProgramData + FExpandFile;
+
+            var ReturnCode:=GetFileFromUrl(LUrlSource, LExpandFile);
+            if ReturnCode <> 0 then
+            begin
+                THelpers.MsgCall(LuncherForm.Handle, TAppMessage.Error, 'Error has been thrown, code: ' + ReturnCode.ToString() + '. Please contact IT support.');
+                ExitProcess(0);
+            end;
+
+            ChangeProgressBar(66, 'Unpacking...', ProgressBar);
+            DeleteFile(PChar(LProgramFile));
+            ExtractToFile(LExpandFile, 0, LProgramFile);
+            DeleteFile(PChar(LExpandFile));
+
+        end;
+
+        ChangeProgressBar(90, 'Calling Unity Platform...', ProgressBar);
+        LunchAndCose(LProgramFile, 2500);
+
+    end
+    else
+    begin
+        THelpers.MsgCall(LuncherForm.Handle, TAppMessage.Error, ACallResponse.LastMessage);
+    end;
+
+end;
+
+
 procedure TLuncherForm.UpdateCheck();
 begin
 
@@ -216,42 +308,29 @@ begin
     if not FileExists(LProgramFile) then
     begin
 
-        TextStatus.Caption:='Downloading package...';
+        ChangeProgressBar(33, 'Downloading package...', ProgressBar);
 
-        var LUrlSource :=FUpdateUri + FExpandFile;
-        var LExpandFile:=FProgramData + FExpandFile;
+        const LUrlSource  = FUpdateUri + FExpandFile;
+        const LExpandFile = FProgramData + FExpandFile;
 
-        var Code:=GetFileFromUrl(LUrlSource, LExpandFile);
-
-        if Code <> 0 then
+        var ReturnCode:=GetFileFromUrl(LUrlSource, LExpandFile);
+        if ReturnCode <> 0 then
         begin
-
-            TextStatus.Caption:='Error: ' + Code.ToString() + ', operation cancelled.';
-            Application.MessageBox(
-                PCHar('Error has been thrown, code: ' + Code.ToString() + '. Please contact IT support.'),
-                PChar('Luncher'), MB_OK + MB_ICONERROR
-            );
+            THelpers.MsgCall(LuncherForm.Handle, TAppMessage.Error, 'Error has been thrown, code: ' + ReturnCode.ToString() + '. Please contact IT support.');
             ExitProcess(0);
-
         end;
 
-        TextStatus.Caption:='Unpacking...';
-
-        const Params = ' -set {0} {1} {2}';
-        var ExecPath:=LProgramFile + Params.Replace('{0}', FBinSource).Replace('{1}', FCfgSource).Replace('{2}', FSetup);
-
+        ChangeProgressBar(66, 'Unpacking...', ProgressBar);
         ExtractToFile(LExpandFile, 0, LProgramFile);
         DeleteFile(PChar(LExpandFile));
 
-        TextStatus.Caption:='Calling Unity Platform...';
-        Sleep(2500);
-        ShellExecute(LuncherForm.Handle, 'open', PChar(ExecPath), nil, nil, SW_SHOWNORMAL);
-        ExitProcess(0);
+        ChangeProgressBar(90, 'Calling Unity Platform...', ProgressBar);
+        LunchAndCose(LProgramFile, 2500);
 
     end
     else
     begin
-        TextStatus.Caption:='Checking for updates...';
+        ChangeProgressBar(33, 'Checking for updates...', ProgressBar);
         CheckForUpdatesAsync(CheckForUpdates_Callback);
     end;
 
@@ -262,7 +341,7 @@ procedure TLuncherForm.FormCreate(Sender: TObject);
 begin
 
     ProgressBar.Progress:=0;
-    TextStatus.Caption:='Initilizing...';
+    TextStatus.Caption:='';
 
     var InfFileName:=ExtractFileDir(Application.ExeName) + TPath.DirectorySeparatorChar + 'Luncher.inf';
     if not Assigned(FAppEnviron) then FAppEnviron:=TMemIniFile.Create(InfFileName);
@@ -290,7 +369,8 @@ end;
 
 procedure TLuncherForm.FormActivate(Sender: TObject);
 begin
-    UpdateCheck();
+    ChangeProgressBar(15, 'Initilizing...', ProgressBar);
+    THelpers.ExecWithDelay(1500, UpdateCheck);
 end;
 
 

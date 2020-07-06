@@ -103,6 +103,127 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="Extensions\Unity.ChkListBox.pas"/>
+        <DCCReference Include="Extensions\Unity.Edit.pas"/>
+        <DCCReference Include="Extensions\Unity.Panel.pas"/>
+        <DCCReference Include="Extensions\Unity.Shape.pas"/>
+        <DCCReference Include="Extensions\Unity.Grid.pas"/>
+        <DCCReference Include="Extensions\Unity.ListView.pas"/>
+        <DCCReference Include="Extensions\Unity.ComboBox.pas"/>
+        <DCCReference Include="Helpers\Unity.Crc32.pas"/>
+        <DCCReference Include="Helpers\Unity.Enums.pas"/>
+        <DCCReference Include="Helpers\Unity.Records.pas"/>
+        <DCCReference Include="Helpers\Unity.Constants.pas"/>
+        <DCCReference Include="Helpers\Unity.Sorting.pas"/>
+        <DCCReference Include="Helpers\Unity.Helpers.pas"/>
+        <DCCReference Include="Helpers\Unity.Types.pas"/>
+        <DCCReference Include="Logic\Unity.Mediator.pas"/>
+        <DCCReference Include="Logic\Unity.Service.pas"/>
+        <DCCReference Include="Logic\Communication\Unity.RestWrapper.pas"/>
+        <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
+        <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
+        <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
+        <DCCReference Include="Model\Layout.AgeViewModel.pas"/>
+        <DCCReference Include="Model\Api.DocumentStatusFields.pas"/>
+        <DCCReference Include="Model\Api.DocumentFields.pas"/>
+        <DCCReference Include="Model\Api.ReportListFields.pas"/>
+        <DCCReference Include="Model\Api.UserDailyCommentsFields.pas"/>
+        <DCCReference Include="Model\Api.AddressBookFields.pas"/>
+        <DCCReference Include="Model\Api.UserCompanyFields.pas"/>
+        <DCCReference Include="Model\Api.CompaniesFields.pas"/>
+        <DCCReference Include="Model\Api.ControlStatusFields.pas"/>
+        <DCCReference Include="Model\Api.PaidInfoFields.pas"/>
+        <DCCReference Include="Model\Api.PaymentTermsFields.pas"/>
+        <DCCReference Include="Model\Api.SalesResponsibleFields.pas"/>
+        <DCCReference Include="Model\Api.PersonResponsibleFields.pas"/>
+        <DCCReference Include="Model\Api.AccountTypeFields.pas"/>
+        <DCCReference Include="Model\Api.CustomerGroupFields.pas"/>
+        <DCCReference Include="Model\Api.OpenItemsFields.pas"/>
+        <DCCReference Include="Model\Api.DetailsFields.pas"/>
+        <DCCReference Include="Model\Api.UserPermissions.pas"/>
+        <DCCReference Include="Model\Api.CustomerSnapshot.pas"/>
+        <DCCReference Include="Model\Api.CustomerSnapshotEx.pas"/>
+        <DCCReference Include="Model\Api.FollowUpData.pas"/>
+        <DCCReference Include="Model\Api.FreeFields.pas"/>
+        <DCCReference Include="Model\Api.MetaData.pas"/>
+        <DCCReference Include="Model\Api.ErrorHandler.pas"/>
+        <DCCReference Include="Model\Api.BankDetails.pas"/>
+        <DCCReference Include="Model\Api.StatementData.pas"/>
+        <DCCReference Include="Model\Requests\Api.SendDocument.pas"/>
+        <DCCReference Include="Model\Requests\Api.AddressBookAddBulk.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserSessionAdd.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserCompanySelection.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserSessionLogs.pas"/>
+        <DCCReference Include="Model\Requests\Api.SendEmail.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserGeneralCommentAdd.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserGeneralCommentUpdate.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserDailyCommentAdd.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserDailyCommentUpdate.pas"/>
+        <DCCReference Include="Model\Requests\Api.LogSentDocument.pas"/>
+        <DCCReference Include="Model\Requests\Api.AddressBookAdd.pas"/>
+        <DCCReference Include="Model\Requests\Api.AddressBookUpdate.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserCustSnapshotList.pas"/>
+        <DCCReference Include="Model\Requests\Api.UpdateFreeFields.pas"/>
+        <DCCReference Include="Model\Requests\Api.FollowUpsUpdate.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserRatingAdd.pas"/>
+        <DCCReference Include="Model\Requests\Api.UserRatingUpdate.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserSessionChecked.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserCompanyList.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserSessionAdded.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserCompaniesUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.CustSortingOptions.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserSessionLogsSaved.pas"/>
+        <DCCReference Include="Model\Responses\Api.SentEmail.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserGeneralCommentAdded.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserGeneralCommentUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserGeneralComment.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserDailyCommentAdded.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserDailyCommentUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserDailyCommentsList.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserDailyCommentCheck.pas"/>
+        <DCCReference Include="Model\Responses\Api.LoggedSentDocument.pas"/>
+        <DCCReference Include="Model\Responses\Api.AddressBookList.pas"/>
+        <DCCReference Include="Model\Responses\Api.AddressBookItem.pas"/>
+        <DCCReference Include="Model\Responses\Api.AddressBookAdded.pas"/>
+        <DCCReference Include="Model\Responses\Api.AddressBookItemDel.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserRating.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserRatingAdded.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserRatingUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCompanies.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnAccountType.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnPaidInfo.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnControlStatus.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnPersonResponsible.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnSalesResponsible.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnPaymentTerms.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCustomerGroup.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnSsisData.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnOpenItems.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCustomerSnapshots.pas"/>
+        <DCCReference Include="Model\Responses\Api.TokenGranted.pas"/>
+        <DCCReference Include="Model\Responses\Api.AddressBookUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserGeneralCommentCheck.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnClientInfo.pas"/>
+        <DCCReference Include="Model\Responses\Api.FreeFieldsUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.FollowUpsUpdated.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCustomerReport.pas"/>
+        <DCCReference Include="Model\Responses\Api.UserPermissionList.pas"/>
+        <DCCReference Include="Model\Responses\Api.LatestAzureJobStatus.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnCompanyEmails.pas"/>
+        <DCCReference Include="Model\Responses\Api.ReturnReportList.pas"/>
+        <DCCReference Include="Model\Responses\Api.AddressBookAddedBulk.pas"/>
+        <DCCReference Include="Model\Responses\Api.SentDocument.pas"/>
+        <DCCReference Include="Logic\Business\Sync.Utility.pas"/>
+        <DCCReference Include="Logic\Business\Async.Accounts.pas"/>
+        <DCCReference Include="Logic\Business\Async.Utilities.pas"/>
+        <DCCReference Include="Logic\Business\Async.AddressBook.pas"/>
+        <DCCReference Include="Logic\Business\Async.Debtors.pas"/>
+        <DCCReference Include="Logic\Business\Async.OpenItems.pas"/>
+        <DCCReference Include="Logic\Business\Async.Comments.pas"/>
+        <DCCReference Include="Logic\Business\Async.Documents.pas"/>
+        <DCCReference Include="Logic\Business\Async.Companies.pas"/>
+        <DCCReference Include="Logic\Business\Async.Mailer.pas"/>
+        <DCCReference Include="Logic\Business\Async.GeneralTables.pas"/>
         <DCCReference Include="View\View.Luncher.pas">
             <Form>;
 
@@ -136,22 +257,16 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
+                <DeployFile LocalName="Win32\Debug\Luncher.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>Luncher.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Images\UnityIcon_150.png" Configuration="Debug" Class="UWP_DelphiLogo150">
                     <Platform Name="Win32">
                         <RemoteDir>Assets\</RemoteDir>
                         <RemoteName>Logo150x150.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Win32\Debug\Luncher.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>Luncher.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Win32\Debug\Luncher.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>Luncher.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
