@@ -167,15 +167,15 @@ object LuncherForm: TLuncherForm
   end
   object MainTextA: TLabel
     AlignWithMargins = True
-    Left = 147
-    Top = 179
-    Width = 295
+    Left = 202
+    Top = 195
+    Width = 211
     Height = 18
     Margins.Left = 0
     Margins.Top = 5
     Margins.Right = 0
     Margins.Bottom = 5
-    Caption = 'Checking for updates..., please wait.'
+    Caption = 'Lunching Unity Platform...'
     Color = clWhite
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWhite
@@ -192,25 +192,5 @@ object LuncherForm: TLuncherForm
     Height = 2
     Brush.Color = 15987699
     Pen.Style = psClear
-  end
-  object MainTextB: TLabel
-    AlignWithMargins = True
-    Left = 147
-    Top = 199
-    Width = 304
-    Height = 18
-    Margins.Left = 0
-    Margins.Top = 5
-    Margins.Right = 0
-    Margins.Bottom = 5
-    Caption = 'This may take up to several minutes.'
-    Color = clWhite
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWhite
-    Font.Height = -15
-    Font.Name = 'Verdana'
-    Font.Style = [fsBold]
-    ParentColor = False
-    ParentFont = False
   end
 end

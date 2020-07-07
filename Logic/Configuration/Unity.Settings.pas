@@ -227,7 +227,7 @@ begin
 end;
 
 
-function TSettings.ConfigToMemory: boolean;
+function TSettings.ConfigToMemory(): boolean;
 begin
 
     Result:=False;
@@ -487,7 +487,7 @@ begin
 
     Result:='N/A';
 
-    var SL: TStringList:=TStringList.Create;
+    var SL: TStringList:=TStringList.Create();
     try
 
         // ----------------------------------------

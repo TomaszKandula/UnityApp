@@ -14,7 +14,8 @@ uses
     Vcl.Dialogs,
     Vcl.StdCtrls,
     Vcl.ExtCtrls,
-    Vcl.Samples.Gauges;
+    Vcl.Samples.Gauges,
+    Api.ReturnClientInfo;
 
 
 type
@@ -27,7 +28,7 @@ type
         ReturnedCode: integer;
     end;
 
-    TCheckForUpdates = procedure(CallResponse: TCallResponse) of object;
+    TGetClientInfo = procedure(PayLoad: TReturnClientInfo) of object;
 
     TLuncherForm = class(TForm)
         ShapeBackground: TShape;
@@ -40,7 +41,6 @@ type
         TextStatus: TLabel;
         MainTextA: TLabel;
         ShapeLine: TShape;
-        MainTextB: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -49,6 +49,7 @@ type
         procedure CreateParams(var Params: TCreateParams); override;
     strict private
         var FAppEnviron:  TMemIniFile;
+        var FUpdateInfo:  TMemIniFile;
         var FProgramData: string;
         var FDataFolder:  string;
         var FBinSource:   string;
@@ -56,12 +57,14 @@ type
         var FSetup:       string;
         var FUpdateUri:   string;
         var FExpandFile:  string;
+        var FLastUpdate:  string;
+        var FEndpoint:    string;
         procedure AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
         procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
         function GetFileFromUrl(const AUri: string; const AFileName: string): integer;
         procedure LunchAndCose(const AProgramFile: string; const Delay: integer);
-        procedure CheckForUpdatesAsync(ACallback: TCheckForUpdates);
-        procedure CheckForUpdates_Callback(ACallResponse: TCallResponse);
+        procedure GetClientInfoAsync(Callback: TGetClientInfo);
+        procedure GetClientInfo_Callback(PayLoad: TReturnClientInfo);
         procedure ExtractToFile(const AZipFileName: string; const AZippedFileIndex: Integer; const AExtractedFileName: string);
         procedure UpdateCheck();
     public
@@ -72,6 +75,8 @@ type
         property Setup:       string read FSetup;
         property UpdateUri:   string read FUpdateUri;
         property ExpandFile:  string read FExpandFile;
+        property LastUpdate:  string read FLastUpdate;
+        property Endpoint:    string read FEndpoint;
     end;
 
 
@@ -138,7 +143,7 @@ begin
 end;
 
 
-procedure TLuncherForm.AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
+procedure TLuncherForm.AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);//move to lib
 begin
 
     if Speed = 0 then Speed:=5;
@@ -171,7 +176,7 @@ begin
 end;
 
 
-procedure TLuncherForm.ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
+procedure TLuncherForm.ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);//move to lib
 begin
     AnimateProgressBar(ProgressBar.Progress, ProgressTarget, ProgressBar);
     TextStatus.Caption:=Text;
@@ -196,7 +201,7 @@ end;
 procedure TLuncherForm.LunchAndCose(const AProgramFile: string; const Delay: integer);
 begin
 
-    THelpers.ExecWithDelay(2500, procedure
+    THelpers.ExecWithDelay(Delay, procedure
     begin
 
         var LParams:='-set {0} {1} {2}';
@@ -252,23 +257,72 @@ begin
 end;
 
 
-procedure TLuncherForm.CheckForUpdatesAsync(ACallback: TCheckForUpdates);
+procedure TLuncherForm.GetClientInfoAsync(Callback: TGetClientInfo);
 begin
 
-// perform async REST call
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Rest: IRESTFul:=TRESTful.Create();
+		Rest.AccessToken:='';
+        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
+
+        Rest.ClientBaseURL:=FEndpoint;
+        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
+
+        var LReturnClientInfo: TReturnClientInfo;
+        try
+
+            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            begin
+                LReturnClientInfo:=TJson.JsonToObject<TReturnClientInfo>(Rest.Content);
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Rest.ExecuteError) then
+                    LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Rest.Content) then
+                        LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+
+                LReturnClientInfo.IsSucceeded:=False;
+
+            end;
+
+        except
+            on E: Exception do
+            begin
+                LReturnClientInfo.IsSucceeded:=False;
+                LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Cannot execute. Error has been thrown: ' + E.Message;
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(LReturnClientInfo);
+            if Assigned(LReturnClientInfo) then LReturnClientInfo.Free();
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 
 
-procedure TLuncherForm.CheckForUpdates_Callback(ACallResponse: TCallResponse);
+procedure TLuncherForm.GetClientInfo_Callback(PayLoad: TReturnClientInfo);
 begin
 
-    if ACallResponse.IsSucceeded then
+    if PayLoad.IsSucceeded then
     begin
 
         var LProgramFile:=FProgramData + 'Unity.exe';
 
-        if ACallResponse.LastMessage = '' then
+        if (PayLoad.Status <> 'Production') and (PayLoad.Version.ToInteger() > FLastUpdate.ToInteger()) then
         begin
 
             const LUrlSource  = FUpdateUri + FExpandFile;
@@ -286,15 +340,19 @@ begin
             ExtractToFile(LExpandFile, 0, LProgramFile);
             DeleteFile(PChar(LExpandFile));
 
+            ChangeProgressBar(90, 'Saving...', ProgressBar);
+            FUpdateInfo.WriteString('Version', 'Latest', PayLoad.Version);
+            FUpdateInfo.UpdateFile();
+
         end;
 
-        ChangeProgressBar(90, 'Calling Unity Platform...', ProgressBar);
+        ChangeProgressBar(100, 'Calling Unity Platform...', ProgressBar);
         LunchAndCose(LProgramFile, 2500);
 
     end
     else
     begin
-        THelpers.MsgCall(LuncherForm.Handle, TAppMessage.Error, ACallResponse.LastMessage);
+        THelpers.MsgCall(LuncherForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
     end;
 
 end;
@@ -331,7 +389,7 @@ begin
     else
     begin
         ChangeProgressBar(33, 'Checking for updates...', ProgressBar);
-        CheckForUpdatesAsync(CheckForUpdates_Callback);
+        GetClientInfoAsync(GetClientInfo_Callback);
     end;
 
 end;
@@ -352,11 +410,31 @@ begin
     FSetup     :=FAppEnviron.ReadString('Environment', 'Setup', '');
     FUpdateUri :=FAppEnviron.ReadString('Environment', 'UpdateUri', '');
     FExpandFile:=FAppEnviron.ReadString('Environment', 'ExpandFile', '');
+    FEndpoint  :=FAppEnviron.ReadString('Environment', 'Endpoint', '');
 
     FProgramData:=TPath.GetPublicPath()
         + TPath.DirectorySeparatorChar
         + FDataFolder
         + TPath.DirectorySeparatorChar;
+
+    var UpdateInfo:=FProgramData + 'Update.ini';
+    if not Assigned(FUpdateInfo) then
+    begin
+
+        if FileExists(UpdateInfo) then
+        begin
+            FUpdateInfo:=TMemIniFile.Create(UpdateInfo);
+            FLastUpdate:=FUpdateInfo.ReadString('Version', 'Latest', '');
+        end
+        else
+        begin
+            FLastUpdate:='0';
+            FUpdateInfo:=TMemIniFile.Create(UpdateInfo);
+            FUpdateInfo.WriteString('Version', 'Latest', '0');
+            FUpdateInfo.UpdateFile();
+        end;
+
+    end;
 
 end;
 
@@ -364,6 +442,7 @@ end;
 procedure TLuncherForm.FormDestroy(Sender: TObject);
 begin
     if Assigned(FAppEnviron) then FAppEnviron.Free();
+    if Assigned(FUpdateInfo) then FUpdateInfo.Free();
 end;
 
 
@@ -375,3 +454,4 @@ end;
 
 
 end.
+
