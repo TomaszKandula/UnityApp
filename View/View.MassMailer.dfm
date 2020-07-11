@@ -676,9 +676,9 @@ object MassMailerForm: TMassMailerForm
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
-      Top = 221
+      Top = 245
       Width = 575
-      Height = 337
+      Height = 313
       Margins.Left = 20
       Margins.Top = 20
       Margins.Right = 20
@@ -692,7 +692,7 @@ object MassMailerForm: TMassMailerForm
         Left = 5
         Top = 5
         Width = 565
-        Height = 327
+        Height = 303
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -719,7 +719,7 @@ object MassMailerForm: TMassMailerForm
       Left = 20
       Top = 20
       Width = 575
-      Height = 181
+      Height = 205
       Margins.Left = 20
       Margins.Top = 20
       Margins.Right = 20
@@ -729,21 +729,21 @@ object MassMailerForm: TMassMailerForm
       TabOrder = 1
       object txtCompany: TLabel
         Left = 27
-        Top = 40
+        Top = 65
         Width = 82
         Height = 13
         Caption = 'Source DB name:'
       end
       object shapeLbuEmails: TShape
         Left = 24
-        Top = 70
+        Top = 95
         Width = 220
         Height = 75
         Pen.Color = 14474460
       end
-      object Text_Warn: TLabel
+      object txtWarning: TLabel
         Left = 24
-        Top = 151
+        Top = 176
         Width = 211
         Height = 13
         Caption = '* E-mail template is available only in English.'
@@ -754,9 +754,16 @@ object MassMailerForm: TMassMailerForm
         Font.Style = []
         ParentFont = False
       end
+      object txtAgent: TLabel
+        Left = 27
+        Top = 33
+        Width = 75
+        Height = 13
+        Caption = 'Filter by Agent:'
+      end
       object selCompany: TComboBox
         Left = 128
-        Top = 37
+        Top = 62
         Width = 116
         Height = 22
         Cursor = crHandPoint
@@ -766,7 +773,7 @@ object MassMailerForm: TMassMailerForm
       end
       object lstLbuEmails: TListBox
         Left = 27
-        Top = 74
+        Top = 99
         Width = 214
         Height = 67
         Style = lbOwnerDrawFixed
@@ -785,7 +792,7 @@ object MassMailerForm: TMassMailerForm
         Left = 272
         Top = 24
         Width = 281
-        Height = 137
+        Height = 146
         Caption = 'Global settings'
         TabOrder = 2
         object cbCtrlStatusOff: TCheckBox
@@ -859,6 +866,13 @@ object MassMailerForm: TMassMailerForm
           State = cbChecked
           TabOrder = 3
         end
+      end
+      object EditAgent: TEdit
+        Left = 128
+        Top = 30
+        Width = 116
+        Height = 21
+        TabOrder = 3
       end
     end
   end

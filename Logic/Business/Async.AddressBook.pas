@@ -28,7 +28,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TArray<string> = nil);
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -77,7 +77,7 @@ type
     public
         constructor Create();
         destructor  Destroy(); override;
-        procedure   OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil); virtual;
+        procedure   OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TArray<string> = nil); virtual;
         procedure   UpdateAddressBookAsync(PayLoad: TCustomerDetails; Callback: TUpdateAddressBook); virtual;
         procedure   AddToAddressBookAsync(PayLoad: TCustomerDetails; Callback: TAddToAddressBook); virtual;
         function    DelFromAddressBookAwaited(Id: integer): TCallResponse; virtual;
@@ -122,7 +122,7 @@ begin
 end;
 
 
-procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
+procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TArray<string> = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -132,7 +132,7 @@ begin
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        if LoadedCompanies.Count > 0 then
+        if Length(LoadedCompanies) > 0 then
         begin
 
 
@@ -142,7 +142,7 @@ begin
 
             var UserCompanySelection:=TUserCompanySelection.Create();
             try
-                UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
+                UserCompanySelection.SelectedCoCodes:=LoadedCompanies;
                 Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             finally
                 UserCompanySelection.Free();

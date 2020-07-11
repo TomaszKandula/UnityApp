@@ -27,7 +27,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails);
+        procedure GetCompanyEmailsAsync(SelectedCompanies: TArray<string>; Callback: TGetCompanyEmails);
     end;
 
 
@@ -39,7 +39,7 @@ type
     public
         constructor Create();
         destructor  Destroy(); override;
-        procedure   GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails); virtual;
+        procedure   GetCompanyEmailsAsync(SelectedCompanies: TArray<string>; Callback: TGetCompanyEmails); virtual;
     end;
 
 
@@ -69,7 +69,7 @@ begin
 end;
 
 
-procedure TCompanies.GetCompanyEmailsAsync(SelectedCompanies: TList<string>; Callback: TGetCompanyEmails);
+procedure TCompanies.GetCompanyEmailsAsync(SelectedCompanies: TArray<string>; Callback: TGetCompanyEmails);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -88,10 +88,9 @@ begin
 
             var UserCompanySelection:=TUserCompanySelection.Create();
             try
-                UserCompanySelection.SelectedCoCodes:=SelectedCompanies.ToArray();
+                UserCompanySelection.SelectedCoCodes:=SelectedCompanies;
                 Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             finally
-                SelectedCompanies.Free();
                 UserCompanySelection.Free();
             end;
 

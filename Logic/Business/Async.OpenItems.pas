@@ -44,7 +44,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadOpenItemsAsync(PageNumber: integer;LoadedCompanies: TList<string>; Callback: TReadOpenItems);
+        procedure ReadOpenItemsAsync(PageNumber: integer; LoadedCompanies: TArray<string>; Callback: TReadOpenItems);
     end;
 
 
@@ -58,7 +58,7 @@ type
         destructor  Destroy(); override;
         function    GetSSISDataAwaited(var DateTime: string; var Status: string): TCallResponse; virtual;
         procedure   GetOpenItemsAsync(SourceDbName: string; CustomerNumber: Int64; Callback: TGetOpenItems); virtual;
-        procedure   ReadOpenItemsAsync(PageNumber: integer;LoadedCompanies: TList<string>; Callback: TReadOpenItems); virtual;
+        procedure   ReadOpenItemsAsync(PageNumber: integer; LoadedCompanies: TArray<string>; Callback: TReadOpenItems); virtual;
     end;
 
 
@@ -235,7 +235,7 @@ begin
 end;
 
 
-procedure TOpenItems.ReadOpenItemsAsync(PageNumber: integer; LoadedCompanies: TList<string>; Callback: TReadOpenItems);
+procedure TOpenItems.ReadOpenItemsAsync(PageNumber: integer; LoadedCompanies: TArray<string>; Callback: TReadOpenItems);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -254,7 +254,7 @@ begin
 
             var UserCompanySelection:=TUserCompanySelection.Create();
             try
-                UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
+                UserCompanySelection.SelectedCoCodes:=LoadedCompanies;
                 Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             finally
                 UserCompanySelection.Free();

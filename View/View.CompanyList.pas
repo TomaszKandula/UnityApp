@@ -107,15 +107,15 @@ procedure TCompanyListForm.RequestAgeReport();
 begin
 
     var ListEnd:=FilterList.Count - 1;
-    MainForm.LoadedCompanies.Clear();
+    MainForm.ResetCompanyList();
 
-    for var iCNT:=0 to ListEnd do
+    for var Index:=0 to ListEnd do
     begin
 
-        if FilterList.Checked[iCNT] = True then
+        if FilterList.Checked[Index] = True then
         begin
-            var CoCode:=GetCoCodeOnly(FilterList.Items[iCNT]);
-            MainForm.LoadedCompanies.Add(THelpers.GetSourceDBName(CoCode, 'F'));
+            var CoCode:=GetCoCodeOnly(FilterList.Items[Index]);
+            MainForm.AddToCompanyList(THelpers.GetSourceDBName(CoCode, 'F'));
         end;
 
     end;
@@ -127,9 +127,9 @@ begin
 
 procedure TCompanyListForm.ClearCompanyList();
 begin
-    for var iCNT:=0 to FilterList.Count - 1 do
-        if FilterList.ItemEnabled[iCNT] = True then
-            FilterList.Checked[iCNT]:=False;
+    for var Index:=0 to FilterList.Count - 1 do
+        if FilterList.ItemEnabled[Index] = True then
+            FilterList.Checked[Index]:=False;
 end;
 
 

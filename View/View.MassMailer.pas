@@ -39,7 +39,7 @@ type
 
     TMassMailerForm = class(TForm)
         PanelBottom: TPanel;
-        Text_Warn: TLabel;
+        txtWarning: TLabel;
         btnCancel: TSpeedButton;
         btnSendEmail: TSpeedButton;
         PanelClient: TPanel;
@@ -79,6 +79,8 @@ type
         cbOverdueOnly: TRadioButton;
         cbNonOverdue: TRadioButton;
         cbNotDueOnly: TRadioButton;
+        EditAgent: TEdit;
+        txtAgent: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -385,11 +387,12 @@ begin
     FPayLoad.Message        :=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
     FPayLoad.UserEmail      :=Service.SessionData.EmailAddress;
     FPayLoad.InvoiceFilter  :=InvFilter;
+    FPayLoad.Agent          :=EditAgent.Text;
     FPayLoad.BeginDate      :=BeginDate;
     FPayLoad.EndDate        :=EndDate;
-    FPayLoad.IsCtrlStatus  :=not cbCtrlStatusOff.Checked;
-    FPayLoad.IsUserInCopy  :=cbUserInCopy.Checked;
-    FPayLoad.IsSourceInCopy:=cbIncludeSource.Checked;
+    FPayLoad.IsCtrlStatus   :=not cbCtrlStatusOff.Checked;
+    FPayLoad.IsUserInCopy   :=cbUserInCopy.Checked;
+    FPayLoad.IsSourceInCopy :=cbIncludeSource.Checked;
 
     for var Index:=0 to CustomerList.Items.Count - 1 do
     begin
@@ -397,13 +400,13 @@ begin
         if CustomerList.Items[Index].SubItems[4] <> 'Not found!' then
         begin
 
-            var Obj:=TDocumentFields.Create();
-            Obj.CustomerNumber:=CustomerList.Items[Index].SubItems[0].ToInt64(); // Customer Number
-            Obj.SourceDbName  :=CustomerList.Items[Index].SubItems[5]; // SourceDbName
-            Obj.SendFrom      :=CustomerList.Items[Index].SubItems[3]; // Send from
-            Obj.EmailTo       :=CustomerList.Items[Index].SubItems[4]; // Send to
+            var DocumentFields:=TDocumentFields.Create();
+            DocumentFields.CustomerNumber:=CustomerList.Items[Index].SubItems[0].ToInt64(); // Customer Number
+            DocumentFields.SourceDbName  :=CustomerList.Items[Index].SubItems[5]; // SourceDbName
+            DocumentFields.SendFrom      :=CustomerList.Items[Index].SubItems[3]; // Send from
+            DocumentFields.EmailTo       :=CustomerList.Items[Index].SubItems[4]; // Send to
 
-            FPayLoad.Documents[Index]:=Obj;
+            FPayLoad.Documents[Index]:=DocumentFields;
 
         end;
 

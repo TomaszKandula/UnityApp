@@ -734,7 +734,7 @@ type
         const AppMenuShown = 170;
         const AppMenuHidden = 0;
         var FAllowEditConfig: boolean;
-        var FLoadedCompanies: TList<string>;
+        var FLoadedCompanies: TArray<string>;
         var FLoadedAgeDate: string;
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
@@ -763,7 +763,7 @@ type
         procedure SkypeCallUpdate(CallTime: cardinal);
         procedure FollowUpsUpdate(Source: TStringGrid; CommonDate: string);
         function  UpdateFreeFields(Source: TStringGrid): TFreeFieldsPayLoad;
-        function  CompanyListToText(LoadedCompanies: TList<string>): string;
+        function  CompanyListToText(LoadedCompanies: TArray<string>): string;
         procedure OpenAddressBook_Callback(PayLoad: TAddressBookList);
         procedure ReadAgeView_Callback(PayLoad: TReturnCustomerSnapshots);
         procedure ScanSnapshots_Callback(CallResponse: TCallResponse; CanGetAge: boolean; ReceivedTime: string);
@@ -781,6 +781,8 @@ type
         var FGridPicture: TImage;
         var FDataUpdate: string;
         var FDataStatus: string;
+        procedure ResetCompanyList();
+        procedure AddToCompanyList(Company: string);
         procedure UpdateAgeSummary(AgingSummary: TAgingSummary);
         procedure UpdateFollowUps(Source: TStringGrid);
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
@@ -792,7 +794,7 @@ type
         procedure UpdateStatusBar(Text: string);
         procedure LoadAgeReport();
         property LoadedAgeDate: string read FLoadedAgeDate;
-        property LoadedCompanies: TList<string> read FLoadedCompanies;
+        property LoadedCompanies: TArray<string> read FLoadedCompanies;
         property FollowsToday: integer read FFollowsToday;
         property FollowsPast: integer read FFollowsPast;
         property FollowsNext: integer read FFollowsNext;
@@ -1021,7 +1023,7 @@ end;
 procedure TMainForm.LoadOpenItems(PageNumber: integer);
 begin
 
-    if LoadedCompanies.Count = 0 then
+    if Length(LoadedCompanies) = 0 then
     begin
         THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
         Service.Logger.Log('[LoadOpenItems]: No aging report loded while open items requested.');
@@ -1209,10 +1211,17 @@ begin
 end;
 
 
-function TMainForm.CompanyListToText(LoadedCompanies: TList<string>): string;
+function TMainForm.CompanyListToText(LoadedCompanies: TArray<string>): string;
 begin
-    for var Index:=0 to LoadedCompanies.Count - 1 do
-        Result:=Result + LoadedCompanies.Items[Index] + '  ';
+
+    if Assigned(LoadedCompanies) then
+    begin
+
+        for var Index:=0 to Length(LoadedCompanies) - 1 do
+            Result:=Result + LoadedCompanies[Index] + '  ';
+
+    end;
+
 end;
 
 
@@ -1302,6 +1311,20 @@ begin
     txtInfo.Font.Color        :=AppMenuTextNormal;
     txtRating.Font.Style      :=[];
     txtRating.Font.Color      :=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.ResetCompanyList();
+begin
+    if Assigned(FLoadedCompanies) then FLoadedCompanies:=nil;
+end;
+
+
+procedure TMainForm.AddToCompanyList(Company: string);
+begin
+    var Records:=Length(FLoadedCompanies);
+    SetLength(FLoadedCompanies, Records + 1);
+    FLoadedCompanies[Records]:=Company;
 end;
 
 
@@ -1899,7 +1922,7 @@ begin
     begin
         FDataUpdate:=ReceivedTime;
         valUpdateStamp.Caption:=ReceivedTime;
-        if FLoadedCompanies.Count > 0 then LoadAgeReport();
+        if Length(FLoadedCompanies) > 0 then LoadAgeReport();
     end
     else
     begin
@@ -2267,7 +2290,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-    FLoadedCompanies:=TList<string>.Create();
+    FLoadedCompanies:=TArray<string>.Create();
     FIsAppMenuLocked:=True;
     FAllowClose:=False;
     ClearMainViewInfo();
@@ -2342,9 +2365,7 @@ begin
             end;
 
             Service.Settings.Encode(TAppFiles.Configuration);
-
-            if Assigned(FLoadedCompanies) then
-                FLoadedCompanies.Free();
+            if Assigned(FLoadedCompanies) then SetLength(FLoadedCompanies, 0);
 
             FAllowClose:=False;
             CanClose:=not FAllowClose;
@@ -3812,7 +3833,7 @@ end;
 procedure TMainForm.imgRefreshReportClick(Sender: TObject);
 begin
 
-    if FLoadedCompanies.Count = 0 then
+    if Length(FLoadedCompanies) = 0 then
     begin
         THelpers.MsgCall(MainForm.Handle, TAppMessage.Warn, 'No aging report has been uploaded.');
         Exit();

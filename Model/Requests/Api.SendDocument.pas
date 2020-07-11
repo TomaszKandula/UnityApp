@@ -26,6 +26,7 @@ type
         var FMessage:         string;
         var FUserEmail:       string;
         var FInvoiceFilter:   string;
+        var FAgent:           string;
         var FBeginDate:       string;
         var FEndDate:         string;
         var FIsCtrlStatus:    boolean;
@@ -39,6 +40,7 @@ type
         const _Message         = 'Message';
         const _UserEmail       = 'User Email';
         const _InvoiceFilter   = 'Invoice Filter';
+        const _Agent           = 'Agent';
         const _BeginDate       = 'Begin Date';
         const _EndDate         = 'End Date';
         const _IsCtrlStatus    = 'IsCtrlStatus';
@@ -52,6 +54,7 @@ type
         property &Message:        string  read FMessage         write FMessage;
         property UserEmail:       string  read FUserEmail       write FUserEmail;
         property InvoiceFilter:   string  read FInvoiceFilter   write FInvoiceFilter;
+        property Agent:           string  read FAgent           write FAgent;
         property BeginDate:       string  read FBeginDate       write FBeginDate;
         property EndDate:         string  read FEndDate         write FEndDate;
         property IsCtrlStatus:    boolean read FIsCtrlStatus    write FIsCtrlStatus;

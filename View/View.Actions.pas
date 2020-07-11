@@ -372,8 +372,7 @@ begin
     UpdateGeneral();
     UpdateCustDetails();
 
-    var SelectedCompany:=TList<string>.Create();
-    SelectedCompany.Add(FSourceDBName);
+    var SelectedCompany:=TArray<string>.Create(FSourceDBName);
 
     Service.Mediator.Companies.GetCompanyEmailsAsync(
         SelectedCompany,

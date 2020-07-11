@@ -35,7 +35,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+        procedure SetUserCompanyListAsync(UserSelection: TArray<string>; Callback: TSetUserCompanyList);
         /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
         /// </summary>
@@ -126,7 +126,7 @@ type
         constructor Create();
         destructor  Destroy(); override;
         procedure   GetUserCompanyListAsync(Callback: TGetUserCompanyList);
-        procedure   SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+        procedure   SetUserCompanyListAsync(UserSelection: TArray<string>; Callback: TSetUserCompanyList);
         function    SaveUserLogsAwaited(): TCallResponse;
         function    GetUserPermissionsAwaited(): TCallResponse;
     end;
@@ -266,7 +266,7 @@ begin
 end;
 
 
-procedure TUsers.SetUserCompanyListAsync(UserSelection: TList<string>; Callback: TSetUserCompanyList);
+procedure TUsers.SetUserCompanyListAsync(UserSelection: TArray<string>; Callback: TSetUserCompanyList);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -286,7 +286,7 @@ begin
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
-            UserCompanySelection.SelectedCoCodes:=UserSelection.ToArray();
+            UserCompanySelection.SelectedCoCodes:=UserSelection;
             Rest.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
         finally
             UserCompanySelection.Free();

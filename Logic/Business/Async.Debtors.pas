@@ -44,7 +44,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure GetAgingReportAsync(SelectedCompanies: TList<string>; AFileName: string; Callback: TGetAgingReport);
+        procedure GetAgingReportAsync(SelectedCompanies: TArray<string>; AFileName: string; Callback: TGetAgingReport);
         /// <summary>
         /// Allow to read async. current age report from SQL database.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -52,7 +52,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCompanies: TArray<string>; SortMode: string; Callback: TReadAgeView);
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
         /// </summary>
@@ -76,8 +76,8 @@ type
         destructor  Destroy(); override;
         function    CheckSnapshotsAwaited(CheckDate: string; var ReceivedTime: string; var ReceivedStatus: string): TCallResponse; virtual;
         procedure   ScanSnapshotsAsync(SnapshotsUpdate: string; Callback: TScanSnapshots); virtual;
-        procedure   GetAgingReportAsync(SelectedCompanies: TList<string>; AFileName: string; Callback: TGetAgingReport); virtual;
-        procedure   ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView); virtual;
+        procedure   GetAgingReportAsync(SelectedCompanies: TArray<string>; AFileName: string; Callback: TGetAgingReport); virtual;
+        procedure   ReadAgeViewAsync(SelectedCompanies: TArray<string>; SortMode: string; Callback: TReadAgeView); virtual;
         function    GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse; virtual;
     end;
 
@@ -245,7 +245,7 @@ begin
 end;
 
 
-procedure TDebtors.GetAgingReportAsync(SelectedCompanies: TList<string>; AFileName: string; Callback: TGetAgingReport);
+procedure TDebtors.GetAgingReportAsync(SelectedCompanies: TArray<string>; AFileName: string; Callback: TGetAgingReport);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -264,7 +264,7 @@ begin
 
             var UserCustSnapshotList:=TUserCustSnapshotList.Create();
             try
-                UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
+                UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies;
                 UserCustSnapshotList.SortMode:=String.Empty;
                 Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
             finally
@@ -424,7 +424,7 @@ begin
 end;
 
 
-procedure TDebtors.ReadAgeViewAsync(SelectedCompanies: TList<string>; SortMode: string; Callback: TReadAgeView);
+procedure TDebtors.ReadAgeViewAsync(SelectedCompanies: TArray<string>; SortMode: string; Callback: TReadAgeView);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -443,7 +443,7 @@ begin
 
             var UserCustSnapshotList:=TUserCustSnapshotList.Create();
             try
-                UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies.ToArray();
+                UserCustSnapshotList.SelectedCoCodes:=SelectedCompanies;
                 UserCustSnapshotList.SortMode:=SortMode;
                 Rest.CustomBody:=TJson.ObjectToJsonString(UserCustSnapshotList);
             finally
