@@ -176,7 +176,7 @@ begin
 
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generalcommentaries/freefields';
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generalcomments/freefields';
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[FreeFieldsUpdateAsync]: Executing POST ' + Rest.ClientBaseURL);
 
@@ -268,7 +268,7 @@ begin
 
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generalcommentaries/followups';
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'generalcomments/followups';
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[BulkFollowupUpdateAsync]: Executing POST ' + Rest.ClientBaseURL);
 
@@ -358,7 +358,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'dailycommentaries/'
+            + 'generalcomments/'
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
@@ -511,7 +511,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'generalcommentaries/'
+            + 'generalcomments/'
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
@@ -655,11 +655,11 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'generalcommentaries/'
+            + 'generalcomments/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
-            + '/check/';
+            + '/scrutiny/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[CheckGeneralCommentAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
@@ -729,7 +729,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'generalcommentaries/'
+            + 'generalcomments/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
@@ -796,11 +796,11 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'dailycommentaries/'
+            + 'dailycomments/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
-            + '/check/'
+            + '/scrutiny/'
             + AgeDate
             + '/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
@@ -872,7 +872,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'dailycommentaries/'
+            + 'dailycomments/'
             + SourceDBName
             + '/'
             + CustNumber.ToString()
