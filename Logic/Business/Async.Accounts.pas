@@ -214,7 +214,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
+            + 'users/'
             + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
@@ -277,7 +277,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
+            + 'users/'
             + Service.SessionData.UnityUserId.ToString()
             + '/companies/';
 
@@ -359,7 +359,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
+            + 'users/'
             + Service.SessionData.UnityUserId.ToString()
             + '/logs/';
 
@@ -446,8 +446,9 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/permissions/'
-            + Service.SessionData.UnityUserId.ToString();
+            + 'users/'
+            + Service.SessionData.UnityUserId.ToString()
+            + '/permissions/';
 
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetUserPermissionsAwaited]: Executing GET ' + Rest.ClientBaseURL);
@@ -610,7 +611,7 @@ begin
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/initiate/' + SessionId;
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'sessions/' + SessionId;
         Rest.RequestMethod:=TRESTRequestMethod.rmPOST;
         Service.Logger.Log('[InitiateSessionAwaited]: Executing POST ' + Rest.ClientBaseURL);
 
@@ -686,7 +687,7 @@ begin
 		Rest.AccessToken:=Service.AccessToken;
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'accounts/check/' + SessionId;
+        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'sessions/scrutiny/' + SessionId;
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[CheckSessionAwaited]: Executing GET ' + Rest.ClientBaseURL);
 
@@ -781,7 +782,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
+            + 'users/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
@@ -844,7 +845,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
+            + 'users/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
@@ -933,7 +934,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'accounts/'
+            + 'users/'
             + Service.SessionData.UnityUserId.ToString()
             + '/rating/';
 
