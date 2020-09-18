@@ -60,7 +60,6 @@ type
     protected
         procedure CreateParams(var Params: TCreateParams); override;
     strict private
-        //var IsAppCurrent: boolean;
         var LastErrorMsg: string;
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
@@ -68,7 +67,6 @@ type
         procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
         procedure ExitAppSync();
         procedure ApplicationStart();
-        //function GetReleaseAsync(): boolean;
         function GetAccessTokenAsync(): boolean;
         function GetScreenDataSync(): boolean;
         function GetGeneralTablesAsync(): boolean;
@@ -251,41 +249,6 @@ begin
 
         end;
 
-//        // -----------------------------------------
-//        // Check current release of the application.
-//        // -----------------------------------------
-//        Sleep(50);
-//        ChangeProgressBar(55, 'Checking for updates...', ProgressBar);
-//
-//        if not GetReleaseAsync() then
-//        begin
-//            Service.Logger.Log('Critical error has occured [GetReleaseAsync]: ' + LastErrorMsg);
-//            THelpers.MsgCall(
-//                StartupForm.Handle,
-//                TAppMessage.Error,
-//                'An error has occured [GetReleaseAsync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.'
-//            );
-//            ExitAppSync();
-//        end
-//        else
-//        begin
-//
-//            if not IsAppCurrent then
-//            begin
-//                Service.Logger.Log('[GetReleaseAsync]: There is newer version available.');
-//                THelpers.MsgCall(
-//                    StartupForm.Handle,
-//                    TAppMessage.Warn,
-//                    'There is newer version available, please update it from Software Centre. Application will be closed.'
-//                );
-//                ExitAppSync();
-//            end;
-//
-//            Service.Logger.Log('No update has been found.');
-//            ChangeProgressBar(60, 'Checking for updates... done.', ProgressBar);
-//
-//        end;
-
         // -------------------------
         // General tables API calls.
         // -------------------------
@@ -328,29 +291,6 @@ begin
     NewTask.Start();
 
 end;
-
-
-//function TStartupForm.GetReleaseAsync(): boolean;
-//begin
-//
-//    Result:=True;
-//
-//    var LCallResponse: TCallResponse;
-//    var LClientInfo: TClientInfo;
-//
-//    LCallResponse:=Service.Mediator.Utilities.CheckReleaseAwaited(LClientInfo);
-//
-//    if not LCallResponse.IsSucceeded then
-//    begin
-//        LastErrorMsg:=LCallResponse.LastMessage;
-//        Result:=False;
-//        Exit();
-//    end;
-//
-//    if LClientInfo.Version > Service.Settings.ReleaseNumber.ToString() then
-//        IsAppCurrent:=False else IsAppCurrent:=True;
-//
-//end;
 
 
 function TStartupForm.GetAccessTokenAsync(): boolean;

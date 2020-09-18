@@ -1729,13 +1729,13 @@ end;
 
 procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then GeneralCom.SetFocus();
+    if Key = VK_TAB then DailyCom.SetFocus();
 end;
 
 
 procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then DailyCom.SetFocus();
+    if Key = VK_TAB then GeneralCom.SetFocus();
 end;
 
 

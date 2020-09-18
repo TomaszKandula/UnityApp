@@ -358,7 +358,7 @@ begin
         Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
 
         Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI')
-            + 'generalcomments/'
+            + 'dailycomments/'
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
