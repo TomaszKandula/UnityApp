@@ -74,6 +74,7 @@ type
         procedure SearchPartialShowAll(ActualRow: integer);
         procedure SearchPartialNextBreak();
         procedure PerformSearch();
+        procedure RemoveFolding();
     public
         property Grid:  TStringGrid read FGrid      write FGrid;
         property SelColumn: integer read FSelColumn write FSelColumn;
@@ -92,6 +93,7 @@ implementation
 uses
     View.Main,
     View.GridFilter,
+    View.BusyScreen,
     Unity.Constants,
     Unity.Helpers,
     Unity.Settings;
@@ -313,6 +315,26 @@ begin
 end;
 
 
+procedure TGridSearchForm.RemoveFolding();
+begin
+
+    if not Assigned(FGrid) then Exit();
+
+    BusyForm.Show();
+    FGrid.Freeze(True);
+    try
+
+        for var Index:=1 to FGrid.RowCount - 1 do
+            FGrid.RowHeights[Index]:=FGrid.sgRowHeight;
+
+    finally
+        BusyForm.Close();
+        FGrid.Freeze(False);
+    end;
+
+end;
+
+
 {$ENDREGION}
 
 
@@ -377,7 +399,7 @@ begin
 
     if Assigned(FGrid) then
     begin
-        MainForm.Action_RemoveFiltersClick(Self);
+        RemoveFolding();
         btnUnhide.Enabled:=False;
     end;
 

@@ -37,8 +37,6 @@ object GridSearchForm: TGridSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 378
-    ExplicitHeight = 230
     object PanelEditBox: TPanel
       AlignWithMargins = True
       Left = 5
@@ -69,8 +67,6 @@ object GridSearchForm: TGridSearchForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitTop = 50
-        ExplicitHeight = 49
         object EditSearch: TEdit
           AlignWithMargins = True
           Left = 2
@@ -84,10 +80,6 @@ object GridSearchForm: TGridSearchForm
           Align = alClient
           BorderStyle = bsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 3
-          ExplicitWidth = 331
-          ExplicitHeight = 35
         end
       end
       object PanelHeader: TPanel
@@ -140,7 +132,6 @@ object GridSearchForm: TGridSearchForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitHeight = 140
       object GroupOptions: TGroupBox
         Left = 7
         Top = 8
@@ -224,7 +215,6 @@ object GridSearchForm: TGridSearchForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 2
-      ExplicitTop = 257
       object btnSearch: TSpeedButton
         Left = 328
         Top = 3
