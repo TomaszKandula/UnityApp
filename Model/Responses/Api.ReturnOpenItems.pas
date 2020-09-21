@@ -27,7 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
-        constructor Create(Count: cardinal);
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
@@ -42,7 +42,7 @@ type
 implementation
 
 
-constructor TReturnOpenItems.Create(Count: cardinal);
+constructor TReturnOpenItems.Create(Count: cardinal = 1);
 begin
 
     if not Assigned(FOpenItems) then
