@@ -751,7 +751,7 @@ begin
 
     FPayLoad.LayoutType     :=TLayoutType.Defined;
     FPayLoad.ReportedAgeDate:=MainForm.LoadedAgeDate;
-    FPayLoad.Subject        :='Account Statement (' + CustNumber.ToString() + ', ' + CustName + ')';
+    FPayLoad.Subject        :=String.Empty;
     FPayLoad.Message        :='';
     FPayLoad.UserEmail      :=Service.SessionData.EmailAddress;
     FPayLoad.InvoiceFilter  :=TFilterType.StatementAllItems;
