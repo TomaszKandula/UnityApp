@@ -291,6 +291,8 @@ begin
             else
             begin
 
+                ReturnReportList:=TReturnReportList.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     ReturnReportList.Error.ErrorDesc:='[GetBiReportsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -306,6 +308,7 @@ begin
         except
             on E: Exception do
             begin
+                ReturnReportList:=TReturnReportList.Create();
                 ReturnReportList.Error.ErrorDesc:='[GetBiReportsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(ReturnReportList.Error.ErrorDesc);
             end;

@@ -27,6 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
+        constructor Create();
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -39,6 +40,14 @@ type
 
 
 implementation
+
+
+constructor TReturnReportList.Create();
+begin
+    if not Assigned(ReportList) then ReportList:=TArray<TReportListFields>.Create();
+    if not Assigned(Error) then Error:=TErrorHandler.Create();
+    if not Assigned(Meta)  then Meta :=TMetaData.Create();
+end;
 
 
 destructor TReturnReportList.Destroy();
