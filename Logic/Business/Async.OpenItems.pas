@@ -201,6 +201,8 @@ begin
             else
             begin
 
+                ReturnOpenItems:=TReturnOpenItems.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     ReturnOpenItems.Error.ErrorDesc:='[GetOpenItemsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -216,6 +218,7 @@ begin
         except
             on E: Exception do
             begin
+                ReturnOpenItems:=TReturnOpenItems.Create();
                 ReturnOpenItems.Error.ErrorDesc:='[GetOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(ReturnOpenItems.Error.ErrorDesc);
             end;
@@ -268,6 +271,8 @@ begin
             else
             begin
 
+                ReturnOpenItems:=TReturnOpenItems.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     ReturnOpenItems.Error.ErrorDesc:='[ReadOpenItemsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -283,6 +288,7 @@ begin
         except
             on E: Exception do
             begin
+                ReturnOpenItems:=TReturnOpenItems.Create();
                 ReturnOpenItems.Error.ErrorDesc:='[ReadOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(ReturnOpenItems.Error.ErrorDesc);
             end;

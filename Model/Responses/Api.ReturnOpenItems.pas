@@ -27,6 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
+        constructor Create(Count: cardinal);
         destructor Destroy(); override;
         const _IsSucceeded       = 'IsSucceeded';
         const _Error             = 'Error';
@@ -39,6 +40,21 @@ type
 
 
 implementation
+
+
+constructor TReturnOpenItems.Create(Count: cardinal);
+begin
+
+    if not Assigned(FOpenItems) then
+    begin
+        SetLength(FOpenItems, Count);
+        for var Index:=0 to Count - 1 do FOpenItems[Index]:=TOpenItemsFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
 
 
 destructor TReturnOpenItems.Destroy();

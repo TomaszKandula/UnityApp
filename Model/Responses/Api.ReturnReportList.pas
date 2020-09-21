@@ -27,7 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
-        constructor Create();
+        constructor Create(Count: cardinal);
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -42,11 +42,18 @@ type
 implementation
 
 
-constructor TReturnReportList.Create();
+constructor TReturnReportList.Create(Count: cardinal);
 begin
-    if not Assigned(ReportList) then ReportList:=TArray<TReportListFields>.Create();
-    if not Assigned(Error) then Error:=TErrorHandler.Create();
-    if not Assigned(Meta)  then Meta :=TMetaData.Create();
+
+    if not Assigned(FReportList) then
+    begin
+        SetLength(FReportList, Count);
+        for var Index:=0 to Count - 1 do FReportList[Index]:=TReportListFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
 end;
 
 
