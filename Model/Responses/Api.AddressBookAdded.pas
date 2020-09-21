@@ -26,6 +26,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _Id          = 'Id';
         const _IsSucceeded = 'IsSucceeded';
@@ -41,10 +42,17 @@ type
 implementation
 
 
+constructor TAddressBookAdded.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TAddressBookAdded.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 

@@ -27,6 +27,7 @@ type
         var FError:            TErrorHandler;
         var FMeta:             TMetaData;
     public
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded      = 'IsSucceeded';
         const _Error            = 'Error';
@@ -41,6 +42,21 @@ type
 implementation
 
 
+constructor TReturnSalesResponsible.Create(Count: cardinal = 1);
+begin
+
+    if not Assigned(FSalesResponsible) then
+    begin
+        SetLength(FSalesResponsible, Count);
+        for var Index:=0 to Count - 1 do FSalesResponsible[Index]:=TSalesResponsibleFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
+
+
 destructor TReturnSalesResponsible.Destroy();
 begin
 
@@ -48,7 +64,7 @@ begin
         if Assigned(SalesResponsible) then SalesResponsible.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
 
     inherited;
 

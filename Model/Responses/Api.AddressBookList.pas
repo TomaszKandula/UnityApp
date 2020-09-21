@@ -64,7 +64,7 @@ begin
         if Assigned(AddressBook) then AddressBook.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
 
     inherited;
 

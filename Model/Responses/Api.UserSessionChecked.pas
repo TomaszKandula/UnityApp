@@ -31,6 +31,7 @@ type
         var FError:        TErrorHandler;
         var FMeta:         TMetaData;
 	public
+        constructor Create();
         destructor Destroy(); override;
         const _IsValidated  = 'IsValidated';
         const _UserId       = 'UserId';
@@ -56,10 +57,17 @@ type
 implementation
 
 
+constructor TUserSessionChecked.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TUserSessionChecked.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 

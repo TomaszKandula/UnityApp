@@ -64,7 +64,7 @@ begin
         if Assigned(UserDailyComments) then UserDailyComments.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
 
     inherited;
 

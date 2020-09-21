@@ -27,6 +27,7 @@ type
         var FError:         TErrorHandler;
         var FMeta:          TMetaData;
 	public
+        constructor Create();
         destructor Destroy(); override;
         const _StatusCode    = 'StatusCode';
         const _CustExtractAt = 'CustExtractDt';
@@ -44,10 +45,17 @@ type
 implementation
 
 
+constructor TReturnSsisData.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TReturnSsisData.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 

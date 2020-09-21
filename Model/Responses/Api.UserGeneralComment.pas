@@ -67,7 +67,7 @@ end;
 destructor TUserGeneralComment.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 

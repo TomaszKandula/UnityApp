@@ -27,6 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _IsSucceeded     = 'IsSucceeded';
         const _Error           = 'Error';
@@ -41,6 +42,13 @@ type
 implementation
 
 
+constructor TReturnCompanies.Create();
+begin
+    if not Assigned(Error) then Error:=TErrorHandler.Create();
+    if not Assigned(Meta)  then Meta :=TMetaData.Create();
+end;
+
+
 destructor TReturnCompanies.Destroy();
 begin
 
@@ -48,7 +56,7 @@ begin
         if Assigned(Companies) then Companies.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
 
     inherited;
 

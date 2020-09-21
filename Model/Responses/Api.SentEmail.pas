@@ -25,6 +25,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
+        constructor Create();
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -38,10 +39,17 @@ type
 implementation
 
 
+constructor TSentEmail.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TSentEmail.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 

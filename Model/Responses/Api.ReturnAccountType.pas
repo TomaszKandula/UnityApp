@@ -27,6 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -41,6 +42,13 @@ type
 implementation
 
 
+constructor TReturnAccountType.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TReturnAccountType.Destroy();
 begin
 
@@ -48,7 +56,7 @@ begin
         if Assigned(AccountType) then AccountType.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
 
     inherited;
 

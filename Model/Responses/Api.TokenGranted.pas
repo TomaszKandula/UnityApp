@@ -29,6 +29,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _AccessToken   = 'AccessToken';
         const _TokenType     = 'TokenType';
@@ -50,10 +51,17 @@ type
 implementation
 
 
+constructor TTokenGranted.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TTokenGranted.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 

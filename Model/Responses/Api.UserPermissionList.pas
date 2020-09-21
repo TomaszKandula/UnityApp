@@ -27,6 +27,7 @@ type
         var FError:           TErrorHandler;
         var FMeta:            TMetaData;
     public
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -41,13 +42,32 @@ type
 implementation
 
 
+constructor TUserPermissionList.Create(Count: cardinal = 1);
+begin
+
+    if not Assigned(FUserPermissions) then
+    begin
+        SetLength(FUserPermissions, Count);
+        for var Index:=0 to Count - 1 do FUserPermissions[Index]:=TUserPermissions.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
+
+
 destructor TUserPermissionList.Destroy();
 begin
+
     for var UserPermissions: TUserPermissions in FUserPermissions do
         if Assigned(UserPermissions) then UserPermissions.Free();
+
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
+
     inherited;
+
 end;
 
 

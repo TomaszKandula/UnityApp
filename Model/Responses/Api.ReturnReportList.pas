@@ -64,7 +64,8 @@ begin
         if Assigned(ReportList) then ReportList.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
+
     inherited;
 
 end;

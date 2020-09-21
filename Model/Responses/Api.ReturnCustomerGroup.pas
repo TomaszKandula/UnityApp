@@ -27,6 +27,7 @@ type
         var FError:         TErrorHandler;
         var FMeta:          TMetaData;
     public
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded      = 'IsSucceeded';
         const _Error            = 'Error';
@@ -41,6 +42,21 @@ type
 implementation
 
 
+constructor TReturnCustomerGroup.Create(Count: cardinal = 1);
+begin
+
+    if not Assigned(FCustomerGroup) then
+    begin
+        SetLength(FCustomerGroup, Count);
+        for var Index:=0 to Count - 1 do FCustomerGroup[Index]:=TCustomerGroupFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
+
+
 destructor TReturnCustomerGroup.Destroy();
 begin
 
@@ -48,7 +64,7 @@ begin
         if Assigned(CustomerGroup) then CustomerGroup.Free();
 
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
 
     inherited;
 

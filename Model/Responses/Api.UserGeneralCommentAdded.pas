@@ -25,7 +25,8 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
-        destructor Destroy(); override;
+        constructor Create();
+		destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
         const _Meta        = 'Meta';
@@ -38,10 +39,17 @@ type
 implementation
 
 
+constructor TUserGeneralCommentAdded.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
+
+
 destructor TUserGeneralCommentAdded.Destroy();
 begin
     if Assigned(FError) then FError.Free();
-    if Assigned(FMeta) then FMeta.Free();
+    if Assigned(FMeta)  then FMeta.Free();
     inherited;
 end;
 
