@@ -102,7 +102,8 @@ uses
     REST.Json,
     Unity.Enums,
     Unity.Helpers,
-    Unity.RestWrapper;
+    Unity.RestWrapper,
+    Api.ErrorHandler;
 
 
 var
@@ -280,6 +281,12 @@ begin
             else
             begin
 
+                if not Assigned(LReturnClientInfo) then
+                begin
+                    LReturnClientInfo:=TReturnClientInfo.Create();
+                    LReturnClientInfo.Error:=TErrorHandler.Create();
+                end;
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -295,6 +302,13 @@ begin
         except
             on E: Exception do
             begin
+
+                if not Assigned(LReturnClientInfo) then
+                begin
+                    LReturnClientInfo:=TReturnClientInfo.Create();
+                    LReturnClientInfo.Error:=TErrorHandler.Create();
+                end;
+
                 LReturnClientInfo.IsSucceeded:=False;
                 LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Cannot execute. Error has been thrown: ' + E.Message;
             end;
