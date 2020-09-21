@@ -39,14 +39,6 @@ type
         /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
         /// <summary>
-        /// Allow to async. check latest available release version (hosted in the Software Centre). If the current software version is lower
-        /// than available for download, then we will prompt the user and exit the application.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse;
-        /// <summary>
         /// Allows to recalculate async. aging summary and risk class based on provided age grid.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
@@ -75,7 +67,6 @@ type
         destructor  Destroy(); override;
         procedure   CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword); virtual;
         procedure   SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword); virtual;
-        function    CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse; virtual;
         procedure   RecalcAgeViewSummaryAsync(Source: TStringGrid; RiskClassGroup: TRiskClassGroup; Callback: TRecalcAgeViewSummary); virtual;
         procedure   GetBiReportsAsync(Callback: TGetBiReports); virtual;
     end;
@@ -237,84 +228,6 @@ begin
     end);
 
     NewTask.Start();
-
-end;
-
-
-function TUtilities.CheckReleaseAwaited(var AClientInfo: TClientInfo): TCallResponse;
-begin
-
-    var LCallResponse: TCallResponse;
-    var LClientInfo:   TClientInfo;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Rest:=Service.InvokeRest();
-		Rest.AccessToken:=Service.AccessToken;
-        Rest.SelectContentType(TRESTContentType.ctAPPLICATION_JSON);
-
-        Rest.ClientBaseURL:=Service.Settings.GetStringValue('API_ENDPOINTS', 'BASE_API_URI') + 'application/';
-        Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[CheckReleaseAwaited]: Executing GET ' + Rest.ClientBaseURL);
-
-        try
-
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
-            begin
-
-                var ReturnClientInfo:=TJson.JsonToObject<TReturnClientInfo>(Rest.Content);
-                try
-
-                    LClientInfo.Version:=ReturnClientInfo.Version;
-                    LClientInfo.Date   :=ReturnClientInfo.Date;
-                    LClientInfo.Status :=ReturnClientInfo.Status;
-
-                    LCallResponse.IsSucceeded:=ReturnClientInfo.IsSucceeded;
-                    LCallResponse.ErrorCode  :=ReturnClientInfo.Error.ErrorCode;
-                    LCallResponse.LastMessage:=ReturnClientInfo.Error.ErrorDesc;
-
-                    Service.Logger.Log('[CheckReleaseAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
-
-                finally
-                    ReturnClientInfo.Free();
-                end;
-
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    LCallResponse.LastMessage:='[CheckReleaseAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Rest.Content) then
-                        LCallResponse.LastMessage:='[CheckReleaseAwaited]: Invalid server response. Please contact IT Support.'
-                    else
-                        LCallResponse.LastMessage:='[CheckReleaseAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
-
-                LCallResponse.ReturnedCode:=Rest.StatusCode;
-                LCallResponse.IsSucceeded:=False;
-                Service.Logger.Log(LCallResponse.LastMessage);
-
-            end;
-
-        except
-            on E: Exception do
-            begin
-                LCallResponse.IsSucceeded:=False;
-                LCallResponse.LastMessage:='[CheckReleaseAwaited]: Cannot execute. Error has been thrown: ' + E.Message;
-                Service.Logger.Log(LCallResponse.LastMessage);
-            end;
-
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-
-    AClientInfo:=LClientInfo;
-    Result:=LCallResponse;
 
 end;
 
