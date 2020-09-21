@@ -144,7 +144,7 @@ begin
 
     FPayLoad.LayoutType     :=TLayoutType.Custom;
     FPayLoad.ReportedAgeDate:=MainForm.LoadedAgeDate;
-    FPayLoad.Subject        :='Account Statement';
+    FPayLoad.Subject        :='Account Statement (' + ActionsForm.CustNumber.ToString() + ', ' + ActionsForm.CustName + ')';
     FPayLoad.Message        :=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
     FPayLoad.UserEmail      :=Service.SessionData.EmailAddress;
     FPayLoad.InvoiceFilter  :=InvFilter;
