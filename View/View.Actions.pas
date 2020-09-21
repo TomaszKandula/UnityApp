@@ -993,10 +993,17 @@ end;
 procedure TActionsForm.GetOpenItems_Callback(PayLoad: TReturnOpenItems);
 begin
 
-    if not PayLoad.IsSucceeded then
+    if (not PayLoad.IsSucceeded) and (PayLoad.Error.ErrorCode <> 'no_data_found') then
     begin
         THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Service.Logger.Log('[GetOpenItems_Callback]: Error has been thrown "' + PayLoad.Error.ErrorDesc + '".');
+        Exit();
+    end;
+
+    if PayLoad.Error.ErrorCode = 'no_data_found' then
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, 'There are no open items for given customer.');
+        Service.Logger.Log('[GetOpenItems_Callback]: There are no open items for given customer.');
         Exit();
     end;
 
