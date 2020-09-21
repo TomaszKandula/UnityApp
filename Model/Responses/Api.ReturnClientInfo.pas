@@ -28,6 +28,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _Version     = 'Version';
         const _Date        = 'Date';
@@ -45,6 +46,13 @@ type
 
 
 implementation
+
+
+constructor TReturnClientInfo.Create();
+begin
+    if not Assigned(Error) then Error:=TErrorHandler.Create();
+    if not Assigned(Meta)  then Meta :=TMetaData.Create();
+end;
 
 
 destructor TReturnClientInfo.Destroy();

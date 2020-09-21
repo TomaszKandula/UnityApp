@@ -271,7 +271,7 @@ begin
         Rest.ClientBaseURL:=FEndpoint;
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
 
-        var LReturnClientInfo: TReturnClientInfo;
+        var LReturnClientInfo:=TReturnClientInfo.Create();
         try
 
             if (Rest.Execute) and (Rest.StatusCode = 200) then
@@ -280,12 +280,6 @@ begin
             end
             else
             begin
-
-                if not Assigned(LReturnClientInfo) then
-                begin
-                    LReturnClientInfo:=TReturnClientInfo.Create();
-                    LReturnClientInfo.Error:=TErrorHandler.Create();
-                end;
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
@@ -302,13 +296,6 @@ begin
         except
             on E: Exception do
             begin
-
-                if not Assigned(LReturnClientInfo) then
-                begin
-                    LReturnClientInfo:=TReturnClientInfo.Create();
-                    LReturnClientInfo.Error:=TErrorHandler.Create();
-                end;
-
                 LReturnClientInfo.IsSucceeded:=False;
                 LReturnClientInfo.Error.ErrorDesc:='[CheckReleaseAwaited]: Cannot execute. Error has been thrown: ' + E.Message;
             end;
