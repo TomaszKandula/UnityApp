@@ -27,6 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _Rating      ='Rating';
         const _Comment     ='Comment';
@@ -42,6 +43,13 @@ type
 
 
 implementation
+
+
+constructor TUserRating.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
 
 
 destructor TUserRating.Destroy();

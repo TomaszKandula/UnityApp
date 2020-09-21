@@ -458,6 +458,8 @@ begin
             else
             begin
 
+                ReturnCustomerSnapshots:=TReturnCustomerSnapshots.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     ReturnCustomerSnapshots.Error.ErrorDesc:='[ReadAgeViewAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -473,6 +475,7 @@ begin
         except
             on E: Exception do
             begin
+                ReturnCustomerSnapshots:=TReturnCustomerSnapshots.Create();
                 ReturnCustomerSnapshots.Error.ErrorDesc:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 Service.Logger.Log(ReturnCustomerSnapshots.Error.ErrorDesc);
             end;

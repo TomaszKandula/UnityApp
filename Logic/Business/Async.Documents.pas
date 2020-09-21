@@ -99,6 +99,8 @@ begin
             else
             begin
 
+                SentDocument:=TSentDocument.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     SentDocument.Error.ErrorDesc:='[SendAccountDocumentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -114,6 +116,7 @@ begin
         except on
             E: Exception do
             begin
+                SentDocument:=TSentDocument.Create();
                 SentDocument.Error.ErrorDesc:='[SendAccountDocumentAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(SentDocument.Error.ErrorDesc);
             end;

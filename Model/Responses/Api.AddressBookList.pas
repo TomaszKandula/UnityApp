@@ -27,6 +27,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
     public
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -39,6 +40,21 @@ type
 
 
 implementation
+
+
+constructor TAddressBookList.Create(Count: cardinal = 1);
+begin
+
+    if not Assigned(FAddressBook) then
+    begin
+        SetLength(FAddressBook, Count);
+        for var Index:=0 to Count - 1 do FAddressBook[Index]:=TAddressBookFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
 
 
 destructor TAddressBookList.Destroy();

@@ -232,6 +232,8 @@ begin
             else
             begin
 
+                UserCompanyList:=TUserCompanyList.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     UserCompanyList.Error.ErrorDesc:='[GetUserCompanyListAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -247,6 +249,7 @@ begin
         except on
             E: Exception do
             begin
+                UserCompanyList:=TUserCompanyList.Create();
                 UserCompanyList.Error.ErrorDesc:='[GetUserCompanyListAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(UserCompanyList.Error.ErrorDesc);
             end;
@@ -800,6 +803,8 @@ begin
             else
             begin
 
+                UserRating:=TUserRating.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -815,6 +820,7 @@ begin
         except on
             E: Exception do
             begin
+                UserRating:=TUserRating.Create();
                 UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(UserRating.Error.ErrorDesc);
             end;

@@ -27,6 +27,7 @@ type
         var FError:         TErrorHandler;
         var FMeta:          TMetaData;
 	public
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -39,6 +40,21 @@ type
 
 
 implementation
+
+
+constructor TUserCompanyList.Create(Count: cardinal = 1);
+begin
+
+    if not Assigned(FUserCompanies) then
+    begin
+        SetLength(FUserCompanies, Count);
+        for var Index:=0 to Count - 1 do FUserCompanies[Index]:=TUserCompanyFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
 
 
 destructor TUserCompanyList.Destroy();

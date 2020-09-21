@@ -167,6 +167,8 @@ begin
             else
             begin
 
+                AddressBookList:=TAddressBookList.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     AddressBookList.Error.ErrorDesc:='[OpenAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -182,6 +184,7 @@ begin
         except on
             E: Exception do
             begin
+                AddressBookList:=TAddressBookList.Create();
                 AddressBookList.Error.ErrorDesc:='[OpenAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(AddressBookList.Error.ErrorDesc);
             end;
@@ -479,6 +482,8 @@ begin
             else
             begin
 
+                AddressBookItem:=TAddressBookItem.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     AddressBookItem.Error.ErrorDesc:='[GetCustomerDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -494,6 +499,7 @@ begin
         except on
             E: Exception do
             begin
+                AddressBookItem:=TAddressBookItem.Create();
                 AddressBookItem.Error.ErrorDesc:='[GetCustomerDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(AddressBookItem.Error.ErrorDesc);
             end;

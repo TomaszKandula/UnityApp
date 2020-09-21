@@ -102,6 +102,8 @@ begin
             else
             begin
 
+                ReturnCompanyEmails:=TReturnCompanyEmails.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     ReturnCompanyEmails.Error.ErrorDesc:='[GetCompanyDetailsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -117,6 +119,7 @@ begin
         except on
             E: Exception do
             begin
+                ReturnCompanyEmails:=TReturnCompanyEmails.Create();
                 ReturnCompanyEmails.Error.ErrorDesc:='[GetCompanyDetailsAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(ReturnCompanyEmails.Error.ErrorDesc);
             end;

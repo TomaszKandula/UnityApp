@@ -31,6 +31,7 @@ type
         var FError:       TErrorHandler;
         var FMeta:        TMetaData;
 	public
+        constructor Create();
         destructor Destroy(); override;
         const _CommentId   = 'CommentId';
         const _FollowUp    = 'FollowUp';
@@ -54,6 +55,13 @@ type
 
 
 implementation
+
+
+constructor TUserGeneralComment.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
 
 
 destructor TUserGeneralComment.Destroy();

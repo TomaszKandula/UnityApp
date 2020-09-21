@@ -27,6 +27,7 @@ type
         var FError:             TErrorHandler;
         var FMeta:              TMetaData;
     public
+        constructor Create(Count: cardinal = 1);
         destructor Destroy(); override;
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
@@ -39,6 +40,21 @@ type
 
 
 implementation
+
+
+constructor TUserDailyCommentsList.Create(Count: cardinal = 1);
+begin
+
+    if not Assigned(FUserDailyComments) then
+    begin
+        SetLength(FUserDailyComments, Count);
+        for var Index:=0 to Count - 1 do FUserDailyComments[Index]:=TUserDailyCommentsFields.Create();
+    end;
+
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+
+end;
 
 
 destructor TUserDailyCommentsList.Destroy();

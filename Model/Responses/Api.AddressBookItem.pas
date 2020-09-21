@@ -33,6 +33,7 @@ type
         var FError:           TErrorHandler;
         var FMeta:            TMetaData;
     public
+        constructor Create();
         destructor Destroy(); override;
         const _Id              = 'Id';
         const _SourceDbName    = 'SourceDbName';
@@ -61,6 +62,13 @@ type
 
 
 implementation
+
+
+constructor TAddressBookItem.Create();
+begin
+    if not Assigned(FError) then FError:=TErrorHandler.Create();
+    if not Assigned(FMeta)  then FMeta :=TMetaData.Create();
+end;
 
 
 destructor TAddressBookItem.Destroy();

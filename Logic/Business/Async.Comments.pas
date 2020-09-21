@@ -748,6 +748,8 @@ begin
             else
             begin
 
+                UserGeneralComment:=TUserGeneralComment.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     UserGeneralComment.Error.ErrorDesc:='[GetGeneralCommentAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -763,6 +765,7 @@ begin
         except on
             E: Exception do
             begin
+                UserGeneralComment:=TUserGeneralComment.Create();
                 UserGeneralComment.Error.ErrorDesc:='[GetGeneralCommentAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(UserGeneralComment.Error.ErrorDesc);
             end;
@@ -891,6 +894,8 @@ begin
             else
             begin
 
+                UserDailyCommentsList:=TUserDailyCommentsList.Create();
+
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
                     UserDailyCommentsList.Error.ErrorDesc:='[GetDailyCommentsAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
@@ -906,6 +911,7 @@ begin
         except on
             E: Exception do
             begin
+                UserDailyCommentsList:=TUserDailyCommentsList.Create();
                 UserDailyCommentsList.Error.ErrorDesc:='[GetDailyCommentsAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(UserDailyCommentsList.Error.ErrorDesc);
             end;
