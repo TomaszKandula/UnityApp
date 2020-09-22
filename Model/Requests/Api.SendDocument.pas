@@ -46,7 +46,7 @@ type
         const _IsCtrlStatus    = 'IsCtrlStatus';
         const _IsUserInCopy    = 'IsUserInCopy';
         const _IsSourceInCopy  = 'IsSourceInCopy';
-        constructor Create(Count: cardinal);
+        constructor Create(Count: cardinal = 0);
         destructor Destroy(); override;
         property LayoutType:      string  read FLayoutType      write FLayoutType;
         property ReportedAgeDate: string  read FReportedAgeDate write FReportedAgeDate;
@@ -67,8 +67,9 @@ type
 implementation
 
 
-constructor TSendDocument.Create(Count: cardinal);
+constructor TSendDocument.Create(Count: cardinal = 0);
 begin
+    if Count = 0 then Exit();
     SetLength(FDocuments, Count);
     for var Index:=0 to Count - 1 do FDocuments[Index]:=TDocumentFields.Create();
 end;

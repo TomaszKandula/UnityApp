@@ -23,7 +23,7 @@ type
         var FUserAlias:  string;
         var FFollowUpsData: TArray<TFollowUpData>;
     public
-        constructor Create(Count: cardinal);
+        constructor Create(Count: cardinal = 0);
         destructor Destroy(); override;
         const _UserAlias     = 'UserAlias';
         const _FollowUpsData = 'FreeFields';
@@ -35,8 +35,9 @@ type
 implementation
 
 
-constructor TFollowUpsUpdate.Create(Count: cardinal);
+constructor TFollowUpsUpdate.Create(Count: cardinal = 0);
 begin
+    if Count = 0 then Exit();
     SetLength(FFollowUpsData, Count);
     for var Index:=0 to Count - 1 do FFollowUpsData[Index]:=TFollowUpData.Create();
 end;

@@ -39,7 +39,7 @@ type
 implementation
 
 
-constructor TLayoutColumns.Create(Columns: cardinal);
+constructor TLayoutColumns.Create(Columns: cardinal = 0);
 begin
     if Columns > 0 then SetLength(FColumns, Columns);
 end;

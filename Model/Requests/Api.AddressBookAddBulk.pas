@@ -23,7 +23,7 @@ type
         var FUserAlias:   string;
         var FAddressBookData: TArray<TAddressBookFields>;
     public
-        constructor Create(Count: cardinal);
+        constructor Create(Count: cardinal = 0);
         destructor Destroy(); override;
         const _UserAlias   = 'UserAlias';
         const _AddressBook = 'AddressBook';
@@ -35,8 +35,9 @@ type
 implementation
 
 
-constructor TAddressBookAddBulk.Create(Count: cardinal);
+constructor TAddressBookAddBulk.Create(Count: cardinal = 0);
 begin
+    if Count = 0 then Exit();
     SetLength(FAddressBookData, Count);
     for var Index:=0 to Count - 1 do FAddressBookData[Index]:=TAddressBookFields.Create();
 end;

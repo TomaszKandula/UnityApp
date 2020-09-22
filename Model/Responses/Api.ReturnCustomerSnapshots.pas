@@ -27,7 +27,7 @@ type
         var FError:            TErrorHandler;
         var FMeta:             TMetaData;
     public
-        constructor Create(Count: cardinal = 1);
+        constructor Create(Count: cardinal = 0);
         destructor Destroy(); override;
         const _AgeDate           = 'Age Date';
         const _IsSucceeded       = 'IsSucceeded';
@@ -44,10 +44,10 @@ type
 implementation
 
 
-constructor TReturnCustomerSnapshots.Create(Count: cardinal = 1);
+constructor TReturnCustomerSnapshots.Create(Count: cardinal = 0);
 begin
 
-    if not Assigned(FCustomerSnapshot) then
+    if Count > 0 then
     begin
         SetLength(FCustomerSnapshot, Count);
         for var Index:=0 to Count - 1 do FCustomerSnapshot[Index]:=TCustomerSnapshot.Create();

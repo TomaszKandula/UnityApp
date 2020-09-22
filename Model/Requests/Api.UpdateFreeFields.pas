@@ -23,7 +23,7 @@ type
         var FUserAlias:  string;
         var FFreeFields: TArray<TFreeFields>;
 	public
-        constructor Create(Count: cardinal);
+        constructor Create(Count: cardinal = 0);
         destructor Destroy(); override;
         const _UserAlias  = 'UserAlias';
         const _FreeFields = 'FreeFields';
@@ -35,9 +35,10 @@ type
 implementation
 
 
-constructor TUpdateFreeFields.Create(Count: cardinal);
+constructor TUpdateFreeFields.Create(Count: cardinal = 0);
 begin
-    SetLength(FFreeFields, Count);
+    if Count = 0 then Exit();
+	SetLength(FFreeFields, Count);
     for var Index:=0 to Count - 1 do FFreeFields[Index]:=TFreeFields.Create();
 end;
 
