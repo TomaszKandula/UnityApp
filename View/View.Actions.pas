@@ -789,7 +789,37 @@ begin
         Exit();
     end;
 
-    THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
+    if Length(PayLoad.SentDocuments) = 0 then
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, 'Object [SentDocuments] is empty. Please contact IT Support.');
+        Exit();
+    end;
+
+    var FailedEmailsMsg:='Failed to send:';
+    var FailedEmailsCount:=0;
+
+    for var Index:=0 to Length(PayLoad.SentDocuments) - 1 do
+    begin
+
+        if not PayLoad.SentDocuments[Index].IsSucceeded then
+        begin
+
+            FailedEmailsMsg:=
+                FailedEmailsMsg + #13#10 +
+                PayLoad.SentDocuments[Index].EmailFrom + ' for customer ' +
+                PayLoad.SentDocuments[Index].CustomerNumber.ToString();
+
+            Inc(FailedEmailsCount);
+
+        end;
+
+    end;
+
+    if FailedEmailsCount > 0 then
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, FailedEmailsMsg + #13#10 + 'Please contact IT Support.')
+    else
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
+
     UpdateDaily();
 
 end;

@@ -448,7 +448,10 @@ begin
 
             if (CustomerList.Items[ListIndex].SubItems[0] = PayLoad.SentDocuments[PayLoadIndex].CustomerNumber.ToString())
             and (CustomerList.Items[ListIndex].SubItems[5] = PayLoad.SentDocuments[PayLoadIndex].SourceDbName) then
-                CustomerList.Items[ListIndex].SubItems[2]:='Yes';
+            begin
+                if PayLoad.SentDocuments[PayLoadIndex].IsSucceeded then
+                    CustomerList.Items[ListIndex].SubItems[2]:='Yes';
+            end;
 
         end;
 
