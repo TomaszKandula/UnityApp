@@ -70,6 +70,7 @@ type
         procedure FilterSourceGrid();
         procedure UnfilterSourceGrid();
         procedure FilterSelectCheck();
+        function IsIndexInAnotherFilter(ExcludedCol: integer; LookupIndex: integer): boolean;
         procedure RecalcAgeViewSummary_Callback(CallResponse: TCallResponse; AgingSummary: TAgingSummary);
         function GetState(ASearchValue: string; AColumnDataPos: integer; RowIndex: integer): integer;
         function GetColumnDataPos(AColumnNumber: integer): integer;
@@ -127,6 +128,37 @@ begin
     if Check = FilterList.Count then
         cbSelectAll.Checked:=True
             else cbSelectAll.Checked:=False;
+
+end;
+
+
+function TFilterForm.IsIndexInAnotherFilter(ExcludedCol: integer; LookupIndex: integer): boolean;
+begin
+
+    Result:=False;
+
+    for var ColIndex:=0 to FFilterList.Count - 1 do
+    begin
+
+        if ColIndex <> ExcludedCol then
+        begin
+
+            for var ItemIndex:=0 to Length(FFilterList[ColIndex].UniqueItems) - 1 do
+            begin
+
+                var SplitArray:=FFilterList[ColIndex].UniqueItems[ItemIndex, 2].Split([' ']);
+
+                if TArrayUtils<string>.Contains(LookupIndex.ToString(), SplitArray) then
+                begin
+                    Result:=True;
+                    Exit();
+                end;
+
+            end;
+
+        end;
+
+    end;
 
 end;
 
@@ -194,17 +226,13 @@ begin
         Exit();
     end;
 
-    if FColumnNumber < 1 then
-    begin
-        THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, 'Invalid column selection.');
-        Exit();
-    end;
+    if FColumnNumber < 1 then Exit();
 
     var ColumnDataPos:=GetColumnDataPos(FColumnNumber);
     FilterList.Clear();
 
     // Check if column has been already queried
-    // and if so, ready the filter state
+    // and if so, read the filter state
     if ColumnDataPos > -1 then
     begin
 
@@ -213,8 +241,6 @@ begin
             THelpers.MsgCall(FilterForm.Handle, TAppMessage.Error, 'Array has not been created.');
             Exit();
         end;
-
-        // add here... update filter items (it may be changed by the user)
 
         for var Items:=0 to Length(FFilterList[ColumnDataPos].UniqueItems) - 1 do
         begin
@@ -329,11 +355,20 @@ begin
     begin
 
         var Value:=FSourceGrid.Cells[FColumnNumber, Index].Trim();
-        // add here... checking for the same index number being in another filter(s)!
-        if GetState(Value, LColumnDataPos, Index) = 1 then FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
-        if GetState(Value, LColumnDataPos, Index) = 0 then FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
+
+        if not IsIndexInAnotherFilter(LColumnDataPos, Index) then
+        begin
+
+            if GetState(Value, LColumnDataPos, Index) = 1 then
+                FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight
+            else
+                FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
+
+        end;
 
     end;
+
+    Service.Logger.Log(Length(FFilterList[0].UniqueItems).ToString());
 
 end;
 
@@ -351,9 +386,17 @@ begin
     var Parsed:=ToUnfilter.Split([' ']);
 
     for var Index:=1 to FSourceGrid.RowCount - 1 do
-        // add here... checking for the same index number being in another filter(s)!
-        if TArrayUtils<string>.Contains(Index.ToString(), Parsed) then
-            FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
+    begin
+
+        if not IsIndexInAnotherFilter(LColumnDataPos, Index) then
+        begin
+
+            if TArrayUtils<string>.Contains(Index.ToString(), Parsed) then
+                FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
+
+        end;
+
+    end;
 
     FFilterList.Delete(LColumnDataPos);
     Dec(FFilteredColumns);

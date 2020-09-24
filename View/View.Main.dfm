@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -10959,6 +10959,7 @@ object MainForm: TMainForm
           OnKeyDown = sgAgeViewKeyDown
           OnKeyUp = sgAgeViewKeyUp
           OnMouseEnter = sgAgeViewMouseEnter
+          OnMouseUp = sgAgeViewMouseUp
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
           ColWidths = (
@@ -15753,6 +15754,7 @@ object MainForm: TMainForm
     Top = 584
   end
   object PopupAgeView: TPopupMenu
+    AutoPopup = False
     MenuAnimation = [maLeftToRight]
     OnPopup = PopupAgeViewPopup
     Left = 1216

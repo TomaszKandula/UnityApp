@@ -719,6 +719,7 @@ type
         procedure btnNextMouseEnter(Sender: TObject);
         procedure btnNextMouseLeave(Sender: TObject);
         procedure TimerRatingTimer(Sender: TObject);
+        procedure sgAgeViewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -745,6 +746,7 @@ type
         var FFollowsPast: integer;
         var FFollowsNext: integer;
         var FExcelFileName: string;
+        var FCanOpenActions: boolean;
         procedure UserRatingCheck();
         function  CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
@@ -2635,6 +2637,7 @@ begin
 
 end;
 
+
 procedure TMainForm.sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
@@ -3598,7 +3601,7 @@ end;
 
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
 begin
-    if valTotalCustomers.Caption <> '0' then Action_LyncCallClick(Self);
+    if (valTotalCustomers.Caption <> '0') and (FCanOpenActions) then Action_LyncCallClick(Self);
 end;
 
 
@@ -4062,6 +4065,44 @@ end;
 
 
 {$REGION 'MOUSE MOVE EVENTS'}
+
+
+procedure TMainForm.sgAgeViewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+
+    var ARow:=0;
+    var ACol:=0;
+
+    sgAgeView.MouseToCell(X, Y, ACol, ARow);
+
+    if ARow > 0 then
+        FCanOpenActions:=True
+    else
+        FCanOpenActions:=False;
+
+    if (Button = TMouseButton.mbLeft) and (ARow = 0) then
+    begin
+        FilterForm.SourceGrid:=MainForm.sgAgeView;
+        FilterForm.ColumnNumber:=ACol;
+        THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
+    end;
+
+    if (Button = TMouseButton.mbRight) and (ARow > 0) then
+    begin
+        PopupAgeView.Popup(
+            MainForm.Left +
+            TabSheets.Left +
+            TabSheets.Margins.Left +
+            sgAgeView.Left +
+            sgAgeView.Margins.Left + X + 20,
+            MainForm.Top +
+            TabSheets.Top +
+            TabSheets.Margins.Top +
+            sgAgeView.Top +
+            sgAgeView.Margins.Top + Y + 160);
+    end;
+
+end;
 
 
 procedure TMainForm.btnStartMouseEnter(Sender: TObject);
