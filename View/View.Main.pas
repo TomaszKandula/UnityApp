@@ -255,7 +255,6 @@ type
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
         N9: TMenuItem;
-        Action_FilterAgeView: TMenuItem;
         N7: TMenuItem;
         N6: TMenuItem;
         Action_AddToBook: TMenuItem;
@@ -302,15 +301,10 @@ type
         SplitLine3: TBevel;
         imgEventLog: TImage;
         txtEventLog: TLabel;
-        Action_INF7_Filter: TMenuItem;
-        Action_CoCode_Filter: TMenuItem;
-        Action_FollowUp_Filter: TMenuItem;
         Action_GroupFollowUp: TMenuItem;
-        Action_INF4_Filter: TMenuItem;
         Action_HideSummary: TMenuItem;
         Action_ExportCSV: TMenuItem;
         Action_RemoveFilters: TMenuItem;
-        Action_Free1: TMenuItem;
         AppMenu: TPanel;
         Separator1: TBevel;
         Separator2: TBevel;
@@ -331,7 +325,6 @@ type
         ShapeShowPassword: TShape;
         N20: TMenuItem;
         N21: TMenuItem;
-        Action_Free2: TMenuItem;
         Action_ViewOptions: TMenuItem;
         N16: TMenuItem;
         imgStart: TImage;
@@ -385,14 +378,6 @@ type
         sgCustomerGr: TStringGrid;
         DebtorsPanel: TPanel;
         shapeFrame: TShape;
-        Action_Free3: TMenuItem;
-        N4: TMenuItem;
-        N23: TMenuItem;
-        Action_SalesResp: TMenuItem;
-        Action_CustomerGrp: TMenuItem;
-        Action_PersonResp: TMenuItem;
-        Action_AccountType: TMenuItem;
-        N24: TMenuItem;
         Action_TurnRowHighlight: TMenuItem;
         AppHeader: TPanel;
         imgAppMenu: TImage;
@@ -580,13 +565,9 @@ type
         procedure imgEventLogClick(Sender: TObject);
         procedure imgEventLogMouseEnter(Sender: TObject);
         procedure imgEventLogMouseLeave(Sender: TObject);
-        procedure Action_CoCode_FilterClick(Sender: TObject);
-        procedure Action_FollowUp_FilterClick(Sender: TObject);
-        procedure Action_INF4_FilterClick(Sender: TObject);
         procedure Action_HideSummaryClick(Sender: TObject);
         procedure Action_ExportCSVClick(Sender: TObject);
         procedure Action_RemoveFiltersClick(Sender: TObject);
-        procedure Action_Free1Click(Sender: TObject);
         procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnUnlockClick(Sender: TObject);
         procedure btnPassUpdateClick(Sender: TObject);
@@ -599,7 +580,6 @@ type
         procedure Action_MassMailerClick(Sender: TObject);
         procedure btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
         procedure btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-        procedure Action_Free2Click(Sender: TObject);
         procedure sgCoCodesMouseEnter(Sender: TObject);
         procedure sgPaidInfoMouseEnter(Sender: TObject);
         procedure sgPmtTermsMouseEnter(Sender: TObject);
@@ -669,11 +649,6 @@ type
         procedure sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure Action_Free3Click(Sender: TObject);
-        procedure Action_SalesRespClick(Sender: TObject);
-        procedure Action_CustomerGrpClick(Sender: TObject);
-        procedure Action_PersonRespClick(Sender: TObject);
-        procedure Action_AccountTypeClick(Sender: TObject);
         procedure Action_ViewOptionsClick(Sender: TObject);
         procedure TabSheet5Show(Sender: TObject);
         procedure Action_TurnRowHighlightClick(Sender: TObject);
@@ -2908,7 +2883,6 @@ begin
         Action_AddToBook.Enabled     :=False;
         Action_MassMailer.Enabled    :=False;
         Action_GroupFollowUp.Enabled :=False;
-        Action_FilterAgeView.Enabled :=False;
         Action_RemoveFilters.Enabled :=False;
         Action_Overdue.Enabled       :=False;
         Action_Search.Enabled        :=False;
@@ -2928,7 +2902,6 @@ begin
             Action_AddToBook.Enabled     :=True;
             Action_MassMailer.Enabled    :=True;
             Action_GroupFollowUp.Enabled :=True;
-            Action_FilterAgeView.Enabled :=False;
             Action_RemoveFilters.Enabled :=False;
             Action_Overdue.Enabled       :=True;
             Action_Search.Enabled        :=False;
@@ -2946,7 +2919,6 @@ begin
             Action_AddToBook.Enabled     :=True;
             Action_MassMailer.Enabled    :=True;
             Action_GroupFollowUp.Enabled :=True;
-            Action_FilterAgeView.Enabled :=True;
             Action_Overdue.Enabled       :=True;
             Action_Search.Enabled        :=True;
             Action_ViewOptions.Enabled   :=True;
@@ -3353,86 +3325,6 @@ end;
 procedure TMainForm.Action_RemoveFollowUpsClick(Sender: TObject);
 begin
     FollowUpsUpdate(sgAgeView, ' ');
-end;
-
-
-procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Inf4);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_SalesRespClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._SalesResponsible);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_PersonRespClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._PersonResponsible);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_CustomerGrpClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._CustomerGroup);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_AccountTypeClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._AccountType);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._FollowUp);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._SourceDbName);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_Free1Click(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Free1);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_Free2Click(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Free2);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
-end;
-
-
-procedure TMainForm.Action_Free3Click(Sender: TObject);
-begin
-    FilterForm.SourceGrid:=MainForm.sgAgeView;
-    FilterForm.ColumnNumber:=sgAgeView.GetCol(TCustomerSnapshotEx._Free3);
-    THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
 end;
 
 
