@@ -16,7 +16,6 @@ program Unity;
 // Framework used:         VCL (created by Borland).                      //
 // Require web services:   Yes, cloud based (Microsoft Azure).            //
 // Active Directory:       Yes, via web service.                          //
-// Chromium engine:        CEF4Delphi / embedded, sub-processed           //
 // ---------------------------------------------------------------------- //
 // Copyright (C) 2017-2020 Tomasz Kandula/DFDS Polska sp. z o.o.          //
 // All rights reserved.                                                   //

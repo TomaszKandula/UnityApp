@@ -701,6 +701,7 @@ type
         procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend events
         procedure WndMessagesExternal(PassMsg: TMessage); // Get lync call details
     strict private
+        function IsColumnFiltered(ColumnName: string): boolean;
         procedure SetAgeViewHeader(var SourceGrid: TStringGrid);
         const FPermitCheckTimeout = 900000; // 15 min.
         const AppMenuTextSelected = $006433C9;
@@ -847,6 +848,25 @@ end;
 
 
 {$REGION 'LOCAL HELPERS'}
+
+
+function TMainForm.IsColumnFiltered(ColumnName: string): boolean;
+begin
+
+    Result:=False;
+
+    for var Index:=0 to FilterForm.GetFilterList.Count - 1 do
+    begin
+
+        if FilterForm.GetFilterList[Index].ColumnName = ColumnName then
+        begin
+            Result:=True;
+            Exit();
+        end;
+
+    end;
+
+end;
 
 
 procedure TMainForm.SetAgeViewHeader(var SourceGrid: TStringGrid);
@@ -2505,8 +2525,21 @@ end;
 procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);//(-100) on GetCol
 begin
 
-    // Skip header
-    if ARow = 0 then Exit;
+    // (Un)mark filtered column
+    if ARow = 0 then
+    begin
+
+        if IsColumnFiltered(sgAgeView.Cells[ACol, ARow]) then
+        begin
+            sgAgeView.Canvas.Brush.Color:=$00FFFF;
+            sgAgeView.Canvas.Font.Color:=$000000;
+            sgAgeView.Canvas.FillRect(Rect);
+            sgAgeView.Canvas.TextOut(Rect.Left + 2, Rect.Top + 6, sgAgeView.Cells[ACol, ARow]);
+        end;
+
+        Exit();
+
+    end;
 
     // Find column numbers for given column name
     var Col1 :=sgAgeView.GetCol(TCustomerSnapshotEx._NotDue);
@@ -3976,6 +4009,7 @@ begin
     begin
         FilterForm.SourceGrid:=MainForm.sgAgeView;
         FilterForm.ColumnNumber:=ACol;
+        FilterForm.ColumnName:=sgAgeView.Cells[ACol, 0];
         THelpers.WndCall(FilterForm, TWindowState.Modal, MainForm);
     end;
 

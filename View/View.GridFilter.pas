@@ -76,10 +76,11 @@ type
         function GetColumnDataPos(AColumnNumber: integer): integer;
     public
         procedure RemoveAllFilters();
-        property InUse:        boolean     read FInUse;
-        property SourceGrid:   TStringGrid read FSourceGrid   write FSourceGrid;
-        property ColumnNumber: integer     read FColumnNumber write FColumnNumber;
-        property ColumnName:   string      read FColumnName   write FColumnName;
+        property InUse:         boolean read FInUse;
+        property GetFilterList: TList<TColumnData> read FFilterList;
+        property SourceGrid:    TStringGrid read FSourceGrid write FSourceGrid;
+        property ColumnNumber:  integer read FColumnNumber write FColumnNumber;
+        property ColumnName:    string read FColumnName write FColumnName;
     end;
 
 
@@ -367,8 +368,6 @@ begin
         end;
 
     end;
-
-    Service.Logger.Log(Length(FFilterList[0].UniqueItems).ToString());
 
 end;
 
