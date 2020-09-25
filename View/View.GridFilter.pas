@@ -512,6 +512,12 @@ end;
 procedure TFilterForm.btnFilterClick(Sender: TObject);
 begin
 
+    if btnRemove.Enabled then
+    begin
+        btnRemoveClick(Self);
+        Exit();
+    end;
+
     Screen.Cursor:=crHourGlass;
     BusyForm.Show();
 

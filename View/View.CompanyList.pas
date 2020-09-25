@@ -76,6 +76,7 @@ implementation
 uses
     System.Generics.Collections,
     View.Main,
+    View.GridFilter,
     Unity.Helpers,
     Unity.Grid,
     Unity.Constants,
@@ -271,6 +272,7 @@ end;
 
 procedure TCompanyListForm.btnSelectClick(Sender: TObject);
 begin
+    if FilterForm.InUse then FilterForm.btnRemoveClick(Self);
     RequestAgeReport();
 end;
 
