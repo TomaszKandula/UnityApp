@@ -362,7 +362,7 @@ begin
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
-            + '/comment/'
+            + '/'
             + PayLoad.UserAlias
             + '/';
 
@@ -515,7 +515,7 @@ begin
             + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
-            + '/comment/'
+            + '/'
             + PayLoad.UserAlias
             + '/';
 
@@ -733,7 +733,7 @@ begin
             + SourceDBName
             + '/'
             + CustNumber.ToString()
-            + '/comment/';
+            + '/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetGeneralCommentAsync]: Executing GET ' + Rest.ClientBaseURL);
 
@@ -879,7 +879,7 @@ begin
             + SourceDBName
             + '/'
             + CustNumber.ToString()
-            + '/comments/';
+            + '/';
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
         Service.Logger.Log('[GetDailyCommentsAsync]: Executing GET ' + Rest.ClientBaseURL);
 
