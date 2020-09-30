@@ -695,11 +695,16 @@ type
         procedure btnNextMouseLeave(Sender: TObject);
         procedure TimerRatingTimer(Sender: TObject);
         procedure sgAgeViewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+        procedure sgAgeViewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
         procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend events
         procedure WndMessagesExternal(PassMsg: TMessage); // Get lync call details
+        var FColWidth: integer;
+        var FIsColumnMoved: boolean;
+        function IsColResized(Grid: TStringGrid; Column: integer): boolean;
+        function CheckIfColumnMoved(): boolean;
     strict private
         function IsColumnFiltered(ColumnName: string): boolean;
         procedure SetAgeViewHeader(var SourceGrid: TStringGrid);
@@ -771,6 +776,7 @@ type
         procedure SwitchTimers(State: TAppTimers);
         procedure UpdateStatusBar(Text: string);
         procedure LoadAgeReport();
+        property IsColumnMoved: boolean read CheckIfColumnMoved;
         property LoadedAgeDate: string read FLoadedAgeDate;
         property LoadedCompanies: TArray<string> read FLoadedCompanies;
         property FollowsToday: integer read FFollowsToday;
@@ -850,15 +856,37 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-function TMainForm.IsColumnFiltered(ColumnName: string): boolean;
+function TMainForm.CheckIfColumnMoved(): boolean;
 begin
 
     Result:=False;
 
+    if FIsColumnMoved then
+    begin
+        FIsColumnMoved:=not FIsColumnMoved;
+        Result:=True;
+    end;
+
+end;
+
+
+function TMainForm.IsColResized(Grid: TStringGrid; Column: integer): boolean;
+begin
+    Result:=False;
+    if Grid.ColWidths[Column] <> FColWidth then Result:=True;
+end;
+
+
+function TMainForm.IsColumnFiltered(ColumnName: string): boolean;
+begin
+
+    Result:=False;
+    if FilterForm.GetFilterList.Count < 1 then Exit();
+
     for var Index:=0 to FilterForm.GetFilterList.Count - 1 do
     begin
 
-        if FilterForm.GetFilterList[Index].ColumnName = ColumnName then
+        if (FilterForm.GetFilterList[Index].ColumnName = ColumnName) and (FilterForm.GetFilterList[Index].IsFiltered) then
         begin
             Result:=True;
             Exit();
@@ -2383,7 +2411,7 @@ end;
 
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
 begin
-    // Do nothing
+    if FromIndex <> ToIndex then FIsColumnMoved:=true;
 end;
 
 
@@ -3992,6 +4020,15 @@ end;
 {$REGION 'MOUSE MOVE EVENTS'}
 
 
+procedure TMainForm.sgAgeViewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+    var ARow:=0;
+    var ACol:=0;
+    sgAgeView.MouseToCell(X, Y, ACol, ARow);
+    FColWidth:=sgAgeView.ColWidths[ACol];
+end;
+
+
 procedure TMainForm.sgAgeViewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
 
@@ -3999,6 +4036,9 @@ begin
     var ACol:=0;
 
     sgAgeView.MouseToCell(X, Y, ACol, ARow);
+
+    if IsColumnMoved then Exit();
+    if IsColResized(sgAgeView, ACol) then Exit();
 
     if ARow > 0 then
         FCanOpenActions:=True
@@ -4027,6 +4067,8 @@ begin
             sgAgeView.Top +
             sgAgeView.Margins.Top + Y + 160);
     end;
+
+    FIsColumnMoved:=false;
 
 end;
 
