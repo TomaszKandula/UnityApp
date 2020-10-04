@@ -790,7 +790,7 @@ begin
             + '/rating/';
 
         Rest.RequestMethod:=TRESTRequestMethod.rmGET;
-        Service.Logger.Log('[LoadRatingAwaited]: Executing GET ' + Rest.ClientBaseURL);
+        Service.Logger.Log('[LoadRatingAsync]: Executing GET ' + Rest.ClientBaseURL);
 
         var UserRating: TUserRating;
         try
@@ -798,7 +798,7 @@ begin
             if (Rest.Execute) and (Rest.StatusCode = 200) then
             begin
                 UserRating:=TJson.JsonToObject<TUserRating>(Rest.Content);
-                Service.Logger.Log('[LoadRatingAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+                Service.Logger.Log('[LoadRatingAsync]: Returned status code is ' + Rest.StatusCode.ToString());
             end
             else
             begin
@@ -806,12 +806,12 @@ begin
                 UserRating:=TUserRating.Create();
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    UserRating.Error.ErrorDesc:='[LoadRatingAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Invalid server response. Please contact IT Support.'
+                        UserRating.Error.ErrorDesc:='[LoadRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        UserRating.Error.ErrorDesc:='[LoadRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
                 Service.Logger.Log(UserRating.Error.ErrorDesc);
 
@@ -821,7 +821,7 @@ begin
             E: Exception do
             begin
                 UserRating:=TUserRating.Create();
-                UserRating.Error.ErrorDesc:='[LoadRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                UserRating.Error.ErrorDesc:='[LoadRatingAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(UserRating.Error.ErrorDesc);
             end;
 

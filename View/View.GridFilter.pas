@@ -352,18 +352,18 @@ begin
 
     Inc(FFilteredColumns);
 
-    for var Index:=1 to FSourceGrid.RowCount - 1 do
+    for var LRowIndex:=1 to FSourceGrid.RowCount - 1 do
     begin
 
-        var Value:=FSourceGrid.Cells[FColumnNumber, Index].Trim();
+        var Value:=FSourceGrid.Cells[FColumnNumber, LRowIndex].Trim();
 
-        if not IsIndexInAnotherFilter(LColumnDataPos, Index) then
+        if not IsIndexInAnotherFilter(LColumnDataPos, LRowIndex) then
         begin
 
-            if GetState(Value, LColumnDataPos, Index) = 1 then
-                FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight
+            if GetState(Value, LColumnDataPos, LRowIndex) = 1 then
+                FSourceGrid.RowHeights[LRowIndex]:=FSourceGrid.sgRowHeight
             else
-                FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHidden;
+                FSourceGrid.RowHeights[LRowIndex]:=FSourceGrid.sgRowHidden;
 
         end;
 
@@ -384,14 +384,14 @@ begin
     ToUnfilter:=ToUnfilter.TrimLeft();
     var Parsed:=ToUnfilter.Split([' ']);
 
-    for var Index:=1 to FSourceGrid.RowCount - 1 do
+    for var LRowIndex:=1 to FSourceGrid.RowCount - 1 do
     begin
 
-        if not IsIndexInAnotherFilter(LColumnDataPos, Index) then
+        if not IsIndexInAnotherFilter(LColumnDataPos, LRowIndex) then
         begin
 
-            if TArrayUtils<string>.Contains(Index.ToString(), Parsed) then
-                FSourceGrid.RowHeights[Index]:=FSourceGrid.sgRowHeight;
+            if TArrayUtils<string>.Contains(LRowIndex.ToString(), Parsed) then
+                FSourceGrid.RowHeights[LRowIndex]:=FSourceGrid.sgRowHeight;
 
         end;
 
