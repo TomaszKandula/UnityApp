@@ -696,6 +696,7 @@ type
         procedure TimerRatingTimer(Sender: TObject);
         procedure sgAgeViewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
         procedure sgAgeViewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+        procedure FormAfterMonitorDpiChanged(Sender: TObject; OldDPI, NewDPI: Integer);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -2340,6 +2341,22 @@ begin
         ImageGrip.Visible:=False else ImageGrip.Visible:=True;
 
     if StartupForm.IsAppInitialized then StartMainWnd();
+
+end;
+
+
+procedure TMainForm.FormAfterMonitorDpiChanged(Sender: TObject; OldDPI, NewDPI: Integer);
+begin
+
+    if NewDPI > 96 then
+    begin
+        THelpers.MsgCall(
+            MainForm.Handle,
+            TAppMessage.Error,
+            'Windows DPI has been changed. Application can work only with screen scaled at 100%. Application will be closed.'
+        );
+        ExitProcess(0);
+    end;
 
 end;
 

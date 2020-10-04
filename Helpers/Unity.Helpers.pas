@@ -15,6 +15,7 @@ uses
     System.Classes,
     System.SysUtils,
     System.IOUtils,
+    System.Win.Registry,
     Winapi.Messages,
     Winapi.Windows,
     Vcl.ExtCtrls,

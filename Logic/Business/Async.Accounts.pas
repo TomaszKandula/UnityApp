@@ -285,7 +285,7 @@ begin
             + '/companies/';
 
         Rest.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        Service.Logger.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Rest.ClientBaseURL);
+        Service.Logger.Log('[SetUserCompanyListAsync]: Executing PATCH ' + Rest.ClientBaseURL);
 
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
@@ -304,7 +304,7 @@ begin
                 var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
                 try
                     CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                    Service.Logger.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Rest.StatusCode.ToString());
+                    Service.Logger.Log('[SetUserCompanyListAsync]: Returned status code is ' + Rest.StatusCode.ToString());
                 finally
                     UserCompaniesUpdated.Free();
                 end;
@@ -314,12 +314,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Rest.ExecuteError) then
-                    CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
+                    CallResponse.LastMessage:='[SetUserCompanyListAsync]: Critical error. Please contact IT Support. Description: ' + Rest.ExecuteError
                 else
                     if String.IsNullOrEmpty(Rest.Content) then
-                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[SetUserCompanyListAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
+                        CallResponse.LastMessage:='[SetUserCompanyListAsync]: An error has occured. Please contact IT Support. Description: ' + Rest.Content;
 
                 CallResponse.ReturnedCode:=Rest.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -331,7 +331,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[SetUserCompanyListAsync]: Cannot execute the request. Description: ' + E.Message;
                 Service.Logger.Log(CallResponse.LastMessage);
             end;
 

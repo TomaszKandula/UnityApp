@@ -9515,6 +9515,7 @@ object MainForm: TMainForm
   OldCreateOrder = False
   Position = poDefaultSizeOnly
   OnActivate = FormActivate
+  OnAfterMonitorDpiChanged = FormAfterMonitorDpiChanged
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy

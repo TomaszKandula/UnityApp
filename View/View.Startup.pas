@@ -484,7 +484,22 @@ end;
 
 procedure TStartupForm.FormActivate(Sender: TObject);
 begin
+
+    var ScalingFactor:=TControl(TextSubtitle).ScaleFactor;
+
+    if ScalingFactor <> 1 then
+    begin
+        THelpers.MsgCall(
+            StartupForm.Handle,
+            TAppMessage.Error,
+            'Application can work only with screen scaled at 100% (your scale factor is '
+            + (ScalingFactor * 100).ToString() + '%). Application will be closed.'
+        );
+        ExitProcess(0);
+    end;
+
     ApplicationStart();
+
 end;
 
 
