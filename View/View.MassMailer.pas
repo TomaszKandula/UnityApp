@@ -440,6 +440,9 @@ begin
         Exit();
     end;
 
+    var FailedEmailsMsg:='Failed to send:';
+    var FailedEmailsCount:=0;
+
     for var ListIndex:=0 to CustomerList.Items.Count - 1 do
     begin
 
@@ -449,15 +452,41 @@ begin
             if (CustomerList.Items[ListIndex].SubItems[0] = PayLoad.SentDocuments[PayLoadIndex].CustomerNumber.ToString())
             and (CustomerList.Items[ListIndex].SubItems[5] = PayLoad.SentDocuments[PayLoadIndex].SourceDbName) then
             begin
+
                 if PayLoad.SentDocuments[PayLoadIndex].IsSucceeded then
+                begin
                     CustomerList.Items[ListIndex].SubItems[2]:='Yes';
+                end
+                else
+                begin
+
+                    FailedEmailsMsg:=
+                        FailedEmailsMsg + #13#10 +
+                        PayLoad.SentDocuments[PayLoadIndex].EmailFrom + ' for customer ' +
+                        PayLoad.SentDocuments[PayLoadIndex].CustomerNumber.ToString() + '.' + #13#10 +
+                        'Error description: ' +
+                        PayLoad.SentDocuments[PayLoadIndex].ErrorDesc + '.';
+
+                    Inc(FailedEmailsCount);
+
+                end;
+
             end;
 
         end;
 
     end;
 
-    THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed within ' + PayLoad.Meta.ProcessingTimeSpan + '.');
+    if FailedEmailsCount > 0 then
+    begin
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Warn, FailedEmailsMsg + #13#10 + 'Please contact IT Support.');
+        Service.Logger.Log('[SendAccountDocument_Callback]: ' + FailedEmailsMsg.Replace(#13#10, ';'));
+    end
+    else
+    begin
+        THelpers.MsgCall(MassMailerForm.Handle, TAppMessage.Info, 'All listed items have been processed within ' + PayLoad.Meta.ProcessingTimeSpan + '.');
+        Service.Logger.Log('[SendAccountDocument_Callback]: Successfully processed within ' + PayLoad.Meta.ProcessingTimeSpan + '.');
+    end;
 
 end;
 

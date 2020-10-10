@@ -807,7 +807,9 @@ begin
             FailedEmailsMsg:=
                 FailedEmailsMsg + #13#10 +
                 PayLoad.SentDocuments[Index].EmailFrom + ' for customer ' +
-                PayLoad.SentDocuments[Index].CustomerNumber.ToString();
+                PayLoad.SentDocuments[Index].CustomerNumber.ToString() + '.' + #13#10 +
+                'Error description: ' +
+                PayLoad.SentDocuments[Index].ErrorDesc + '.';
 
             Inc(FailedEmailsCount);
 
@@ -816,9 +818,15 @@ begin
     end;
 
     if FailedEmailsCount > 0 then
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, FailedEmailsMsg + #13#10 + 'Please contact IT Support.')
+    begin
+        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, FailedEmailsMsg + #13#10 + 'Please contact IT Support.');
+        Service.Logger.Log('[SendAccountDocument_Callback]: ' + FailedEmailsMsg.Replace(#13#10, ';'));
+    end
     else
+    begin
         THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
+        Service.Logger.Log('[SendAccountDocument_Callback]: Action has been executed successfully.');
+    end;
 
     UpdateDaily();
 

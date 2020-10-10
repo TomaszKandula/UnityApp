@@ -243,6 +243,8 @@ begin
             Exit();
         end;
 
+        // update filter state...
+
         for var Items:=0 to Length(FFilterList[ColumnDataPos].UniqueItems) - 1 do
         begin
             FilterList.Items.Add(FFilterList[ColumnDataPos].UniqueItems[Items, 0]);

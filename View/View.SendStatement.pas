@@ -150,9 +150,9 @@ begin
     FPayLoad.InvoiceFilter  :=InvFilter;
     FPayLoad.BeginDate      :=BeginDate;
     FPayLoad.EndDate        :=EndDate;
-    FPayLoad.IsCtrlStatus  :=not ActionsForm.cbCtrlStatusOff.Checked;
-    FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
-    FPayLoad.IsSourceInCopy:=ActionsForm.cbIncludeSource.Checked;
+    FPayLoad.IsCtrlStatus   :=not ActionsForm.cbCtrlStatusOff.Checked;
+    FPayLoad.IsUserInCopy   :=ActionsForm.cbUserInCopy.Checked;
+    FPayLoad.IsSourceInCopy :=ActionsForm.cbIncludeSource.Checked;
 
     FPayLoad.Documents[0].CustomerNumber:=ActionsForm.CustNumber;
     FPayLoad.Documents[0].SourceDbName  :=ActionsForm.SourceDBName;
@@ -180,7 +180,7 @@ begin
 
     if not PayLoad.IsSucceeded then
     begin
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
+        THelpers.MsgCall(SendForm.Handle, TAppMessage.Error, PayLoad.Error.ErrorDesc);
         Exit();
     end;
 
@@ -196,7 +196,9 @@ begin
             FailedEmailsMsg:=
                 FailedEmailsMsg + #13#10 +
                 PayLoad.SentDocuments[Index].EmailFrom + ' for customer ' +
-                PayLoad.SentDocuments[Index].CustomerNumber.ToString();
+                PayLoad.SentDocuments[Index].CustomerNumber.ToString() + '.' + #13#10 +
+                'Error description: ' +
+                PayLoad.SentDocuments[Index].ErrorDesc + '.';
 
             Inc(FailedEmailsCount);
 
@@ -205,9 +207,15 @@ begin
     end;
 
     if FailedEmailsCount > 0 then
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Warn, FailedEmailsMsg + #13#10 + 'Please contact IT Support.')
+    begin
+        THelpers.MsgCall(SendForm.Handle, TAppMessage.Warn, FailedEmailsMsg + #13#10 + 'Please contact IT Support.');
+        Service.Logger.Log('[SendAccountDocument_Callback]: ' + FailedEmailsMsg.Replace(#13#10, ';'));
+    end
     else
-        THelpers.MsgCall(ActionsForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
+    begin
+        THelpers.MsgCall(SendForm.Handle, TAppMessage.Info, 'Action has been executed successfully!');
+        Service.Logger.Log('[SendAccountDocument_Callback]: Action has been executed successfully.');
+    end;
 
     SendForm.Enabled:=True;
 
