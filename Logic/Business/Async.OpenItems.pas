@@ -112,7 +112,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnSsisData:=TJson.JsonToObject<TReturnSsisData>(Rest.Content);
@@ -193,7 +193,7 @@ begin
         var ReturnOpenItems: TReturnOpenItems;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Rest.Content);
                 Service.Logger.Log('[GetOpenItemsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -263,7 +263,7 @@ begin
                 UserCompanySelection.Free();
             end;
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Rest.Content);
                 Service.Logger.Log('[ReadOpenItemsAsync]: Returned status code is ' + Rest.StatusCode.ToString());

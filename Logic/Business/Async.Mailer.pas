@@ -110,7 +110,7 @@ begin
 
             end;
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Rest.Content);

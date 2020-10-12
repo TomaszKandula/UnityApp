@@ -91,7 +91,7 @@ begin
         var SentDocument: TSentDocument;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 SentDocument:=TJson.JsonToObject<TSentDocument>(Rest.Content);
                 Service.Logger.Log('[SendAccountDocumentAsync]: Returned status code is ' + Rest.StatusCode.ToString());

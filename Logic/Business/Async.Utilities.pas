@@ -283,7 +283,7 @@ begin
         var ReturnReportList: TReturnReportList;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 ReturnReportList:=TJson.JsonToObject<TReturnReportList>(Rest.Content);
                 Service.Logger.Log('[GetBiReportsAsync]: Returned status code is ' + Rest.StatusCode.ToString());

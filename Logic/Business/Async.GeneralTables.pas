@@ -190,7 +190,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnCompanies:=TJson.JsonToObject<TReturnCompanies>(Rest.Content);
@@ -302,7 +302,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnControlStatus:=TJson.JsonToObject<TReturnControlStatus>(Rest.Content);
@@ -394,7 +394,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnPaidInfo:=TJson.JsonToObject<TReturnPaidInfo>(Rest.Content);
@@ -484,7 +484,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnPaymentTerms:=TJson.JsonToObject<TReturnPaymentTerms>(Rest.Content);
@@ -584,7 +584,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnSalesResponsible:=TJson.JsonToObject<TReturnSalesResponsible>(Rest.Content);
@@ -676,7 +676,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnPersonResponsible:=TJson.JsonToObject<TReturnPersonResponsible>(Rest.Content);
@@ -768,7 +768,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnAccountType:=TJson.JsonToObject<TReturnAccountType>(Rest.Content);
@@ -860,7 +860,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var ReturnCustomerGroup:=TJson.JsonToObject<TReturnCustomerGroup>(Rest.Content);

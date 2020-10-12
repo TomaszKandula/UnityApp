@@ -159,7 +159,7 @@ begin
         var AddressBookList: TAddressBookList;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 AddressBookList:=TJson.JsonToObject<TAddressBookList>(Rest.Content);
                 Service.Logger.Log('[OpenAddressBookAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -235,7 +235,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var AddressBookUpdated:=TJson.JsonToObject<TAddressBookUpdated>(Rest.Content);
@@ -326,7 +326,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var LAddressBookAdded:=TJson.JsonToObject<TAddressBookAdded>(Rest.Content);
@@ -400,7 +400,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var AddressBookItemDel:=TJson.JsonToObject<TAddressBookItemDel>(Rest.Content);
@@ -474,7 +474,7 @@ begin
         var AddressBookItem: TAddressBookItem;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Rest.Content);
                 Service.Logger.Log('[GetCustomerDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -554,7 +554,7 @@ begin
         var LCallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var Response:=TJson.JsonToObject<TAddressBookAddedBulk>(Rest.Content);

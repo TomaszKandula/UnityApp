@@ -202,7 +202,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var FreeFieldsUpdated:=TJson.JsonToObject<TFreeFieldsUpdated>(Rest.Content);
@@ -292,7 +292,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var FollowUpsUpdated:=TJson.JsonToObject<TFollowUpsUpdated>(Rest.Content);
@@ -420,7 +420,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 if not PayLoad.CommentId = 0 then
@@ -568,7 +568,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 if QueryData.DoesCommentExists then
@@ -665,7 +665,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserGeneralCommentCheck:=TJson.JsonToObject<TUserGeneralCommentCheck>(Rest.Content);
@@ -740,7 +740,7 @@ begin
         var UserGeneralComment: TUserGeneralComment;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 UserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Rest.Content);
                 Service.Logger.Log('[GetGeneralCommentAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -811,7 +811,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserDailyCommentCheck:=TJson.JsonToObject<TUserDailyCommentCheck>(Rest.Content);
@@ -886,7 +886,7 @@ begin
         var UserDailyCommentsList: TUserDailyCommentsList;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Rest.Content);
                 Service.Logger.Log('[GetDailyCommentsAsync]: Returned status code is ' + Rest.StatusCode.ToString());

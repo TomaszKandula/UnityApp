@@ -94,7 +94,7 @@ begin
                 UserCompanySelection.Free();
             end;
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 ReturnCompanyEmails:=TJson.JsonToObject<TReturnCompanyEmails>(Rest.Content);
                 Service.Logger.Log('[GetCompanyDetailsAsync]: Returned status code is ' + Rest.StatusCode.ToString());

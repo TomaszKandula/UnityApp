@@ -224,7 +224,7 @@ begin
         var UserCompanyList: TUserCompanyList;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Rest.Content);
                 Service.Logger.Log('[GetUserCompanyListAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -298,7 +298,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Rest.Content);
@@ -381,7 +381,7 @@ begin
             Rest.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
             try
 
-                if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
                 begin
 
                     var UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Rest.Content);
@@ -458,7 +458,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserPermissionList:=TJson.JsonToObject<TUserPermissionList>(Rest.Content);
@@ -549,7 +549,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var TokenGranted:=TJson.JsonToObject<TTokenGranted>(Rest.Content);
@@ -628,7 +628,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Rest.Content);
@@ -696,7 +696,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Rest.Content);
@@ -795,7 +795,7 @@ begin
         var UserRating: TUserRating;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
                 UserRating:=TJson.JsonToObject<TUserRating>(Rest.Content);
                 Service.Logger.Log('[LoadRatingAsync]: Returned status code is ' + Rest.StatusCode.ToString());
@@ -870,7 +870,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserRatingAdded:=TJson.JsonToObject<TUserRatingAdded>(Rest.Content);
@@ -958,7 +958,7 @@ begin
 
         try
 
-            if (Rest.Execute) and (Rest.StatusCode = 200) then
+            if (Rest.Execute) and ( (Rest.StatusCode >= 200) and (Rest.StatusCode <= 226) ) then
             begin
 
                 var UserRatingUpdated:=TJson.JsonToObject<TUserRatingUpdated>(Rest.Content);
