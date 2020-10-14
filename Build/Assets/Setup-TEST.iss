@@ -1,5 +1,5 @@
 #define MyAppName "Unity Platform Test"
-#define MyAppVersion "2.0.1.2010"
+#define MyAppVersion "2.0.1.2300"
 #define MyAppPublisher "Tomasz Kandula/DFDS Polska Sp. z o.o."
 #define MyAppURL "http://www.dfds.com/"
 #define MyAppExeName "Unity.exe"
@@ -20,7 +20,7 @@ DefaultDirName={#MyAppName}
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\Tools\_Setup
-OutputBaseFilename=Setup32_Build2210_Test
+OutputBaseFilename=Setup32_Build2300_Test
 SetupIconFile=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Unity_Mutlisize_64.ico
 UninstallFilesDir={commonpf}\{#MyAppName}
 Compression=lzma
@@ -48,7 +48,7 @@ Name: "{commonappdata}\{#MyAppName}\sessions";
 ;BIN
 Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\$programdata\Config.bin"; DestDir: "{commonappdata}\{#MyAppName}"; DestName: "Config.bin"; Flags: ignoreversion
 ;INF
-Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\Luncher.inf"; DestDir: "{commonpf}\{#MyAppName}"; DestName: "Luncher.inf"; Flags: ignoreversion
+Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\Luncher.inf.TEST"; DestDir: "{commonpf}\{#MyAppName}"; DestName: "Luncher.inf"; Flags: ignoreversion
 ;EXE
 Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\Luncher.exe"; DestDir: "{commonpf}\{#MyAppName}";  Flags: ignoreversion
 Source: "I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Build\Win32\Bin\$programdata\LyncCall.exe"; DestDir: "{commonappdata}\{#MyAppName}"; Flags: ignoreversion

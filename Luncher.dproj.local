@@ -2,8 +2,8 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2020/06/18 13:11:31.000.289,=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2020/06/18 13:13:02.000.050,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.dfm=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\View\View.Luncher.dfm</Transaction>
-    <Transaction>2020/06/18 13:13:02.000.050,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\View\View.Luncher.pas</Transaction>
-    <Transaction>2020/06/18 13:13:47.000.645,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Project1.dproj=I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Luncher.dproj</Transaction>
+    <Transaction>2020/06/18 13:13:02.000.050,I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\View\View.Luncher.pas=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2020/06/18 13:13:02.000.050,I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\View\View.Luncher.dfm=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2020/06/18 13:13:47.000.645,I:\Projects\Software Projects\Embarcadero Delphi\Unity Project\UnityApp\Luncher.dproj=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
   </Transactions>
 </BorlandProject>
