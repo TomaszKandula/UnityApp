@@ -404,7 +404,9 @@ begin
             DocumentFields.CustomerNumber:=CustomerList.Items[Index].SubItems[0].ToInt64(); // Customer Number
             DocumentFields.SourceDbName  :=CustomerList.Items[Index].SubItems[5]; // SourceDbName
             DocumentFields.SendFrom      :=CustomerList.Items[Index].SubItems[3]; // Send from
-            DocumentFields.EmailTo       :=CustomerList.Items[Index].SubItems[4]; // Send to
+
+            var LEmails: string:=CustomerList.Items[Index].SubItems[4];
+            DocumentFields.EmailTo:=LEmails.Replace(' ','').Replace(',',';'); // Send to
 
             FPayLoad.Documents[Index]:=DocumentFields;
 

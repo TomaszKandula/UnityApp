@@ -764,7 +764,9 @@ begin
     FPayLoad.Documents[0].CustomerNumber:=ActionsForm.CustNumber;
     FPayLoad.Documents[0].SourceDbName  :=ActionsForm.SourceDBName;
     FPayLoad.Documents[0].SendFrom      :=ActionsForm.LbuSendFrom;
-    FPayLoad.Documents[0].EmailTo       :=ActionsForm.Cust_Mail.Text;
+
+    var LEmails: string:=ActionsForm.Cust_Mail.Text;
+    FPayLoad.Documents[0].EmailTo:=LEmails.Replace(' ','').Replace(',',';');
 
     Screen.Cursor:=crHourGlass;
     Service.Mediator.Documents.SendAccountDocumentAsync(FPayLoad, SendAccountDocument_Callback);
