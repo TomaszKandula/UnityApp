@@ -2348,15 +2348,15 @@ end;
 procedure TMainForm.FormAfterMonitorDpiChanged(Sender: TObject; OldDPI, NewDPI: Integer);
 begin
 
-    if NewDPI > 96 then
-    begin
-        THelpers.MsgCall(
-            MainForm.Handle,
-            TAppMessage.Error,
-            'Windows DPI has been changed. Application can work only with screen scaled at 100%. Application will be closed.'
-        );
-        ExitProcess(0);
-    end;
+//    if NewDPI > 96 then
+//    begin
+//        THelpers.MsgCall(
+//            MainForm.Handle,
+//            TAppMessage.Error,
+//            'Windows DPI has been changed. Application can work only with screen scaled at 100%. Application will be closed.'
+//        );
+//        ExitProcess(0);
+//    end;
 
 end;
 
